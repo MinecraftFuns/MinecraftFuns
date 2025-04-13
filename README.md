@@ -8,8 +8,8 @@ I'm Joe Fang, a second-year undergraduate at the University of Toronto, pursuing
 
 ## Contact
 
-To reach me, please import my [PGP key](https://joefang.org/pgp) and use the `Primary User ID` for email communication.
+To get in touch, please import my [<img src="https://ragnarok.joefang.org/static/xqkm2leqc9g0pup6avc1jhi4rtv9r2qc6.svg" height="12px" alt="This is an icon for PGP, an encryption program that provides cryptographic privacy and authentication for data communication."> PGP key](https://joefang.org/pgp) and use the **Primary User ID** when emailing me.  
 
-> Note: This is a temporary measure to help protect my email from malicious crawlers and spam.
+You can also reach me on [<img src="https://ragnarok.joefang.org/static/xjs6tunmpvvthn7sqgpv63kcskq03o6ae.svg" height="12px" alt="This is an icon for Matrix, an open network for secure, decentralized communication."> Matrix](https://matrix.org/), a decentralized, end-to-end encrypted messaging platform, at [`@multiset:matrix.org`](https://matrix.to/#/@multiset:matrix.org).
 
-You can also connect with me through my [<img src="https://joefang.org/assets/blog.webp" style="border-radius: 12px;" height="12px" alt="This is an icon for my blog."/> Blog](https://two-plus-two-make-four.blogspot.com/), [<img src="https://joefang.org/assets/github.svg" height="12px" alt="This is an icon for GitHub."/> GitHub](https://github.com/MinecraftFuns/MinecraftFuns/issues), or [<img src="https://joefang.org/assets/twitter.svg" height="12px" alt="This is an icon for Twitter."/> Twitter](https://x.com/SerendipityArk).
+Alternatively, connect with me through my [<img src="https://joefang.org/assets/blog.webp" style="border-radius: 12px;" height="12px" alt="This is an icon for my blog."/> Blog](https://two-plus-two-make-four.blogspot.com/), [<img src="https://joefang.org/assets/github.svg" height="12px" alt="This is an icon for GitHub."/> GitHub](https://github.com/MinecraftFuns/MinecraftFuns/issues), or [<img src="https://joefang.org/assets/twitter.svg" height="12px" alt="This is an icon for Twitter."/> Twitter](https://x.com/SerendipityArk).  
