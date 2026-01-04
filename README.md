@@ -4,7 +4,7 @@
 
 ## About
 
-I'm Joe Fang, a second-year undergraduate at the University of Toronto, pursuing a double major in Computer Science and Cognitive Science, along with a minor in Statistics.
+I'm Joe Fang, a third-year undergraduate at the University of Toronto, pursuing a double major in Computer Science and Cognitive Science, along with a minor in Statistics.
 
 ## Contact
 
