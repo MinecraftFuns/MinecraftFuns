@@ -1,0 +1,10 @@
+# Cloudflare Pages redirects. Inert on GitHub Pages.
+#
+# Only the key aliases survive from the legacy file. Dropped: /*.md, /*.py and
+# /*.pyc, which existed because the old repository served its own sources and
+# this build emits none of them; and a favicon redirect to an external CDN,
+# now that the icon is served from this origin.
+
+/gpg     /pgp  301
+/pgp.*   /pgp  301
+/gpg.*   /pgp  301

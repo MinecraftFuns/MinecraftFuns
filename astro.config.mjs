@@ -1,4 +1,5 @@
 // @ts-check
+import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
@@ -48,6 +49,23 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  /*
+   * The sitemap is derived from the routes the build actually emitted, which
+   * is the only description of the site guaranteed to be true. The legacy
+   * sitemap was hand-maintained — a second encoding of the route set that
+   * nothing forced to agree with the first — and by the end it advertised
+   * three URLs that no longer existed and omitted every page added after it
+   * was last edited.
+   *
+   * `filter` drops the non-document routes. A sitemap lists pages for a
+   * crawler to index; a key file and a policy file are neither, and listing
+   * them invites a crawler to index a binary blob.
+   */
+  integrations: [
+    sitemap({
+      filter: (page) => !/\/(pgp|\.well-known)\b/.test(new URL(page).pathname),
+    }),
+  ],
   markdown: {
     shikiConfig: {
       // Shiki themes are keyed to their own palettes; these two are the

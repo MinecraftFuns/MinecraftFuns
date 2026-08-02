@@ -1,0 +1,31 @@
+---
+import Button from "../components/Button.astro";
+import PageIntro from "../components/PageIntro.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { routeUrl } from "../lib/url.ts";
+
+/*
+ * GitHub Pages and Cloudflare Pages both serve /404.html for an unmatched
+ * path, so this needs no route configuration — only to exist. The legacy site
+ * had one; the rebuild did not, which meant every mistyped URL fell through to
+ * the host's default page with none of this site's chrome on it.
+ */
+---
+
+<BaseLayout
+  title="Not found"
+  description="That page does not exist on joefang.org."
+>
+  <PageIntro
+    kind="page"
+    eyebrow="404"
+    title="That page does not exist."
+    lede="The link may be out of date, or the address may have a typo in it. The pages below are the ones that do exist."
+  >
+    <div class="mt-lg flex flex-wrap gap-xs">
+      <Button href={routeUrl("/")} variant="primary">Home</Button>
+      <Button href={routeUrl("/blog")} variant="secondary">Blog</Button>
+      <Button href={routeUrl("/projects")} variant="secondary">Projects</Button>
+    </div>
+  </PageIntro>
+</BaseLayout>

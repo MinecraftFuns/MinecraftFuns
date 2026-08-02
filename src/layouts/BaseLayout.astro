@@ -23,6 +23,15 @@ const {
 
 const pageTitle = title ? `${title} — ${site.name}` : site.title;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
+
+/*
+ * Only the primary origin should be indexed. The GitHub Pages build is a
+ * mirror, and two indexed copies of one site compete as duplicates of each
+ * other. robots.txt cannot say this there — a crawler reads it only from the
+ * origin root, never from beneath a base path — so the request has to travel
+ * in the document itself.
+ */
+const isPrimary = (Astro.site?.origin ?? "") === new URL(site.url).origin;
 ---
 
 <!doctype html>
@@ -34,6 +43,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href={assetUrl("/favicon.svg")} type="image/svg+xml" />
+    {!isPrimary && <meta name="robots" content="noindex" />}
 
     <meta property="og:type" content={type} />
     <meta property="og:title" content={pageTitle} />
