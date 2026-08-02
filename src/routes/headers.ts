@@ -1,25 +1,25 @@
 import type { APIRoute } from "astro";
 
-import { headerProblems, renderHeaders } from "../lib/hosting.ts";
-import { headerRules } from "../lib/host-policy.ts";
+import { hosting } from "../config/hosting.ts";
+import { orThrow } from "../lib/adt.ts";
+import { decodeHostConfig, renderHeaders } from "../lib/hosting.ts";
+import { assetUrl } from "../lib/url.ts";
 
 /**
- * `_headers`, rendered from the typed policy.
+ * `_headers`, rendered from `config/hosting.ts`.
  *
  * Injected rather than placed in `src/pages`, because Astro excludes any route
  * file whose name begins with an underscore and this one must be named exactly
  * `_headers`.
+ *
+ * Decoding fails the build rather than emitting a file known to be unsound.
+ * `assetUrl` is passed in rather than reached for inside the library, which is
+ * what keeps the decoder pure and testable without a bundler.
  */
 export const GET: APIRoute = () => {
-  const problems = headerProblems(headerRules);
-  if (problems.length > 0) {
-    // Emitting a file known to be self-contradictory is worse than not building.
-    throw new TypeError(
-      `_headers policy is unsound:\n${problems.map((p) => `  ${p.rule}: ${p.reason}`).join("\n")}`,
-    );
-  }
+  const { headers } = orThrow(decodeHostConfig(hosting, assetUrl), "config/hosting.ts");
 
-  return new Response(renderHeaders(headerRules), {
+  return new Response(renderHeaders(headers), {
     headers: { "content-type": "text/plain; charset=utf-8" },
   });
 };

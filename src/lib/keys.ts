@@ -148,6 +148,17 @@ export const publishedKeys = (domain: string): Promise<readonly PublishedKey[]> 
   return pending;
 };
 
+/**
+ * A fingerprint as people transcribe it: upper case, in groups of four.
+ *
+ * Derived rather than written down. It used to be a config string sitting
+ * beside the key, which is a second encoding of the same fact — and the one
+ * that goes stale silently, because rotating a key changes the file while
+ * leaving the printed fingerprint looking perfectly plausible.
+ */
+export const formatFingerprint = (fingerprint: string): string =>
+  (fingerprint.toUpperCase().match(/.{1,4}/g) ?? []).join(" ");
+
 /** Every published address across every key, newest file order. */
 export const publishedAddresses = async (
   domain: string,

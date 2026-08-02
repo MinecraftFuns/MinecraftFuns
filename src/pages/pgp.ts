@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-import { contact } from "../config.ts";
+import { contact } from "../config/contact.ts";
 import { publishedKeys } from "../lib/keys.ts";
 
 /**

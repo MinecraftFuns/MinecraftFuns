@@ -1,3 +1,4 @@
+import { site } from "../config/site.ts";
 import { invalid, ok, orThrow, type Parsed } from "./adt.ts";
 
 /**
@@ -52,10 +53,10 @@ export const timeZone = (raw: string): TimeZone =>
  * also takes an explicit `zone`, so the module stays reusable for content that
  * belongs to some other zone.
  */
-export const SITE_TIME_ZONE: TimeZone = timeZone("America/Toronto");
+export const SITE_TIME_ZONE: TimeZone = timeZone(site.timeZone);
 
 /** Formatting locale. Separate from the zone: they vary independently. */
-export const SITE_LOCALE = "en-CA";
+export const SITE_LOCALE: string = site.dateLocale;
 
 // ---------------------------------------------------------------------------
 // Calendar dates

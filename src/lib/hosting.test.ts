@@ -3,8 +3,10 @@ import { describe, it } from "node:test";
 
 import {
   covers,
+  decodeHostConfig,
   exactPath,
   headerProblems,
+  parsePathPattern,
   patternMatches,
   prefixPath,
   redirectProblems,
@@ -121,6 +123,117 @@ describe("redirectProblems", () => {
 
   it("is total — an empty policy is not a problem", () => {
     assert.deepEqual(redirectProblems([]), []);
+  });
+});
+
+describe("parsePathPattern", () => {
+  it("reads a plain path as exact and a trailing star as a prefix", () => {
+    assert.deepEqual(parsePathPattern("/pgp"), { tag: "ok", value: exactPath("/pgp") });
+    assert.deepEqual(parsePathPattern("/pgp."), {
+      tag: "ok",
+      value: exactPath("/pgp."),
+    });
+    assert.deepEqual(parsePathPattern("/pgp.*"), {
+      tag: "ok",
+      value: prefixPath("/pgp."),
+    });
+  });
+
+  it("rejects a path that is not rooted", () => {
+    assert.equal(parsePathPattern("pgp").tag, "invalid");
+  });
+
+  /* The domain models a trailing wildcard only, so a mid-path one is refused
+     rather than silently treated as a literal asterisk. */
+  it("rejects a star anywhere but the end", () => {
+    assert.equal(parsePathPattern("/a/*/b").tag, "invalid");
+    assert.equal(parsePathPattern("/*x").tag, "invalid");
+  });
+
+  it("is total — no input throws", () => {
+    ["", "*", "/", "//*", "/a**"].forEach((raw) =>
+      assert.doesNotThrow(() => parsePathPattern(raw)),
+    );
+  });
+});
+
+describe("decodeHostConfig", () => {
+  const under = (path: string) => `/base${path}`;
+
+  it("applies the base to patterns and to internal destinations", () => {
+    const decoded = decodeHostConfig(
+      {
+        headers: [{ path: "/pgp", set: { "content-type": "application/pgp-keys" } }],
+        redirects: [{ from: "/gpg", to: "/pgp" }],
+      },
+      under,
+    );
+
+    assert.equal(decoded.tag, "ok");
+    if (decoded.tag !== "ok") return;
+    assert.equal(renderRedirects(decoded.value.redirects), "/base/gpg /base/pgp 301\n");
+    assert.match(renderHeaders(decoded.value.headers), /^\/base\/pgp$/m);
+  });
+
+  /* The wildcard is not part of the path, so only the literal half is resolved
+     and no base logic ever sees an asterisk. */
+  it("resolves only the literal half of a prefix", () => {
+    const decoded = decodeHostConfig(
+      { headers: [], redirects: [{ from: "/pgp.*", to: "/pgp" }] },
+      under,
+    );
+    assert.equal(decoded.tag, "ok");
+    if (decoded.tag !== "ok") return;
+    assert.equal(renderRedirects(decoded.value.redirects), "/base/pgp.* /base/pgp 301\n");
+  });
+
+  it("leaves a destination on another origin alone", () => {
+    const decoded = decodeHostConfig(
+      { headers: [], redirects: [{ from: "/x", to: "https://example.test/y" }] },
+      under,
+    );
+    assert.equal(decoded.tag, "ok");
+    if (decoded.tag !== "ok") return;
+    assert.match(renderRedirects(decoded.value.redirects), /https:\/\/example\.test\/y/);
+  });
+
+  it("defaults the status to a permanent move", () => {
+    const decoded = decodeHostConfig(
+      { headers: [], redirects: [{ from: "/a", to: "/b" }] },
+      (path) => path,
+    );
+    assert.equal(decoded.tag === "ok" && decoded.value.redirects[0]?.status, 301);
+  });
+
+  it("rejects a header rule that does nothing", () => {
+    const decoded = decodeHostConfig({ headers: [{ path: "/a" }], redirects: [] }, under);
+    assert.equal(decoded.tag, "invalid");
+  });
+
+  /* Config is edited by hand, so a run that reports one mistake at a time turns
+     a typo into a sequence of builds. */
+  it("reports every problem at once rather than the first", () => {
+    const decoded = decodeHostConfig(
+      {
+        headers: [{ path: "no-slash", set: { a: "b" } }],
+        redirects: [{ from: "/a/*/b", to: "/c" }],
+      },
+      under,
+    );
+    assert.equal(decoded.tag, "invalid");
+    if (decoded.tag !== "invalid") return;
+    assert.match(decoded.reason, /no-slash/);
+    assert.match(decoded.reason, /\/a\/\*\/b/);
+  });
+
+  it("carries the structural checks through, on decoded values", () => {
+    const decoded = decodeHostConfig(
+      { headers: [], redirects: [{ from: "/pg*", to: "/pgp" }] },
+      under,
+    );
+    assert.equal(decoded.tag, "invalid");
+    if (decoded.tag !== "invalid") return;
+    assert.match(decoded.reason, /loop/);
   });
 });
 

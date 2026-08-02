@@ -1,6 +1,6 @@
 import type { APIRoute, GetStaticPaths } from "astro";
 
-import { contact } from "../../../../config.ts";
+import { contact } from "../../../../config/contact.ts";
 import { publishedAddresses, type PublishedKey } from "../../../../lib/keys.ts";
 
 /**

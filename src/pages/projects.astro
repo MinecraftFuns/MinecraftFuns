@@ -2,43 +2,10 @@
 import PageIntro from "../components/PageIntro.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import Section from "../components/Section.astro";
-import { projects, type ProjectKind } from "../config.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { projectSections } from "../lib/projects.ts";
 
-/*
- * Presentation order and headings for the closed sum. A `Record` keyed by the
- * kind is the finite-domain form of an exhaustive match: adding a fourth kind
- * makes these objects a type error until it is named and placed, so a new kind
- * can never quietly render as an unlabelled group.
- */
-const KIND_ORDER: readonly ProjectKind[] = [
-  "side-project",
-  "research",
-  "open-source",
-];
-
-const KIND_HEADING: Readonly<Record<ProjectKind, string>> = {
-  "side-project": "Side projects",
-  research: "Research",
-  "open-source": "Open source",
-};
-
-const KIND_BLURB: Readonly<Record<ProjectKind, string>> = {
-  "side-project": "Things I built because I wanted them to exist.",
-  research: "Artifacts and code supporting research work.",
-  "open-source": "Contributions to projects maintained by other people.",
-};
-
-const grouped = Object.groupBy(projects, (project) => project.kind);
-
-// Only render a section that has something in it. An empty heading advertises
-// a gap; omitting it simply says nothing.
-const sections = KIND_ORDER.map((kind) => ({
-  kind,
-  heading: KIND_HEADING[kind],
-  blurb: KIND_BLURB[kind],
-  items: grouped[kind] ?? [],
-})).filter((section) => section.items.length > 0);
+const sections = projectSections();
 ---
 
 <BaseLayout

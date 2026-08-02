@@ -1,7 +1,10 @@
 ---
 import PageIntro from "../components/PageIntro.astro";
 import Section from "../components/Section.astro";
-import { contact } from "../config.ts";
+import { education } from "../config/about.ts";
+import { profiles, pgpHref } from "../lib/contact.ts";
+import { contact } from "../config/contact.ts";
+import { formatFingerprint, publishedKeys } from "../lib/keys.ts";
 import { routeUrl } from "../lib/url.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
@@ -16,20 +19,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
  * ships to a live CV is worse than a short one.
  */
 
-const education = [
-  {
-    institution: "University of Toronto",
-    credential: "Double major in Computer Science and Cognitive Science",
-    detail: "Minor in Statistics",
-    period: "Third year",
-  },
-];
-
-const elsewhere = [
-  { label: "GitHub", value: "MinecraftFuns", href: contact.github },
-  { label: "Matrix", value: "@multiset:matrix.org", href: contact.matrix },
-  { label: "Twitter", value: "@SerendipityArk", href: contact.twitter },
-];
+/* Read off the key rather than written beside it, so rotating the key cannot
+   leave a stale fingerprint printed here. */
+const [key] = await publishedKeys(contact.mailDomain);
+const fingerprint = key === undefined ? "" : formatFingerprint(key.fingerprint);
 
 /* Period in a fixed left column, detail beside it — the standard CV rhythm,
    collapsing to stacked rows where the column would crowd the text. */
@@ -77,7 +70,7 @@ const ENTRY_PERIOD = "text-ink-tertiary font-mono text-caption";
   <Section id="contact" title="Contact">
     <div class="prose mb-md">
       <p>
-        For anything substantive, import my <a href={contact.pgp}>PGP key</a> and
+        For anything substantive, import my <a href={pgpHref()}>PGP key</a> and
         write to the address in its <strong>Primary User ID</strong>. There is
         deliberately no plaintext address on this page.
       </p>
@@ -86,16 +79,16 @@ const ENTRY_PERIOD = "text-ink-tertiary font-mono text-caption";
       <div class={ENTRY}>
         <dt class={ENTRY_PERIOD}>PGP</dt>
         <dd class="text-ink-muted font-mono text-body-sm wrap-anywhere">
-          {contact.pgpFingerprint}
+          {fingerprint}
         </dd>
       </div>
       {
-        elsewhere.map((item) => (
+        profiles.map((item) => (
           <div class={ENTRY}>
             <dt class={ENTRY_PERIOD}>{item.label}</dt>
             <dd>
               <a class="text-accent hover:text-accent-hover" href={item.href}>
-                {item.value}
+                {item.handle}
               </a>
             </dd>
           </div>

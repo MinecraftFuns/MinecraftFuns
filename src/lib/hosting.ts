@@ -1,4 +1,4 @@
-import { assertNever } from "./adt.ts";
+import { assertNever, invalid, ok, type Parsed } from "./adt.ts";
 
 /**
  * Host directives: the two path-keyed declaration files a static host reads.
@@ -155,6 +155,145 @@ export const renderHeaders = (rules: readonly HeaderRule[]): string =>
   `${rules
     .map((rule) => [renderPattern(rule.pattern), ...rule.ops.map(renderOp)].join("\n"))
     .join("\n\n")}\n`;
+
+// ---------------------------------------------------------------------------
+// Config surface
+// ---------------------------------------------------------------------------
+//
+// Everything above is the abstract syntax: what code manipulates. What follows
+// is the concrete syntax — what a person writes in `src/config`, and the
+// decoder that turns one into the other.
+//
+// The two differ deliberately. A pattern is a plain string ending in `*`
+// because that is how anyone would write it and how the host's own
+// documentation spells it; it becomes a variant here, where the wildcard being
+// structural is what makes matching a comparison. Config is written
+// site-relative and the base is applied during decoding, so nobody editing a
+// rule has to know the deployment has a base path at all.
+
+/** A redirect as written in config. `status` defaults to a permanent move. */
+export type RedirectConfig = {
+  readonly from: string;
+  readonly to: string;
+  readonly status?: RedirectStatus;
+};
+
+/**
+ * A header rule as written in config.
+ *
+ * `set` is a record rather than a list of pairs, which makes a repeated header
+ * name unrepresentable in the common case — object keys are unique. Names
+ * differing only in case remain expressible, so the check below survives.
+ */
+export type HeaderConfig = {
+  readonly path: string;
+  readonly set?: Readonly<Record<string, string>>;
+  readonly remove?: readonly string[];
+};
+
+export type HostConfig = {
+  readonly headers: readonly HeaderConfig[];
+  readonly redirects: readonly RedirectConfig[];
+};
+
+/** Applies the deployment's base to a site-relative path. */
+export type Resolve = (path: string) => string;
+
+/**
+ * Total. The wildcard may only end a pattern, because that is the only shape
+ * the domain models — a mid-path splat is rejected loudly rather than silently
+ * mishandled.
+ */
+export const parsePathPattern = (raw: string): Parsed<PathPattern> => {
+  if (!raw.startsWith("/")) {
+    return invalid(`path must start with "/": ${JSON.stringify(raw)}`);
+  }
+
+  const star = raw.indexOf("*");
+  if (star === -1) return ok(exactPath(raw));
+  if (star !== raw.length - 1) {
+    return invalid(`"*" may only end a pattern: ${JSON.stringify(raw)}`);
+  }
+
+  return ok(prefixPath(raw.slice(0, -1)));
+};
+
+/* Only the literal half is resolved; the wildcard is not part of the path and
+   never reaches the URL parser. */
+const resolvePattern = (pattern: PathPattern, resolve: Resolve): PathPattern =>
+  pattern.kind === "exact"
+    ? exactPath(resolve(pattern.path))
+    : prefixPath(resolve(pattern.path));
+
+const decodeRedirect = (
+  config: RedirectConfig,
+  resolve: Resolve,
+): Parsed<Redirect> => {
+  const from = parsePathPattern(config.from);
+  if (from.tag !== "ok") return from;
+
+  return ok({
+    from: resolvePattern(from.value, resolve),
+    /* A destination leaving the site keeps its own authority. */
+    to: config.to.startsWith("/") ? resolve(config.to) : config.to,
+    status: config.status ?? 301,
+  });
+};
+
+const decodeHeaderRule = (
+  config: HeaderConfig,
+  resolve: Resolve,
+): Parsed<HeaderRule> => {
+  const pattern = parsePathPattern(config.path);
+  if (pattern.tag !== "ok") return pattern;
+
+  const ops: HeaderOp[] = [
+    ...Object.entries(config.set ?? {}).map(
+      ([name, value]): HeaderOp => ({ kind: "set", name, value }),
+    ),
+    ...(config.remove ?? []).map((name): HeaderOp => ({ kind: "remove", name })),
+  ];
+
+  const [first, ...rest] = ops;
+  if (first === undefined) {
+    return invalid(`${config.path} sets and removes nothing`);
+  }
+
+  return ok({ pattern: resolvePattern(pattern.value, resolve), ops: [first, ...rest] });
+};
+
+/**
+ * Decode the whole host policy, reporting every problem rather than the first.
+ *
+ * Config is edited by hand, so a run that names one mistake at a time turns a
+ * typo into a sequence of builds. Errors accumulate; the structural checks
+ * below then run over what decoded.
+ */
+export const decodeHostConfig = (
+  config: HostConfig,
+  resolve: Resolve,
+): Parsed<{ readonly headers: readonly HeaderRule[]; readonly redirects: readonly Redirect[] }> => {
+  const headers = config.headers.map((rule) => decodeHeaderRule(rule, resolve));
+  const redirects = config.redirects.map((rule) => decodeRedirect(rule, resolve));
+
+  const reasons = [...headers, ...redirects].flatMap((parsed) =>
+    parsed.tag === "invalid" ? [parsed.reason] : [],
+  );
+  if (reasons.length > 0) return invalid(reasons.join("\n  "));
+
+  const decoded = {
+    headers: headers.flatMap((parsed) => (parsed.tag === "ok" ? [parsed.value] : [])),
+    redirects: redirects.flatMap((parsed) => (parsed.tag === "ok" ? [parsed.value] : [])),
+  };
+
+  const problems = [
+    ...redirectProblems(decoded.redirects),
+    ...headerProblems(decoded.headers),
+  ];
+  return problems.length > 0
+    ? invalid(problems.map(({ rule, reason }) => `${rule}: ${reason}`).join("\n  "))
+    : ok(decoded);
+};
 
 // ---------------------------------------------------------------------------
 // Structural checks

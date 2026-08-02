@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-import { site } from "../config.ts";
+import { site } from "../config/site.ts";
 import { allowAll, disallowAll, renderRobots } from "../lib/robots.ts";
 import { assetUrl } from "../lib/url.ts";
 
@@ -25,7 +25,7 @@ import { assetUrl } from "../lib/url.ts";
  * base is the root.
  */
 export const GET: APIRoute = ({ site: deployedTo }) => {
-  const primary = new URL(site.url);
+  const primary = new URL(site.canonicalOrigin);
   const isPrimary = deployedTo === undefined || deployedTo.origin === primary.origin;
 
   const sitemapUrl = new URL(assetUrl("/sitemap-index.xml"), deployedTo ?? primary);

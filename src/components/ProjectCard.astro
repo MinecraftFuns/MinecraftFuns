@@ -1,5 +1,6 @@
 ---
-import type { Project, ProjectStatus } from "../config.ts";
+import type { Project } from "../config/projects.ts";
+import { badgeFor } from "../lib/projects.ts";
 
 type Props = { readonly project: Project };
 
@@ -15,18 +16,9 @@ const { project } = Astro.props;
  */
 const Tag = project.href === undefined ? "div" : "a";
 
-/*
- * Total elimination over a closed sum. `null` means "this state shows no
- * badge", which is a decision the author made, not a value that went missing —
- * and adding a third status makes this object a type error until it is
- * classified.
- */
-const STATUS_BADGE: Readonly<Record<ProjectStatus, string | null>> = {
-  active: null,
-  archived: "Archived",
-};
-
-const badge = STATUS_BADGE[project.status];
+/* The label lives beside the status it belongs to, in config. `null` means
+   "this state shows no badge" — a decision, not a value that went missing. */
+const badge = badgeFor(project.status);
 
 /* Elevation is a surface step plus a stronger hairline. There are no shadow
    utilities in this theme, so that is enforced rather than merely intended. */

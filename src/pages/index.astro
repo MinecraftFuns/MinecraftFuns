@@ -5,7 +5,8 @@ import PostRow from "../components/PostRow.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import Section from "../components/Section.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { contact, projects } from "../config.ts";
+import { projects } from "../config/projects.ts";
+import { pgpHref } from "../lib/contact.ts";
 import { postSummaries } from "../lib/posts.ts";
 import { routeUrl } from "../lib/url.ts";
 
@@ -22,7 +23,7 @@ const recentPosts = await postSummaries(3);
   >
     <div class="mt-lg flex flex-wrap gap-xs">
       <Button href={routeUrl("/projects")} variant="primary">View projects</Button>
-      <Button href={contact.pgp} variant="secondary">Get in touch</Button>
+      <Button href={pgpHref()} variant="secondary">Get in touch</Button>
     </div>
   </PageIntro>
 

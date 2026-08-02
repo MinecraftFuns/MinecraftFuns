@@ -3,6 +3,8 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
+import { nonDocumentRoutes } from "./src/config/site.ts";
+
 /**
  * The deployment target is a parameter, not a constant.
  *
@@ -83,7 +85,10 @@ export default defineConfig({
       },
     },
     sitemap({
-      filter: (page) => !/\/(pgp|\.well-known)\b/.test(new URL(page).pathname),
+      filter: (page) => {
+        const { pathname } = new URL(page);
+        return !nonDocumentRoutes.some((route) => pathname.includes(route));
+      },
     }),
   ],
   markdown: {
