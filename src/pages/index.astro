@@ -3,6 +3,7 @@ import PostRow from "../components/PostRow.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { contact, projects, recentPosts } from "../config.ts";
+import { withBase } from "../lib/url.ts";
 ---
 
 <BaseLayout>
@@ -16,7 +17,7 @@ import { contact, projects, recentPosts } from "../config.ts";
       Computer Science and Cognitive Science with a minor in Statistics.
     </p>
     <div class="hero__actions">
-      <a class="button button--primary" href="/work">View work</a>
+      <a class="button button--primary" href={withBase("/work")}>View work</a>
       <a class="button button--secondary" href={contact.pgp}>Get in touch</a>
     </div>
   </section>
@@ -24,7 +25,7 @@ import { contact, projects, recentPosts } from "../config.ts";
   <section class="section container" aria-labelledby="work-heading">
     <div class="section__head">
       <h2 class="section__title" id="work-heading">Selected work</h2>
-      <a class="section__link" href="/work">All projects</a>
+      <a class="section__link" href={withBase("/work")}>All projects</a>
     </div>
     <ul class="grid" role="list">
       {
@@ -40,7 +41,7 @@ import { contact, projects, recentPosts } from "../config.ts";
   <section class="section container" aria-labelledby="writing-heading">
     <div class="section__head">
       <h2 class="section__title" id="writing-heading">Recent writing</h2>
-      <a class="section__link" href="/writing">All posts</a>
+      <a class="section__link" href={withBase("/writing")}>All posts</a>
     </div>
     <div class="rows">
       {recentPosts.map((post) => <PostRow post={post} />)}

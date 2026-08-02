@@ -1,16 +1,24 @@
 ---
 import { nav, site } from "../config.ts";
+import { isWithin, withBase } from "../lib/url.ts";
 
 const { pathname } = Astro.url;
 
-/** Marks the section as current, so `/writing/some-post` still lights "Writing". */
-const isCurrent = (href: string) =>
-  pathname === href || pathname.startsWith(`${href}/`);
+/*
+ * Resolve each nav target once, then reuse it for both the link and the
+ * current-section test. `Astro.url.pathname` already carries the deployment's
+ * base path, so the comparison has to be made against a resolved target rather
+ * than the raw config value.
+ */
+const items = nav.map((item) => ({
+  ...item,
+  target: withBase(item.href),
+}));
 ---
 
 <header class="header">
   <div class="container header__inner">
-    <a class="brand" href="/" aria-label={`${site.name} — home`}>
+    <a class="brand" href={withBase("/")} aria-label={`${site.name} — home`}>
       <span class="brand__mark" aria-hidden="true"></span>
       <span class="brand__name">{site.name}</span>
     </a>
@@ -18,12 +26,12 @@ const isCurrent = (href: string) =>
     <nav class="nav" aria-label="Primary">
       <ul class="nav__list" role="list">
         {
-          nav.map((item) => (
+          items.map((item) => (
             <li>
               <a
                 class="nav__link"
-                href={item.href}
-                aria-current={isCurrent(item.href) ? "page" : undefined}
+                href={item.target}
+                aria-current={isWithin(pathname, item.target) ? "page" : undefined}
               >
                 {item.label}
               </a>
