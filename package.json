@@ -22,6 +22,7 @@
     "typecheck": "astro check",
     "test:unit": "node --test \"src/**/*.test.ts\" \"scripts/**/*.test.mjs\"",
     "check:dist": "node scripts/check-dist.mjs",
+    "audit": "node scripts/audit/run.mjs",
     "test": "npm run lint && npm run typecheck && npm run test:unit",
     "verify": "npm test && npm run build && npm run check:dist",
     "submodules": "git submodule update --init --recursive",
@@ -34,8 +35,10 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.12.1",
     "@types/node": "^26.1.2",
     "markdownlint-cli2": "^0.23.2",
+    "playwright": "^1.62.1",
     "typescript": "^6.0.3"
   },
   "dependencies": {
