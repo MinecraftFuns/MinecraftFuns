@@ -1,0 +1,178 @@
+name: Build and deploy site
+
+# The trigger set is closed and small: the default branch, plus a manual
+# escape hatch. Pull requests deliberately do not run this workflow — a PR
+# from a fork must never reach a job holding deployment credentials.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Deny everything by default, then re-grant per job. The build side never
+# needs more than read access; only `deploy` receives write scopes, so a
+# compromised dependency in the build cannot publish anything.
+permissions: {}
+
+# One deployment at a time. In-progress runs are allowed to finish rather than
+# being cancelled, because a half-applied production deploy is worse than a
+# slightly stale one; queued runs beyond the newest are dropped.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  # The build major. Deliberately not read from `engines.node`, which states a
+  # *minimum* (">=24") — resolving that range would silently move CI onto a new
+  # major the day one ships.
+  NODE_VERSION: "24"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Validate once. Nothing here produces an artifact or touches the outside
+  # world, so it holds read access only.
+  # ---------------------------------------------------------------------------
+  verify:
+    name: Lint, typecheck, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          # Drop the token from .git/config once the checkout is done. Nothing
+          # downstream performs a git operation, so leaving credentials on disk
+          # for the rest of the job is pure exposure.
+          persist-credentials: false
+          # Submodules stay out: the skills submodules are not inputs to the
+          # site build, and `.claude/skills` is a gitlink with no .gitmodules
+          # entry, so fetching them would fail as well as waste time.
+          submodules: false
+          show-progress: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # `ci` rather than `install`: it installs exactly the lockfile's tree and
+      # fails if package.json and the lockfile disagree, so CI cannot silently
+      # resolve a different dependency graph than the one committed.
+      - name: Install dependencies
+        run: npm ci
+
+      # markdownlint, astro check, and the unit tests. Running them in their own
+      # job means one execution gates every target below, instead of repeating
+      # per matrix entry.
+      - name: Verify
+        run: npm test
+
+  # ---------------------------------------------------------------------------
+  # Build once per destination. A base path is baked into every generated link,
+  # so the two origins genuinely need two artifacts — the same validated source
+  # compiled against different parameters, not two independent pipelines.
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build ${{ matrix.name }}
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      # Let both targets report. They are two parameterisations of one source,
+      # so knowing whether a failure is target-specific or common to both is
+      # the first diagnostic question — cancelling the sibling destroys it.
+      # `deploy` still requires every leg to succeed.
+      fail-fast: false
+      matrix:
+        include:
+          # Served beneath /MinecraftFuns because this is a project repository
+          # rather than a <user>.github.io one.
+          - name: github-pages
+            site: https://minecraftfuns.github.io
+            base: /MinecraftFuns
+            pages: true
+          # The eventual primary domain, served at the root.
+          - name: joefang-org
+            site: https://joefang.org
+            base: /
+            pages: false
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          submodules: false
+          show-progress: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for ${{ matrix.site }}${{ matrix.base }}
+        env:
+          SITE_URL: ${{ matrix.site }}
+          SITE_BASE: ${{ matrix.base }}
+        run: npm run build
+
+      # Pages expects one specifically named artifact, which the deploy job
+      # consumes. Retention stays at the default single day: it is an
+      # intermediate, superseded by the next push.
+      - name: Upload Pages artifact
+        if: matrix.pages
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/
+          retention-days: 1
+
+      # The second destination has no deployment step yet, so its build is
+      # published as an ordinary downloadable artifact. `if-no-files-found:
+      # error` turns a silently empty upload into a failure.
+      - name: Upload portable artifact
+        if: ${{ !matrix.pages }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: site-${{ matrix.name }}
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+          # Re-running a failed job would otherwise collide with the artifact
+          # left by the previous attempt and fail on upload.
+          overwrite: true
+
+  # ---------------------------------------------------------------------------
+  # The only job with write access, and the only one that touches anything
+  # outside the runner. It runs no repository code — it just hands GitHub an
+  # already-built artifact, so `contents` access is not among its grants.
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write # publish the deployment
+      id-token: write # prove to Pages that it originated here
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
+        with:
+          artifact_name: github-pages
+          # Five minutes rather than the default ten. This site is a handful of
+          # static files; a deployment still pending after five minutes has
+          # stalled, and failing fast beats occupying the concurrency slot.
+          timeout: "300000"
