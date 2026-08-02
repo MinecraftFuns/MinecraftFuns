@@ -1,0 +1,30 @@
+{
+  "name": "minecraftfuns",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Source for the GitHub profile README shown at github.com/MinecraftFuns",
+  "homepage": "https://joefang.org",
+  "bugs": {
+    "url": "https://github.com/MinecraftFuns/MinecraftFuns/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MinecraftFuns/MinecraftFuns.git"
+  },
+  "author": {
+    "name": "Joe Fang",
+    "url": "https://joefang.org"
+  },
+  "scripts": {
+    "lint": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#.github/skills\" \"#.claude/skills\"",
+    "lint:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules\" \"#.github/skills\" \"#.claude/skills\"",
+    "test": "npm run lint",
+    "submodules": "git submodule update --init --recursive"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "^0.23.2"
+  }
+}
