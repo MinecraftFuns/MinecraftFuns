@@ -1,0 +1,79 @@
+---
+import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
+import "../styles/global.css";
+
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import { site } from "../config";
+
+type Props = {
+  title?: string;
+  description?: string;
+  /** Set on article pages so the OG type is accurate. */
+  type?: "website" | "article";
+};
+
+const {
+  title,
+  description = site.description,
+  type = "website",
+} = Astro.props;
+
+const pageTitle = title ? `${title} — ${site.name}` : site.title;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
+---
+
+<!doctype html>
+<html lang={site.locale} data-theme-pref="system">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {/*
+      Restore the stored theme before first paint. Inline and synchronous on
+      purpose: a deferred script would let the default theme paint first and
+      flash. Kept to the minimum work needed to set one attribute.
+    */}
+    <script is:inline>
+      (() => {
+        try {
+          const pref = localStorage.getItem("theme");
+          if (pref === "light" || pref === "dark") {
+            document.documentElement.dataset.themePref = pref;
+            document.documentElement.style.colorScheme = pref;
+          }
+        } catch {
+          /* Storage unavailable — fall through to the system theme. */
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>
+
+<style>
+  main {
+    /* The skip-link target is programmatically focusable but should not draw
+       an outline when reached that way. */
+    outline: none;
+  }
+</style>

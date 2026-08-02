@@ -1,0 +1,157 @@
+---
+import PostRow from "../components/PostRow.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { contact, projects, recentPosts } from "../config";
+---
+
+<BaseLayout>
+  <section class="hero container">
+    <p class="eyebrow">Toronto, Canada</p>
+    <h1 class="hero__title">
+      Joe Fang builds software and studies how minds work.
+    </h1>
+    <p class="hero__lede">
+      Third-year undergraduate at the University of Toronto, double majoring in
+      Computer Science and Cognitive Science with a minor in Statistics.
+    </p>
+    <div class="hero__actions">
+      <a class="button button--primary" href="/work">View work</a>
+      <a class="button button--secondary" href={contact.pgp}>Get in touch</a>
+    </div>
+  </section>
+
+  <section class="section container" aria-labelledby="work-heading">
+    <div class="section__head">
+      <h2 class="section__title" id="work-heading">Selected work</h2>
+      <a class="section__link" href="/work">All projects</a>
+    </div>
+    <ul class="grid" role="list">
+      {
+        projects.map((project) => (
+          <li>
+            <ProjectCard project={project} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="section container" aria-labelledby="writing-heading">
+    <div class="section__head">
+      <h2 class="section__title" id="writing-heading">Recent writing</h2>
+      <a class="section__link" href="/writing">All posts</a>
+    </div>
+    <div class="rows">
+      {recentPosts.map((post) => <PostRow post={post} />)}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--space-section) var(--space-xl);
+  }
+
+  .hero__title {
+    max-width: 20ch;
+    margin-top: var(--space-xs);
+    font-size: var(--text-display-lg);
+    font-weight: var(--weight-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display-lg);
+  }
+
+  .hero__lede {
+    max-width: 52ch;
+    margin-top: var(--space-md);
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
+    color: var(--ink-muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-top: var(--space-lg);
+  }
+
+  /* 8px radius, compact padding — pill CTAs are out of system. */
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: var(--space-2xs) 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease),
+      border-color var(--duration-fast) var(--ease);
+  }
+
+  .button--primary {
+    background-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .button--primary:hover {
+    background-color: var(--accent-hover);
+    color: var(--on-accent);
+  }
+
+  .button--secondary {
+    background-color: var(--surface-1);
+    border-color: var(--hairline);
+    color: var(--ink);
+  }
+
+  .button--secondary:hover {
+    background-color: var(--surface-2);
+    border-color: var(--hairline-strong);
+    color: var(--ink);
+  }
+
+  .section {
+    padding-block: var(--space-xl);
+  }
+
+  .section__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-bottom: var(--space-md);
+    margin-bottom: var(--space-md);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .section__title {
+    font-size: var(--text-headline);
+    letter-spacing: var(--tracking-headline);
+  }
+
+  .section__link {
+    font-size: var(--text-body-sm);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .section__link:hover {
+    text-decoration: underline;
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    margin: 0;
+  }
+
+  .rows > :last-child {
+    border-bottom: none;
+  }
+</style>

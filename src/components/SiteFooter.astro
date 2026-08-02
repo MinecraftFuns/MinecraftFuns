@@ -1,0 +1,101 @@
+---
+import { contact, site } from "../config";
+
+const year = new Date().getFullYear();
+
+const elsewhere = [
+  { label: "GitHub", href: contact.github },
+  { label: "Matrix", href: contact.matrix },
+  { label: "Twitter", href: contact.twitter },
+  { label: "PGP", href: contact.pgp },
+];
+---
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__col">
+      <p class="footer__name">{site.name}</p>
+      <p class="footer__meta">
+        © {year} · Built with <a href="https://astro.build">Astro</a>
+      </p>
+    </div>
+
+    <nav class="footer__col" aria-label="Elsewhere">
+      <h2 class="eyebrow">Elsewhere</h2>
+      <ul class="footer__list" role="list">
+        {
+          elsewhere.map((item) => (
+            <li>
+              <a class="footer__link" href={item.href} rel="me">
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="footer__col">
+      <h2 class="eyebrow">PGP fingerprint</h2>
+      <p class="footer__fingerprint">{contact.pgpFingerprint}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: var(--space-section);
+    padding-block: var(--space-xl);
+    border-top: 1px solid var(--hairline);
+    color: var(--ink-subtle);
+    font-size: var(--text-body-sm);
+  }
+
+  .footer__inner {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .footer__name {
+    color: var(--ink);
+    font-weight: var(--weight-medium);
+  }
+
+  .footer__meta {
+    font-size: var(--text-caption);
+  }
+
+  .footer__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    margin: 0;
+  }
+
+  .footer__link {
+    color: var(--ink-subtle);
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .footer__link:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  /* Mono is reserved for machine-readable strings — this and code blocks. */
+  .footer__fingerprint {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    line-height: var(--leading-body);
+    max-width: 22ch;
+    overflow-wrap: anywhere;
+  }
+</style>

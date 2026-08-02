@@ -1,0 +1,139 @@
+---
+import { nav, site } from "../config";
+import ThemeToggle from "./ThemeToggle.astro";
+
+const { pathname } = Astro.url;
+
+/** Marks the section as current, so `/writing/some-post` still lights "Writing". */
+const isCurrent = (href: string) =>
+  pathname === href || pathname.startsWith(`${href}/`);
+---
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="/" aria-label={`${site.name} — home`}>
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__name">{site.name}</span>
+    </a>
+
+    <nav class="nav" aria-label="Primary">
+      <ul class="nav__list" role="list">
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                class="nav__link"
+                href={item.href}
+                aria-current={isCurrent(item.href) ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <ThemeToggle />
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: color-mix(in srgb, var(--canvas) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    min-height: var(--nav-height);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-card-title);
+  }
+
+  /* One of the few sanctioned uses of the accent: the brand mark. */
+  .brand__mark {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-xs);
+    background-color: var(--accent);
+  }
+
+  .nav {
+    margin-inline-start: auto;
+  }
+
+  .nav__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    margin: 0;
+  }
+
+  .nav__link {
+    display: block;
+    padding: var(--space-3xs) var(--space-2xs);
+    border-radius: var(--radius-md);
+    color: var(--ink-subtle);
+    font-size: var(--text-body-sm);
+    text-decoration: none;
+    transition:
+      color var(--duration-fast) var(--ease),
+      background-color var(--duration-fast) var(--ease);
+  }
+
+  .nav__link:hover {
+    color: var(--ink);
+    background-color: var(--surface-1);
+  }
+
+  /* Current section is marked by ink weight, not by the accent — the accent
+     stays scarce, and `aria-current` already carries it for assistive tech. */
+  .nav__link[aria-current="page"] {
+    color: var(--ink);
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  @media (max-width: 34rem) {
+    .nav__list {
+      gap: 0;
+    }
+
+    .nav__link {
+      padding-inline: var(--space-3xs);
+      font-size: var(--text-caption);
+    }
+
+    .brand__name {
+      display: none;
+    }
+  }
+
+  @media (pointer: coarse) {
+    .nav__link {
+      padding-block: var(--space-xs);
+    }
+  }
+</style>

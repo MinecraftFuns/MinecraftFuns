@@ -1,0 +1,285 @@
+@import "./tokens.css";
+
+/* ---- Reset ------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-synthesis-weight: none;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: var(--weight-display);
+  line-height: var(--leading-headline);
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding: 0;
+}
+
+/* ---- Focus ------------------------------------------------------------ */
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---- Motion ----------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Primitives ------------------------------------------------------- */
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+}
+
+@media (min-width: 48rem) {
+  .container {
+    padding-inline: var(--space-lg);
+  }
+}
+
+.container--narrow {
+  max-width: var(--container-narrow);
+}
+
+/* Skip link — visually hidden until focused. */
+.skip-link {
+  position: absolute;
+  top: var(--space-2xs);
+  left: var(--space-2xs);
+  z-index: 100;
+  padding: var(--space-2xs) var(--space-xs);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.eyebrow {
+  font-size: var(--text-eyebrow);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-subtle);
+}
+
+/* ---- Links ------------------------------------------------------------ */
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+/* ---- Prose ------------------------------------------------------------
+ *
+ * Long-form reading styles for blog posts and the CV. This is the part
+ * Linear's system has no answer for: its densest body style is tuned for
+ * scanning a landing page, not for staying on an essay for ten minutes.
+ * Measure is constrained, leading opens up, and headings get real space.
+ */
+
+.prose {
+  max-width: var(--measure);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-prose);
+  color: var(--ink-muted);
+}
+
+.prose > * + * {
+  margin-top: var(--space-md);
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: var(--ink);
+  margin-top: var(--space-xl);
+}
+
+.prose h2 {
+  font-size: var(--text-headline);
+  letter-spacing: var(--tracking-headline);
+}
+
+.prose h3 {
+  font-size: var(--text-card-title);
+  letter-spacing: var(--tracking-card-title);
+}
+
+.prose h4 {
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-medium);
+}
+
+.prose strong {
+  color: var(--ink);
+  font-weight: var(--weight-medium);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: var(--space-md);
+}
+
+.prose li + li {
+  margin-top: var(--space-2xs);
+}
+
+.prose li::marker {
+  color: var(--ink-tertiary);
+}
+
+.prose blockquote {
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--hairline-strong);
+  color: var(--ink-subtle);
+  font-style: normal;
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: 0.15em 0.35em;
+  background-color: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-xs);
+  color: var(--ink);
+}
+
+.prose pre {
+  padding: var(--space-md);
+  background-color: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+}
+
+.prose pre code {
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: inherit;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--hairline);
+  margin-block: var(--space-xl);
+}
+
+.prose figcaption,
+.prose small {
+  font-size: var(--text-body-sm);
+  color: var(--ink-subtle);
+}
+
+/* Wide content must scroll inside its own box, never the page. */
+.prose .table-wrap {
+  overflow-x: auto;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+}
+
+.prose th,
+.prose td {
+  padding: var(--space-2xs) var(--space-xs);
+  border-bottom: 1px solid var(--hairline);
+  text-align: left;
+}
+
+.prose th {
+  color: var(--ink);
+  font-weight: var(--weight-medium);
+}
