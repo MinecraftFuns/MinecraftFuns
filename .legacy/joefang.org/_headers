@@ -1,0 +1,18 @@
+/*
+    x-declaration: <https://joefang.org/declaration>
+    link: <https://cdn.jsdelivr.net/>; rel="preconnect", <https://ragnarok.joefang.org/>; rel="preconnect", <https://joefang.org/favicon.ico>; rel="prefetch", <https://ragnarok.joefang.org/static/xhpusi6tjp86fqp33ee7idjan5ifjj1on.webp>; rel="preload"; as="image"
+
+/pgp
+    content-type: application/pgp-keys
+    cache-control: no-store
+    content-disposition: attachment; filename=joefang.asc
+    ! link
+
+/.well-known/openpgpkey/hu/*
+    content-type: application/octet-stream
+    cache-control: no-store
+    content-disposition: attachment; filename=openpgpkey.asc
+    ! link
+
+/404
+  x-robots-tag: noindex

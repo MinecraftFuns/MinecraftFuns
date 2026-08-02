@@ -1,0 +1,103 @@
+<!DOCTYPE html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Taking Control of My Tailnet: How I Use Tailscale ACLs and Tags to Organize My Devices | Opaque Hub</title><link rel=canonical href=https://joefang.org/blog/2025-04/taking-control-of-my-tailnet><meta name=description content="When I started using Tailscale , it was great to link all my machines—laptops, servers, Raspberry Pis, containers, and exit nodes—into one private network ..."><meta property=og:title content="Taking Control of My Tailnet: How I Use Tailscale ACLs and Tags to Organize My Devices"><meta property=og:site_name content="Opaque Hub"><meta property=og:description content="When I started using Tailscale , it was great to link all my machines—laptops, servers, Raspberry Pis, containers, and exit nodes—into one private network ..."><meta property=og:type content=article><meta property=og:url content=https://joefang.org/blog/2025-04/taking-control-of-my-tailnet><meta property=og:image content=https://ragnarok.joefang.org/static/xhpusi6tjp86fqp33ee7idjan5ifjj1on.webp><meta property=og:image:alt content="Ark's Avatar"><link rel=icon href=https://ragnarok.joefang.org/static/xhpusi6tjp86fqp33ee7idjan5ifjj1on.webp><link rel=stylesheet href=https://cdn.jsdelivr.net/gh/PetrichorA/page-648446cf@0.1.9/css/style.css><link rel=stylesheet href=https://cdn.jsdelivr.net/gh/PetrichorA/page-648446cf@0.1.9/katex/katex.min.css><link rel=stylesheet href=https://cdn.jsdelivr.net/gh/PetrichorA/page-648446cf@0.1.9/hljs/styles/github.min.css><link rel=me href=https://www.threads.net/@btreemap><link rel=preload as=script id=katex-url href=https://cdn.jsdelivr.net/gh/PetrichorA/page-648446cf@0.1.9/katex/katex.min.js><link rel=preload as=script id=hljs-url href=https://cdn.jsdelivr.net/gh/PetrichorA/page-648446cf@0.1.9/hljs/highlight.min.js><script async src=https://cdn.jsdelivr.net/gh/PetrichorA/page-648446cf@0.1.9/js/loader.js></script></head><body class=markdown-body><h1>Taking Control of My Tailnet: How I Use Tailscale ACLs and Tags to Organize My Devices</h1><p>When I started using <a href=https://tailscale.com/ >Tailscale</a>, it was great to link all my machines—laptops, servers, Raspberry Pis, containers, and exit nodes—into one private network. As the number of devices grew, I needed a simple way to keep things secure and easy to manage. That’s why I turned to Tailscale’s <a href=https://tailscale.com/kb/1018/acls>Access Control Lists</a> (ACLs) and <a href=https://tailscale.com/kb/1068/tags>tags</a>.</p><h2>Why I Use ACLs and Tags</h2><p>By default, Tailscale lets any node talk to any other node. That works for a few devices, but when I added services and shared with others, I wanted:</p><ul><li><strong>Deny by default.</strong> Only allow the connections I really need, which significantly reduces security risks from unauthorized access or misconfigured services.</li><li><strong>Easy-to-read policies.</strong> JSON format is simple to understand and allows easy version control through Git, enabling clear audit trails and rollback capability if changes go wrong.</li><li><strong>Device IDs.</strong> Treating servers and services similarly to users means access is controlled granularly, improving security by avoiding overly permissive defaults.</li></ul><p>Tags let me label devices—<code>server</code>, <code>container</code>, <code>exit-node</code>, <code>rdp-client</code>, and so on—so each machine has a clear role. Then ACLs use those tags to allow only the right traffic. This makes it easy to understand exactly what each device is allowed to do, simplifying troubleshooting and improving security auditing.</p><h2>ACL File Structure</h2><p>My <a href=https://gist.github.com/MinecraftFuns/c01d9abb6a4dc621e0c6e3ef3371dbca>policy file</a> lives in a private Git repository. At the top, I set up my admin group, tag owners, and host names:</p><pre><code class=language-json>{
+  &quot;groups&quot;: {
+    &quot;group:root&quot;: [ /* Admin group with full access */ ]
+  },
+
+  &quot;tagOwners&quot;: {
+    /* All device role tags are owned and assigned by the admin group */
+  },
+
+  &quot;hosts&quot;: {
+    /* Static hostnames mapped to internal Tailscale IP addresses */
+    &quot;arkg15.perch-map.ts.net&quot;:     &quot;fd7a:115c:a1e0::cafe:babe&quot;,
+    &quot;arklab.perch-map.ts.net&quot;:     &quot;fd7a:115c:a1e0::dead:beef&quot;,
+    &quot;arklab-wsl.perch-map.ts.net&quot;: &quot;fd7a:115c:a1e0::face:feed&quot;
+  },
+
+  &quot;acls&quot;: [ /* Access control rules defined below */ ],
+  
+  &quot;ssh&quot;:  [ /* SSH access rules using Tailscale SSH */ ],
+  
+  &quot;nodeAttrs&quot;: [
+    /* Node attributes like Taildrive and Funnel capabilities */
+  ],
+  
+  &quot;grants&quot;: [
+    /* Permissions for Web UI and Drive access */
+  ]
+}
+</code></pre><h2>How I Tag My Devices</h2><ol><li><p><strong>Core Servers</strong></p><ul><li>Tag: <code>tag:server</code></li><li>These machines host critical infrastructure like databases or APIs. Clearly tagging them helps me quickly verify and protect critical endpoints.</li></ul></li><li><p><strong>Containers &amp; Labs</strong></p><ul><li>Tags: <code>tag:container</code>, <code>tag:arklab</code></li><li>Containers frequently change, so tagging helps rapidly apply appropriate ACLs without reconfiguring permissions each time a container restarts or scales.</li></ul></li><li><p><strong>Remote Desktop</strong></p><ul><li>Tags: <code>tag:rdp-client</code>, <code>tag:rdp-server</code></li><li>Tagging both clients and servers ensures only my authorized Windows machines can initiate RDP connections, reducing the attack surface for potential intruders.</li></ul></li><li><p><strong>Exit Nodes &amp; DNS</strong></p><ul><li>Tags: <code>tag:exit-node</code>, <code>tag:dns-server</code>, <code>tag:dns-client</code>, <code>tag:doh-client</code>, <code>tag:dot-client</code></li><li>Tagging exit nodes separately allows tight control over internet traffic flow. Using tags for DNS-related roles further secures my DNS setup, clearly defining which devices handle DNS queries and ensuring encrypted protocols (DoH, DoT) are correctly routed.</li></ul></li></ol><p>When I add a new device, I tag it immediately—either via the admin console or an auth key that tags devices automatically. This reduces the risk of misconfiguration and ensures consistent security policies.</p><h2>My ACL Rules</h2><p>Here’s the core of my <a href=https://gist.github.com/MinecraftFuns/a5632e078cb31acfd3706c049d667f8d>ACL setup</a>:</p><pre><code class=language-json>&quot;acls&quot;: [
+  {
+   &quot;action&quot;: &quot;accept&quot;,
+   &quot;src&quot;:    [&quot;group:root&quot;],
+   &quot;dst&quot;:    [&quot;*:*&quot;],
+  },
+
+  {
+   &quot;action&quot;: &quot;accept&quot;,
+   &quot;src&quot;:    [&quot;group:root&quot;, &quot;tag:rdp-client&quot;],
+   &quot;dst&quot;:    [&quot;tag:rdp-server:3389&quot;],
+  },
+
+  {
+   &quot;action&quot;: &quot;accept&quot;,
+   &quot;src&quot;:    [&quot;arklab.perch-map.ts.net&quot;],
+   &quot;dst&quot;:    [&quot;arkg15.perch-map.ts.net:3389&quot;],
+  },
+
+  {
+   &quot;action&quot;: &quot;accept&quot;,
+   &quot;src&quot;:    [&quot;group:root&quot;, &quot;tag:exit-node-user&quot;],
+   &quot;dst&quot;:    [&quot;autogroup:internet:*&quot;],
+  },
+
+  {
+   &quot;action&quot;: &quot;accept&quot;,
+   &quot;src&quot;:    [&quot;group:root&quot;, &quot;tag:dns-client&quot;],
+   &quot;dst&quot;:    [&quot;tag:dns-server:53&quot;],
+  },
+
+  {
+   &quot;action&quot;: &quot;accept&quot;,
+   &quot;src&quot;:    [&quot;group:root&quot;, &quot;tag:doh-client&quot;],
+   &quot;dst&quot;:    [&quot;tag:dns-server:443&quot;, &quot;tag:dns-server:60443&quot;],
+  },
+
+  {
+   &quot;action&quot;: &quot;accept&quot;,
+   &quot;src&quot;:    [&quot;group:root&quot;, &quot;tag:dot-client&quot;],
+   &quot;dst&quot;:    [&quot;tag:dns-server:853&quot;, &quot;tag:dns-server:60853&quot;],
+  },
+]
+</code></pre><ul><li><strong>Admins &amp; Servers</strong> can do everything—great for management and backups.</li><li><strong>RDP Clients</strong> only reach RDP servers on port 3389—no extra access.</li><li><strong>Specific Host</strong> (<code>arklab.perch-map.ts.net</code>) has a special RDP rule for my Windows laptop.</li><li><strong>Exit Nodes Users</strong> can route internet traffic via exit nodes.</li><li><strong>DNS over 53</strong> clients only talk to my DNS servers over port 53 (still encrypted since Tailscale encrypts all the traffic end-to-end).</li><li><strong>Encrypted DNS</strong> clients only talk to my DNS servers over encrypted ports designated by each protocol.</li></ul><p>Each rule clearly defines allowed interactions. By explicitly stating ports and allowed sources, I can quickly identify unnecessary permissions or diagnose connectivity issues. This granular control minimizes potential vulnerabilities due to overly permissive access.</p><h2>Securing SSH with Tailscale SSH</h2><p>I use Tailscale SSH instead of manually managing SSH keys. Here’s my SSH setup:</p><pre><code class=language-json>&quot;ssh&quot;: [
+  {
+   &quot;action&quot;:      &quot;check&quot;,
+   &quot;src&quot;:         [&quot;group:root&quot;],
+   &quot;dst&quot;:         [&quot;autogroup:self&quot;],
+   &quot;users&quot;:       [&quot;autogroup:nonroot&quot;, &quot;root&quot;],
+   &quot;checkPeriod&quot;: &quot;72h&quot;,
+  },
+
+  {
+   &quot;action&quot;: &quot;accept&quot;,
+   &quot;src&quot;:    [&quot;group:root&quot;],
+   &quot;dst&quot;:    [&quot;tag:device&quot;, &quot;tag:server&quot;, &quot;tag:container&quot;],
+   &quot;users&quot;:  [&quot;autogroup:nonroot&quot;],
+  },
+
+  {
+   &quot;action&quot;:      &quot;check&quot;,
+   &quot;src&quot;:         [&quot;group:root&quot;],
+   &quot;dst&quot;:         [&quot;tag:device&quot;, &quot;tag:server&quot;, &quot;tag:container&quot;],
+   &quot;users&quot;:       [&quot;root&quot;],
+   &quot;checkPeriod&quot;: &quot;72h&quot;,
+  },
+
+  {
+   &quot;action&quot;: &quot;accept&quot;,
+   &quot;src&quot;:    [&quot;group:root&quot;, &quot;tag:tailscale-ssh-client&quot;],
+   &quot;dst&quot;:    [&quot;tag:tailscale-ssh-server&quot;],
+   &quot;users&quot;:  [&quot;autogroup:nonroot&quot;, &quot;root&quot;],
+  },
+]
+</code></pre><p>Now running <code>ssh ubuntu@arklab-wsl.perch-map.ts.net</code> just works—Tailscale checks the policy, lets me in, and there is no need for manually configuring a list of <code>authorized_keys</code> anymore, as the burden of authentication and authorization falls to Tailscale.</p><p>Using tags and ACLs has made my tailnet safe and easy to manage. Give it a try—you’ll save time and avoid surprises when you add new devices or share access with others.</p><footer class=center><a href=/ ><img style=width:60px;height:60px;border-radius:60px src=https://ragnarok.joefang.org/static/xhpusi6tjp86fqp33ee7idjan5ifjj1on.webp alt="Ark's Avatar"></a></footer></body></html>

@@ -1,0 +1,7 @@
+/pgp.* /pgp 301
+/gpg /pgp 301
+/gpg.* /pgp 301
+/*.py / 301
+/*.pyc / 301
+/*.md / 301
+/favicon.ico https://ragnarok.joefang.org/static/xhpusi6tjp86fqp33ee7idjan5ifjj1on.webp 301
