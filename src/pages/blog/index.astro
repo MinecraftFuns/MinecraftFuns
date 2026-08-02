@@ -1,4 +1,5 @@
 ---
+import PageIntro from "../../components/PageIntro.astro";
 import PostRow from "../../components/PostRow.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { postSummaries } from "../../lib/posts.ts";
@@ -10,21 +11,21 @@ const posts = await postSummaries();
   title="Blog"
   description="Technical notes on software, systems, and cognitive science by Joe Fang."
 >
-  <section class="page-intro">
-    <p class="eyebrow">Blog</p>
-    <h1 class="page-intro__title">Technical notes, written down so I stop re-deriving them.</h1>
-    <p class="page-intro__lede">
-      Mostly software and systems, occasionally cognitive science. Written for
-      the version of me who hits the same problem in a year.
-    </p>
-  </section>
+  <PageIntro
+    kind="page"
+    eyebrow="Blog"
+    title="Technical notes, written down so I stop re-deriving them."
+    lede="Mostly software and systems, occasionally cognitive science. Written for the version of me who hits the same problem in a year."
+  />
 
   <section aria-label="All posts">
     {
       posts.length === 0 ? (
-        <p class="empty">No posts published yet.</p>
+        <p class="text-ink-subtle py-lg">No posts published yet.</p>
       ) : (
-        <div class="rows">
+        /* This list has no section head above it, so it supplies the rule that
+           a head would otherwise draw. */
+        <div class="border-hairline border-t *:last:border-b-0">
           {posts.map((post) => (
             <PostRow post={post} />
           ))}
@@ -33,16 +34,3 @@ const posts = await postSummaries();
     }
   </section>
 </BaseLayout>
-
-<style>
-  /* This list has no section head above it, so it supplies the rule that a
-     head would otherwise draw. Everywhere else `.rows` inherits it. */
-  .rows {
-    border-top: 1px solid var(--hairline);
-  }
-
-  .empty {
-    padding-block: var(--space-lg);
-    color: var(--ink-subtle);
-  }
-</style>

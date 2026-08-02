@@ -1,4 +1,6 @@
 ---
+import PageIntro from "../components/PageIntro.astro";
+import Section from "../components/Section.astro";
 import { contact } from "../config.ts";
 import { withBase } from "../lib/url.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -28,16 +30,19 @@ const elsewhere = [
   { label: "Matrix", value: "@multiset:matrix.org", href: contact.matrix },
   { label: "Twitter", value: "@SerendipityArk", href: contact.twitter },
 ];
+
+/* Period in a fixed left column, detail beside it — the standard CV rhythm,
+   collapsing to stacked rows where the column would crowd the text. */
+const ENTRY = "grid gap-md border-b border-hairline py-sm last:border-b-0 sm:grid-cols-entry";
+const ENTRY_PERIOD = "text-ink-tertiary font-mono text-caption";
 ---
 
 <BaseLayout
   title="About"
   description="Joe Fang — Computer Science and Cognitive Science at the University of Toronto."
 >
-  <section class="page-intro">
-    <p class="eyebrow">About</p>
-    <h1 class="page-intro__title">Joe Fang</h1>
-    <div class="prose">
+  <PageIntro kind="page" eyebrow="About" title="Joe Fang">
+    <div class="prose mt-md">
       <p>
         I am a third-year undergraduate at the University of Toronto, taking a
         double major in Computer Science and Cognitive Science alongside a minor
@@ -50,137 +55,69 @@ const elsewhere = [
         <a href={withBase("/blog")}>blog</a> of technical notes.
       </p>
     </div>
-  </section>
+  </PageIntro>
 
-  <section class="section" aria-labelledby="education">
-    <div class="section__head">
-      <h2 class="section__title" id="education">Education</h2>
-    </div>
-    <dl class="entries">
+  <Section id="education" title="Education">
+    <dl>
       {
         education.map((entry) => (
-          <div class="entry">
-            <dt class="entry__period">{entry.period}</dt>
-            <dd class="entry__body">
-              <p class="entry__primary">{entry.institution}</p>
-              <p class="entry__secondary">{entry.credential}</p>
-              <p class="entry__secondary">{entry.detail}</p>
+          <div class={ENTRY}>
+            <dt class={ENTRY_PERIOD}>{entry.period}</dt>
+            <dd>
+              <p class="text-ink text-control">{entry.institution}</p>
+              <p class="text-body-sm text-ink-subtle">{entry.credential}</p>
+              <p class="text-body-sm text-ink-subtle">{entry.detail}</p>
             </dd>
           </div>
         ))
       }
     </dl>
-  </section>
+  </Section>
 
-  <section class="section" aria-labelledby="contact">
-    <div class="section__head">
-      <h2 class="section__title" id="contact">Contact</h2>
-    </div>
-    <div class="prose">
+  <Section id="contact" title="Contact">
+    <div class="prose mb-md">
       <p>
         For anything substantive, import my <a href={contact.pgp}>PGP key</a> and
         write to the address in its <strong>Primary User ID</strong>. There is
         deliberately no plaintext address on this page.
       </p>
     </div>
-    <dl class="entries">
-      <div class="entry">
-        <dt class="entry__period">PGP</dt>
-        <dd class="entry__body">
-          <p class="entry__fingerprint">{contact.pgpFingerprint}</p>
+    <dl>
+      <div class={ENTRY}>
+        <dt class={ENTRY_PERIOD}>PGP</dt>
+        <dd class="text-ink-muted font-mono text-body-sm wrap-anywhere">
+          {contact.pgpFingerprint}
         </dd>
       </div>
       {
         elsewhere.map((item) => (
-          <div class="entry">
-            <dt class="entry__period">{item.label}</dt>
-            <dd class="entry__body">
-              <a href={item.href}>{item.value}</a>
+          <div class={ENTRY}>
+            <dt class={ENTRY_PERIOD}>{item.label}</dt>
+            <dd>
+              <a class="text-accent hover:text-accent-hover" href={item.href}>
+                {item.value}
+              </a>
             </dd>
           </div>
         ))
       }
     </dl>
-  </section>
+  </Section>
 
   {/*
-    Templates for the remaining CV sections. Uncomment and fill; the styles
-    below already cover them.
+    Template for the remaining CV sections. Uncomment and fill; ENTRY and
+    ENTRY_PERIOD above already cover the layout.
 
-    <section class="section" aria-labelledby="experience">
-      <div class="section__head">
-        <h2 class="section__title" id="experience">Experience</h2>
-      </div>
-      <dl class="entries">
-        <div class="entry">
-          <dt class="entry__period">2026</dt>
-          <dd class="entry__body">
-            <p class="entry__primary">Role, Organisation</p>
-            <p class="entry__secondary">One line on what you actually did.</p>
+    <Section id="experience" title="Experience">
+      <dl>
+        <div class={ENTRY}>
+          <dt class={ENTRY_PERIOD}>2026</dt>
+          <dd>
+            <p class="text-ink text-control">Role, Organisation</p>
+            <p class="text-body-sm text-ink-subtle">One line on what you did.</p>
           </dd>
         </div>
       </dl>
-    </section>
+    </Section>
   */}
 </BaseLayout>
-
-<style>
-  /* The prose block below the title supplies its own leading margin, so the
-     title only needs the gap above it that every intro has. */
-  .page-intro .prose {
-    margin-top: var(--space-md);
-  }
-
-  .entries {
-    margin: 0;
-  }
-
-  /* Period in a fixed left column, detail beside it — the standard CV rhythm,
-     collapsing to stacked rows where the column would crowd the text. */
-  .entry {
-    display: grid;
-    grid-template-columns: 9rem 1fr;
-    gap: var(--space-md);
-    padding-block: var(--space-sm);
-    border-bottom: 1px solid var(--hairline);
-  }
-
-  .entry:last-child {
-    border-bottom: none;
-  }
-
-  .entry__period {
-    font-family: var(--font-mono);
-    font-size: var(--text-caption);
-    color: var(--ink-tertiary);
-    padding-top: 0.2em;
-  }
-
-  .entry__body {
-    margin: 0;
-  }
-
-  .entry__primary {
-    color: var(--ink);
-    font-weight: var(--weight-medium);
-  }
-
-  .entry__secondary {
-    font-size: var(--text-body-sm);
-    color: var(--ink-subtle);
-  }
-
-  .entry__fingerprint {
-    font-family: var(--font-mono);
-    font-size: var(--text-body-sm);
-    color: var(--ink-muted);
-    overflow-wrap: anywhere;
-  }
-
-  @media (max-width: 34rem) {
-    .entry {
-      grid-template-columns: 1fr;
-      gap: var(--space-3xs);
-    }
-  }
-</style>

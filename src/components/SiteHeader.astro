@@ -16,20 +16,40 @@ const items = nav.map((item) => ({
 }));
 ---
 
-<header class="header">
-  <div class="container header__inner">
-    <a class="brand" href={withBase("/")} aria-label={`${site.name} — home`}>
-      <span class="brand__mark" aria-hidden="true"></span>
-      <span class="brand__name">{site.name}</span>
+<header
+  class="border-hairline bg-veil sticky top-0 z-50 border-b backdrop-blur-md"
+>
+  <div
+    class="mx-auto flex w-full max-w-frame items-center gap-md px-md min-h-nav md:px-lg"
+  >
+    <a
+      class="text-control text-ink inline-flex min-h-control items-center gap-2xs no-underline"
+      href={withBase("/")}
+      aria-label={`${site.name} — home`}
+    >
+      {/* One of the few sanctioned uses of the accent. Sized to the cap height
+          of the name beside it, and on the 4px base like everything else. */}
+      <span class="bg-accent size-xs rounded-xs" aria-hidden="true"></span>
+      <span class="hidden xs:inline">{site.name}</span>
     </a>
 
-    <nav class="nav" aria-label="Primary">
-      <ul class="nav__list" role="list">
+    {/*
+      The chips carry inline padding, so the nav is pulled outward by exactly
+      that padding: what should line up with the frame edge is the last label,
+      not the hover box around it.
+    */}
+    <nav class="ms-auto -me-2xs xs:-me-xs" aria-label="Primary">
+      <ul class="flex items-center" role="list">
         {
           items.map((item) => (
             <li>
+              {/*
+                `flex`, not `inline-flex`: an inline box would sit on the list
+                item's baseline and inherit its half-leading, making the chip
+                taller than the token says and misaligning it against the brand.
+              */}
               <a
-                class="nav__link"
+                class="text-body text-ink-subtle hover:bg-surface-1 hover:text-ink current:text-ink flex min-h-control items-center rounded-md px-2xs no-underline transition-colors xs:px-xs"
                 href={item.target}
                 aria-current={isWithin(pathname, item.target) ? "page" : undefined}
               >
@@ -42,112 +62,3 @@ const items = nav.map((item) => ({
     </nav>
   </div>
 </header>
-
-<style>
-  .header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background-color: color-mix(in srgb, var(--canvas) 88%, transparent);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--hairline);
-  }
-
-  .header__inner {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    min-height: var(--nav-height);
-  }
-
-  /* Brand and nav share one type size; weight and ink separate them, so the
-     hierarchy survives a change to either. */
-  .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2xs);
-    min-height: var(--control-height);
-    color: var(--ink);
-    text-decoration: none;
-    font-size: var(--text-body);
-    font-weight: var(--weight-medium);
-    letter-spacing: var(--tracking-card-title);
-  }
-
-  /* One of the few sanctioned uses of the accent: the brand mark. Sized to the
-     cap height of the name beside it, and on the 4px base like everything else. */
-  .brand__mark {
-    width: 12px;
-    height: 12px;
-    border-radius: var(--radius-xs);
-    background-color: var(--accent);
-  }
-
-  /*
-   * The chips carry inline padding, so the nav is pulled outward by exactly
-   * that padding: what should line up with the container edge is the last
-   * label, not the hover box around it. Deriving the pull from the same custom
-   * property keeps the two in step when the breakpoint changes one of them.
-   */
-  .nav {
-    --nav-link-padding: var(--space-xs);
-
-    margin-inline-start: auto;
-    margin-inline-end: calc(-1 * var(--nav-link-padding));
-  }
-
-  .nav__list {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3xs);
-    margin: 0;
-  }
-
-  /* Block-level flex, not inline-flex: an inline box would sit on the list
-     item's baseline and inherit its half-leading, making the chips taller than
-     the token says and misaligning them against the brand. */
-  .nav__link {
-    display: flex;
-    align-items: center;
-    min-height: var(--control-height);
-    padding-inline: var(--nav-link-padding);
-    border-radius: var(--radius-md);
-    color: var(--ink-subtle);
-    font-size: var(--text-body);
-    text-decoration: none;
-    transition:
-      color var(--duration-fast) var(--ease),
-      background-color var(--duration-fast) var(--ease);
-  }
-
-  .nav__link:hover {
-    color: var(--ink);
-    background-color: var(--surface-1);
-  }
-
-  /* Current section is marked by ink weight, not by the accent — the accent
-     stays scarce, and `aria-current` already carries it for assistive tech. */
-  .nav__link[aria-current="page"] {
-    color: var(--ink);
-  }
-
-  /*
-   * The nav keeps its type size at every width — shrinking the only navigation
-   * to 12px was the previous behaviour and it fired at 544px, far wider than
-   * necessary. Chip padding tightens instead, and the brand name gives way only
-   * where the two genuinely cannot share the bar.
-   */
-  @media (max-width: 26rem) {
-    .nav {
-      --nav-link-padding: var(--space-2xs);
-    }
-
-    .nav__list {
-      gap: 0;
-    }
-
-    .brand__name {
-      display: none;
-    }
-  }
-</style>

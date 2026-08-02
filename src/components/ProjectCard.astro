@@ -8,9 +8,10 @@ const { project } = Astro.props;
 /*
  * The element type *is* the witness that a project is linked. The previous
  * version derived that same fact twice — once to pick `a` versus `div`, and
- * again to emit a `data-interactive` attribute for the hover rule — leaving two
- * encodings of one state that nothing forced to agree. Styling `a.card:hover`
- * reads the decision off the DOM instead of restating it.
+ * again to emit a `data-interactive` attribute for the hover rule — leaving
+ * two encodings of one state that nothing forced to agree. A `group-hover`
+ * would restate it a third time, so the hover styling is scoped by `a:hover`
+ * in the one place a link is actually produced.
  */
 const Tag = project.href === undefined ? "div" : "a";
 
@@ -26,108 +27,47 @@ const STATUS_BADGE: Readonly<Record<ProjectStatus, string | null>> = {
 };
 
 const badge = STATUS_BADGE[project.status];
+
+/* Elevation is a surface step plus a stronger hairline. There are no shadow
+   utilities in this theme, so that is enforced rather than merely intended. */
+const INTERACTIVE =
+  "hover:border-hairline-strong hover:bg-surface-2 transition-colors";
 ---
 
-<Tag class="card" href={project.href}>
-  <div class="card__head">
-    <h3 class="card__title">{project.title}</h3>
-    <span class="card__year">{project.year}</span>
+<Tag
+  class:list={[
+    "border-hairline bg-surface-1 flex h-full flex-col gap-xs rounded-lg border p-md no-underline",
+    project.href !== undefined && INTERACTIVE,
+  ]}
+  href={project.href}
+>
+  <div class="flex items-baseline justify-between gap-2xs">
+    <h3 class="text-card-title text-ink">{project.title}</h3>
+    <span class="text-ink-tertiary shrink-0 font-mono text-caption">
+      {project.year}
+    </span>
   </div>
 
-  <p class="card__body">{project.description}</p>
+  <p class="text-body-sm text-ink-subtle mb-auto">{project.description}</p>
 
-  <div class="card__foot">
-    <ul class="tags" role="list">
-      {project.tags.map((tag) => <li class="tag">{tag}</li>)}
+  <div class="mt-2xs flex items-center justify-between gap-2xs">
+    <ul class="flex flex-wrap gap-3xs text-caption text-ink-subtle" role="list">
+      {
+        project.tags.map((tag, index) => (
+          <li>
+            {index > 0 && <span class="text-ink-tertiary me-3xs">·</span>}
+            {tag}
+          </li>
+        ))
+      }
     </ul>
-    {badge !== null && <span class="badge">{badge}</span>}
+    {
+      /* Pill radius is allowed here — badges are the exception, buttons are not. */
+      badge !== null && (
+        <span class="bg-surface-2 text-ink-muted shrink-0 rounded-pill px-2xs py-3xs text-caption">
+          {badge}
+        </span>
+      )
+    }
   </div>
 </Tag>
-
-<style>
-  .card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-    height: 100%;
-    padding: var(--space-md);
-    background-color: var(--surface-1);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius-lg);
-    color: inherit;
-    text-decoration: none;
-    transition:
-      background-color var(--duration) var(--ease),
-      border-color var(--duration) var(--ease);
-  }
-
-  /* Elevation is a surface step plus a stronger hairline. No shadows. */
-  a.card:hover {
-    background-color: var(--surface-2);
-    border-color: var(--hairline-strong);
-  }
-
-  .card__head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-2xs);
-  }
-
-  .card__title {
-    font-size: var(--text-card-title);
-    font-weight: var(--weight-medium);
-    letter-spacing: var(--tracking-card-title);
-    color: var(--ink);
-  }
-
-  .card__year {
-    font-family: var(--font-mono);
-    font-size: var(--text-caption);
-    color: var(--ink-tertiary);
-    flex-shrink: 0;
-  }
-
-  .card__body {
-    font-size: var(--text-body-sm);
-    line-height: var(--leading-body);
-    color: var(--ink-subtle);
-    margin-block-end: auto;
-  }
-
-  .card__foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2xs);
-    margin-top: var(--space-2xs);
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3xs);
-    margin: 0;
-  }
-
-  .tag {
-    font-size: var(--text-caption);
-    color: var(--ink-subtle);
-  }
-
-  .tag + .tag::before {
-    content: "·";
-    margin-inline-end: var(--space-3xs);
-    color: var(--ink-tertiary);
-  }
-
-  /* Pill radius is allowed here — badges are the exception, buttons are not. */
-  .badge {
-    flex-shrink: 0;
-    padding: 2px var(--space-2xs);
-    background-color: var(--surface-2);
-    border-radius: var(--radius-pill);
-    font-size: var(--text-caption);
-    color: var(--ink-muted);
-  }
-</style>

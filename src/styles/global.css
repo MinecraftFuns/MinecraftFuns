@@ -1,428 +1,555 @@
-@import "./tokens.css";
+@import "tailwindcss";
 
-/* ---- Reset ------------------------------------------------------------ */
+/* ===========================================================================
+ * The design system, as a language.
+ *
+ * A utility framework is a combinator library: each class is a nullary term
+ * and a class list is their product. Its one hazard is that the stock language
+ * is far larger than any design system — `p-[13px]`, `text-red-500`, and
+ * `shadow-lg` all typecheck against a system that contains none of them.
+ *
+ * So the theme below is subtractive before it is additive. Every namespace we
+ * define is first reset to `initial`, which deletes Tailwind's defaults rather
+ * than shadowing them. `p-4` does not resolve to the wrong value here; it does
+ * not exist. The generated utilities *are* the design system, and rendered
+ * geometry is closed under them by construction.
+ *
+ * Read the two layers below in order: the palette is values, and the theme is
+ * the vocabulary. Only the second one becomes a utility.
+ * ======================================================================== */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/* ---------------------------------------------------------------------------
+ * Layer 1 — the palette.
+ *
+ * Deliberately outside `@theme`. Anything in the theme's `--color-*` namespace
+ * becomes a utility, and `bg-ink-black-500` in a template is precisely the
+ * failure this system exists to prevent: it names a pigment rather than a
+ * role, so re-theming has to visit every call site. Keeping the ramps here
+ * makes the two-layer rule a property of the language instead of a comment
+ * asking politely — there is no utility to reach for.
+ * ------------------------------------------------------------------------ */
+
+:root {
+  --color-ink-black-50: #edf0f8;
+  --color-ink-black-100: #dbe1f0;
+  --color-ink-black-200: #b6c3e2;
+  --color-ink-black-300: #92a5d3;
+  --color-ink-black-400: #6d87c5;
+  --color-ink-black-500: #496ab6;
+  --color-ink-black-600: #3a5492;
+  --color-ink-black-700: #2c3f6d;
+  --color-ink-black-800: #1d2a49;
+  --color-ink-black-900: #0f1524;
+  --color-ink-black-950: #0a0f1a;
+
+  --color-deep-space-blue-50: #edf1f7;
+  --color-deep-space-blue-100: #dbe4f0;
+  --color-deep-space-blue-200: #b8c9e0;
+  --color-deep-space-blue-300: #94add1;
+  --color-deep-space-blue-400: #7092c2;
+  --color-deep-space-blue-500: #4d77b3;
+  --color-deep-space-blue-600: #3d5f8f;
+  --color-deep-space-blue-700: #2e476b;
+  --color-deep-space-blue-800: #1f3047;
+  --color-deep-space-blue-900: #0f1824;
+  --color-deep-space-blue-950: #0b1119;
+
+  --color-blue-slate-50: #eef3f6;
+  --color-blue-slate-100: #dee6ed;
+  --color-blue-slate-200: #bccddc;
+  --color-blue-slate-300: #9bb4ca;
+  --color-blue-slate-400: #799bb9;
+  --color-blue-slate-500: #5882a7;
+  --color-blue-slate-600: #466886;
+  --color-blue-slate-700: #354e64;
+  --color-blue-slate-800: #233443;
+  --color-blue-slate-900: #121a21;
+  --color-blue-slate-950: #0c1217;
+
+  --color-dusty-denim-50: #eff2f5;
+  --color-dusty-denim-100: #dfe5ec;
+  --color-dusty-denim-200: #bfcad9;
+  --color-dusty-denim-300: #9fb0c6;
+  --color-dusty-denim-400: #8096b3;
+  --color-dusty-denim-500: #607b9f;
+  --color-dusty-denim-600: #4d6380;
+  --color-dusty-denim-700: #394a60;
+  --color-dusty-denim-800: #263140;
+  --color-dusty-denim-900: #131920;
+  --color-dusty-denim-950: #0d1116;
+
+  --color-eggshell-50: #f8f5ed;
+  --color-eggshell-100: #f1ecda;
+  --color-eggshell-200: #e2d9b6;
+  --color-eggshell-300: #d4c691;
+  --color-eggshell-400: #c6b26c;
+  --color-eggshell-500: #b89f47;
+  --color-eggshell-600: #937f39;
+  --color-eggshell-700: #6e602b;
+  --color-eggshell-800: #49401d;
+  --color-eggshell-900: #25200e;
+  --color-eggshell-950: #1a160a;
 }
 
-* {
-  margin: 0;
+/* ---------------------------------------------------------------------------
+ * Layer 2 — the vocabulary.
+ * ------------------------------------------------------------------------ */
+
+@theme {
+  /* Deletions first: `initial` removes a namespace, and later entries in this
+     block repopulate it. Anything not listed below is not expressible. */
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --tracking-*: initial;
+  --leading-*: initial;
+  --spacing: initial;
+  --radius-*: initial;
+  --breakpoint-*: initial;
+  --container-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --ease-*: initial;
+  --animate-*: initial;
+
+  /* ---- Colour roles --------------------------------------------------- */
+
+  /*
+   * Theming is `light-dark()`, so each role is declared once and the browser
+   * resolves it from the used colour scheme. The system preference is the only
+   * source of truth: no in-page control, no stored preference, no theme
+   * script. That is what keeps the page correct without JavaScript, free of a
+   * first-paint flash, and free of any state that could contradict the
+   * reader's own setting. Tailwind's `dark:` variant is therefore unused —
+   * a second mechanism could only disagree with this one.
+   */
+  --color-canvas: light-dark(var(--color-eggshell-50), var(--color-ink-black-950));
+  --color-surface-1: light-dark(var(--color-eggshell-100), var(--color-deep-space-blue-900));
+  --color-surface-2: light-dark(var(--color-eggshell-200), var(--color-deep-space-blue-800));
+
+  /* The sticky header's translucent backing. Written as a mix over the same
+     palette entries the canvas uses, so it cannot drift from it. */
+  --color-veil: light-dark(
+    color-mix(in srgb, var(--color-eggshell-50) 88%, transparent),
+    color-mix(in srgb, var(--color-ink-black-950) 88%, transparent)
+  );
+
+  /* Hairlines carry all elevation. `--shadow-*` is reset above, so "no
+     shadows in this system" is enforced rather than merely intended. */
+  --color-hairline: light-dark(var(--color-eggshell-200), var(--color-blue-slate-800));
+  --color-hairline-strong: light-dark(var(--color-eggshell-300), var(--color-blue-slate-700));
+
+  /*
+   * Ink ladder. Contrast against canvas, verified:
+   *   ink        16.72:1 light / 16.19:1 dark   AAA
+   *   ink-muted   7.95:1 light / 11.55:1 dark   AAA
+   *   ink-subtle  5.65:1 light /  8.67:1 dark   AA / AAA
+   * ink-tertiary is decorative only — never for text that must be read.
+   */
+  --color-ink: light-dark(var(--color-ink-black-900), var(--color-eggshell-100));
+  --color-ink-muted: light-dark(var(--color-blue-slate-700), var(--color-dusty-denim-200));
+  --color-ink-subtle: light-dark(var(--color-dusty-denim-600), var(--color-dusty-denim-300));
+  --color-ink-tertiary: light-dark(var(--color-dusty-denim-500), var(--color-dusty-denim-500));
+
+  /*
+   * The single chromatic accent — brand mark, focus ring, links, and the one
+   * primary action per view. Never a section background or card fill.
+   *
+   * ink-black-500 is the only palette step simultaneously legible on the
+   * canvas (4.79:1) and clearly distinct from body ink (3.49:1). The warm
+   * eggshell steps fail the first test on paper; the darker blues fail the
+   * second. Links also carry an underline, so the affordance never rests on
+   * colour alone.
+   */
+  --color-accent: light-dark(var(--color-ink-black-500), var(--color-ink-black-300));
+  --color-accent-hover: light-dark(var(--color-ink-black-600), var(--color-ink-black-200));
+  --color-on-accent: light-dark(var(--color-eggshell-50), var(--color-ink-black-950));
+
+  /* ---- Type ------------------------------------------------------------ */
+
+  --font-sans:
+    "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, system-ui, sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", ui-monospace, "SF Mono", "Menlo", monospace;
+
+  /*
+   * Each role binds size, leading, tracking, and weight together, so
+   * `text-display-lg` applies a complete typographic style atomically. Under
+   * the previous scheme those were four independent tokens applied by hand at
+   * each call site, which is a product type spread across four places that
+   * nothing forced to agree — and they had drifted.
+   *
+   * Every fluid ramp completes at 48rem, the viewport at which the frame stops
+   * growing. Type keyed to `vw` past that point would keep scaling inside a
+   * column that no longer does.
+   */
+  --text-display-lg: clamp(2.25rem, 1.54rem + 3.57vw, 3.25rem); /* 36 → 52 */
+  --text-display-lg--line-height: 1.08;
+  --text-display-lg--letter-spacing: -0.032em;
+  --text-display-lg--font-weight: 600;
+
+  --text-display-md: clamp(2rem, 1.46rem + 2.68vw, 2.75rem); /* 32 → 44 */
+  --text-display-md--line-height: 1.08;
+  --text-display-md--letter-spacing: -0.025em;
+  --text-display-md--font-weight: 600;
+
+  --text-headline: clamp(1.5rem, 1.32rem + 0.89vw, 1.75rem); /* 24 → 28 */
+  --text-headline--line-height: 1.2;
+  --text-headline--letter-spacing: -0.021em;
+  --text-headline--font-weight: 600;
+
+  --text-card-title: 1.375rem; /* 22 */
+  --text-card-title--line-height: 1.2;
+  --text-card-title--letter-spacing: -0.018em;
+  --text-card-title--font-weight: 500;
+
+  --text-row-title: 1.125rem; /* 18 */
+  --text-row-title--line-height: 1.3;
+  --text-row-title--letter-spacing: -0.018em;
+  --text-row-title--font-weight: 500;
+
+  /* Long-form reading only. Same size as body-lg, looser leading: Linear's
+     densest body is 1.5, tuned for scanning a landing page rather than for
+     staying on an essay for ten minutes. */
+  --text-prose: 1.125rem; /* 18 */
+  --text-prose--line-height: 1.7;
+  --text-prose--letter-spacing: -0.003em;
+  --text-prose--font-weight: 400;
+
+  --text-body-lg: 1.125rem; /* 18 */
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--letter-spacing: -0.003em;
+  --text-body-lg--font-weight: 400;
+
+  --text-body: 1rem; /* 16 */
+  --text-body--line-height: 1.5;
+  --text-body--letter-spacing: -0.003em;
+  --text-body--font-weight: 400;
+
+  /* Body size at medium weight: button labels and the brand. A separate role
+     rather than `text-body font-medium`, because two utilities setting the
+     same property leave the result to stylesheet order. */
+  --text-control: 1rem; /* 16 */
+  --text-control--line-height: 1.5;
+  --text-control--letter-spacing: -0.018em;
+  --text-control--font-weight: 500;
+
+  --text-body-sm: 0.875rem; /* 14 */
+  --text-body-sm--line-height: 1.5;
+  --text-body-sm--letter-spacing: -0.003em;
+  --text-body-sm--font-weight: 400;
+
+  --text-caption: 0.75rem; /* 12 */
+  --text-caption--line-height: 1.5;
+  --text-caption--font-weight: 400;
+
+  --text-eyebrow: 0.8125rem; /* 13 */
+  --text-eyebrow--line-height: 1.5;
+  --text-eyebrow--letter-spacing: 0.03em;
+  --text-eyebrow--font-weight: 500;
+
+  /* ---- Space ------------------------------------------------------------ */
+
+  /* `--spacing: initial` above removed the numeric ramp, so `p-4` and
+     `gap-7` are gone. What remains is a named scale on a 4px base. */
+  --spacing-3xs: 0.25rem; /*  4 */
+  --spacing-2xs: 0.5rem; /*  8 */
+  --spacing-xs: 0.75rem; /* 12 */
+  --spacing-sm: 1rem; /* 16 */
+  --spacing-md: 1.5rem; /* 24 */
+  --spacing-lg: 2rem; /* 32 */
+  --spacing-xl: 3rem; /* 48 */
+  --spacing-section: clamp(4rem, 2.57rem + 7.14vw, 6rem); /* 64 → 96 */
+
+  /*
+   * Interactive geometry. A control is exactly one token tall rather than a
+   * line box plus two paddings, so its height cannot drift with the font size
+   * inside it. The bar is that height plus one space token above and below,
+   * which keeps the header closed under the same scale as its contents.
+   */
+  --spacing-target: 1.5rem; /* 24 — WCAG 2.5.8 minimum target */
+  --spacing-control: 2.5rem; /* 40 — nav links, buttons */
+  --spacing-nav: 4rem; /* 64 = 40 + 12 above + 12 below */
+
+  /* ---- Shape ------------------------------------------------------------ */
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px; /* buttons, inputs — never pill */
+  --radius-lg: 12px; /* cards */
+  --radius-xl: 16px; /* full-width media panels */
+  --radius-pill: 9999px; /* badges and tags only */
+
+  /* ---- Measure ---------------------------------------------------------- */
+
+  /*
+   * One frame, for every page. Its width is derived rather than chosen: prose
+   * capped at the measure runs ~612px, and the widest composite on the site —
+   * an index row of date column, description, and meta — runs ~692px. Both sit
+   * inside 48rem less its padding, and nothing here is wider.
+   *
+   * There is exactly one, and the layout applies it. A page cannot name a
+   * width, so the two frames that used to drift apart cannot recur.
+   */
+  --container-frame: 48rem; /* 768 */
+  --container-measure: 68ch; /* reading measure for long-form prose */
+  --container-fingerprint: 22ch; /* two PGP groups per line */
+
+  /* ---- Composite layouts ------------------------------------------------ */
+
+  /*
+   * Grid templates are named constants for the same reason lengths are: a
+   * `grid-cols-[8rem_1fr_auto]` in markup is an anonymous literal that no
+   * review will ever compare against its twin three files away.
+   */
+  --grid-template-columns-row: 8rem 1fr auto; /* date · content · meta */
+  --grid-template-columns-row-stacked: 1fr auto;
+  --grid-template-columns-entry: 9rem 1fr; /* period · detail */
+  --grid-template-columns-cards: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+  --grid-template-columns-footer: repeat(auto-fit, minmax(12rem, 1fr));
+
+  /* ---- Breakpoints ------------------------------------------------------ */
+
+  /*
+   * Three, each named for the single thing that becomes possible at it. The
+   * previous set held 44rem and 48rem — close enough to read as one intent,
+   * far enough apart to behave as two.
+   */
+  --breakpoint-xs: 26rem; /* the brand name fits beside the nav */
+  --breakpoint-sm: 34rem; /* two-column entries fit */
+  --breakpoint-md: 48rem; /* the frame reaches full width */
+
+  /* ---- Motion ----------------------------------------------------------- */
+
+  /*
+   * One duration for the whole site. There were two, 120ms and 180ms, applied
+   * to the same class of change — a distinction nobody can perceive and
+   * everybody has to maintain. Set as the transition defaults, so `transition-
+   * colors` in markup needs no duration or easing beside it.
+   */
+  --default-transition-duration: 120ms;
+  --default-transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
-}
+/* ---------------------------------------------------------------------------
+ * Variants.
+ *
+ * `aria-current` is not among Tailwind's built-in aria variants, and the
+ * arbitrary form `aria-[current=page]:` is the bracket syntax this system
+ * forbids everywhere else. Naming it once keeps the markup free of literals
+ * and gives the state a word.
+ * ------------------------------------------------------------------------ */
 
-body {
-  background-color: var(--canvas);
-  color: var(--ink);
-  font-family: var(--font-sans);
-  font-size: var(--text-body);
-  font-weight: var(--weight-body);
-  line-height: var(--leading-body);
-  letter-spacing: var(--tracking-body);
-  min-height: 100dvh;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  font-synthesis-weight: none;
-}
+@custom-variant current (&[aria-current="page"]);
 
-img,
-picture,
-svg,
-video {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
+/* ---------------------------------------------------------------------------
+ * Base.
+ *
+ * Preflight already handles the reset — box sizing, margins, media defaults,
+ * list and heading normalisation. What remains is what preflight cannot know:
+ * the colour scheme, the focus ring, and the motion preference.
+ * ------------------------------------------------------------------------ */
 
-input,
-button,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
-}
+@layer base {
+  :root {
+    /* Required for `light-dark()` to resolve, and the declaration that makes
+       the system preference authoritative. */
+    color-scheme: light dark;
+  }
 
-h1,
-h2,
-h3,
-h4 {
-  font-weight: var(--weight-display);
-  line-height: var(--leading-headline);
-  text-wrap: balance;
-}
-
-p {
-  text-wrap: pretty;
-}
-
-ul[role="list"],
-ol[role="list"] {
-  list-style: none;
-  padding: 0;
-}
-
-/* ---- Focus ------------------------------------------------------------ */
-
-:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: var(--radius-xs);
-}
-
-:focus:not(:focus-visible) {
-  outline: none;
-}
-
-/* ---- Motion ----------------------------------------------------------- */
-
-@media (prefers-reduced-motion: reduce) {
   html {
-    scroll-behavior: auto;
+    scroll-behavior: smooth;
   }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  body {
+    text-rendering: optimizeLegibility;
+    font-synthesis-weight: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-/* ---- Primitives ------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+ * Prose.
+ *
+ * The one place utilities genuinely cannot reach: Markdown renders to elements
+ * this project never writes, so there is nowhere to put a class. Descendant
+ * selectors are the honest tool, and they read the same theme variables the
+ * utilities do — there is still exactly one source for every value.
+ * ------------------------------------------------------------------------ */
 
-/*
- * The frame. Applied by the layout and by the two chrome components — never by
- * a page, which is why there is no modifier to apply wrongly.
- */
-.container {
-  width: 100%;
-  max-width: var(--container);
-  margin-inline: auto;
-  padding-inline: var(--space-md);
-}
-
-@media (min-width: 48rem) {
-  .container {
-    padding-inline: var(--space-lg);
+@layer components {
+  .prose {
+    max-width: var(--container-measure);
+    font-size: var(--text-prose);
+    line-height: var(--text-prose--line-height);
+    letter-spacing: var(--text-prose--letter-spacing);
+    color: var(--color-ink-muted);
   }
-}
 
-/* Skip link — visually hidden until focused. */
-.skip-link {
-  position: absolute;
-  top: var(--space-2xs);
-  left: var(--space-2xs);
-  z-index: 100;
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--control-height);
-  padding-inline: var(--space-sm);
-  background-color: var(--accent);
-  color: var(--on-accent);
-  border-radius: var(--radius-md);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-medium);
-  text-decoration: none;
-  transform: translateY(-200%);
-}
+  .prose > * + * {
+    margin-top: var(--spacing-md);
+  }
 
-.skip-link:focus-visible {
-  transform: translateY(0);
-}
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    color: var(--color-ink);
+    margin-top: var(--spacing-xl);
+    text-wrap: balance;
+  }
 
-.eyebrow {
-  font-size: var(--text-eyebrow);
-  font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--ink-subtle);
-}
+  .prose h2 {
+    font-size: var(--text-headline);
+    line-height: var(--text-headline--line-height);
+    letter-spacing: var(--text-headline--letter-spacing);
+    font-weight: var(--text-headline--font-weight);
+  }
 
-/* ---- Page composition -------------------------------------------------
- *
- * Every page is built from these. They were previously redeclared in four
- * pages' scoped styles, which is how one `.section` came to be --space-xl tall
- * on the home page and --space-lg elsewhere, and how section headings acquired
- * a bottom rule on About but not on Projects. Declared once, they cannot
- * disagree.
- *
- * Titles carry no max-width: the frame is now narrow enough to set the line
- * length itself, and `text-wrap: balance` handles the ragged edge. The three
- * different character caps that used to do this job were three guesses at the
- * same number.
- */
+  .prose h3 {
+    font-size: var(--text-card-title);
+    line-height: var(--text-card-title--line-height);
+    letter-spacing: var(--text-card-title--letter-spacing);
+    font-weight: var(--text-card-title--font-weight);
+  }
 
-.page-intro {
-  padding-block: var(--space-xl) var(--space-lg);
-}
+  .prose h4 {
+    font-size: var(--text-body-lg);
+    line-height: var(--text-body-lg--line-height);
+    font-weight: var(--text-card-title--font-weight);
+  }
 
-.page-intro__title {
-  margin-top: var(--space-xs);
-  font-size: var(--text-display-md);
-  font-weight: var(--weight-display);
-  line-height: var(--leading-display);
-  letter-spacing: var(--tracking-display-md);
-}
+  .prose strong {
+    color: var(--color-ink);
+    font-weight: var(--text-card-title--font-weight);
+  }
 
-.page-intro__lede {
-  max-width: var(--measure);
-  margin-top: var(--space-md);
-  font-size: var(--text-body-lg);
-  line-height: var(--leading-body);
-  color: var(--ink-muted);
-}
+  .prose a {
+    color: var(--color-accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
 
-.section {
-  padding-block: var(--space-lg);
-}
+  .prose a:hover {
+    color: var(--color-accent-hover);
+  }
 
-/* Baseline, not flex-start: the trailing link or count aligns to the heading's
-   first baseline whether the leading side is a bare heading or a heading with
-   a blurb beneath it. One rule covers both arrangements. */
-.section__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-md);
-  padding-bottom: var(--space-md);
-  margin-bottom: var(--space-md);
-  border-bottom: 1px solid var(--hairline);
-}
+  .prose ul,
+  .prose ol {
+    padding-left: var(--spacing-md);
+    list-style: revert;
+  }
 
-.section__title {
-  font-size: var(--text-headline);
-  letter-spacing: var(--tracking-headline);
-}
+  .prose li + li {
+    margin-top: var(--spacing-2xs);
+  }
 
-.section__blurb {
-  margin-top: var(--space-3xs);
-  font-size: var(--text-body-sm);
-  color: var(--ink-subtle);
-}
+  .prose li::marker {
+    color: var(--color-ink-tertiary);
+  }
 
-.section__count {
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
-  color: var(--ink-tertiary);
-}
+  .prose blockquote {
+    padding-left: var(--spacing-md);
+    border-left: 2px solid var(--color-hairline-strong);
+    color: var(--color-ink-subtle);
+  }
 
-.section__link {
-  flex-shrink: 0;
-  font-size: var(--text-body-sm);
-  text-decoration: none;
-  white-space: nowrap;
-}
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    padding: 0.15em 0.35em;
+    background-color: var(--color-surface-1);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-xs);
+    color: var(--color-ink);
+  }
 
-.section__link:hover {
-  text-decoration: underline;
-}
+  .prose pre {
+    padding: var(--spacing-md);
+    background-color: var(--color-surface-1);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+  }
 
-/*
- * auto-fill, not auto-fit. auto-fit collapses the empty tracks, so a group
- * holding a single project stretched one card across the entire frame — three
- * lines of text in a 700px slab, which is precisely the accident that reads as
- * unfinished. auto-fill keeps the track, and a lone card stays card-sized.
- */
-.grid {
-  display: grid;
-  gap: var(--space-md);
-  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
-  margin: 0;
-}
+  .prose pre code {
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: inherit;
+  }
 
-.rows > :last-child {
-  border-bottom: none;
-}
+  .prose hr {
+    border: none;
+    border-top: 1px solid var(--color-hairline);
+    margin-block: var(--spacing-xl);
+  }
 
-/* ---- Controls ---------------------------------------------------------
- *
- * One token sets the height of every control on the site, so a button and a
- * nav link cannot end up two pixels apart.
- */
+  .prose figcaption,
+  .prose small {
+    font-size: var(--text-body-sm);
+    color: var(--color-ink-subtle);
+  }
 
-.button {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--control-height);
-  padding-inline: var(--space-sm);
-  border-radius: var(--radius-md);
-  border: 1px solid transparent;
-  font-size: var(--text-body);
-  font-weight: var(--weight-medium);
-  text-decoration: none;
-  transition:
-    background-color var(--duration-fast) var(--ease),
-    border-color var(--duration-fast) var(--ease);
-}
+  /* Wide content must scroll inside its own box, never the page. */
+  .prose .table-wrap {
+    overflow-x: auto;
+  }
 
-.button--primary {
-  background-color: var(--accent);
-  color: var(--on-accent);
-}
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-body-sm);
+  }
 
-.button--primary:hover {
-  background-color: var(--accent-hover);
-  color: var(--on-accent);
-}
+  .prose th,
+  .prose td {
+    padding: var(--spacing-2xs) var(--spacing-xs);
+    border-bottom: 1px solid var(--color-hairline);
+    text-align: left;
+  }
 
-.button--secondary {
-  background-color: var(--surface-1);
-  border-color: var(--hairline);
-  color: var(--ink);
-}
-
-.button--secondary:hover {
-  background-color: var(--surface-2);
-  border-color: var(--hairline-strong);
-  color: var(--ink);
-}
-
-/* ---- Links ------------------------------------------------------------ */
-
-a {
-  color: var(--accent);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
-  transition: color var(--duration-fast) var(--ease);
-}
-
-a:hover {
-  color: var(--accent-hover);
-}
-
-/* ---- Prose ------------------------------------------------------------
- *
- * Long-form reading styles for blog posts and the CV. This is the part
- * Linear's system has no answer for: its densest body style is tuned for
- * scanning a landing page, not for staying on an essay for ten minutes.
- * Measure is constrained, leading opens up, and headings get real space.
- */
-
-.prose {
-  max-width: var(--measure);
-  font-size: var(--text-body-lg);
-  line-height: var(--leading-prose);
-  color: var(--ink-muted);
-}
-
-.prose > * + * {
-  margin-top: var(--space-md);
-}
-
-.prose h2,
-.prose h3,
-.prose h4 {
-  color: var(--ink);
-  margin-top: var(--space-xl);
-}
-
-.prose h2 {
-  font-size: var(--text-headline);
-  letter-spacing: var(--tracking-headline);
-}
-
-.prose h3 {
-  font-size: var(--text-card-title);
-  letter-spacing: var(--tracking-card-title);
-}
-
-.prose h4 {
-  font-size: var(--text-body-lg);
-  font-weight: var(--weight-medium);
-}
-
-.prose strong {
-  color: var(--ink);
-  font-weight: var(--weight-medium);
-}
-
-.prose ul,
-.prose ol {
-  padding-left: var(--space-md);
-}
-
-.prose li + li {
-  margin-top: var(--space-2xs);
-}
-
-.prose li::marker {
-  color: var(--ink-tertiary);
-}
-
-.prose blockquote {
-  padding-left: var(--space-md);
-  border-left: 2px solid var(--hairline-strong);
-  color: var(--ink-subtle);
-  font-style: normal;
-}
-
-.prose code {
-  font-family: var(--font-mono);
-  font-size: 0.875em;
-  padding: 0.15em 0.35em;
-  background-color: var(--surface-1);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-xs);
-  color: var(--ink);
-}
-
-.prose pre {
-  padding: var(--space-md);
-  background-color: var(--surface-1);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-lg);
-  overflow-x: auto;
-  font-size: var(--text-body-sm);
-  line-height: var(--leading-body);
-}
-
-.prose pre code {
-  padding: 0;
-  background: none;
-  border: none;
-  font-size: inherit;
-}
-
-.prose hr {
-  border: none;
-  border-top: 1px solid var(--hairline);
-  margin-block: var(--space-xl);
-}
-
-.prose figcaption,
-.prose small {
-  font-size: var(--text-body-sm);
-  color: var(--ink-subtle);
-}
-
-/* Wide content must scroll inside its own box, never the page. */
-.prose .table-wrap {
-  overflow-x: auto;
-}
-
-.prose table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--text-body-sm);
-}
-
-.prose th,
-.prose td {
-  padding: var(--space-2xs) var(--space-xs);
-  border-bottom: 1px solid var(--hairline);
-  text-align: left;
-}
-
-.prose th {
-  color: var(--ink);
-  font-weight: var(--weight-medium);
+  .prose th {
+    color: var(--color-ink);
+    font-weight: var(--text-card-title--font-weight);
+  }
 }

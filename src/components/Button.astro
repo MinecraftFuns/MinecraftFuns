@@ -1,0 +1,35 @@
+---
+/**
+ * A link styled as a control.
+ *
+ * The variant is a closed sum eliminated by a total `Record`, so adding a
+ * third variant is a type error until it is given a look. That the mapping
+ * holds complete class-name literals is not incidental: Tailwind's scanner
+ * reads source text, so a composed name like `bg-${tone}-500` would generate
+ * nothing. Totality and scannability want the same shape here.
+ */
+export type ButtonVariant = "primary" | "secondary";
+
+type Props = {
+  readonly href: string;
+  readonly variant: ButtonVariant;
+};
+
+const { href, variant } = Astro.props;
+
+const VARIANT: Readonly<Record<ButtonVariant, string>> = {
+  primary: "border-transparent bg-accent text-on-accent hover:bg-accent-hover",
+  secondary:
+    "border-hairline bg-surface-1 text-ink hover:border-hairline-strong hover:bg-surface-2",
+};
+---
+
+<a
+  class:list={[
+    "inline-flex min-h-control items-center rounded-md border px-sm text-control no-underline transition-colors",
+    VARIANT[variant],
+  ]}
+  href={href}
+>
+  <slot />
+</a>

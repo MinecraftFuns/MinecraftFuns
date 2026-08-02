@@ -27,15 +27,21 @@ export const ALIGNMENT_TOLERANCE = 4;
  * than duplicated here, so fluid scales cannot drift against the stylesheet.
  */
 export const TOKEN_NAMES = {
+  /* The interactive heights live in the spacing namespace because Tailwind's
+     `--spacing-*` is its length namespace, and a 40px control height is a
+     legitimate generator for rendered geometry to land on. */
   spacing: [
-    "--space-3xs",
-    "--space-2xs",
-    "--space-xs",
-    "--space-sm",
-    "--space-md",
-    "--space-lg",
-    "--space-xl",
-    "--space-section",
+    "--spacing-3xs",
+    "--spacing-2xs",
+    "--spacing-xs",
+    "--spacing-sm",
+    "--spacing-md",
+    "--spacing-lg",
+    "--spacing-xl",
+    "--spacing-section",
+    "--spacing-target",
+    "--spacing-control",
+    "--spacing-nav",
   ],
   radius: [
     "--radius-xs",
@@ -50,9 +56,11 @@ export const TOKEN_NAMES = {
     "--text-display-md",
     "--text-headline",
     "--text-card-title",
-    "--text-subhead",
+    "--text-row-title",
+    "--text-prose",
     "--text-body-lg",
     "--text-body",
+    "--text-control",
     "--text-body-sm",
     "--text-caption",
     "--text-eyebrow",

@@ -1,0 +1,44 @@
+---
+/**
+ * The opening block of every page: eyebrow, title, and optional lede.
+ *
+ * `kind` is a closed sum over the two openings this site has, and the record
+ * below maps it to both padding and title role at once. Those two travel
+ * together — a hero is larger type *and* more room above it — so binding them
+ * in one entry removes the state where a page is one but not the other.
+ *
+ * Titles carry no width cap. The frame is narrow enough to set the line length
+ * itself, and `text-wrap: balance` handles the ragged edge; the three
+ * different character caps this replaced were three guesses at one number.
+ */
+export type IntroKind = "hero" | "page";
+
+type Props = {
+  readonly kind: IntroKind;
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly lede?: string;
+};
+
+const { kind, eyebrow, title, lede } = Astro.props;
+
+const INTRO: Readonly<
+  Record<IntroKind, { readonly spacing: string; readonly title: string }>
+> = {
+  hero: { spacing: "pt-section pb-lg", title: "text-display-lg" },
+  page: { spacing: "pt-xl pb-lg", title: "text-display-md" },
+};
+
+const { spacing, title: titleClass } = INTRO[kind];
+---
+
+<section class:list={[spacing]}>
+  <p class="text-eyebrow text-ink-subtle uppercase">{eyebrow}</p>
+  <h1 class:list={["mt-xs text-ink", titleClass]}>{title}</h1>
+  {
+    lede !== undefined && (
+      <p class="mt-md max-w-measure text-body-lg text-ink-muted">{lede}</p>
+    )
+  }
+  <slot />
+</section>

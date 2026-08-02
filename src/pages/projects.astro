@@ -1,5 +1,7 @@
 ---
+import PageIntro from "../components/PageIntro.astro";
 import ProjectCard from "../components/ProjectCard.astro";
+import Section from "../components/Section.astro";
 import { projects, type ProjectKind } from "../config.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
@@ -43,36 +45,29 @@ const sections = KIND_ORDER.map((kind) => ({
   title="Projects"
   description="Side projects, research artifacts, and open-source contributions by Joe Fang."
 >
-  <section class="page-intro">
-    <p class="eyebrow">Projects</p>
-    <h1 class="page-intro__title">Things I have built, studied, and contributed to.</h1>
-    <p class="page-intro__lede">
-      Grouped by what they are, because a side project, a research artifact,
-      and a patch to someone else's codebase are not the same kind of thing.
-    </p>
-  </section>
+  <PageIntro
+    kind="page"
+    eyebrow="Projects"
+    title="Things I have built, studied, and contributed to."
+    lede="Grouped by what they are, because a side project, a research artifact, and a patch to someone else's codebase are not the same kind of thing."
+  />
 
   {
     sections.map((section) => (
-      <section class="section" aria-labelledby={`${section.kind}-heading`}>
-        <div class="section__head">
-          <div>
-            <h2 class="section__title" id={`${section.kind}-heading`}>
-              {section.heading}
-            </h2>
-            <p class="section__blurb">{section.blurb}</p>
-          </div>
-          <span class="section__count">{section.items.length}</span>
-        </div>
-        <ul class="grid" role="list">
+      <Section
+        id={`${section.kind}-heading`}
+        title={section.heading}
+        blurb={section.blurb}
+        trailing={{ kind: "count", value: section.items.length }}
+      >
+        <ul class="grid grid-cols-cards gap-md" role="list">
           {section.items.map((project) => (
             <li>
               <ProjectCard project={project} />
             </li>
           ))}
         </ul>
-      </section>
+      </Section>
     ))
   }
 </BaseLayout>
-

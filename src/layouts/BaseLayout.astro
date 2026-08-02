@@ -49,25 +49,36 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
     */}
   </head>
 
-  <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+  <body class="bg-canvas text-ink font-sans text-body min-h-dvh antialiased">
+    {/*
+      `sr-only` plus `focus:not-sr-only` is the whole skip link — no offscreen
+      transform to maintain, and it stays reachable if CSS transforms fail.
+    */}
+    <a
+      class="sr-only focus:not-sr-only focus:absolute focus:top-2xs focus:left-2xs focus:z-100 focus:inline-flex focus:min-h-control focus:items-center focus:rounded-md focus:bg-accent focus:px-sm focus:text-control focus:text-on-accent focus:no-underline"
+      href="#main"
+    >
+      Skip to content
+    </a>
+
     <SiteHeader />
+
     {/*
       The frame lives here, not in the pages. A page renders sections and has
       no way to state a width, so the column cannot differ between one page and
       the next — which it previously did, by 26rem.
+
+      `outline-none` because this is a programmatic focus target for the skip
+      link, not something the reader tabbed to.
     */}
-    <main class="container" id="main" tabindex="-1">
+    <main
+      class="mx-auto w-full max-w-frame px-md outline-none md:px-lg"
+      id="main"
+      tabindex="-1"
+    >
       <slot />
     </main>
+
     <SiteFooter />
   </body>
 </html>
-
-<style>
-  main {
-    /* The skip-link target is programmatically focusable but should not draw
-       an outline when reached that way. */
-    outline: none;
-  }
-</style>

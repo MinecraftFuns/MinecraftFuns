@@ -31,20 +31,24 @@ const published = formatIsoDate(post.data.date);
   description={post.data.description}
   type="article"
 >
-  <article class="post">
-    <header class="post__header">
-      <p class="post__meta">
+  <article class="pt-xl pb-lg">
+    <header class="border-hairline mb-lg border-b pb-lg">
+      <p class="text-ink-tertiary flex items-center gap-2xs font-mono text-caption">
         <time datetime={post.data.date}>{published}</time>
         <span aria-hidden="true">·</span>
         <span>{minutes} min read</span>
       </p>
-      <h1 class="post__title">{post.data.title}</h1>
-      <p class="post__description">{post.data.description}</p>
+      <h1 class="text-display-md text-ink mt-xs">{post.data.title}</h1>
+      <p class="text-body-lg text-ink-muted mt-sm max-w-measure">
+        {post.data.description}
+      </p>
       {
         post.data.tags.length > 0 && (
-          <ul class="tags" role="list">
+          <ul class="mt-md flex flex-wrap gap-2xs" role="list">
             {post.data.tags.map((tag) => (
-              <li class="tag">{tag}</li>
+              <li class="border-hairline bg-surface-1 text-ink-subtle rounded-pill border px-2xs py-3xs text-caption">
+                {tag}
+              </li>
             ))}
           </ul>
         )
@@ -55,67 +59,10 @@ const published = formatIsoDate(post.data.date);
       <Content />
     </div>
 
-    <footer class="post__footer">
-      <a href={withBase("/blog")}>← All posts</a>
+    <footer class="border-hairline mt-xl border-t pt-md text-body-sm">
+      <a class="text-accent hover:text-accent-hover" href={withBase("/blog")}>
+        ← All posts
+      </a>
     </footer>
   </article>
 </BaseLayout>
-
-<style>
-  .post {
-    padding-block: var(--space-xl) var(--space-lg);
-  }
-
-  .post__header {
-    padding-bottom: var(--space-lg);
-    margin-bottom: var(--space-lg);
-    border-bottom: 1px solid var(--hairline);
-  }
-
-  .post__meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2xs);
-    font-family: var(--font-mono);
-    font-size: var(--text-caption);
-    color: var(--ink-tertiary);
-  }
-
-  .post__title {
-    margin-top: var(--space-xs);
-    font-size: var(--text-display-md);
-    font-weight: var(--weight-display);
-    line-height: var(--leading-display);
-    letter-spacing: var(--tracking-display-md);
-  }
-
-  .post__description {
-    margin-top: var(--space-sm);
-    font-size: var(--text-body-lg);
-    line-height: var(--leading-body);
-    color: var(--ink-muted);
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2xs);
-    margin: var(--space-md) 0 0;
-  }
-
-  .tag {
-    padding: 2px var(--space-2xs);
-    background-color: var(--surface-1);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius-pill);
-    font-size: var(--text-caption);
-    color: var(--ink-subtle);
-  }
-
-  .post__footer {
-    margin-top: var(--space-xl);
-    padding-top: var(--space-md);
-    border-top: 1px solid var(--hairline);
-    font-size: var(--text-body-sm);
-  }
-</style>

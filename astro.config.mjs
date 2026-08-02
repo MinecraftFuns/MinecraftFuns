@@ -1,4 +1,5 @@
 // @ts-check
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 /**
@@ -31,6 +32,14 @@ try {
 export default defineConfig({
   site,
   base,
+  /*
+   * Tailwind v4 registers as a Vite plugin, not an Astro integration. The
+   * `@astrojs/tailwind` integration is the v3 path and is deprecated; putting
+   * this under `integrations` is the usual migration mistake.
+   */
+  vite: {
+    plugins: [tailwindcss()],
+  },
   markdown: {
     shikiConfig: {
       // Shiki themes are keyed to their own palettes; these two are the

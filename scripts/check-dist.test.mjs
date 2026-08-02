@@ -132,6 +132,20 @@ describe("undefinedCustomProperties", () => {
   it("passes a stylesheet whose references all resolve", () => {
     assert.deepEqual(undefinedCustomProperties(":root{--ink:#000}.a{color:var(--ink)}"), []);
   });
+
+  it("allows an undefined property that supplies a fallback", () => {
+    // Tailwind's override slots are deliberately unset: an unset --tw-leading
+    // means "nothing overrode the role's line height".
+    const css = ".a{line-height:var(--tw-leading,var(--text-body--line-height))}";
+    assert.deepEqual(undefinedCustomProperties(css), ["--text-body--line-height"]);
+  });
+
+  it("still catches a bare read nested inside a fallback", () => {
+    assert.deepEqual(
+      undefinedCustomProperties(".a{color:var(--tw-x,var(--gone))}"),
+      ["--gone"],
+    );
+  });
 });
 
 describe("palette checks", () => {

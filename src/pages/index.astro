@@ -1,6 +1,9 @@
 ---
+import Button from "../components/Button.astro";
+import PageIntro from "../components/PageIntro.astro";
 import PostRow from "../components/PostRow.astro";
 import ProjectCard from "../components/ProjectCard.astro";
+import Section from "../components/Section.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { contact, projects } from "../config.ts";
 import { postSummaries } from "../lib/posts.ts";
@@ -11,68 +14,35 @@ const recentPosts = await postSummaries(3);
 ---
 
 <BaseLayout>
-  <section class="hero">
-    <p class="eyebrow">Toronto, Canada</p>
-    <h1 class="hero__title">
-      Joe Fang builds software and studies how minds work.
-    </h1>
-    <p class="page-intro__lede">
-      Third-year undergraduate at the University of Toronto, double majoring in
-      Computer Science and Cognitive Science with a minor in Statistics.
-    </p>
-    <div class="hero__actions">
-      <a class="button button--primary" href={withBase("/projects")}>View projects</a>
-      <a class="button button--secondary" href={contact.pgp}>Get in touch</a>
+  <PageIntro
+    kind="hero"
+    eyebrow="Toronto, Canada"
+    title="Joe Fang builds software and studies how minds work."
+    lede="Third-year undergraduate at the University of Toronto, double majoring in Computer Science and Cognitive Science with a minor in Statistics."
+  >
+    <div class="mt-lg flex flex-wrap gap-xs">
+      <Button href={withBase("/projects")} variant="primary">View projects</Button>
+      <Button href={contact.pgp} variant="secondary">Get in touch</Button>
     </div>
-  </section>
+  </PageIntro>
 
-  <section class="section" aria-labelledby="work-heading">
-    <div class="section__head">
-      <h2 class="section__title" id="work-heading">Selected projects</h2>
-      <a class="section__link" href={withBase("/projects")}>All projects</a>
-    </div>
-    <ul class="grid" role="list">
-      {
-        projects.map((project) => (
-          <li>
-            <ProjectCard project={project} />
-          </li>
-        ))
-      }
+  <Section
+    id="work-heading"
+    title="Selected projects"
+    trailing={{ kind: "link", href: withBase("/projects"), label: "All projects" }}
+  >
+    <ul class="grid grid-cols-cards gap-md" role="list">
+      {projects.map((project) => <li><ProjectCard project={project} /></li>)}
     </ul>
-  </section>
+  </Section>
 
-  <section class="section" aria-labelledby="writing-heading">
-    <div class="section__head">
-      <h2 class="section__title" id="writing-heading">Recent posts</h2>
-      <a class="section__link" href={withBase("/blog")}>All posts</a>
-    </div>
-    <div class="rows">
+  <Section
+    id="writing-heading"
+    title="Recent posts"
+    trailing={{ kind: "link", href: withBase("/blog"), label: "All posts" }}
+  >
+    <div class="*:last:border-b-0">
       {recentPosts.map((post) => <PostRow post={post} />)}
     </div>
-  </section>
+  </Section>
 </BaseLayout>
-
-<style>
-  /* The home page differs from the other intros in exactly one way — it opens
-     at display-lg and with section spacing above — so it keeps its own rule
-     rather than parameterising the shared one. */
-  .hero {
-    padding-block: var(--space-section) var(--space-lg);
-  }
-
-  .hero__title {
-    margin-top: var(--space-xs);
-    font-size: var(--text-display-lg);
-    font-weight: var(--weight-display);
-    line-height: var(--leading-display);
-    letter-spacing: var(--tracking-display-lg);
-  }
-
-  .hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xs);
-    margin-top: var(--space-lg);
-  }
-</style>

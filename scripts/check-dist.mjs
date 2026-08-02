@@ -73,15 +73,29 @@ export const candidatePaths = (reference, base) => {
   return [bare, `${bare}/index.html`, `${bare}.html`];
 };
 
-/** Custom properties a stylesheet reads but never defines. */
+/**
+ * Custom properties a stylesheet reads without a fallback and never defines.
+ *
+ * The fallback exemption is not a loophole. `var(--x, blue)` on an undefined
+ * `--x` is well-defined CSS that renders blue, and Tailwind builds its
+ * override slots exactly that way: `var(--tw-leading, var(--text-body--line-
+ * height))` means "the leading unless something overrode it", so the property
+ * is *meant* to be unset. What renders nothing — and so is worth failing a
+ * build over — is a bare read of a name that does not exist.
+ *
+ * The character immediately after the name decides it: `,` opens a fallback,
+ * `)` closes a bare read. No nesting analysis is needed to tell them apart.
+ */
 export const undefinedCustomProperties = (css) => {
   const defined = new Set(
     [...css.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((match) => match[1]),
   );
-  const used = new Set(
-    [...css.matchAll(/var\(\s*(--[a-z0-9-]+)/gi)].map((match) => match[1]),
+  const readBare = new Set(
+    [...css.matchAll(/var\(\s*(--[a-z0-9-]+)\s*([,)])/gi)]
+      .filter((match) => match[2] === ")")
+      .map((match) => match[1]),
   );
-  return [...used].filter((name) => !defined.has(name)).sort();
+  return [...readBare].filter((name) => !defined.has(name)).sort();
 };
 
 /** Hex colours outside the sanctioned palette. */
@@ -256,8 +270,11 @@ const main = async () => {
   const dist = resolve(process.env.DIST_DIR ?? "dist");
   const base = process.env.SITE_BASE ?? "/MinecraftFuns/";
   const site = process.env.SITE_URL ?? "https://minecraftfuns.github.io";
+  /* The palette lives in global.css, outside `@theme` — a ramp step must not
+     become a utility. That `:root` block is still the single source this
+     check reads to decide which hex values are sanctioned. */
   const tokensCss = await readFile(
-    resolve("src/styles/tokens.css"),
+    resolve("src/styles/global.css"),
     "utf8",
   );
 

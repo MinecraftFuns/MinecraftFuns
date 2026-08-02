@@ -1,0 +1,72 @@
+---
+import { assertNever } from "../lib/adt.ts";
+
+/**
+ * A titled section with a ruled head.
+ *
+ * This exists because four pages previously wrote the same block by hand and
+ * had already drifted: one section was `--space-xl` tall and the rest
+ * `--space-lg`, and the heading rule appeared on About but nowhere else. One
+ * component means the drift is not merely fixed but unrepresentable.
+ *
+ * The trailing element is a closed sum rather than two optional props, which
+ * would have admitted the state where both are set and nothing said which
+ * wins. All three variants are live: Projects counts, the home page links,
+ * About has neither.
+ */
+export type SectionTrailing =
+  | { readonly kind: "link"; readonly href: string; readonly label: string }
+  | { readonly kind: "count"; readonly value: number };
+
+type Props = {
+  readonly id: string;
+  readonly title: string;
+  readonly blurb?: string;
+  readonly trailing?: SectionTrailing;
+};
+
+const { id, title, blurb, trailing } = Astro.props;
+
+/*
+ * Astro templates cannot host a `switch`, so exhaustiveness is asserted here
+ * instead: a fourth variant fails to typecheck against `assertNever` until the
+ * markup below is taught to render it.
+ */
+if (trailing !== undefined && trailing.kind !== "link" && trailing.kind !== "count") {
+  assertNever(trailing);
+}
+---
+
+{/*
+  The head aligns on the baseline rather than the top, so the trailing element
+  lines up with the heading whether or not a blurb sits beneath it — one rule
+  covering both arrangements.
+*/}
+<section class="py-lg" aria-labelledby={id}>
+  <div class="border-hairline mb-md flex items-baseline justify-between gap-md border-b pb-md">
+    <div>
+      <h2 class="text-headline text-ink" id={id}>{title}</h2>
+      {blurb !== undefined && <p class="mt-3xs text-body-sm text-ink-subtle">{blurb}</p>}
+    </div>
+
+    {
+      trailing?.kind === "link" && (
+        <a
+          class="text-accent hover:text-accent-hover text-body-sm shrink-0 whitespace-nowrap no-underline hover:underline"
+          href={trailing.href}
+        >
+          {trailing.label}
+        </a>
+      )
+    }
+    {
+      trailing?.kind === "count" && (
+        <span class="text-ink-tertiary shrink-0 font-mono text-caption">
+          {trailing.value}
+        </span>
+      )
+    }
+  </div>
+
+  <slot />
+</section>
