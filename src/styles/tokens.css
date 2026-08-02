@@ -7,9 +7,13 @@
  * in a component, or the theme stops being switchable in one place.
  *
  * Theming uses light-dark(), so every role is declared exactly once and the
- * browser resolves it from the used color-scheme. Toggling a theme is then a
- * single `color-scheme` change on <html> rather than a parallel set of
- * overrides that can drift out of sync.
+ * browser resolves it from the used color-scheme.
+ *
+ * The system preference is the only source of truth: there is deliberately no
+ * in-page theme control, no stored preference, and no theme script. That is not
+ * a missing feature — it is what keeps the page correct with JavaScript
+ * disabled, free of a flash on first paint, and free of any state that could
+ * disagree with the reader's own setting.
  */
 
 :root {

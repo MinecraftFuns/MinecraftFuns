@@ -5,13 +5,13 @@ import "../styles/global.css";
 
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
-import { site } from "../config";
+import { site } from "../config.ts";
 
 type Props = {
-  title?: string;
-  description?: string;
+  readonly title?: string;
+  readonly description?: string;
   /** Set on article pages so the OG type is accurate. */
-  type?: "website" | "article";
+  readonly type?: "website" | "article";
 };
 
 const {
@@ -25,7 +25,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
 ---
 
 <!doctype html>
-<html lang={site.locale} data-theme-pref="system">
+<html lang={site.locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -41,23 +41,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
     <meta name="twitter:card" content="summary_large_image" />
 
     {/*
-      Restore the stored theme before first paint. Inline and synchronous on
-      purpose: a deferred script would let the default theme paint first and
-      flash. Kept to the minimum work needed to set one attribute.
+      There is deliberately no theme script here. The system preference is the
+      single source of truth, and `color-scheme: light dark` plus `light-dark()`
+      resolve it in CSS before first paint — so there is no stored preference to
+      restore, no state to desynchronise, and no flash to prevent.
     */}
-    <script is:inline>
-      (() => {
-        try {
-          const pref = localStorage.getItem("theme");
-          if (pref === "light" || pref === "dark") {
-            document.documentElement.dataset.themePref = pref;
-            document.documentElement.style.colorScheme = pref;
-          }
-        } catch {
-          /* Storage unavailable — fall through to the system theme. */
-        }
-      })();
-    </script>
   </head>
 
   <body>

@@ -1,6 +1,5 @@
 ---
-import { nav, site } from "../config";
-import ThemeToggle from "./ThemeToggle.astro";
+import { nav, site } from "../config.ts";
 
 const { pathname } = Astro.url;
 
@@ -33,10 +32,6 @@ const isCurrent = (href: string) =>
         }
       </ul>
     </nav>
-
-    <div class="header__actions">
-      <ThemeToggle />
-    </div>
   </div>
 </header>
 
@@ -108,12 +103,6 @@ const isCurrent = (href: string) =>
      stays scarce, and `aria-current` already carries it for assistive tech. */
   .nav__link[aria-current="page"] {
     color: var(--ink);
-  }
-
-  .header__actions {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2xs);
   }
 
   @media (max-width: 34rem) {
