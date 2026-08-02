@@ -1,17 +1,34 @@
 ---
-import type { Project } from "../config";
+import type { Project, ProjectStatus } from "../config.ts";
 
-type Props = { project: Project };
+type Props = { readonly project: Project };
 
 const { project } = Astro.props;
-const Tag = project.href ? "a" : "div";
+
+/*
+ * The element type *is* the witness that a project is linked. The previous
+ * version derived that same fact twice — once to pick `a` versus `div`, and
+ * again to emit a `data-interactive` attribute for the hover rule — leaving two
+ * encodings of one state that nothing forced to agree. Styling `a.card:hover`
+ * reads the decision off the DOM instead of restating it.
+ */
+const Tag = project.href === undefined ? "div" : "a";
+
+/*
+ * Total elimination over a closed sum. `null` means "this state shows no
+ * badge", which is a decision the author made, not a value that went missing —
+ * and adding a third status makes this object a type error until it is
+ * classified.
+ */
+const STATUS_BADGE: Readonly<Record<ProjectStatus, string | null>> = {
+  active: null,
+  archived: "Archived",
+};
+
+const badge = STATUS_BADGE[project.status];
 ---
 
-<Tag
-  class="card"
-  href={project.href}
-  data-interactive={project.href ? "" : undefined}
->
+<Tag class="card" href={project.href}>
   <div class="card__head">
     <h3 class="card__title">{project.title}</h3>
     <span class="card__year">{project.year}</span>
@@ -23,11 +40,7 @@ const Tag = project.href ? "a" : "div";
     <ul class="tags" role="list">
       {project.tags.map((tag) => <li class="tag">{tag}</li>)}
     </ul>
-    {
-      project.status === "archived" && (
-        <span class="badge">Archived</span>
-      )
-    }
+    {badge !== null && <span class="badge">{badge}</span>}
   </div>
 </Tag>
 
@@ -49,7 +62,7 @@ const Tag = project.href ? "a" : "div";
   }
 
   /* Elevation is a surface step plus a stronger hairline. No shadows. */
-  .card[data-interactive]:hover {
+  a.card:hover {
     background-color: var(--surface-2);
     border-color: var(--hairline-strong);
   }

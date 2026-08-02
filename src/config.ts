@@ -1,5 +1,13 @@
+import {
+  byRecency,
+  isoDate,
+  SITE_LOCALE,
+  SITE_TIME_ZONE,
+  type IsoDate,
+} from "./lib/time.ts";
+
 /**
- * Single source of truth for site identity and navigation.
+ * Single source of truth for site identity, navigation, and authored content.
  *
  * Kept deliberately separate from page markup: the GitHub profile README is a
  * second rendering target that cannot share this site's CSS, but it can and
@@ -14,6 +22,13 @@ export const site = {
   description:
     "Computer Science and Cognitive Science at the University of Toronto. Projects, writing, and CV.",
   locale: "en",
+  /**
+   * Re-exported so page code has one place to look for site settings. The
+   * definition lives in lib/time.ts because the date primitives depend on it,
+   * and this module depends on them.
+   */
+  timeZone: SITE_TIME_ZONE,
+  dateLocale: SITE_LOCALE,
 } as const;
 
 export const nav = [
@@ -36,19 +51,52 @@ export const contact = {
   twitter: "https://x.com/SerendipityArk",
 } as const;
 
+/**
+ * `rel="me"` asserts "this profile is the same person as this site" and is what
+ * Mastodon-style verification consumes. It belongs on identity profiles only —
+ * a keyserver link is a document, not an identity, so the flag is per-link data
+ * rather than a blanket attribute in the footer template.
+ */
+export type ElsewhereLink = {
+  readonly label: string;
+  readonly href: string;
+  readonly isIdentity: boolean;
+};
+
+export const elsewhere: readonly ElsewhereLink[] = [
+  { label: "GitHub", href: contact.github, isIdentity: true },
+  { label: "Matrix", href: contact.matrix, isIdentity: true },
+  { label: "Twitter", href: contact.twitter, isIdentity: true },
+  { label: "PGP", href: contact.pgp, isIdentity: false },
+];
+
+/**
+ * A closed sum. Previously `status?: "active" | "archived"`, which admitted
+ * three representations for two states — `undefined` and `"active"` rendered
+ * identically, so the model could not say which one an author meant. Making the
+ * field required collapses that ambiguity.
+ */
+export type ProjectStatus = "active" | "archived";
+
 export type Project = {
-  title: string;
-  description: string;
-  href?: string;
-  year: string;
+  readonly title: string;
+  readonly description: string;
+  /**
+   * Absent when a project has no public link. This is incidental absence in a
+   * single field, so `undefined` is the honest representation; promoting it to
+   * a tagged union would add ceremony without forbidding any invalid state.
+   */
+  readonly href?: string;
+  readonly year: string;
   /** Rendered as tags on the card. Keep to three or fewer. */
-  tags: readonly string[];
-  status?: "active" | "archived";
+  readonly tags: readonly string[];
+  readonly status: ProjectStatus;
 };
 
 /**
  * Placeholder content — replace with real projects, or migrate to an Astro
- * content collection once the shape settles.
+ * content collection once the shape settles. `parseIsoDate` and these types are
+ * already the decoder that collection would reuse.
  */
 export const projects: readonly Project[] = [
   {
@@ -67,6 +115,7 @@ export const projects: readonly Project[] = [
     href: "https://github.com/MinecraftFuns",
     year: "2025",
     tags: ["TypeScript", "Tooling"],
+    status: "active",
   },
   {
     title: "Project Three",
@@ -79,27 +128,45 @@ export const projects: readonly Project[] = [
 ];
 
 export type Post = {
-  title: string;
-  description: string;
-  href: string;
-  date: string;
-  readingTime: string;
+  readonly title: string;
+  readonly description: string;
+  readonly href: string;
+  /** A calendar date, parsed at module load — a bad date fails the build. */
+  readonly date: IsoDate;
+  /**
+   * Data, not presentation. The unit lives in the type name and the "min"
+   * suffix is applied at the render edge, so a future locale change is one
+   * formatter away rather than a rewrite of every content entry.
+   */
+  readonly readingMinutes: number;
 };
 
-export const recentPosts: readonly Post[] = [
+/**
+ * Authored in whatever order is convenient. Display order is *derived* below
+ * rather than trusted, so a post added in the wrong place cannot silently
+ * appear out of sequence.
+ */
+const authoredPosts: readonly Post[] = [
   {
     title: "A representative post title, long enough to wrap on narrow screens",
     description:
       "The one-line standfirst that tells a reader whether this is for them.",
     href: "#",
-    date: "2026-07-14",
-    readingTime: "8 min",
+    date: isoDate("2026-07-14"),
+    readingMinutes: 8,
   },
   {
     title: "Another post",
     description: "Rows stay dense and scannable; the list is not a card grid.",
     href: "#",
-    date: "2026-06-02",
-    readingTime: "5 min",
+    date: isoDate("2026-06-02"),
+    readingMinutes: 5,
   },
 ];
+
+/**
+ * `toSorted` rather than `sort`: the input is `readonly` and shared, and an
+ * in-place sort would mutate it for every other consumer. The immutable array
+ * methods have been Baseline widely available since 2023.
+ */
+export const recentPosts: readonly Post[] = byRecency(authoredPosts);

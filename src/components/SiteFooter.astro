@@ -1,14 +1,13 @@
 ---
-import { contact, site } from "../config";
+import { contact, elsewhere, site } from "../config.ts";
+import { currentYear } from "../lib/time.ts";
 
-const year = new Date().getFullYear();
-
-const elsewhere = [
-  { label: "GitHub", href: contact.github },
-  { label: "Matrix", href: contact.matrix },
-  { label: "Twitter", href: contact.twitter },
-  { label: "PGP", href: contact.pgp },
-];
+/*
+ * Reading the clock is an effect, so it happens here at the render edge rather
+ * than inside a module constant. It is evaluated once at build time — the year
+ * advances on redeploy, not at midnight.
+ */
+const year = currentYear();
 ---
 
 <footer class="footer">
@@ -24,10 +23,14 @@ const elsewhere = [
       <h2 class="eyebrow">Elsewhere</h2>
       <ul class="footer__list" role="list">
         {
-          elsewhere.map((item) => (
+          elsewhere.map((link) => (
             <li>
-              <a class="footer__link" href={item.href} rel="me">
-                {item.label}
+              <a
+                class="footer__link"
+                href={link.href}
+                rel={link.isIdentity ? "me" : undefined}
+              >
+                {link.label}
               </a>
             </li>
           ))

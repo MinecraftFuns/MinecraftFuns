@@ -1,29 +1,30 @@
 ---
-import type { Post } from "../config";
+import type { Post } from "../config.ts";
+import { formatIsoDate } from "../lib/time.ts";
 
-type Props = { post: Post };
+type Props = { readonly post: Post };
 
 const { post } = Astro.props;
-const date = new Date(post.date);
+
+/*
+ * `datetime` carries the machine-readable calendar date and the text carries
+ * the human-readable one. They are now two renderings of a single validated
+ * value rather than two independent computations that can disagree — which is
+ * exactly how the previous version shipped `datetime="2026-07-14"` next to the
+ * text "Jul 13, 2026".
+ */
+const displayDate = formatIsoDate(post.date);
 ---
 
 <a class="row" href={post.href}>
-  <time class="row__date" datetime={post.date}>
-    {
-      date.toLocaleDateString("en-CA", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    }
-  </time>
+  <time class="row__date" datetime={post.date}>{displayDate}</time>
 
   <div class="row__content">
     <h3 class="row__title">{post.title}</h3>
     <p class="row__description">{post.description}</p>
   </div>
 
-  <span class="row__meta">{post.readingTime}</span>
+  <span class="row__meta">{post.readingMinutes} min</span>
 </a>
 
 <style>
