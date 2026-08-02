@@ -1,8 +1,9 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
 import { orThrow } from "./adt.ts";
+import { compareDocs, type DocOrder } from "./doc-order.ts";
 import { readingMinutes } from "./reading.ts";
-import { site } from "../config/site.ts";
+import { nav } from "../config/site.ts";
 import { parseSlug } from "./slug.ts";
 import { routeUrl } from "./url.ts";
 
@@ -53,6 +54,21 @@ export type DocSummary = {
 /** The site-relative URL, before the deployment base is applied. */
 export const hrefOf = (slug: string): string => `/docs/${slug}`;
 
+/**
+ * Docs are never in the site nav, and this is where that is enforced.
+ *
+ * The nav frames the personal site in the first person; docs are reference
+ * material that deliberately drops the bar entirely, so an entry pointing here
+ * would advertise a section and then strand the reader in it. A comment would
+ * record the decision. `Extract` over the literal hrefs, which `as const`
+ * preserves, makes adding one a typecheck failure instead: the assertion below
+ * only holds while nothing under `/docs` appears in `nav`.
+ */
+type DocsInNav = Extract<(typeof nav)[number]["href"], `/docs${string}`>;
+
+const _docsAreNotInNav: [DocsInNav] extends [never] ? true : never = true;
+void _docsAreNotInNav;
+
 export const summarise = ({ entry, slug }: PublishedDoc): DocSummary => ({
   title: entry.data.title,
   description: entry.data.description,
@@ -64,7 +80,7 @@ export const summarise = ({ entry, slug }: PublishedDoc): DocSummary => ({
 });
 
 /**
- * Published docs, by title.
+ * Published docs, in `compareDocs` order.
  *
  * `orThrow` rather than a filter: a doc nested in a folder is a mistake to
  * report, not a document to hide. Dropping it silently is how a page goes
@@ -81,11 +97,12 @@ export const publishedDocs = async (): Promise<readonly PublishedDoc[]> => {
     ),
   }));
 
-  /* Compared in the site's own locale rather than the machine's, so the order
-     is a property of the site and not of whoever ran the build. */
-  return docs.toSorted((a, b) =>
-    a.entry.data.title.localeCompare(b.entry.data.title, site.locale),
-  );
+  const order = ({ entry, slug }: PublishedDoc): DocOrder => ({
+    title: entry.data.title,
+    slug,
+  });
+
+  return docs.toSorted((a, b) => compareDocs(order(a), order(b)));
 };
 
 export const docSummaries = async (): Promise<readonly DocSummary[]> =>
