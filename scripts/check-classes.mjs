@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Source gate: no anonymous values in markup.
+ * Source gate: no anonymous values in markup, and no type set in a page.
  *
  * The theme deletes Tailwind's default namespaces, so `p-4` and `text-red-500`
  * genuinely do not exist. One hole remains: bracket syntax compiles whatever
@@ -17,6 +17,18 @@
  * usually a mistake nobody will catch by reading. This is a source check
  * rather than an artifact check because by the time it reaches CSS the
  * literal has been compiled away into something that looks deliberate.
+ *
+ * The second rule is about layering. Naming every size in `@theme` stops a
+ * value being anonymous but not a *decision* being made twice: the About page
+ * built two lists of the same shape and set the value column's role separately
+ * on each row, so one list rendered at 14px and 16px alternately. Nothing
+ * above catches that, because every class involved was a legitimate named
+ * role. What catches it is refusing to let a page set type at all. Pages
+ * compose components; components decide what things look like, once, where a
+ * second opinion has nowhere to live.
+ *
+ * The roles are read out of the theme rather than listed here, so the rule
+ * cannot fall behind the type scale it polices.
  */
 
 import { readdir, readFile } from "node:fs/promises";
@@ -75,6 +87,38 @@ export const anonymousValues = (source) =>
     ),
   );
 
+/**
+ * The type-scale role names, read from the theme.
+ *
+ * `--text-body: …` declares a role; `--text-body--line-height: …` tunes one,
+ * and `--text-*: initial` is the namespace reset. Only the first names a
+ * utility, so the two double-hyphen forms are dropped.
+ */
+export const typeRoles = (css) =>
+  [...css.matchAll(/^\s*--text-([a-z0-9-]+):/gm)]
+    .map((declaration) => declaration[1])
+    .filter((role) => !role.includes("--") && !role.includes("*"));
+
+/**
+ * Type roles set in one file. Pure and total.
+ *
+ * The lookahead is what keeps `text-body` from also matching inside
+ * `text-body-sm`: a word boundary sits between `y` and `-`, so `\b` alone
+ * would report every longer role twice.
+ */
+export const typeRolesSet = (source, roles) =>
+  classRegions(source).flatMap((region) =>
+    roles.flatMap((role) =>
+      [...region.matchAll(new RegExp(`\\btext-${role}(?![-a-z0-9])`, "g"))].map(
+        (found) => ({
+          rule: "type-in-page",
+          text: found[0],
+          remedy: "move the markup into a component; pages compose, components set type",
+        }),
+      ),
+    ),
+  );
+
 // ---------------------------------------------------------------------------
 // Effect boundary
 // ---------------------------------------------------------------------------
@@ -92,13 +136,27 @@ const walk = async (dir) => {
 
 const main = async () => {
   const root = resolve(process.env.SRC_DIR ?? "src");
-  const files = (await walk(root)).filter((path) => path.endsWith(".astro"));
+
+  /* Component `.ts` is scanned for the same reason frontmatter literals are:
+     a class list moved to a `const` is still markup. */
+  const files = (await walk(root)).filter(
+    (path) =>
+      path.endsWith(".astro") ||
+      (path.endsWith(".ts") && path.includes(`${join(root, "components")}/`)),
+  );
+
+  const roles = typeRoles(await readFile(join(root, "styles", "global.css"), "utf8"));
+  const pages = `${join(root, "pages")}/`;
 
   const found = (
     await Promise.all(
       files.map(async (path) => {
         const source = await readFile(path, "utf8");
-        return anonymousValues(source).map((violation) => ({
+        const violations = [
+          ...anonymousValues(source),
+          ...(path.startsWith(pages) ? typeRolesSet(source, roles) : []),
+        ];
+        return violations.map((violation) => ({
           ...violation,
           path: relative(process.cwd(), path),
         }));
@@ -108,12 +166,13 @@ const main = async () => {
 
   if (found.length === 0) {
     console.log(
-      `check-classes: OK, ${files.length} component(s) carry no anonymous values`,
+      `check-classes: OK, ${files.length} file(s) carry no anonymous values` +
+        `, and no page among them sets type (${roles.length} role(s))`,
     );
     return;
   }
 
-  console.error(`check-classes: ${found.length} anonymous value(s)\n`);
+  console.error(`check-classes: ${found.length} problem(s)\n`);
   found.forEach(({ path, rule, text, remedy }) => {
     console.error(`  ${path}\n    ${rule}: ${text}\n    → ${remedy}\n`);
   });

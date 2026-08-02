@@ -1,0 +1,24 @@
+---
+/**
+ * A post's tags, as pills.
+ *
+ * Renders nothing at all when there are none, so no call site has to guard;
+ * the empty list already means "no tags" and a second expression of that in the
+ * page would be a condition somebody could get backwards.
+ */
+type Props = { readonly tags: readonly string[] };
+
+const { tags } = Astro.props;
+---
+
+{
+  tags.length > 0 && (
+    <ul class="mt-md flex flex-wrap gap-2xs" role="list">
+      {tags.map((tag) => (
+        <li class="border-hairline bg-surface-1 text-ink-subtle rounded-pill border px-2xs py-3xs text-caption">
+          {tag}
+        </li>
+      ))}
+    </ul>
+  )
+}

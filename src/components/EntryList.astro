@@ -1,0 +1,86 @@
+---
+import { assertNever } from "../lib/adt.ts";
+
+/**
+ * A labelled list: a short label in a fixed left column, its value beside it.
+ *
+ * Education and Contact were already sharing the grid, through two `const`
+ * strings in the page. What they were not sharing was the value column, which
+ * was a slot every call site filled with type of its own choosing. Three of
+ * them chose differently: an education entry set `text-control`, the
+ * fingerprint `text-body-sm`, and a profile link nothing at all, so a single
+ * list rendered alternating rows at 14px and 16px.
+ *
+ * The body is therefore a closed sum rather than a slot. Each shape a value can
+ * take is given its look once, here; a fourth shape is a variant added to this
+ * type, not a class written into a page. That is the difference between a
+ * convention and a guarantee.
+ *
+ * Rows align on the first baseline, not the top. A label is 12px and a value is
+ * 16px, so top alignment sits the label a different distance above its value on
+ * every row that carries a different value; baselines are what a reader
+ * actually reads as "the same line". The columns collapse below `sm`, where the
+ * fixed label column would crowd the text.
+ */
+export type EntryBody =
+  | {
+      readonly kind: "lines";
+      readonly title: string;
+      readonly notes: readonly string[];
+    }
+  | { readonly kind: "link"; readonly href: string; readonly label: string }
+  /** A machine-readable string: a fingerprint, an identifier, a hash. */
+  | { readonly kind: "mono"; readonly value: string };
+
+export type Entry = {
+  readonly label: string;
+  readonly body: EntryBody;
+};
+
+type Props = { readonly entries: readonly Entry[] };
+
+const { entries } = Astro.props;
+
+/*
+ * Astro templates cannot host a `switch`, so exhaustiveness is asserted here:
+ * a fourth variant fails to typecheck until the markup below is taught it.
+ */
+entries.forEach(({ body }) => {
+  if (body.kind !== "lines" && body.kind !== "link" && body.kind !== "mono") {
+    assertNever(body);
+  }
+});
+---
+
+<dl>
+  {
+    entries.map(({ label, body }) => (
+      <div class="border-hairline grid gap-md border-b py-sm last:border-b-0 sm:grid-cols-entry sm:items-baseline">
+        <dt class="text-ink-tertiary font-mono text-caption">{label}</dt>
+        <dd>
+          {body.kind === "lines" && (
+            <>
+              <p class="text-ink text-control">{body.title}</p>
+              {body.notes.map((note) => (
+                <p class="text-ink-subtle text-body-sm">{note}</p>
+              ))}
+            </>
+          )}
+          {body.kind === "link" && (
+            <a
+              class="text-accent hover:text-accent-hover text-control"
+              href={body.href}
+            >
+              {body.label}
+            </a>
+          )}
+          {body.kind === "mono" && (
+            <span class="text-ink-muted font-mono text-body wrap-anywhere">
+              {body.value}
+            </span>
+          )}
+        </dd>
+      </div>
+    ))
+  }
+</dl>

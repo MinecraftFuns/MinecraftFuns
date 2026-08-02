@@ -1,0 +1,40 @@
+---
+import { formatIsoDate, type IsoDate } from "../lib/time.ts";
+import { INTRO } from "./intro.ts";
+import TagList from "./TagList.astro";
+
+/**
+ * A post's opening block.
+ *
+ * The same opening as `PageIntro`'s `page` kind, with publication metadata
+ * where an eyebrow would go. The spacing and title role come from `INTRO`
+ * rather than being written out again, which is what the post page used to do:
+ * `pt-xl pb-lg` and `text-display-md` spelled twice, in two files, with nothing
+ * to notice if one moved.
+ *
+ * `datetime` carries the machine-readable date and the text the human-readable
+ * one, both rendered from a single validated value.
+ */
+type Props = {
+  readonly title: string;
+  readonly description: string;
+  readonly date: IsoDate;
+  readonly readingMinutes: number;
+  readonly tags: readonly string[];
+};
+
+const { title, description, date, readingMinutes, tags } = Astro.props;
+
+const { spacing, title: titleClass } = INTRO.page;
+---
+
+<header class:list={["border-hairline mb-lg border-b", spacing]}>
+  <p class="text-ink-tertiary flex items-center gap-2xs font-mono text-caption">
+    <time datetime={date}>{formatIsoDate(date)}</time>
+    <span aria-hidden="true">·</span>
+    <span>{readingMinutes} min read</span>
+  </p>
+  <h1 class:list={["text-ink mt-xs", titleClass]}>{title}</h1>
+  <p class="text-ink-muted mt-sm max-w-measure text-body-lg">{description}</p>
+  <TagList tags={tags} />
+</header>

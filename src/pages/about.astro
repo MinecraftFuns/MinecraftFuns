@@ -1,4 +1,5 @@
 ---
+import EntryList, { type Entry } from "../components/EntryList.astro";
 import PageIntro from "../components/PageIntro.astro";
 import Section from "../components/Section.astro";
 import { education } from "../config/about.ts";
@@ -20,10 +21,33 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 /* Read off the key, so rotating it cannot leave a stale one printed here. */
 const fingerprint = await siteFingerprint();
 
-/* Period in a fixed left column, detail beside it: the standard CV rhythm,
-   collapsing to stacked rows where the column would crowd the text. */
-const ENTRY = "grid gap-md border-b border-hairline py-sm last:border-b-0 sm:grid-cols-entry";
-const ENTRY_PERIOD = "text-ink-tertiary font-mono text-caption";
+/*
+ * Both lists below are data. `EntryList` owns the grid, the label column, and
+ * the type of every value shape, so this page states facts and nothing about
+ * how they look.
+ */
+const educationEntries: readonly Entry[] = education.map((entry) => ({
+  label: entry.period,
+  body: {
+    kind: "lines",
+    title: entry.institution,
+    /* `detail` is optional, so an absent one contributes no line at all
+       rather than an empty paragraph holding space. */
+    notes: [entry.credential, entry.detail].flatMap((note) =>
+      note === undefined ? [] : [note],
+    ),
+  },
+}));
+
+const contactEntries: readonly Entry[] = [
+  { label: "PGP", body: { kind: "mono", value: fingerprint } },
+  ...profiles.map(
+    (item): Entry => ({
+      label: item.label,
+      body: { kind: "link", href: item.href, label: item.handle },
+    }),
+  ),
+];
 ---
 
 <BaseLayout
@@ -47,20 +71,7 @@ const ENTRY_PERIOD = "text-ink-tertiary font-mono text-caption";
   </PageIntro>
 
   <Section id="education" title="Education">
-    <dl>
-      {
-        education.map((entry) => (
-          <div class={ENTRY}>
-            <dt class={ENTRY_PERIOD}>{entry.period}</dt>
-            <dd>
-              <p class="text-ink text-control">{entry.institution}</p>
-              <p class="text-body-sm text-ink-subtle">{entry.credential}</p>
-              <p class="text-body-sm text-ink-subtle">{entry.detail}</p>
-            </dd>
-          </div>
-        ))
-      }
-    </dl>
+    <EntryList entries={educationEntries} />
   </Section>
 
   <Section id="contact" title="Contact">
@@ -71,42 +82,26 @@ const ENTRY_PERIOD = "text-ink-tertiary font-mono text-caption";
         deliberately no plaintext address on this page.
       </p>
     </div>
-    <dl>
-      <div class={ENTRY}>
-        <dt class={ENTRY_PERIOD}>PGP</dt>
-        <dd class="text-ink-muted font-mono text-body-sm wrap-anywhere">
-          {fingerprint}
-        </dd>
-      </div>
-      {
-        profiles.map((item) => (
-          <div class={ENTRY}>
-            <dt class={ENTRY_PERIOD}>{item.label}</dt>
-            <dd>
-              <a class="text-accent hover:text-accent-hover" href={item.href}>
-                {item.handle}
-              </a>
-            </dd>
-          </div>
-        ))
-      }
-    </dl>
+    <EntryList entries={contactEntries} />
   </Section>
 
   {/*
-    Template for the remaining CV sections. Uncomment and fill; ENTRY and
-    ENTRY_PERIOD above already cover the layout.
+    Template for the remaining CV sections. Uncomment and fill; the shape is
+    the same data an education entry is built from.
 
     <Section id="experience" title="Experience">
-      <dl>
-        <div class={ENTRY}>
-          <dt class={ENTRY_PERIOD}>2026</dt>
-          <dd>
-            <p class="text-ink text-control">Role, Organisation</p>
-            <p class="text-body-sm text-ink-subtle">One line on what you did.</p>
-          </dd>
-        </div>
-      </dl>
+      <EntryList
+        entries={[
+          {
+            label: "2026",
+            body: {
+              kind: "lines",
+              title: "Role, Organisation",
+              notes: ["One line on what you did."],
+            },
+          },
+        ]}
+      />
     </Section>
   */}
 </BaseLayout>
