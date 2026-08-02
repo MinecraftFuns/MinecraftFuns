@@ -1,8 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { documentProbe, layoutProbe, motionProbe } from "./checks.mjs";
-import { designProbe } from "./design.mjs";
+import {
+  documentProbe,
+  focusProbe,
+  motionProbe,
+  overflowProbe,
+  pageProbe,
+} from "./probe.mjs";
 
 /*
  * `page.evaluate` serialises the function and nothing else: the browser gets
@@ -31,6 +36,10 @@ const MODULE_SCOPE = [
   "rhythmBreaks",
   "designFindings",
   "compareFindings",
+  "LIMITS",
+  "SPACING_PROPERTIES",
+  "probeOptions",
+  "TOKEN_NAMES",
 ];
 
 /** Bare identifier use, ignoring property access such as `Math.round`. */
@@ -45,7 +54,7 @@ const localNames = (source) => {
   return new Set([...declared, ...parameters]);
 };
 
-const PROBES = { layoutProbe, documentProbe, motionProbe, designProbe };
+const PROBES = { pageProbe, documentProbe, motionProbe, focusProbe, overflowProbe };
 
 describe("probe serialisation", () => {
   for (const [name, probe] of Object.entries(PROBES)) {

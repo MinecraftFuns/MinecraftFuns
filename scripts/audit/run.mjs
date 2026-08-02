@@ -1,27 +1,13 @@
 /**
- * Browser audit driver.
+ * Browser audit driver — the only effectful module here.
  *
- * Loads every built page in a real browser at several viewport widths, in both
- * colour schemes, and records what a browser can see that static analysis
- * cannot: computed contrast, layout overflow, focus behaviour, runtime errors,
- * and design conformance.
+ * Non-blocking by construction: it always exits 0 and the workflow does not
+ * gate deployment on it, because an audit that can fail a deploy is one that
+ * gets disabled the first time it is inconvenient.
  *
- * Deliberately non-blocking. It always exits 0, and the workflow does not gate
- * deployment on it. An audit that can fail a deploy is one that gets disabled
- * the first time it is inconvenient; one that only reports stays.
- *
- * Cost model, since this is the slowest job in the pipeline:
- *   - Browser contexts are created per (viewport, scheme) and reused across
- *     routes. A context is heavyweight — a fresh profile — while a page is
- *     cheap, so the loop is ordered contexts-outermost: 8 contexts rather than
- *     one per page visit.
- *   - Screenshots reuse the page already loaded for the audit rather than
- *     navigating a second time, halving page loads at those viewports.
- *   - Link probing runs through a bounded worker pool instead of sequential
- *     awaits, turning a sum of round trips into a maximum of them.
- *
- * Everything effectful lives here. Classification lives in checks.mjs and
- * design.mjs, rendering in report.mjs — all pure and unit-tested.
+ * Contexts are created per (viewport, scheme) and reused across routes: a
+ * context is a fresh browser profile while a page is cheap, so ordering the
+ * loop contexts-outermost costs eight profiles rather than one per page visit.
  */
 
 import { spawn } from "node:child_process";
@@ -31,14 +17,17 @@ import { join, relative, resolve } from "node:path";
 import { AxeBuilder } from "@axe-core/playwright";
 import { chromium } from "playwright";
 
+import { dedupeFindings } from "./checks.mjs";
+import { designFindings, TOKEN_NAMES } from "./design.mjs";
 import {
-  dedupeFindings,
   documentProbe,
+  focusProbe,
   INTERACTIVE_SELECTOR,
-  layoutProbe,
   motionProbe,
-} from "./checks.mjs";
-import { designFindings, designProbe, TOKEN_NAMES } from "./design.mjs";
+  overflowProbe,
+  pageProbe,
+  probeOptions,
+} from "./probe.mjs";
 import { toJson, toMarkdown } from "./report.mjs";
 
 const PORT = Number(process.env.AUDIT_PORT ?? 4321);
@@ -49,18 +38,14 @@ const DIST = resolve(process.env.DIST_DIR ?? "dist");
 const OUT = resolve(process.env.AUDIT_OUT ?? "audit");
 const ORIGIN = `http://localhost:${PORT}`;
 
-/** Base without its trailing slash, so joining a rooted route cannot double up. */
 const BASE_PREFIX = BASE.replace(/\/+$/, "");
 const urlFor = (route) => `${ORIGIN}${BASE_PREFIX}${route}`;
-
-/** Filesystem-safe label for a route, so "/" does not become an empty name. */
 const slug = (route) => route.replace(/^\/|\/$/g, "").replaceAll("/", "_") || "home";
 
 /**
- * 320 is the narrowest width WCAG 1.4.10 (reflow) expects to work; 1440 is a
- * common desktop. Axe runs only at the extremes — the middle widths exist to
- * catch layout overflow, which is where they actually differ. `capture` marks
- * the widths worth a screenshot.
+ * 320 is the narrowest width WCAG reflow expects to work; 1440 is a common
+ * desktop. Axe runs at the extremes only — the middle widths exist to catch
+ * layout overflow, which is where they actually differ.
  */
 const VIEWPORTS = [
   { name: "narrow", width: 320, height: 640, axe: true, capture: false },
@@ -70,38 +55,130 @@ const VIEWPORTS = [
 ];
 
 const SCHEMES = ["light", "dark"];
-
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
-
-/** Concurrent link probes: enough to hide latency, few enough to stay polite. */
 const LINK_CONCURRENCY = 8;
+const TOUCH_WIDTH = 768;
 
 const findings = [];
 const record = (finding) => findings.push(finding);
+const recordAll = (entries) => entries.forEach(record);
 
 /**
- * Bounded worker pool. `limit` tasks stay in flight and each worker pulls the
- * next index as it frees up, so total time is bounded by the slowest worker
- * rather than by the sum of all tasks.
+ * Bounded worker pool: `limit` tasks stay in flight and each worker takes the
+ * next index as it frees, so elapsed time is the slowest worker rather than
+ * the sum of every task.
  */
 const mapConcurrent = async (items, limit, task) => {
-  const results = new Array(items.length);
-  let cursor = 0;
-
+  const queue = items.entries();
   const worker = async () => {
-    while (cursor < items.length) {
-      const index = cursor;
-      cursor += 1;
-      results[index] = await task(items[index], index);
-    }
+    for (const [, item] of queue) await task(item);
   };
-
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
 };
 
 // ---------------------------------------------------------------------------
-// Server lifecycle
+// Rule tables
+//
+// Each probe result maps onto findings the same way, so the mapping is data.
+// Adding a check is a row, not another near-identical block.
+// ---------------------------------------------------------------------------
+
+const LAYOUT_RULES = [
+  {
+    key: "overflowing",
+    category: "readability",
+    rule: "element-overflows-viewport",
+    impact: "moderate",
+    touchOnly: false,
+    message: (item, layout) =>
+      `extends to ${item.right}px, past the ${layout.viewportWidth}px viewport`,
+  },
+  {
+    key: "tinyText",
+    category: "readability",
+    rule: "text-below-12px",
+    impact: "moderate",
+    touchOnly: false,
+    message: (item) => `${item.fontSize} text: "${item.sample}"`,
+  },
+  {
+    key: "clipped",
+    category: "readability",
+    rule: "text-clipped",
+    impact: "moderate",
+    touchOnly: false,
+    message: (item) =>
+      `content is ${item.scrollWidth}px inside a ${item.clientWidth}px box with hidden overflow`,
+  },
+  {
+    // Target size matters where fingers are used, not under a desktop pointer.
+    key: "smallTargets",
+    category: "accessibility",
+    rule: "target-size-under-24px",
+    impact: "moderate",
+    touchOnly: true,
+    message: (item) =>
+      `${item.width}x${item.height}px, below the 24x24 minimum (WCAG 2.5.8)`,
+  },
+];
+
+const DOCUMENT_RULES = [
+  {
+    when: (doc) => doc.scriptCount > 0,
+    category: "runtime",
+    rule: "unexpected-script",
+    impact: "moderate",
+    message: (doc) =>
+      `${doc.scriptCount} script element(s) — this site is intended to ship no client JavaScript`,
+  },
+  {
+    when: (doc) => doc.title.trim() === "",
+    category: "meta",
+    rule: "missing-title",
+    impact: "serious",
+    message: () => "document has no title",
+  },
+  {
+    when: (doc) => doc.description.trim() === "",
+    category: "meta",
+    rule: "missing-description",
+    impact: "minor",
+    message: () => "no meta description",
+  },
+  {
+    when: (doc) => doc.h1Count !== 1,
+    category: "meta",
+    rule: "h1-count",
+    impact: "moderate",
+    message: (doc) => `${doc.h1Count} <h1> elements; exactly one is expected`,
+  },
+  {
+    when: (doc) => !/Inter/i.test(doc.bodyFontFamily),
+    category: "readability",
+    rule: "webfont-not-applied",
+    impact: "minor",
+    message: (doc) => `body renders in ${doc.bodyFontFamily} — the webfont did not apply`,
+  },
+];
+
+const RUNTIME_EVENTS = [
+  {
+    event: "pageerror",
+    rule: "uncaught-exception",
+    impact: "critical",
+    message: (error) => String(error?.message ?? error),
+  },
+  {
+    event: "requestfailed",
+    rule: "request-failed",
+    impact: "serious",
+    message: (request) =>
+      `${request.method()} ${request.url()} — ${request.failure()?.errorText ?? "failed"}`,
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Server and routes
 // ---------------------------------------------------------------------------
 
 const startPreview = async () => {
@@ -112,21 +189,20 @@ const startPreview = async () => {
   );
 
   const deadline = Date.now() + 60_000;
-  while (Date.now() < deadline) {
-    try {
-      const response = await fetch(urlFor("/"));
-      if (response.ok) return server;
-    } catch {
-      // Not listening yet.
-    }
-    await new Promise((continueAfter) => setTimeout(continueAfter, 250));
-  }
+  const ready = async () => {
+    const response = await fetch(urlFor("/")).catch(() => null);
+    if (response?.ok) return true;
+    if (Date.now() > deadline) return false;
+    await new Promise((next) => setTimeout(next, 250));
+    return ready();
+  };
 
+  if (await ready()) return server;
   server.kill();
   throw new Error(`preview server did not become ready on ${urlFor("/")}`);
 };
 
-/** Every built page, discovered rather than hardcoded so new routes are covered. */
+/** Routes discovered from the build, so new pages are covered automatically. */
 const discoverRoutes = async (dir) => {
   const walk = async (current) => {
     const entries = await readdir(current, { withFileTypes: true });
@@ -139,8 +215,7 @@ const discoverRoutes = async (dir) => {
     return nested.flat();
   };
 
-  const files = await walk(dir);
-  return files
+  return (await walk(dir))
     .filter((path) => path.endsWith("index.html"))
     .map((path) => `/${relative(dir, path).replace(/index\.html$/, "")}`.replace(/\/+/g, "/"))
     .sort();
@@ -151,47 +226,80 @@ const discoverRoutes = async (dir) => {
 // ---------------------------------------------------------------------------
 
 const attachRuntimeListeners = (page, where) => {
-  page.on("pageerror", (error) =>
-    record({
-      ...where,
-      category: "runtime",
-      rule: "uncaught-exception",
-      impact: "critical",
-      message: String(error?.message ?? error),
-    }),
+  RUNTIME_EVENTS.forEach(({ event, rule, impact, message }) =>
+    page.on(event, (subject) =>
+      record({ ...where, category: "runtime", rule, impact, message: message(subject) }),
+    ),
   );
 
-  page.on("console", (message) => {
-    if (message.type() !== "error") return;
-    record({
-      ...where,
-      category: "runtime",
-      rule: "console-error",
-      impact: "serious",
-      message: message.text().slice(0, 300),
-    });
-  });
-
-  page.on("requestfailed", (request) =>
-    record({
-      ...where,
-      category: "runtime",
-      rule: "request-failed",
-      impact: "serious",
-      message: `${request.method()} ${request.url()} — ${request.failure()?.errorText ?? "failed"}`,
-    }),
+  page.on("console", (message) =>
+    message.type() === "error"
+      ? record({
+          ...where,
+          category: "runtime",
+          rule: "console-error",
+          impact: "serious",
+          message: message.text().slice(0, 300),
+        })
+      : undefined,
   );
 
-  page.on("response", (response) => {
-    if (response.status() < 400) return;
+  page.on("response", (response) =>
+    response.status() >= 400
+      ? record({
+          ...where,
+          category: "runtime",
+          rule: "http-error",
+          impact: "serious",
+          message: `${response.status()} ${response.url()}`,
+        })
+      : undefined,
+  );
+};
+
+const auditAxe = async (page, where) => {
+  const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
+  recordAll(
+    violations.flatMap((violation) =>
+      violation.nodes.slice(0, 5).map((node) => ({
+        ...where,
+        category: "accessibility",
+        rule: violation.id,
+        impact: violation.impact ?? "moderate",
+        selector: node.target.join(" "),
+        message: violation.help,
+        help: violation.helpUrl,
+      })),
+    ),
+  );
+};
+
+const auditDocument = async (page, where, interactiveCount) => {
+  const doc = await page.evaluate(documentProbe);
+
+  recordAll(
+    DOCUMENT_RULES.filter(({ when }) => when(doc)).map(({ category, rule, impact, message }) => ({
+      ...where,
+      category,
+      rule,
+      impact,
+      message: message(doc),
+    })),
+  );
+
+  // Keyboard focus must be visible; a mouse user never sees this fail.
+  const unmarked = interactiveCount > 0 ? await page.evaluate(focusProbe, INTERACTIVE_SELECTOR) : [];
+  if (unmarked.length > 0) {
     record({
       ...where,
-      category: "runtime",
-      rule: "http-error",
-      impact: "serious",
-      message: `${response.status()} ${response.url()}`,
+      category: "accessibility",
+      rule: "focus-indicator-unclear",
+      impact: "info",
+      message: `no outline or shadow under programmatic focus: ${unmarked.join(", ")} — verify by tabbing`,
     });
-  });
+  }
+
+  return doc;
 };
 
 const auditPage = async (context, route, viewport, scheme) => {
@@ -201,8 +309,11 @@ const auditPage = async (context, route, viewport, scheme) => {
   attachRuntimeListeners(page, where);
   await page.goto(urlFor(route), { waitUntil: "load" });
 
-  // -- Layout and readability ---------------------------------------------
-  const layout = await page.evaluate(layoutProbe, INTERACTIVE_SELECTOR);
+  // Geometry does not vary with colour scheme, so design is measured once.
+  const { layout, design } = await page.evaluate(
+    pageProbe,
+    probeOptions(TOKEN_NAMES, scheme === "light"),
+  );
 
   if (layout.documentScrollWidth > layout.viewportWidth + 1) {
     record({
@@ -210,171 +321,32 @@ const auditPage = async (context, route, viewport, scheme) => {
       category: "readability",
       rule: "horizontal-overflow",
       impact: "serious",
-      message: `page scrolls horizontally: content is ${layout.documentScrollWidth}px wide in a ${layout.viewportWidth}px viewport`,
+      message: `page scrolls horizontally: ${layout.documentScrollWidth}px of content in a ${layout.viewportWidth}px viewport`,
     });
   }
 
-  for (const element of layout.overflowing) {
-    record({
-      ...where,
-      category: "readability",
-      rule: "element-overflows-viewport",
-      impact: "moderate",
-      selector: element.selector,
-      message: `extends to ${element.right}px, past the ${layout.viewportWidth}px viewport`,
-    });
-  }
-
-  for (const element of layout.tinyText) {
-    record({
-      ...where,
-      category: "readability",
-      rule: "text-below-12px",
-      impact: "moderate",
-      selector: element.selector,
-      message: `${element.fontSize} text: "${element.sample}"`,
-    });
-  }
-
-  for (const element of layout.clipped) {
-    record({
-      ...where,
-      category: "readability",
-      rule: "text-clipped",
-      impact: "moderate",
-      selector: element.selector,
-      message: `content is ${element.scrollWidth}px inside a ${element.clientWidth}px box with hidden overflow`,
-    });
-  }
-
-  // Target size matters where fingers are used; reported on touch-sized
-  // viewports only, to avoid noise about a desktop pointer.
-  if (viewport.width <= 768) {
-    for (const element of layout.smallTargets) {
-      record({
-        ...where,
-        category: "accessibility",
-        rule: "target-size-under-24px",
-        impact: "moderate",
-        selector: element.selector,
-        message: `${element.width}x${element.height}px, below the 24x24 minimum (WCAG 2.5.8)`,
-      });
-    }
-  }
-
-  // -- Design conformance --------------------------------------------------
-  // Geometry does not depend on the colour scheme, so this runs once per
-  // viewport; measuring in both would only duplicate every finding.
-  if (scheme === "light") {
-    const probe = await page.evaluate(designProbe, TOKEN_NAMES);
-    for (const found of designFindings(probe, { page: route, viewport: viewport.name })) {
-      record(found);
-    }
-  }
-
-  // -- Accessibility -------------------------------------------------------
-  if (viewport.axe) {
-    const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
-    for (const violation of results.violations) {
-      for (const node of violation.nodes.slice(0, 5)) {
-        record({
+  recordAll(
+    LAYOUT_RULES.filter(({ touchOnly }) => !touchOnly || viewport.width <= TOUCH_WIDTH).flatMap(
+      ({ key, category, rule, impact, message }) =>
+        layout[key].map((item) => ({
           ...where,
-          category: "accessibility",
-          rule: violation.id,
-          impact: violation.impact ?? "moderate",
-          selector: node.target.join(" "),
-          message: violation.help,
-          help: violation.helpUrl,
-        });
-      }
-    }
+          category,
+          rule,
+          impact,
+          selector: item.selector,
+          message: message(item, layout),
+        })),
+    ),
+  );
+
+  if (design !== null) {
+    recordAll(designFindings(design, { page: route, viewport: viewport.name }));
   }
 
-  // -- Document-level facts, once per scheme ------------------------------
-  let documentFacts = null;
-  if (viewport.name === "desktop") {
-    documentFacts = await page.evaluate(documentProbe);
+  if (viewport.axe) await auditAxe(page, where);
 
-    if (documentFacts.scriptCount > 0) {
-      record({
-        ...where,
-        category: "runtime",
-        rule: "unexpected-script",
-        impact: "moderate",
-        message: `${documentFacts.scriptCount} script element(s) — this site is intended to ship no client JavaScript`,
-      });
-    }
-
-    if (documentFacts.title.trim() === "") {
-      record({
-        ...where,
-        category: "meta",
-        rule: "missing-title",
-        impact: "serious",
-        message: "document has no title",
-      });
-    }
-
-    if (documentFacts.description.trim() === "") {
-      record({
-        ...where,
-        category: "meta",
-        rule: "missing-description",
-        impact: "minor",
-        message: "no meta description",
-      });
-    }
-
-    if (documentFacts.h1Count !== 1) {
-      record({
-        ...where,
-        category: "meta",
-        rule: "h1-count",
-        impact: "moderate",
-        message: `${documentFacts.h1Count} <h1> elements; exactly one is expected`,
-      });
-    }
-
-    if (!/Inter/i.test(documentFacts.bodyFontFamily)) {
-      record({
-        ...where,
-        category: "readability",
-        rule: "webfont-not-applied",
-        impact: "minor",
-        message: `body renders in ${documentFacts.bodyFontFamily} — the intended webfont did not apply`,
-      });
-    }
-
-    // Keyboard focus must be visible; this is the check most often missed,
-    // because a mouse user never sees it fail.
-    if (layout.interactiveCount > 0) {
-      const invisibleFocus = await page.evaluate((selector) => {
-        const unmarked = new Set();
-        for (const element of [...document.querySelectorAll(selector)].slice(0, 20)) {
-          element.focus();
-          const style = getComputedStyle(element);
-          const outlined =
-            style.outlineStyle !== "none" && Number.parseFloat(style.outlineWidth) > 0;
-          if (!outlined && style.boxShadow === "none") {
-            unmarked.add(element.tagName.toLowerCase());
-          }
-        }
-        return [...unmarked];
-      }, INTERACTIVE_SELECTOR);
-
-      // Programmatic focus does not always match :focus-visible heuristics, so
-      // this is information to verify by hand rather than a defect.
-      if (invisibleFocus.length > 0) {
-        record({
-          ...where,
-          category: "accessibility",
-          rule: "focus-indicator-unclear",
-          impact: "info",
-          message: `focusable elements showed no outline or shadow when focused programmatically: ${invisibleFocus.join(", ")} — verify by tabbing manually`,
-        });
-      }
-    }
-  }
+  const doc =
+    viewport.name === "desktop" ? await auditDocument(page, where, layout.interactiveCount) : null;
 
   // Reuse the loaded page rather than navigating again for a screenshot.
   if (viewport.capture) {
@@ -385,14 +357,30 @@ const auditPage = async (context, route, viewport, scheme) => {
   }
 
   await page.close();
-  return documentFacts;
+  return doc;
 };
 
 // ---------------------------------------------------------------------------
-// Cross-cutting checks
+// Cross-cutting passes
 // ---------------------------------------------------------------------------
 
-/** Light and dark must actually differ, or the theme is silently not applying. */
+/**
+ * Visit every route once in a single throwaway context. Shared by the
+ * reduced-motion and print passes, which differ only in setup and inspection.
+ */
+const overRoutes = async (browser, { contextOptions, prepare, visit }, routes) => {
+  const context = await browser.newContext(contextOptions);
+  const page = await context.newPage();
+  if (prepare) await prepare(page);
+
+  for (const route of routes) {
+    await page.goto(urlFor(route), { waitUntil: "load" });
+    await visit(page, route);
+  }
+
+  await context.close();
+};
+
 const checkSchemesDiffer = (route, byScheme) => {
   const light = byScheme.get("light");
   const dark = byScheme.get("dark");
@@ -404,16 +392,17 @@ const checkSchemesDiffer = (route, byScheme) => {
       rule: "schemes-identical",
       impact: "serious",
       page: route,
-      message: `light and dark render the same background (${light.backgroundColor}) — the colour scheme is not being applied`,
+      message: `light and dark render the same background (${light.backgroundColor}) — the colour scheme is not applying`,
     });
   }
 };
 
 const checkTitlesUnique = (titles) => {
   const seen = new Map();
-  for (const [route, title] of titles) {
+  titles.forEach(([route, title]) => {
     const existing = seen.get(title);
-    if (existing !== undefined) {
+    if (existing === undefined) seen.set(title, route);
+    else
       record({
         category: "meta",
         rule: "duplicate-title",
@@ -421,70 +410,10 @@ const checkTitlesUnique = (titles) => {
         page: route,
         message: `shares its title with ${existing}: "${title}"`,
       });
-    } else {
-      seen.set(title, route);
-    }
-  }
-};
-
-/** Motion must actually stop when the user asks it to. */
-const checkReducedMotion = async (browser, routes) => {
-  const context = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
-    reducedMotion: "reduce",
   });
-  const page = await context.newPage();
-
-  for (const route of routes) {
-    await page.goto(urlFor(route), { waitUntil: "load" });
-    const { animated } = await page.evaluate(motionProbe);
-    if (animated.length > 0) {
-      record({
-        category: "accessibility",
-        rule: "reduced-motion-ignored",
-        impact: "moderate",
-        page: route,
-        message: `elements still animate under prefers-reduced-motion: ${animated.join(", ")}`,
-      });
-    }
-  }
-
-  await context.close();
 };
 
-/** A CV that cannot be printed is a CV with a missing feature. */
-const checkPrint = async (browser, routes) => {
-  const context = await browser.newContext({ viewport: { width: 1200, height: 1600 } });
-  const page = await context.newPage();
-  await page.emulateMedia({ media: "print" });
-
-  for (const route of routes) {
-    await page.goto(urlFor(route), { waitUntil: "load" });
-    const overflows = await page.evaluate(
-      () => document.documentElement.scrollWidth > window.innerWidth + 1,
-    );
-    if (overflows) {
-      record({
-        category: "readability",
-        rule: "print-overflow",
-        impact: "minor",
-        page: route,
-        message: "content overflows horizontally when printed",
-      });
-    }
-    await page.screenshot({
-      path: join(OUT, "screenshots", `print-${slug(route)}.png`),
-      fullPage: true,
-    });
-  }
-
-  await context.close();
-};
-
-/**
- * Static checks already prove internal links resolve to files; this proves the
- * server serves them at the URL the page links to. Probed concurrently.
- */
+/** Static checks prove links resolve to files; this proves the server serves them. */
 const checkLinks = async (browser, links) => {
   if (links.length === 0) return;
 
@@ -511,18 +440,13 @@ const checkLinks = async (browser, links) => {
 /**
  * Latest stable Chrome where available, falling back to the Chromium the
  * pinned Playwright ships. The driver stays reproducible through the lockfile
- * while the rendering engine tracks what readers actually run.
+ * while the engine tracks what readers actually run.
  */
-const launchBrowser = async () => {
-  try {
-    return await chromium.launch({ channel: "chrome" });
-  } catch (error) {
-    console.warn(
-      `audit: stable Chrome unavailable (${error?.message ?? error}); falling back to bundled Chromium`,
-    );
+const launchBrowser = async () =>
+  chromium.launch({ channel: "chrome" }).catch((error) => {
+    console.warn(`audit: stable Chrome unavailable (${error?.message ?? error}); using bundled Chromium`);
     return chromium.launch();
-  }
-};
+  });
 
 const main = async () => {
   await mkdir(join(OUT, "screenshots"), { recursive: true });
@@ -538,13 +462,10 @@ const main = async () => {
   const browser = await launchBrowser();
 
   try {
-    /** route -> scheme -> document facts */
     const documentsByRoute = new Map(routes.map((route) => [route, new Map()]));
     const titles = [];
     const links = new Set();
 
-    // Contexts outermost: a context is a fresh browser profile and costs far
-    // more to create than the page inside it.
     for (const scheme of SCHEMES) {
       for (const viewport of VIEWPORTS) {
         const context = await browser.newContext({
@@ -554,13 +475,13 @@ const main = async () => {
         });
 
         for (const route of routes) {
-          const documentFacts = await auditPage(context, route, viewport, scheme);
-          if (documentFacts === null) continue;
-
-          documentsByRoute.get(route).set(scheme, documentFacts);
-          if (scheme === "light") {
-            titles.push([route, documentFacts.title]);
-            for (const href of documentFacts.internalLinks) links.add(href);
+          const doc = await auditPage(context, route, viewport, scheme);
+          if (doc !== null) {
+            documentsByRoute.get(route).set(scheme, doc);
+            if (scheme === "light") {
+              titles.push([route, doc.title]);
+              doc.internalLinks.forEach((href) => links.add(href));
+            }
           }
         }
 
@@ -568,13 +489,55 @@ const main = async () => {
       }
     }
 
-    for (const [route, byScheme] of documentsByRoute) checkSchemesDiffer(route, byScheme);
+    documentsByRoute.forEach((byScheme, route) => checkSchemesDiffer(route, byScheme));
     checkTitlesUnique(titles);
 
-    await checkReducedMotion(browser, routes);
-    await checkPrint(browser, routes);
-    await checkLinks(browser, [...links]);
+    await overRoutes(
+      browser,
+      {
+        contextOptions: { viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" },
+        visit: async (page, route) => {
+          const { animated } = await page.evaluate(motionProbe);
+          if (animated.length > 0) {
+            record({
+              category: "accessibility",
+              rule: "reduced-motion-ignored",
+              impact: "moderate",
+              page: route,
+              message: `elements still animate under prefers-reduced-motion: ${animated.join(", ")}`,
+            });
+          }
+        },
+      },
+      routes,
+    );
 
+    // A CV that cannot be printed is a CV with a missing feature.
+    await overRoutes(
+      browser,
+      {
+        contextOptions: { viewport: { width: 1200, height: 1600 } },
+        prepare: (page) => page.emulateMedia({ media: "print" }),
+        visit: async (page, route) => {
+          if (await page.evaluate(overflowProbe)) {
+            record({
+              category: "readability",
+              rule: "print-overflow",
+              impact: "minor",
+              page: route,
+              message: "content overflows horizontally when printed",
+            });
+          }
+          await page.screenshot({
+            path: join(OUT, "screenshots", `print-${slug(route)}.png`),
+            fullPage: true,
+          });
+        },
+      },
+      routes,
+    );
+
+    await checkLinks(browser, [...links]);
     return routes;
   } finally {
     await browser.close();
@@ -594,36 +557,31 @@ const write = async (collected, routes) => {
   await writeFile(join(OUT, "report.md"), toMarkdown(collected, meta));
 };
 
-// Findings are reported, never fatal. The workflow does not gate on this job,
-// and a crash in the audit itself must not read as a broken site — it is
-// recorded as a finding so the failure stays visible without being fatal.
+// Findings are reported, never fatal — a crash in the audit is itself recorded
+// so the failure stays visible without reading as a broken site.
 try {
   const routes = await main();
   const deduped = dedupeFindings(findings);
   await write(deduped, routes);
 
   console.log(`audit: ${deduped.length} finding(s) written to ${OUT}`);
-  for (const finding of deduped.slice(0, 20)) {
-    console.log(`  [${finding.impact}] ${finding.page} ${finding.rule}: ${finding.message}`);
-  }
+  deduped
+    .slice(0, 20)
+    .forEach((f) => console.log(`  [${f.impact}] ${f.page} ${f.rule}: ${f.message}`));
 } catch (error) {
   console.error("audit: driver failed —", error);
-  try {
-    await write(
-      [
-        {
-          category: "runtime",
-          rule: "audit-driver-failed",
-          impact: "info",
-          page: "-",
-          message: `the audit could not complete: ${String(error?.message ?? error)}`,
-        },
-      ],
-      [],
-    );
-  } catch {
-    // Nothing further to do; the log above is the record.
-  }
+  await write(
+    [
+      {
+        category: "runtime",
+        rule: "audit-driver-failed",
+        impact: "info",
+        page: "-",
+        message: `the audit could not complete: ${String(error?.message ?? error)}`,
+      },
+    ],
+    [],
+  ).catch(() => undefined);
 }
 
 process.exitCode = 0;

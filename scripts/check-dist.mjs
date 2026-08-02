@@ -195,25 +195,17 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
     }
 
     // -- Link integrity ---------------------------------------------------
-    for (const reference of extractReferences(html)) {
-      if (!isInternal(reference)) continue;
-
-      if (!reference.startsWith(normalisedBase)) {
-        found.push(
-          violation(
-            "base-path",
-            `${path}: ${reference} does not start with ${normalisedBase}`,
-          ),
-        );
-        continue;
-      }
-
-      if (!candidatePaths(reference, base).some((candidate) => present.has(candidate))) {
-        found.push(
-          violation("dead-link", `${path}: ${reference} resolves to no file`),
-        );
-      }
-    }
+    extractReferences(html)
+      .filter(isInternal)
+      .forEach((reference) => {
+        if (!reference.startsWith(normalisedBase)) {
+          found.push(
+            violation("base-path", `${path}: ${reference} does not start with ${normalisedBase}`),
+          );
+        } else if (!candidatePaths(reference, base).some((candidate) => present.has(candidate))) {
+          found.push(violation("dead-link", `${path}: ${reference} resolves to no file`));
+        }
+      });
 
     // -- Canonical --------------------------------------------------------
     const canonical = /<link\s+rel="canonical"\s+href="([^"]*)"/i.exec(html);
