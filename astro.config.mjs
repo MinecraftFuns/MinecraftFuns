@@ -33,6 +33,14 @@ export default defineConfig({
   site,
   base,
   /*
+   * Every page is emitted as `slug/index.html`, so the canonical form of a
+   * route ends in a slash — which is what the canonical tag has always said.
+   * The default, `"ignore"`, lets the dev server answer both forms, so a link
+   * missing its slash works locally and costs a redirect in production. Being
+   * explicit makes development fail the same way production would.
+   */
+  trailingSlash: "always",
+  /*
    * Tailwind v4 registers as a Vite plugin, not an Astro integration. The
    * `@astrojs/tailwind` integration is the v3 path and is deprecated; putting
    * this under `integrations` is the usual migration mistake.

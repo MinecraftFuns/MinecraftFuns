@@ -2,7 +2,7 @@
 import PageIntro from "../components/PageIntro.astro";
 import Section from "../components/Section.astro";
 import { contact } from "../config.ts";
-import { withBase } from "../lib/url.ts";
+import { routeUrl } from "../lib/url.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 /*
@@ -51,8 +51,8 @@ const ENTRY_PERIOD = "text-ink-tertiary font-mono text-caption";
         be a compiler or a mind.
       </p>
       <p>
-        This site holds my <a href={withBase("/projects")}>projects</a> and a
-        <a href={withBase("/blog")}>blog</a> of technical notes.
+        This site holds my <a href={routeUrl("/projects")}>projects</a> and a
+        <a href={routeUrl("/blog")}>blog</a> of technical notes.
       </p>
     </div>
   </PageIntro>

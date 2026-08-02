@@ -4,7 +4,7 @@ import { orThrow } from "./adt.ts";
 import { hrefOf, reconcile, type PostPath } from "./archive.ts";
 import { readingMinutes } from "./reading.ts";
 import { byRecencyWith, type IsoDate } from "./time.ts";
-import { withBase } from "./url.ts";
+import { routeUrl } from "./url.ts";
 
 /**
  * The blog's read model.
@@ -40,7 +40,7 @@ export type PostSummary = {
 export const summarise = ({ entry, path }: PublishedPost): PostSummary => ({
   title: entry.data.title,
   description: entry.data.description,
-  href: withBase(hrefOf(path)),
+  href: routeUrl(hrefOf(path)),
   date: entry.data.date,
   readingMinutes: readingMinutes(entry.body ?? ""),
   tags: entry.data.tags,

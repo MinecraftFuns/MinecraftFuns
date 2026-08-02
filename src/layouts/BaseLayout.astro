@@ -6,7 +6,7 @@ import "../styles/global.css";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import { site } from "../config.ts";
-import { withBase } from "../lib/url.ts";
+import { assetUrl } from "../lib/url.ts";
 
 type Props = {
   readonly title?: string;
@@ -33,7 +33,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
+    <link rel="icon" href={assetUrl("/favicon.svg")} type="image/svg+xml" />
 
     <meta property="og:type" content={type} />
     <meta property="og:title" content={pageTitle} />

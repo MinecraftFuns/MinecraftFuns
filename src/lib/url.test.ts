@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isWithin, joinBase } from "./url.ts";
+import { isWithin, joinBase, joinRoute } from "./url.ts";
 
 /** The two base paths this project actually deploys to. */
 const PROJECT_BASE = "/MinecraftFuns/";
@@ -64,6 +64,56 @@ describe("joinBase", () => {
     const once = joinBase(ROOT_BASE, "/work");
     assert.equal(joinBase(ROOT_BASE, once), once);
   });
+
+  it("leaves an asset path unslashed — a file is not a directory", () => {
+    assert.equal(joinBase(PROJECT_BASE, "/favicon.svg"), "/MinecraftFuns/favicon.svg");
+  });
+});
+
+describe("joinRoute", () => {
+  it("terminates a route with the slash its built directory has", () => {
+    assert.equal(joinRoute(PROJECT_BASE, "/blog"), "/MinecraftFuns/blog/");
+    assert.equal(joinRoute(ROOT_BASE, "/blog"), "/blog/");
+  });
+
+  it("agrees with the canonical form of a nested archive route", () => {
+    assert.equal(
+      joinRoute(PROJECT_BASE, "/blog/2026/08/a-post"),
+      "/MinecraftFuns/blog/2026/08/a-post/",
+    );
+  });
+
+  it("maps the home path to the base itself, already slashed", () => {
+    assert.equal(joinRoute(PROJECT_BASE, "/"), "/MinecraftFuns/");
+    assert.equal(joinRoute(ROOT_BASE, "/"), "/");
+  });
+
+  it("is idempotent — re-resolving a route does not stack slashes", () => {
+    const once = joinRoute(ROOT_BASE, "/blog");
+    assert.equal(joinRoute(ROOT_BASE, once), once);
+  });
+
+  it("puts the slash before a fragment, not after it", () => {
+    assert.equal(joinRoute(PROJECT_BASE, "/about#contact"), "/MinecraftFuns/about/#contact");
+    assert.equal(joinRoute(PROJECT_BASE, "/blog?tag=time"), "/MinecraftFuns/blog/?tag=time");
+  });
+
+  it("passes through anything that carries its own authority", () => {
+    ["https://example.com", "mailto:a@b.c", "#main", "//cdn.example.com/x"].forEach(
+      (href) => {
+        assert.equal(joinRoute(PROJECT_BASE, href), href, `mangled: ${href}`);
+      },
+    );
+  });
+
+  it("is total — no input throws", () => {
+    const paths = ["", "/", "//", "?", "#", "a", "/a/b/c/", "?#"];
+    [PROJECT_BASE, ROOT_BASE, ""].forEach((base) => {
+      paths.forEach((path) => {
+        assert.doesNotThrow(() => joinRoute(base, path));
+      });
+    });
+  });
 });
 
 describe("isWithin", () => {
@@ -77,8 +127,20 @@ describe("isWithin", () => {
   });
 
   it("does not match a sibling sharing a prefix", () => {
-    // The reason this is not a bare startsWith.
+    // Slash-terminating both sides is what makes the bare startsWith correct:
+    // the separator is part of the prefix being tested.
     assert.equal(isWithin("/MinecraftFuns/workshop", "/MinecraftFuns/work"), false);
+  });
+
+  it("is indifferent to which side already carries its slash", () => {
+    const pairs = [
+      ["/MinecraftFuns/blog/", "/MinecraftFuns/blog/"],
+      ["/MinecraftFuns/blog", "/MinecraftFuns/blog/"],
+      ["/MinecraftFuns/blog/", "/MinecraftFuns/blog"],
+    ];
+    pairs.forEach(([pathname, target]) => {
+      assert.ok(isWithin(pathname, target), `${pathname} within ${target}`);
+    });
   });
 
   it("does not match unrelated sections", () => {

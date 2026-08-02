@@ -1,6 +1,6 @@
 ---
 import { nav, site } from "../config.ts";
-import { isWithin, withBase } from "../lib/url.ts";
+import { isWithin, routeUrl } from "../lib/url.ts";
 
 const { pathname } = Astro.url;
 
@@ -12,7 +12,7 @@ const { pathname } = Astro.url;
  */
 const items = nav.map((item) => ({
   ...item,
-  target: withBase(item.href),
+  target: routeUrl(item.href),
 }));
 ---
 
@@ -24,7 +24,7 @@ const items = nav.map((item) => ({
   >
     <a
       class="text-control text-ink inline-flex min-h-control items-center gap-2xs no-underline"
-      href={withBase("/")}
+      href={routeUrl("/")}
       aria-label={`${site.name} — home`}
     >
       {/* One of the few sanctioned uses of the accent. Sized to the cap height

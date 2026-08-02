@@ -7,7 +7,7 @@ import Section from "../components/Section.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { contact, projects } from "../config.ts";
 import { postSummaries } from "../lib/posts.ts";
-import { withBase } from "../lib/url.ts";
+import { routeUrl } from "../lib/url.ts";
 
 // The three most recent posts; the blog index holds the rest.
 const recentPosts = await postSummaries(3);
@@ -21,7 +21,7 @@ const recentPosts = await postSummaries(3);
     lede="Third-year undergraduate at the University of Toronto, double majoring in Computer Science and Cognitive Science with a minor in Statistics."
   >
     <div class="mt-lg flex flex-wrap gap-xs">
-      <Button href={withBase("/projects")} variant="primary">View projects</Button>
+      <Button href={routeUrl("/projects")} variant="primary">View projects</Button>
       <Button href={contact.pgp} variant="secondary">Get in touch</Button>
     </div>
   </PageIntro>
@@ -29,7 +29,7 @@ const recentPosts = await postSummaries(3);
   <Section
     id="work-heading"
     title="Selected projects"
-    trailing={{ kind: "link", href: withBase("/projects"), label: "All projects" }}
+    trailing={{ kind: "link", href: routeUrl("/projects"), label: "All projects" }}
   >
     <ul class="grid grid-cols-cards gap-md" role="list">
       {projects.map((project) => <li><ProjectCard project={project} /></li>)}
@@ -39,7 +39,7 @@ const recentPosts = await postSummaries(3);
   <Section
     id="writing-heading"
     title="Recent posts"
-    trailing={{ kind: "link", href: withBase("/blog"), label: "All posts" }}
+    trailing={{ kind: "link", href: routeUrl("/blog"), label: "All posts" }}
   >
     <div class="*:last:border-b-0">
       {recentPosts.map((post) => <PostRow post={post} />)}
