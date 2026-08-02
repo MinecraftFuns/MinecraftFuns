@@ -45,10 +45,16 @@ export const publishedPosts = async (): Promise<
     (post) => post.data.date,
   );
 
-/** Published posts as summaries, newest first. */
+/**
+ * Published posts as summaries, newest first.
+ *
+ * Truncation happens before summarising, not after. `summarise` scans the full
+ * body to derive reading time, so mapping first made the home page — which asks
+ * for three — pay that scan for every post in the archive.
+ */
 export const postSummaries = async (
   limit?: number,
 ): Promise<readonly PostSummary[]> => {
-  const posts = (await publishedPosts()).map(summarise);
-  return limit === undefined ? posts : posts.slice(0, limit);
+  const posts = await publishedPosts();
+  return (limit === undefined ? posts : posts.slice(0, limit)).map(summarise);
 };

@@ -139,29 +139,44 @@ export const byRecency = <T extends { readonly date: IsoDate }>(
 // ---------------------------------------------------------------------------
 
 /**
- * Formatter construction is the expensive half of `Intl`; formatting is cheap.
- * Caching per zone keeps repeated use O(1) in constructions. Bounded by the
- * number of distinct zones the site uses, which is one.
+ * Keyed memoisation.
+ *
+ * Constructing an `Intl` formatter is the expensive half; formatting is cheap.
+ * Both formatters below wanted the same cache-or-build dance, differing only in
+ * arity, so it is written once here. `T extends object` is what makes the
+ * `undefined` test a sound miss check rather than a guess about the value.
  */
-const wallClockFormatters = new Map<string, Intl.DateTimeFormat>();
+const memoiseBy = <A extends readonly unknown[], T extends object>(
+  keyOf: (...args: A) => string,
+  build: (...args: A) => T,
+): ((...args: A) => T) => {
+  const cache = new Map<string, T>();
 
-const wallClockFormatter = (zone: TimeZone): Intl.DateTimeFormat => {
-  const cached = wallClockFormatters.get(zone);
-  if (cached !== undefined) return cached;
+  return (...args: A): T => {
+    const key = keyOf(...args);
+    const cached = cache.get(key);
+    if (cached !== undefined) return cached;
 
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: zone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23",
-  });
-  wallClockFormatters.set(zone, formatter);
-  return formatter;
+    const built = build(...args);
+    cache.set(key, built);
+    return built;
+  };
 };
+
+const wallClockFormatter = memoiseBy(
+  (zone: TimeZone) => zone,
+  (zone: TimeZone) =>
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: zone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    }),
+);
 
 export type WallClock = {
   readonly year: number;
@@ -178,14 +193,20 @@ export type WallClock = {
  * The parts are indexed in a single pass. Searching the array once per field
  * would rescan it six times for a list the formatter already returns in one
  * piece — and this runs for every rendered date.
+ *
+ * The `?? 0` branch is unreachable: `wallClockFormatter` requests all six
+ * fields a few lines above, so the invariant is established locally and does
+ * not rest on the caller.
  */
 export const wallClockAt = (instant: Date, zone: TimeZone): WallClock => {
-  const fields = new Map<string, number>();
-  for (const part of wallClockFormatter(zone).formatToParts(instant)) {
-    fields.set(part.type, Number(part.value));
-  }
+  const fields = new Map(
+    wallClockFormatter(zone)
+      .formatToParts(instant)
+      .map((part) => [part.type, Number(part.value)] as const),
+  );
 
-  const field = (type: string): number => fields.get(type) ?? 0;
+  const field = (type: Intl.DateTimeFormatPartTypes): number =>
+    fields.get(type) ?? 0;
 
   return {
     year: field("year"),
@@ -236,25 +257,18 @@ export const startOfDayIn = (
 // Rendering
 // ---------------------------------------------------------------------------
 
-const displayFormatters = new Map<string, Intl.DateTimeFormat>();
-
-const displayFormatter = (
-  zone: TimeZone,
-  locale: string,
-): Intl.DateTimeFormat => {
-  const key = `${zone} ${locale}`;
-  const cached = displayFormatters.get(key);
-  if (cached !== undefined) return cached;
-
-  const formatter = new Intl.DateTimeFormat(locale, {
-    timeZone: zone,
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  displayFormatters.set(key, formatter);
-  return formatter;
-};
+/* NUL separates the two halves of the key. Neither an IANA zone identifier
+   nor a BCP 47 tag may contain it, so no two distinct pairs can collide. */
+const displayFormatter = memoiseBy(
+  (zone: TimeZone, locale: string) => `${zone} ${locale}`,
+  (zone: TimeZone, locale: string) =>
+    new Intl.DateTimeFormat(locale, {
+      timeZone: zone,
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }),
+);
 
 /**
  * Renders a calendar date as read in `zone`.

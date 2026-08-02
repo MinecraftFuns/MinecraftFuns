@@ -1,5 +1,8 @@
 import { glob } from "astro/loaders";
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
+/* `astro/zod` is the surviving path. The `z` re-exported from `astro:content`
+   and from `astro:schema` are both deprecated for removal in Astro 7. */
+import { z } from "astro/zod";
 
 import { isoDate, parseIsoDate } from "./lib/time.ts";
 
