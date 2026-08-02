@@ -1,0 +1,33 @@
+---
+import { categoryHref, type DocCategory } from "../lib/docs.ts";
+
+/**
+ * The categories a reader can browse by, on the docs index.
+ *
+ * The docs' own, not `PostTags` with a different label type. They look alike
+ * today and mean different things: a tag is one of several a post joins, a
+ * category is the single subject a guide belongs to, and typing this to
+ * `DocCategory` is what stops a post's tags being rendered here.
+ *
+ * Mono, because that is how a category already reads in a doc's header, and a
+ * reader should recognise the same thing in both places.
+ */
+type Props = { readonly categories: readonly DocCategory[] };
+
+const { categories } = Astro.props;
+---
+
+{
+  categories.length > 0 && (
+    <nav class="mb-lg flex flex-wrap gap-2xs" aria-label="Categories">
+      {categories.map((category) => (
+        <a
+          class="border-hairline bg-surface-1 text-ink-subtle hover:border-hairline-strong hover:bg-surface-2 hover:text-ink inline-flex min-h-target items-center rounded-pill border px-2xs py-3xs font-mono text-caption no-underline transition-colors"
+          href={categoryHref(category)}
+        >
+          {category}
+        </a>
+      ))}
+    </nav>
+  )
+}

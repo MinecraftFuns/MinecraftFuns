@@ -1,0 +1,53 @@
+---
+import DocRow from "../../../components/DocRow.astro";
+import PageIntro from "../../../components/PageIntro.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { docCategories, type DocCategory, type DocSummary } from "../../../lib/docs.ts";
+import { routeUrl } from "../../../lib/url.ts";
+
+/*
+ * One page per category, built from the same taxonomy the category links are
+ * derived from, so a link can only point at a page that exists.
+ */
+export async function getStaticPaths() {
+  const categories = await docCategories();
+  return categories.map((taxon) => ({
+    params: { category: taxon.slug },
+    props: { category: taxon.label, docs: taxon.items },
+  }));
+}
+
+type Props = {
+  readonly category: DocCategory;
+  readonly docs: readonly [DocSummary, ...DocSummary[]];
+};
+
+const { category, docs } = Astro.props;
+---
+
+{/* `document` chrome, like every other page under /docs. */}
+<BaseLayout
+  title={`${category} docs`}
+  description={`Reference and troubleshooting guides filed under ${category}.`}
+  chrome="document"
+>
+  <PageIntro
+    kind="page"
+    eyebrow="Category"
+    title={category}
+    lede={`${docs.length} guide${docs.length === 1 ? "" : "s"} filed under ${category}.`}
+  />
+
+  {/* Non-empty by type: a category exists only by being on a doc. */}
+  <section aria-label={`Docs in ${category}`}>
+    <div class="border-hairline border-t *:last:border-b-0">
+      {docs.map((doc) => <DocRow doc={doc} />)}
+    </div>
+  </section>
+
+  <footer class="border-hairline mt-xl border-t pt-md">
+    <a class="text-accent hover:text-accent-hover" href={routeUrl("/docs")}>
+      ← All docs
+    </a>
+  </footer>
+</BaseLayout>

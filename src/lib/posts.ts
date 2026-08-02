@@ -3,6 +3,8 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import { orThrow } from "./adt.ts";
 import { hrefOf, reconcile, type PostPath } from "./archive.ts";
 import { readingMinutes } from "./reading.ts";
+import { slugify } from "./slug.ts";
+import { taxonomy, type Taxon } from "./taxonomy.ts";
 import { byRecencyWith, type IsoDate } from "./time.ts";
 import { routeUrl } from "./url.ts";
 
@@ -98,3 +100,24 @@ export const postSummaries = async (
   const posts = await publishedPosts();
   return (limit === undefined ? posts : posts.slice(0, limit)).map(summarise);
 };
+
+/**
+ * Where a tag leads.
+ *
+ * Derived from the tag rather than stored beside it, so the link a post
+ * renders and the route `taxonomy` generates are two calls to one function
+ * instead of two spellings that have to agree. A tag with no usable segment,
+ * or two tags sharing one, fails the build in `postTags` below.
+ */
+export const tagHref = (tag: PostTag): string =>
+  routeUrl(`/blog/tags/${slugify(tag)}`);
+
+/**
+ * The blog's tags, alphabetically, each with its posts newest first.
+ *
+ * `taxonomy` is instantiated at `PostTag` here and at `DocCategory` in
+ * `lib/docs.ts`, so the two lists cannot be mixed even though one function
+ * built both.
+ */
+export const postTags = async (): Promise<readonly Taxon<PostTag, PostSummary>[]> =>
+  taxonomy(await postSummaries(), (post) => post.tags, "blog tags");

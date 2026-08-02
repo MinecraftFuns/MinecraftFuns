@@ -4,7 +4,8 @@ import { orThrow } from "./adt.ts";
 import { compareDocs, type DocOrder } from "./doc-order.ts";
 import { readingMinutes } from "./reading.ts";
 import { nav } from "../config/site.ts";
-import { parseSlug } from "./slug.ts";
+import { parseSlug, slugify } from "./slug.ts";
+import { taxonomy, type Taxon } from "./taxonomy.ts";
 import { routeUrl } from "./url.ts";
 
 /**
@@ -107,3 +108,22 @@ export const publishedDocs = async (): Promise<readonly PublishedDoc[]> => {
 
 export const docSummaries = async (): Promise<readonly DocSummary[]> =>
   (await publishedDocs()).map(summarise);
+
+/**
+ * Where a category leads. Derived from the category for the same reason
+ * `tagHref` is derived from its tag: one function, not two spellings.
+ */
+export const categoryHref = (category: DocCategory): string =>
+  routeUrl(`/docs/categories/${slugify(category)}`);
+
+/**
+ * The docs' categories, alphabetically, each with its docs by title.
+ *
+ * A doc has exactly one category, so the singleton list is not a limitation
+ * being worked around: it is what "one category" looks like to a function that
+ * takes labels. `taxonomy` is instantiated at `DocCategory`, so these taxa
+ * share no type with the blog's.
+ */
+export const docCategories = async (): Promise<
+  readonly Taxon<DocCategory, DocSummary>[]
+> => taxonomy(await docSummaries(), (doc) => [doc.category], "doc categories");

@@ -1,10 +1,17 @@
 ---
 import PageIntro from "../../components/PageIntro.astro";
 import PostRow from "../../components/PostRow.astro";
+import PostTags from "../../components/PostTags.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { postSummaries } from "../../lib/posts.ts";
+import { postSummaries, postTags } from "../../lib/posts.ts";
 
 const posts = await postSummaries();
+
+/* `PostTags` again rather than a browse-specific component: these are the same
+   links a post renders, and one list of the blog's tags is the point. Both
+   come from the same collection, so no tag here is missing from the posts
+   below. */
+const tags = (await postTags()).map((taxon) => taxon.label);
 ---
 
 <BaseLayout
@@ -17,6 +24,8 @@ const posts = await postSummaries();
     title="Technical notes, written down so I stop re-deriving them."
     lede="Mostly software and systems, occasionally cognitive science. Written for the version of me who hits the same problem in a year."
   />
+
+  <PostTags tags={tags} />
 
   <section aria-label="All posts">
     {

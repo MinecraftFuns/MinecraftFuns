@@ -1,4 +1,4 @@
-import { site } from "../config/site.ts";
+import { COLLATOR } from "./collate.ts";
 
 /**
  * How the docs list is ordered.
@@ -14,16 +14,6 @@ export type DocOrder = {
   readonly title: string;
   readonly slug: string;
 };
-
-/*
- * Built once and reused. `localeCompare` negotiates a collator on every call,
- * and a comparator is called O(n log n) times; the same reason the audit's
- * severity ranks are a `Map` rather than an array scan.
- *
- * The site's locale rather than the machine's, so the order is a property of
- * the site and not of whoever ran the build.
- */
-const COLLATOR = new Intl.Collator(site.locale);
 
 /**
  * A *total* order, so the list is a function of the docs rather than of the

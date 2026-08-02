@@ -1,10 +1,15 @@
 ---
+import DocCategories from "../../components/DocCategories.astro";
 import DocRow from "../../components/DocRow.astro";
 import PageIntro from "../../components/PageIntro.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { docSummaries } from "../../lib/docs.ts";
+import { docCategories, docSummaries } from "../../lib/docs.ts";
 
 const docs = await docSummaries();
+
+/* Both come from the same collection, so the browse list cannot offer a
+   category that no doc below is filed under. */
+const categories = (await docCategories()).map((taxon) => taxon.label);
 ---
 
 <BaseLayout
@@ -18,6 +23,8 @@ const docs = await docSummaries();
     title="Guides worth writing down once."
     lede="Reference pages and troubleshooting notes. Read when something breaks, rather than in the order they were written."
   />
+
+  <DocCategories categories={categories} />
 
   <section aria-label="All docs">
     {

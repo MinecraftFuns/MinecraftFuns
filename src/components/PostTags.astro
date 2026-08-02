@@ -1,5 +1,5 @@
 ---
-import type { PostTag } from "../lib/posts.ts";
+import { tagHref, type PostTag } from "../lib/posts.ts";
 
 /**
  * A post's tags, as pills.
@@ -18,12 +18,23 @@ type Props = { readonly tags: readonly PostTag[] };
 const { tags } = Astro.props;
 ---
 
+{/*
+  Each pill is a link to the tag's page. A wrapped row of them is not a
+  sentence, so WCAG 2.5.8's inline exception does not apply and the target size
+  is stated with `min-h-target` rather than left to whatever the padding, line
+  box and border happen to add up to.
+*/}
 {
   tags.length > 0 && (
     <ul class="mt-md flex flex-wrap gap-2xs" role="list">
       {tags.map((tag) => (
-        <li class="border-hairline bg-surface-1 text-ink-subtle rounded-pill border px-2xs py-3xs text-caption">
-          {tag}
+        <li>
+          <a
+            class="border-hairline bg-surface-1 text-ink-subtle hover:border-hairline-strong hover:bg-surface-2 hover:text-ink inline-flex min-h-target items-center rounded-pill border px-2xs py-3xs text-caption no-underline transition-colors"
+            href={tagHref(tag)}
+          >
+            {tag}
+          </a>
         </li>
       ))}
     </ul>

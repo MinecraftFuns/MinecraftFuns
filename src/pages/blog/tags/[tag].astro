@@ -1,0 +1,57 @@
+---
+import PageIntro from "../../../components/PageIntro.astro";
+import PostRow from "../../../components/PostRow.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { postTags, type PostTag } from "../../../lib/posts.ts";
+import type { PostSummary } from "../../../lib/posts.ts";
+import { routeUrl } from "../../../lib/url.ts";
+
+/*
+ * One page per tag, built from the same taxonomy the tag links are derived
+ * from, so a link can only point at a page that exists. `taxonomy` rejects a
+ * tag with no usable URL segment, and two tags that would share one, before
+ * any of this runs.
+ */
+export async function getStaticPaths() {
+  const tags = await postTags();
+  return tags.map((taxon) => ({
+    params: { tag: taxon.slug },
+    props: { tag: taxon.label, posts: taxon.items },
+  }));
+}
+
+type Props = {
+  readonly tag: PostTag;
+  readonly posts: readonly [PostSummary, ...PostSummary[]];
+};
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout
+  title={`Posts tagged ${tag}`}
+  description={`Writing tagged ${tag}, newest first.`}
+>
+  <PageIntro
+    kind="page"
+    eyebrow="Tag"
+    title={tag}
+    lede={`${posts.length} post${posts.length === 1 ? "" : "s"} tagged ${tag}, newest first.`}
+  />
+
+  {/*
+    No empty branch. `items` is non-empty by type, because a tag exists only by
+    being on a post, so the state this page would guard against cannot arise.
+  */}
+  <section aria-label={`Posts tagged ${tag}`}>
+    <div class="border-hairline border-t *:last:border-b-0">
+      {posts.map((post) => <PostRow post={post} />)}
+    </div>
+  </section>
+
+  <footer class="border-hairline mt-xl border-t pt-md">
+    <a class="text-accent hover:text-accent-hover" href={routeUrl("/blog")}>
+      ← All posts
+    </a>
+  </footer>
+</BaseLayout>
