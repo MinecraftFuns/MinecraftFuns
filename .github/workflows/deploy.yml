@@ -94,7 +94,7 @@ jobs:
           # rather than a <user>.github.io one.
           - name: github-pages
             site: https://minecraftfuns.github.io
-            base: /MinecraftFuns
+            base: /MinecraftFuns/
             pages: true
           # The eventual primary domain, served at the root.
           - name: joefang-org
@@ -124,6 +124,20 @@ jobs:
           SITE_URL: ${{ matrix.site }}
           SITE_BASE: ${{ matrix.base }}
         run: npm run build
+
+      # Source-level checks cannot see the deployable. This reads dist/ and
+      # asserts the properties that only exist after a build: every internal
+      # link carries the base path and resolves to a real file, the canonical
+      # URL matches the target, no template value leaked, no client script
+      # appeared, and no colour outside the palette reached the stylesheet.
+      #
+      # It runs per target, because the base path it validates differs between
+      # them — the check is worthless if it does not match what was built.
+      - name: Check built artifact
+        env:
+          SITE_URL: ${{ matrix.site }}
+          SITE_BASE: ${{ matrix.base }}
+        run: npm run check:dist
 
       # Pages expects one specifically named artifact, which the deploy job
       # consumes. Retention stays at the default single day: it is an
