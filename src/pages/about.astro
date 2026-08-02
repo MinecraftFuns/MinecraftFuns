@@ -1,0 +1,198 @@
+---
+import { contact } from "../config.ts";
+import { withBase } from "../lib/url.ts";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+/*
+ * This page absorbs what was previously split across "CV" and "About". The two
+ * overlapped almost entirely: a CV is a structured view of the same facts a
+ * bio states in prose. One page, prose first, structured sections beneath.
+ *
+ * Only verifiable facts appear below. Sections for experience, skills, and
+ * awards are left as commented templates at the foot of this file rather than
+ * filled with plausible-looking placeholder text — an invented internship that
+ * ships to a live CV is worse than a short one.
+ */
+
+const education = [
+  {
+    institution: "University of Toronto",
+    credential: "Double major in Computer Science and Cognitive Science",
+    detail: "Minor in Statistics",
+    period: "Third year",
+  },
+];
+
+const elsewhere = [
+  { label: "GitHub", value: "MinecraftFuns", href: contact.github },
+  { label: "Matrix", value: "@multiset:matrix.org", href: contact.matrix },
+  { label: "Twitter", value: "@SerendipityArk", href: contact.twitter },
+];
+---
+
+<BaseLayout
+  title="About"
+  description="Joe Fang — Computer Science and Cognitive Science at the University of Toronto."
+>
+  <section class="intro container container--narrow">
+    <p class="eyebrow">About</p>
+    <h1 class="intro__title">Joe Fang</h1>
+    <div class="prose">
+      <p>
+        I am a third-year undergraduate at the University of Toronto, taking a
+        double major in Computer Science and Cognitive Science alongside a minor
+        in Statistics. The combination is deliberate: I am interested in how
+        systems represent and process information, whether the system happens to
+        be a compiler or a mind.
+      </p>
+      <p>
+        This site holds my <a href={withBase("/projects")}>projects</a> and a
+        <a href={withBase("/blog")}>blog</a> of technical notes.
+      </p>
+    </div>
+  </section>
+
+  <section class="section container container--narrow" aria-labelledby="education">
+    <h2 class="section__title" id="education">Education</h2>
+    <dl class="entries">
+      {
+        education.map((entry) => (
+          <div class="entry">
+            <dt class="entry__period">{entry.period}</dt>
+            <dd class="entry__body">
+              <p class="entry__primary">{entry.institution}</p>
+              <p class="entry__secondary">{entry.credential}</p>
+              <p class="entry__secondary">{entry.detail}</p>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="section container container--narrow" aria-labelledby="contact">
+    <h2 class="section__title" id="contact">Contact</h2>
+    <div class="prose">
+      <p>
+        For anything substantive, import my <a href={contact.pgp}>PGP key</a> and
+        write to the address in its <strong>Primary User ID</strong>. There is
+        deliberately no plaintext address on this page.
+      </p>
+    </div>
+    <dl class="entries">
+      <div class="entry">
+        <dt class="entry__period">PGP</dt>
+        <dd class="entry__body">
+          <p class="entry__fingerprint">{contact.pgpFingerprint}</p>
+        </dd>
+      </div>
+      {
+        elsewhere.map((item) => (
+          <div class="entry">
+            <dt class="entry__period">{item.label}</dt>
+            <dd class="entry__body">
+              <a href={item.href}>{item.value}</a>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  {/*
+    Templates for the remaining CV sections. Uncomment and fill; the styles
+    below already cover them.
+
+    <section class="section container container--narrow" aria-labelledby="experience">
+      <h2 class="section__title" id="experience">Experience</h2>
+      <dl class="entries">
+        <div class="entry">
+          <dt class="entry__period">2026</dt>
+          <dd class="entry__body">
+            <p class="entry__primary">Role, Organisation</p>
+            <p class="entry__secondary">One line on what you actually did.</p>
+          </dd>
+        </div>
+      </dl>
+    </section>
+  */}
+</BaseLayout>
+
+<style>
+  .intro {
+    padding-block: var(--space-xl) var(--space-lg);
+  }
+
+  .intro__title {
+    margin-block: var(--space-xs) var(--space-md);
+    font-size: var(--text-display-md);
+    font-weight: var(--weight-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display-md);
+  }
+
+  .section {
+    padding-block: var(--space-lg);
+  }
+
+  .section__title {
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
+    border-bottom: 1px solid var(--hairline);
+    font-size: var(--text-headline);
+    letter-spacing: var(--tracking-headline);
+  }
+
+  .entries {
+    margin: 0;
+  }
+
+  /* Period in a fixed left column, detail beside it — the standard CV rhythm,
+     collapsing to stacked rows where the column would crowd the text. */
+  .entry {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: var(--space-md);
+    padding-block: var(--space-sm);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .entry:last-child {
+    border-bottom: none;
+  }
+
+  .entry__period {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    color: var(--ink-tertiary);
+    padding-top: 0.2em;
+  }
+
+  .entry__body {
+    margin: 0;
+  }
+
+  .entry__primary {
+    color: var(--ink);
+    font-weight: var(--weight-medium);
+  }
+
+  .entry__secondary {
+    font-size: var(--text-body-sm);
+    color: var(--ink-subtle);
+  }
+
+  .entry__fingerprint {
+    font-family: var(--font-mono);
+    font-size: var(--text-body-sm);
+    color: var(--ink-muted);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 34rem) {
+    .entry {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
+    }
+  }
+</style>

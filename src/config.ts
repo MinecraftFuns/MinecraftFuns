@@ -1,10 +1,4 @@
-import {
-  byRecency,
-  isoDate,
-  SITE_LOCALE,
-  SITE_TIME_ZONE,
-  type IsoDate,
-} from "./lib/time.ts";
+import { SITE_LOCALE, SITE_TIME_ZONE } from "./lib/time.ts";
 
 /**
  * Single source of truth for site identity, navigation, and authored content.
@@ -32,9 +26,8 @@ export const site = {
 } as const;
 
 export const nav = [
-  { label: "Work", href: "/work" },
-  { label: "Writing", href: "/writing" },
-  { label: "CV", href: "/cv" },
+  { label: "Projects", href: "/projects" },
+  { label: "Blog", href: "/blog" },
   { label: "About", href: "/about" },
 ] as const;
 
@@ -78,6 +71,16 @@ export const elsewhere: readonly ElsewhereLink[] = [
  */
 export type ProjectStatus = "active" | "archived";
 
+/**
+ * The three genuinely different things this section holds. They are not
+ * interchangeable — an open-source contribution is someone else's project, a
+ * research artifact supports a paper rather than standing alone, and a side
+ * project is wholly owned. Grouping by this reads better than one flat list,
+ * and a closed sum means a new kind cannot be added without deciding where it
+ * belongs and what it is called.
+ */
+export type ProjectKind = "side-project" | "research" | "open-source";
+
 export type Project = {
   readonly title: string;
   readonly description: string;
@@ -91,12 +94,12 @@ export type Project = {
   /** Rendered as tags on the card. Keep to three or fewer. */
   readonly tags: readonly string[];
   readonly status: ProjectStatus;
+  readonly kind: ProjectKind;
 };
 
 /**
  * Placeholder content — replace with real projects, or migrate to an Astro
- * content collection once the shape settles. `parseIsoDate` and these types are
- * already the decoder that collection would reuse.
+ * content collection once the shape settles, in the way the blog already has.
  */
 export const projects: readonly Project[] = [
   {
@@ -107,6 +110,7 @@ export const projects: readonly Project[] = [
     year: "2026",
     tags: ["Rust", "Systems"],
     status: "active",
+    kind: "side-project",
   },
   {
     title: "Project Two",
@@ -116,6 +120,7 @@ export const projects: readonly Project[] = [
     year: "2025",
     tags: ["TypeScript", "Tooling"],
     status: "active",
+    kind: "open-source",
   },
   {
     title: "Project Three",
@@ -124,49 +129,7 @@ export const projects: readonly Project[] = [
     year: "2025",
     tags: ["Research"],
     status: "archived",
+    kind: "research",
   },
 ];
 
-export type Post = {
-  readonly title: string;
-  readonly description: string;
-  readonly href: string;
-  /** A calendar date, parsed at module load — a bad date fails the build. */
-  readonly date: IsoDate;
-  /**
-   * Data, not presentation. The unit lives in the type name and the "min"
-   * suffix is applied at the render edge, so a future locale change is one
-   * formatter away rather than a rewrite of every content entry.
-   */
-  readonly readingMinutes: number;
-};
-
-/**
- * Authored in whatever order is convenient. Display order is *derived* below
- * rather than trusted, so a post added in the wrong place cannot silently
- * appear out of sequence.
- */
-const authoredPosts: readonly Post[] = [
-  {
-    title: "A representative post title, long enough to wrap on narrow screens",
-    description:
-      "The one-line standfirst that tells a reader whether this is for them.",
-    href: "#",
-    date: isoDate("2026-07-14"),
-    readingMinutes: 8,
-  },
-  {
-    title: "Another post",
-    description: "Rows stay dense and scannable; the list is not a card grid.",
-    href: "#",
-    date: isoDate("2026-06-02"),
-    readingMinutes: 5,
-  },
-];
-
-/**
- * `toSorted` rather than `sort`: the input is `readonly` and shared, and an
- * in-place sort would mutate it for every other consumer. The immutable array
- * methods have been Baseline widely available since 2023.
- */
-export const recentPosts: readonly Post[] = byRecency(authoredPosts);

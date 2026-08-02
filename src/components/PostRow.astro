@@ -1,8 +1,8 @@
 ---
-import type { Post } from "../config.ts";
+import type { PostSummary } from "../lib/posts.ts";
 import { formatIsoDate } from "../lib/time.ts";
 
-type Props = { readonly post: Post };
+type Props = { readonly post: PostSummary };
 
 const { post } = Astro.props;
 

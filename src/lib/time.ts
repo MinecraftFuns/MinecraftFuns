@@ -117,10 +117,22 @@ export const isoDate = (raw: string): IsoDate =>
 export const compareIsoDate = (a: IsoDate, b: IsoDate): number =>
   a < b ? -1 : a > b ? 1 : 0;
 
-/** Newest first, without mutating the input. */
+/**
+ * Newest first, without mutating the input.
+ *
+ * The accessor form is the general one: not every dated record carries its date
+ * in a top-level `date` field — a content-collection entry keeps it under
+ * `data`. Taking a projection avoids reshaping records just to sort them.
+ */
+export const byRecencyWith = <T>(
+  items: readonly T[],
+  dateOf: (item: T) => IsoDate,
+): readonly T[] => items.toSorted((a, b) => compareIsoDate(dateOf(b), dateOf(a)));
+
+/** Partial application of `byRecencyWith` for the common shape. */
 export const byRecency = <T extends { readonly date: IsoDate }>(
   items: readonly T[],
-): readonly T[] => items.toSorted((a, b) => compareIsoDate(b.date, a.date));
+): readonly T[] => byRecencyWith(items, (item) => item.date);
 
 // ---------------------------------------------------------------------------
 // Zone resolution

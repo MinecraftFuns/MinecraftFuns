@@ -1,0 +1,139 @@
+---
+import ProjectCard from "../components/ProjectCard.astro";
+import { projects, type ProjectKind } from "../config.ts";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+/*
+ * Presentation order and headings for the closed sum. A `Record` keyed by the
+ * kind is the finite-domain form of an exhaustive match: adding a fourth kind
+ * makes these objects a type error until it is named and placed, so a new kind
+ * can never quietly render as an unlabelled group.
+ */
+const KIND_ORDER: readonly ProjectKind[] = [
+  "side-project",
+  "research",
+  "open-source",
+];
+
+const KIND_HEADING: Readonly<Record<ProjectKind, string>> = {
+  "side-project": "Side projects",
+  research: "Research",
+  "open-source": "Open source",
+};
+
+const KIND_BLURB: Readonly<Record<ProjectKind, string>> = {
+  "side-project": "Things I built because I wanted them to exist.",
+  research: "Artifacts and code supporting research work.",
+  "open-source": "Contributions to projects maintained by other people.",
+};
+
+const grouped = Object.groupBy(projects, (project) => project.kind);
+
+// Only render a section that has something in it. An empty heading advertises
+// a gap; omitting it simply says nothing.
+const sections = KIND_ORDER.map((kind) => ({
+  kind,
+  heading: KIND_HEADING[kind],
+  blurb: KIND_BLURB[kind],
+  items: grouped[kind] ?? [],
+})).filter((section) => section.items.length > 0);
+---
+
+<BaseLayout
+  title="Projects"
+  description="Side projects, research artifacts, and open-source contributions by Joe Fang."
+>
+  <section class="intro container">
+    <p class="eyebrow">Projects</p>
+    <h1 class="intro__title">Things I have built, studied, and contributed to.</h1>
+    <p class="intro__lede">
+      Grouped by what they are, because a side project, a research artifact,
+      and a patch to someone else's codebase are not the same kind of thing.
+    </p>
+  </section>
+
+  {
+    sections.map((section) => (
+      <section class="section container" aria-labelledby={`${section.kind}-heading`}>
+        <div class="section__head">
+          <div>
+            <h2 class="section__title" id={`${section.kind}-heading`}>
+              {section.heading}
+            </h2>
+            <p class="section__blurb">{section.blurb}</p>
+          </div>
+          <span class="section__count">{section.items.length}</span>
+        </div>
+        <ul class="grid" role="list">
+          {section.items.map((project) => (
+            <li>
+              <ProjectCard project={project} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</BaseLayout>
+
+<style>
+  .intro {
+    padding-block: var(--space-xl) var(--space-lg);
+  }
+
+  .intro__title {
+    max-width: 22ch;
+    margin-top: var(--space-xs);
+    font-size: var(--text-display-md);
+    font-weight: var(--weight-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display-md);
+  }
+
+  .intro__lede {
+    max-width: 56ch;
+    margin-top: var(--space-md);
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
+    color: var(--ink-muted);
+  }
+
+  .section {
+    padding-block: var(--space-lg);
+  }
+
+  .section__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-bottom: var(--space-md);
+    margin-bottom: var(--space-md);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .section__title {
+    font-size: var(--text-headline);
+    letter-spacing: var(--tracking-headline);
+  }
+
+  .section__blurb {
+    margin-top: var(--space-3xs);
+    font-size: var(--text-body-sm);
+    color: var(--ink-subtle);
+  }
+
+  .section__count {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    color: var(--ink-tertiary);
+    flex-shrink: 0;
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    margin: 0;
+  }
+</style>

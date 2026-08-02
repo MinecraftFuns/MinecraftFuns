@@ -2,8 +2,12 @@
 import PostRow from "../components/PostRow.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { contact, projects, recentPosts } from "../config.ts";
+import { contact, projects } from "../config.ts";
+import { postSummaries } from "../lib/posts.ts";
 import { withBase } from "../lib/url.ts";
+
+// The three most recent posts; the blog index holds the rest.
+const recentPosts = await postSummaries(3);
 ---
 
 <BaseLayout>
@@ -17,15 +21,15 @@ import { withBase } from "../lib/url.ts";
       Computer Science and Cognitive Science with a minor in Statistics.
     </p>
     <div class="hero__actions">
-      <a class="button button--primary" href={withBase("/work")}>View work</a>
+      <a class="button button--primary" href={withBase("/projects")}>View projects</a>
       <a class="button button--secondary" href={contact.pgp}>Get in touch</a>
     </div>
   </section>
 
   <section class="section container" aria-labelledby="work-heading">
     <div class="section__head">
-      <h2 class="section__title" id="work-heading">Selected work</h2>
-      <a class="section__link" href={withBase("/work")}>All projects</a>
+      <h2 class="section__title" id="work-heading">Selected projects</h2>
+      <a class="section__link" href={withBase("/projects")}>All projects</a>
     </div>
     <ul class="grid" role="list">
       {
@@ -40,8 +44,8 @@ import { withBase } from "../lib/url.ts";
 
   <section class="section container" aria-labelledby="writing-heading">
     <div class="section__head">
-      <h2 class="section__title" id="writing-heading">Recent writing</h2>
-      <a class="section__link" href={withBase("/writing")}>All posts</a>
+      <h2 class="section__title" id="writing-heading">Recent posts</h2>
+      <a class="section__link" href={withBase("/blog")}>All posts</a>
     </div>
     <div class="rows">
       {recentPosts.map((post) => <PostRow post={post} />)}
