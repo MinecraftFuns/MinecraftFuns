@@ -1,16 +1,19 @@
 ---
 import { categoryHref, type DocCategory } from "../lib/docs.ts";
+import Button from "./Button.astro";
 
 /**
  * The categories a reader can browse by, on the docs index.
  *
- * The docs' own, not `PostTags` with a different label type. They look alike
- * today and mean different things: a tag is one of several a post joins, a
- * category is the single subject a guide belongs to, and typing this to
- * `DocCategory` is what stops a post's tags being rendered here.
+ * The docs' own component, not `PostTags` with a different label type: typing
+ * this to `DocCategory` is what stops a post's tags being rendered here. What
+ * it does not have of its own is a *look*. Both lists are controls, both go
+ * through `Button`, and neither describes a border again.
  *
- * Mono, because that is how a category already reads in a doc's header, and a
- * reader should recognise the same thing in both places.
+ * The mono treatment this used to carry is gone with the rest. A category
+ * still reads as mono inside a doc's header, where it sits in a line of
+ * metadata; here it is something to press, and a control on this site looks
+ * like a control.
  */
 type Props = { readonly categories: readonly DocCategory[] };
 
@@ -21,12 +24,9 @@ const { categories } = Astro.props;
   categories.length > 0 && (
     <nav class="mb-lg flex flex-wrap gap-2xs" aria-label="Categories">
       {categories.map((category) => (
-        <a
-          class="border-hairline bg-surface-1 text-ink-subtle hover:border-hairline-strong hover:bg-surface-2 hover:text-ink inline-flex min-h-target items-center rounded-pill border px-2xs py-3xs font-mono text-caption no-underline transition-colors"
-          href={categoryHref(category)}
-        >
+        <Button href={categoryHref(category)} tone="secondary" size="compact">
           {category}
-        </a>
+        </Button>
       ))}
     </nav>
   )

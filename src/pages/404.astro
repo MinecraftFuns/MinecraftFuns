@@ -23,9 +23,9 @@ import { routeUrl } from "../lib/url.ts";
     lede="The link may be out of date, or the address may have a typo in it. The pages below are the ones that do exist."
   >
     <div class="mt-lg flex flex-wrap gap-xs">
-      <Button href={routeUrl("/")} variant="primary">Home</Button>
-      <Button href={routeUrl("/blog")} variant="secondary">Blog</Button>
-      <Button href={routeUrl("/projects")} variant="secondary">Projects</Button>
+      <Button href={routeUrl("/")} tone="primary" size="control">Home</Button>
+      <Button href={routeUrl("/blog")} tone="secondary" size="control">Blog</Button>
+      <Button href={routeUrl("/projects")} tone="secondary" size="control">Projects</Button>
     </div>
   </PageIntro>
 </BaseLayout>

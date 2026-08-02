@@ -1,8 +1,15 @@
 ---
 import { tagHref, type PostTag } from "../lib/posts.ts";
+import Button from "./Button.astro";
 
 /**
- * A post's tags, as pills.
+ * A post's tags, as controls.
+ *
+ * Each tag is a `Button`, not a pill that resembles one. This component drew
+ * its own border, radius, padding and hover before, which is how it ended up
+ * with a different radius and type role from the buttons on the home page:
+ * two descriptions of "a small thing you can click", agreeing with each other
+ * only for as long as nobody edited either.
  *
  * Typed to the blog's taxonomy, so a doc's category cannot be rendered here
  * even though it is a string too. That is what branding them buys: the two
@@ -18,23 +25,14 @@ type Props = { readonly tags: readonly PostTag[] };
 const { tags } = Astro.props;
 ---
 
-{/*
-  Each pill is a link to the tag's page. A wrapped row of them is not a
-  sentence, so WCAG 2.5.8's inline exception does not apply and the target size
-  is stated with `min-h-target` rather than left to whatever the padding, line
-  box and border happen to add up to.
-*/}
 {
   tags.length > 0 && (
     <ul class="mt-md flex flex-wrap gap-2xs" role="list">
       {tags.map((tag) => (
         <li>
-          <a
-            class="border-hairline bg-surface-1 text-ink-subtle hover:border-hairline-strong hover:bg-surface-2 hover:text-ink inline-flex min-h-target items-center rounded-pill border px-2xs py-3xs text-caption no-underline transition-colors"
-            href={tagHref(tag)}
-          >
+          <Button href={tagHref(tag)} tone="secondary" size="compact">
             {tag}
-          </a>
+          </Button>
         </li>
       ))}
     </ul>
