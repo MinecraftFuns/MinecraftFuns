@@ -109,10 +109,15 @@ export const nearMissPairs = (values, tolerance = ALIGNMENT_TOLERANCE) => {
 export const rhythmBreaks = (gaps) => {
   if (gaps.length < 2) return [];
 
-  const clusters = gaps.reduce((found, gap) => {
-    if (!found.some((cluster) => near(cluster, gap, EPSILON * 2))) found.push(gap);
-    return found;
-  }, []);
+  /* Distinct under approximate equality, which `new Set` cannot express: it
+     compares exactly, and two gaps a rounding error apart are one rhythm. The
+     fold returns a new list rather than pushing into its own accumulator, so
+     nothing here is both the input and the output. */
+  const clusters = gaps.reduce(
+    (found, gap) =>
+      found.some((cluster) => near(cluster, gap, EPSILON * 2)) ? found : [...found, gap],
+    [],
+  );
 
   return clusters.length > 1 ? clusters.map(round) : [];
 };

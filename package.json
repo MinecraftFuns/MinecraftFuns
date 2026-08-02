@@ -19,7 +19,9 @@
   "scripts": {
     "lint": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#.github/skills\" \"#.claude/skills\"",
     "lint:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules\" \"#.github/skills\" \"#.claude/skills\"",
-    "typecheck": "astro check",
+    "typecheck": "npm run typecheck:src && npm run typecheck:scripts",
+    "typecheck:src": "astro check",
+    "typecheck:scripts": "tsc -p tsconfig.scripts.json",
     "check:classes": "node scripts/check-classes.mjs",
     "test:unit": "node --test \"src/**/*.test.ts\" \"scripts/**/*.test.mjs\"",
     "check:dist": "node scripts/check-dist.mjs",

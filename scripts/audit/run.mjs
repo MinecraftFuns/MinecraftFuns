@@ -54,7 +54,7 @@ const VIEWPORTS = [
   { name: "desktop", width: 1440, height: 900, axe: true, capture: true },
 ];
 
-const SCHEMES = ["light", "dark"];
+const SCHEMES = /** @type {const} */ (["light", "dark"]);
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 const LINK_CONCURRENCY = 8;
 const TOUCH_WIDTH = 768;
@@ -368,10 +368,16 @@ const auditPage = async (context, route, viewport, scheme) => {
  * Visit every route once in a single throwaway context. Shared by the
  * reduced-motion and print passes, which differ only in setup and inspection.
  */
-const overRoutes = async (browser, { contextOptions, prepare, visit }, routes) => {
+/* `prepare` defaults to doing nothing rather than being checked at each use:
+   an absent hook and a hook that changes nothing are the same run. */
+const overRoutes = async (
+  browser,
+  { contextOptions, prepare = async (_page) => {}, visit },
+  routes,
+) => {
   const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
-  if (prepare) await prepare(page);
+  await prepare(page);
 
   for (const route of routes) {
     await page.goto(urlFor(route), { waitUntil: "load" });
@@ -577,7 +583,7 @@ try {
         rule: "audit-driver-failed",
         impact: "info",
         page: "-",
-        message: `the audit could not complete: ${String(error?.message ?? error)}`,
+        message: `the audit could not complete: ${error instanceof Error ? error.message : String(error)}`,
       },
     ],
     [],

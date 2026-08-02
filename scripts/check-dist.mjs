@@ -137,24 +137,22 @@ export const parseHeaderPatterns = (text) =>
  * claim; these are the claims the artifact can settle.
  */
 export const hostDirectiveViolations = ({ redirects, headerPatterns, resolves }) => {
-  const found = [];
+  // A destination carrying its own authority cannot be checked from here.
+  const internal = ({ to }) => to.startsWith("/") && !to.startsWith("//");
 
-  redirects.forEach(({ from, to }) => {
-    // A destination leaving the site cannot be checked from here.
-    if (!to.startsWith("/") || to.startsWith("//")) return;
-    if (!resolves(to)) {
-      found.push(`_redirects: ${from} points at ${to}, which no file satisfies`);
-    }
-  });
+  const unmatched = (pattern) => {
+    const wildcard = pattern.endsWith("*");
+    return !resolves(wildcard ? pattern.slice(0, -1) : pattern, wildcard);
+  };
 
-  headerPatterns.forEach((pattern) => {
-    const prefix = pattern.endsWith("*") ? pattern.slice(0, -1) : pattern;
-    if (!resolves(pattern.endsWith("*") ? prefix : pattern, pattern.endsWith("*"))) {
-      found.push(`_headers: ${pattern} matches nothing that was built`);
-    }
-  });
-
-  return found;
+  return [
+    ...redirects
+      .filter((redirect) => internal(redirect) && !resolves(redirect.to))
+      .map(({ from, to }) => `_redirects: ${from} points at ${to}, which no file satisfies`),
+    ...headerPatterns
+      .filter(unmatched)
+      .map((pattern) => `_headers: ${pattern} matches nothing that was built`),
+  ];
 };
 
 /** Z-Base-32, RFC 6189 section 5.1.6. Deliberately not RFC 4648's alphabet. */
@@ -169,34 +167,32 @@ const ZBASE32_NAME = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{32}$/;
  * an OpenPGP public-key packet begins with tag 6, which is 0x98 or 0x99 in the
  * old packet format the export uses.
  */
-export const wkdViolations = (entries) => {
-  const found = [];
-  const { policy, keys } = entries;
+/** What is wrong with an entry's name, or nothing. */
+const namingProblem = ({ name }) =>
+  ZBASE32_NAME.test(name)
+    ? undefined
+    : `hu/${name} is not a 32-character Z-Base-32 hash`;
 
-  if (!policy) {
-    found.push("no .well-known/openpgpkey/policy; the specification requires it");
-  }
-  if (keys.length === 0) {
-    found.push("no keys published under .well-known/openpgpkey/hu/");
-  }
-
-  keys.forEach(({ name, bytes }) => {
-    if (!ZBASE32_NAME.test(name)) {
-      found.push(`hu/${name} is not a 32-character Z-Base-32 hash`);
-    }
-    if (bytes.length === 0) {
-      found.push(`hu/${name} is empty`);
-    } else if (bytes[0] !== 0x98 && bytes[0] !== 0x99) {
-      // An armored key here would start with "-" (0x2d), which is the mistake
-      // the specification explicitly warns against.
-      found.push(
-        `hu/${name} does not begin with an OpenPGP public-key packet (0x${bytes[0].toString(16)}); the key must be binary, not armored`,
-      );
-    }
-  });
-
-  return found;
+/**
+ * What is wrong with an entry's bytes, or nothing. An armored key would start
+ * with "-" (0x2d), which is the mistake the specification warns against.
+ */
+const contentProblem = ({ name, bytes }) => {
+  if (bytes.length === 0) return `hu/${name} is empty`;
+  if (bytes[0] === 0x98 || bytes[0] === 0x99) return undefined;
+  return `hu/${name} does not begin with an OpenPGP public-key packet (0x${bytes[0].toString(16)}); the key must be binary, not armored`;
 };
+
+/* Each check is a total function to "a problem, or nothing", so the whole
+   thing is that list with the nothings removed. Written as pushes into a
+   shared array, the checks read as steps in a procedure rather than as the
+   independent facts they are. */
+export const wkdViolations = ({ policy, keys }) =>
+  [
+    policy ? undefined : "no .well-known/openpgpkey/policy; the specification requires it",
+    keys.length === 0 ? "no keys published under .well-known/openpgpkey/hu/" : undefined,
+    ...keys.flatMap((entry) => [namingProblem(entry), contentProblem(entry)]),
+  ].filter((problem) => problem !== undefined);
 
 /**
  * Whether a canonical URL points inside this deployment.
@@ -305,14 +301,15 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
    */
   const present = new Set(relativeFiles);
 
-  const htmlFiles = [];
-  const cssFiles = [];
-  const jsFiles = [];
-  for (const path of relativeFiles) {
-    if (path.endsWith(".html")) htmlFiles.push(path);
-    else if (path.endsWith(".css")) cssFiles.push(path);
-    else if (path.endsWith(".js")) jsFiles.push(path);
-  }
+  /* Three filters rather than one loop dealing three ways. The extensions are
+     disjoint, so nothing was gained by visiting each path once except hiding
+     what each list is behind a branch. */
+  const withExtension = (extension) =>
+    relativeFiles.filter((path) => path.endsWith(extension));
+
+  const htmlFiles = withExtension(".html");
+  const cssFiles = withExtension(".css");
+  const jsFiles = withExtension(".js");
 
   // -- The build produced something at all --------------------------------
   if (htmlFiles.length === 0) {
@@ -403,25 +400,29 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
     ),
   );
 
-  hostDirectiveViolations({
-    redirects: parseRedirects(directiveFiles[0]),
-    headerPatterns: parseHeaderPatterns(directiveFiles[1]),
-    resolves,
-  }).forEach((detail) => found.push(violation("host-directives", detail)));
+  found.push(
+    ...hostDirectiveViolations({
+      redirects: parseRedirects(directiveFiles[0]),
+      headerPatterns: parseHeaderPatterns(directiveFiles[1]),
+      resolves,
+    }).map((detail) => violation("host-directives", detail)),
+  );
 
   // -- Web Key Directory ---------------------------------------------------
   const HU = join("\.well-known", "openpgpkey", "hu");
   const huFiles = relativeFiles.filter((path) => path.startsWith(`${HU}/`));
 
-  wkdViolations({
-    policy: present.has(join("\.well-known", "openpgpkey", "policy")),
-    keys: await Promise.all(
-      huFiles.map(async (path) => ({
-        name: path.slice(HU.length + 1),
-        bytes: await readFile(join(dist, path)),
-      })),
-    ),
-  }).forEach((detail) => found.push(violation("wkd", detail)));
+  found.push(
+    ...wkdViolations({
+      policy: present.has(join("\.well-known", "openpgpkey", "policy")),
+      keys: await Promise.all(
+        huFiles.map(async (path) => ({
+          name: path.slice(HU.length + 1),
+          bytes: await readFile(join(dist, path)),
+        })),
+      ),
+    }).map((detail) => violation("wkd", detail)),
+  );
 
   // -- Stylesheet integrity ------------------------------------------------
   const palette = paletteFrom(tokensCss);
@@ -491,6 +492,8 @@ const main = async () => {
 };
 
 // Only run when invoked directly, so the test file can import the helpers.
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split("/").pop())) {
+// Compared as whole paths, the same way `check-classes` does it: matching on a
+// basename would also fire for any other file that happened to share one.
+if (process.argv[1] === new URL(import.meta.url).pathname) {
   await main();
 }

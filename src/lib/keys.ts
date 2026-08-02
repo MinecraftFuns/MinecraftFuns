@@ -73,25 +73,35 @@ const dearmor = async (armored: string): Promise<Uint8Array> => {
  * `me@joefang.org`, a plain one and a "(Work)" one, and they must collapse to
  * a single directory entry rather than two identical files.
  */
+const addressOn = (
+  user: openpgp.User,
+  domain: string,
+): PublishedAddress | undefined => {
+  const email = user.userID?.email;
+  if (email === undefined || email === "") return undefined;
+
+  const parsed = parseMailAddress(email);
+  if (parsed.tag !== "ok" || !isOnDomain(parsed.value, domain)) return undefined;
+
+  const { local } = parsed.value;
+  return { local, address: email, hash: wkdHash(local) };
+};
+
 const addressesOn = (
   key: openpgp.Key,
   domain: string,
 ): readonly PublishedAddress[] => {
-  const found = new Map<string, PublishedAddress>();
+  const published = key.users
+    .map((user) => addressOn(user, domain))
+    .filter((address) => address !== undefined);
 
-  key.users.forEach((user) => {
-    const email = user.userID?.email;
-    if (email === undefined || email === "") return;
-
-    const parsed = parseMailAddress(email);
-    if (parsed.tag !== "ok" || !isOnDomain(parsed.value, domain)) return;
-
-    const { local } = parsed.value;
-    const hash = wkdHash(local);
-    if (!found.has(hash)) found.set(hash, { local, address: email, hash });
-  });
-
-  return [...found.values()];
+  /* The first occurrence of each hash. A `Map` keyed by hash would also
+     deduplicate, but it keeps the last, and "first wins" is the property this
+     needs stated rather than inherited from a collection's overwrite rule. */
+  return published.filter(
+    (address, index) =>
+      published.findIndex((other) => other.hash === address.hash) === index,
+  );
 };
 
 const load = async (domain: string): Promise<readonly PublishedKey[]> => {
@@ -115,19 +125,27 @@ const load = async (domain: string): Promise<readonly PublishedKey[]> => {
    * address would mean two different files at one URL, which Astro would
    * resolve arbitrarily and a client would never notice. Failing the build is
    * the only honest outcome.
+   *
+   * Finding the conflict is separate from raising it. Flattening to claims
+   * first makes the search one `find` over a list rather than a nested walk
+   * mutating a `Map` it is simultaneously reading.
    */
-  const claimed = new Map<string, string>();
-  keys.forEach((key) =>
-    key.addresses.forEach(({ address, hash }) => {
-      const owner = claimed.get(hash);
-      if (owner !== undefined && owner !== key.name) {
-        throw new TypeError(
-          `${address} is claimed by both ${owner}.asc and ${key.name}.asc; one address, one key`,
-        );
-      }
-      claimed.set(hash, key.name);
-    }),
+  const claims = keys.flatMap((key) =>
+    key.addresses.map(({ address, hash }) => ({ address, hash, owner: key.name })),
   );
+
+  const disputed = claims.find(({ hash, owner }, index) =>
+    claims
+      .slice(0, index)
+      .some((earlier) => earlier.hash === hash && earlier.owner !== owner),
+  );
+
+  if (disputed !== undefined) {
+    const first = claims.find((claim) => claim.hash === disputed.hash)?.owner;
+    throw new TypeError(
+      `${disputed.address} is claimed by both ${first}.asc and ${disputed.owner}.asc; one address, one key`,
+    );
+  }
 
   return keys;
 };

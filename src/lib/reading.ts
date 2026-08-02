@@ -25,7 +25,10 @@ export const readingMinutes = (markdown: string): number => {
     .replace(/^\s{0,3}(?:#{1,6}|>|[-*+]|\d+\.)\s+/gm, " ") // markers
     .replace(/[*_~]/g, " ");
 
-  const words = prose.split(/\s+/).filter((word) => word.length > 0).length;
+  /* Count the runs of non-whitespace directly. Splitting on whitespace and
+     then discarding the empties filters away an artefact of the split rather
+     than anything about the prose. */
+  const words = prose.match(/\S+/g)?.length ?? 0;
 
   // Never zero: "0 min" reads as broken rather than as short.
   return Math.max(1, Math.round(words / WORDS_PER_MINUTE));

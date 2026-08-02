@@ -10,7 +10,10 @@ export const IMPACT_ORDER = ["critical", "serious", "moderate", "minor", "info"]
  * array inside it would multiply the sort by the number of severity levels.
  */
 const IMPACT_RANK = new Map(IMPACT_ORDER.map((impact, index) => [impact, index]));
-const DEFAULT_RANK = IMPACT_RANK.get("info");
+/* Past the last known severity, so an impact this table has never heard of
+   sorts below every one it has. Read out of the map instead, the rank was
+   `number | undefined` and the comparator subtracted it regardless. */
+const DEFAULT_RANK = IMPACT_ORDER.length;
 
 const rankOf = (impact) => IMPACT_RANK.get(impact) ?? DEFAULT_RANK;
 

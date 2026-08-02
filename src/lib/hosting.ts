@@ -248,14 +248,19 @@ export const decodeHostConfig = (
   const headers = config.headers.map((rule) => decodeHeaderRule(rule, resolve));
   const redirects = config.redirects.map((rule) => decodeRedirect(rule, resolve));
 
-  const reasons = [...headers, ...redirects].flatMap((parsed) =>
-    parsed.tag === "invalid" ? [parsed.reason] : [],
-  );
+  /* Select, then project. Both steps were one `flatMap` returning a singleton
+     or an empty array, which is `filterMap` spelled in the one combinator
+     general enough to express it and too general to say which it is. */
+  const reasons = [...headers, ...redirects]
+    .filter((parsed) => parsed.tag === "invalid")
+    .map((parsed) => parsed.reason);
   if (reasons.length > 0) return invalid(reasons.join("\n  "));
 
   const decoded = {
-    headers: headers.flatMap((parsed) => (parsed.tag === "ok" ? [parsed.value] : [])),
-    redirects: redirects.flatMap((parsed) => (parsed.tag === "ok" ? [parsed.value] : [])),
+    headers: headers.filter((parsed) => parsed.tag === "ok").map((parsed) => parsed.value),
+    redirects: redirects
+      .filter((parsed) => parsed.tag === "ok")
+      .map((parsed) => parsed.value),
   };
 
   const problems = [
@@ -287,52 +292,56 @@ export const redirectProblems = (
   redirects: readonly Redirect[],
 ): readonly RuleProblem[] =>
   redirects.flatMap((redirect, index) => {
-    const rule = `${renderPattern(redirect.from)} -> ${redirect.to}`;
-    const problems: RuleProblem[] = [];
-
-    if (patternMatches(redirect.from, redirect.to)) {
-      problems.push({ rule, reason: "redirects to a path it matches, a loop" });
-    }
-
-    if (!redirect.to.startsWith("/") && !URL.canParse(redirect.to)) {
-      problems.push({
-        rule,
-        reason: "destination is neither a rooted path nor an absolute URL",
-      });
-    }
-
     // First match wins, so anything an earlier rule already covers is dead.
     const shadow = redirects
       .slice(0, index)
       .find((earlier) => covers(earlier.from, redirect.from));
-    if (shadow !== undefined) {
-      problems.push({
-        rule,
-        reason: `unreachable: ${renderPattern(shadow.from)} above it already matches`,
-      });
-    }
 
-    return problems;
+    /* Three independent facts about one rule, each a reason or nothing. Listed
+       rather than pushed, because none of them depends on another having run. */
+    return [
+      patternMatches(redirect.from, redirect.to)
+        ? "redirects to a path it matches, a loop"
+        : undefined,
+      redirect.to.startsWith("/") || URL.canParse(redirect.to)
+        ? undefined
+        : "destination is neither a rooted path nor an absolute URL",
+      shadow === undefined
+        ? undefined
+        : `unreachable: ${renderPattern(shadow.from)} above it already matches`,
+    ]
+      .filter((reason) => reason !== undefined)
+      .map((reason) => ({
+        rule: `${renderPattern(redirect.from)} -> ${redirect.to}`,
+        reason,
+      }));
   });
 
-/** Header rules that quietly lose one of their own declarations. */
+/** Header names are case-insensitive, so `Link` and `link` are one header. */
+const headerName = (op: HeaderOp): string => op.name.toLowerCase();
+
+/**
+ * Header rules that quietly lose one of their own declarations.
+ *
+ * "The ops that repeat an earlier name, each of which is a problem": a filter
+ * and a map, so the code says which step is which. It read as one `flatMap`
+ * threading a mutable `Set`, where returning the empty array was the filter
+ * and returning a singleton was the map. Looking back along the list is the
+ * same shape the shadowing check above uses, and both are bounded by a rule's
+ * own handful of entries.
+ */
 export const headerProblems = (
   rules: readonly HeaderRule[],
 ): readonly RuleProblem[] =>
-  rules.flatMap((rule) => {
-    const seen = new Set<string>();
-
-    return rule.ops.flatMap((op) => {
-      const name = op.name.toLowerCase();
-      if (!seen.has(name)) {
-        seen.add(name);
-        return [];
-      }
-      return [
-        {
-          rule: renderPattern(rule.pattern),
-          reason: `sets ${op.name} more than once; only the last would apply`,
-        },
-      ];
-    });
-  });
+  rules.flatMap((rule) =>
+    rule.ops
+      .filter((op, index) =>
+        rule.ops
+          .slice(0, index)
+          .some((earlier) => headerName(earlier) === headerName(op)),
+      )
+      .map((op) => ({
+        rule: renderPattern(rule.pattern),
+        reason: `sets ${op.name} more than once; only the last would apply`,
+      })),
+  );

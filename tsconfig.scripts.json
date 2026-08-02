@@ -1,0 +1,30 @@
+{
+  // The build and gate scripts, which `astro check` never sees: it reads the
+  // main tsconfig, and that includes only `.ts`/`.astro`. Some two thousand
+  // lines deciding whether a build ships were the least checked code here.
+  //
+  // `noImplicitAny` is off, and that is the point rather than a concession.
+  // Turning it on reports 202 unannotated parameters and 32 real problems; the
+  // 202 would be answered by JSDoc that restates what the call sites already
+  // say, and the noise is what stops anybody reading the 32. Inference alone
+  // catches the mistakes worth catching: a possibly-undefined value used as a
+  // number, an argument that may be undefined, a catch binding treated as an
+  // Error.
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "noImplicitAny": false,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2023",
+    // ES2024 for `Object.groupBy`; DOM because the audit probes are functions
+    // serialised into a browser page.
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    // `astro/client` because the config imports `lib/sitemap.ts`, and the
+    // module graph reaches `import.meta.env` from there.
+    "types": ["node", "astro/client"]
+  },
+  "include": ["scripts/**/*.mjs", "astro.config.mjs"]
+}

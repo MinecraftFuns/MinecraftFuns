@@ -33,9 +33,7 @@ const educationEntries: readonly Entry[] = education.map((entry) => ({
     title: entry.institution,
     /* `detail` is optional, so an absent one contributes no line at all
        rather than an empty paragraph holding space. */
-    notes: [entry.credential, entry.detail].flatMap((note) =>
-      note === undefined ? [] : [note],
-    ),
+    notes: [entry.credential, entry.detail].filter((note) => note !== undefined),
   },
 }));
 
