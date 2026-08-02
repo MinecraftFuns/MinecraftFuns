@@ -63,6 +63,23 @@ const decodedPath = (pathname) => {
   }
 };
 
+/*
+ * Why patterns are enough here, expanding the note at the top of the file.
+ *
+ * This input is not general HTML: every byte was emitted by one serialiser,
+ * minutes earlier, in the build being checked. Astro always double-quotes
+ * attribute values, so the quoting below is a property of the producer rather
+ * than a hope about the format. The day this gate reads markup it did not
+ * generate, that reasoning expires and a parser becomes worth its cost.
+ *
+ * One definition of a quoted attribute value, since three patterns read one.
+ */
+const ATTRIBUTE = '\\s*=\\s*"([^"]*)"';
+
+const REFERENCE = new RegExp(`\\b(?:href|src)${ATTRIBUTE}`, "gi");
+const CANONICAL = new RegExp(`<link\\s+rel="canonical"\\s+href${ATTRIBUTE}`, "i");
+const SCRIPT_ELEMENT = /<script\b/i;
+
 /**
  * Every `href`/`src` value in a document, in source order.
  *
@@ -70,9 +87,7 @@ const decodedPath = (pathname) => {
  * independently testable.
  */
 export const extractReferences = (html) =>
-  [...html.matchAll(/\b(?:href|src)\s*=\s*"([^"]*)"/gi)].map(
-    (match) => match[1],
-  );
+  [...html.matchAll(REFERENCE)].map((match) => match[1]);
 
 /** Anything carrying its own authority is out of scope for local resolution. */
 export const isInternal = (reference) =>
@@ -228,12 +243,29 @@ export const isCanonicalWithin = (canonical, site, base) => {
  * The character immediately after the name decides it: `,` opens a fallback,
  * `)` closes a bare read. No nesting analysis is needed to tell them apart.
  */
+/*
+ * The two shapes every pattern below is built from.
+ *
+ * Written once because four patterns have to agree about them: a definition, a
+ * bare read, a loose colour and a palette entry. Spelled out at each site, the
+ * day one learns that a custom property may contain an underscore is the day
+ * the others quietly stop matching what the first one finds.
+ */
+const CUSTOM_PROPERTY = "--[a-z0-9-]+";
+const HEX_COLOUR = "#[0-9a-f]{6}";
+
+const DEFINITION = new RegExp(`(${CUSTOM_PROPERTY})\\s*:`, "gi");
+const BARE_READ = new RegExp(`var\\(\\s*(${CUSTOM_PROPERTY})\\s*([,)])`, "gi");
+const ANY_COLOUR = new RegExp(`${HEX_COLOUR}\\b`, "gi");
+const COLOUR_DEFINITION = new RegExp(
+  `(${CUSTOM_PROPERTY})\\s*:\\s*(${HEX_COLOUR})`,
+  "gi",
+);
+
 export const undefinedCustomProperties = (css) => {
-  const defined = new Set(
-    [...css.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((match) => match[1]),
-  );
+  const defined = new Set([...css.matchAll(DEFINITION)].map((match) => match[1]));
   const readBare = new Set(
-    [...css.matchAll(/var\(\s*(--[a-z0-9-]+)\s*([,)])/gi)]
+    [...css.matchAll(BARE_READ)]
       .filter((match) => match[2] === ")")
       .map((match) => match[1]),
   );
@@ -242,16 +274,23 @@ export const undefinedCustomProperties = (css) => {
 
 /** Hex colours outside the sanctioned palette. */
 export const offPaletteColours = (css, palette) =>
-  [...new Set([...css.matchAll(/#[0-9a-f]{6}\b/gi)].map((m) => m[0].toLowerCase()))]
+  [...new Set([...css.matchAll(ANY_COLOUR)].map((m) => m[0].toLowerCase()))]
     .filter((colour) => !palette.has(colour))
     .sort();
 
-/** The palette as declared by the token layer, the single source of truth. */
+/**
+ * The palette as declared by the token layer, the single source of truth.
+ *
+ * A colour definition is a custom property assigned a hex value; the ramp is
+ * the subset of those under the `--color-` namespace. Filtering by prefix
+ * rather than baking it into the pattern lets both colour rules share one
+ * definition of what a colour literal looks like.
+ */
 export const paletteFrom = (tokensCss) =>
   new Set(
-    [...tokensCss.matchAll(/--color-[a-z0-9-]+:\s*(#[0-9a-f]{6})/gi)].map((m) =>
-      m[1].toLowerCase(),
-    ),
+    [...tokensCss.matchAll(COLOUR_DEFINITION)]
+      .filter(([, name]) => name.startsWith("--color-"))
+      .map(([, , colour]) => colour.toLowerCase()),
   );
 
 // ---------------------------------------------------------------------------
@@ -338,7 +377,7 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
   for (const [index, path] of htmlFiles.entries()) {
     const html = htmlContents[index];
 
-    if (/<script\b/i.test(html)) {
+    if (SCRIPT_ELEMENT.test(html)) {
       found.push(violation("zero-js", `inline <script> in ${path}`));
     }
 
@@ -365,7 +404,7 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
       });
 
     // -- Canonical --------------------------------------------------------
-    const canonical = /<link\s+rel="canonical"\s+href="([^"]*)"/i.exec(html);
+    const canonical = CANONICAL.exec(html);
     if (canonical === null) {
       found.push(violation("canonical", `${path}: no canonical link`));
     } else if (!isCanonicalWithin(canonical[1], site, base)) {

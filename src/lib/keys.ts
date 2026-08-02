@@ -1,3 +1,5 @@
+import { basename } from "node:path/posix";
+
 import * as openpgp from "openpgp";
 
 import {
@@ -55,8 +57,14 @@ const SOURCES = import.meta.glob("../keys/*.asc", {
   eager: true,
 }) as Readonly<Record<string, string>>;
 
-const stemOf = (path: string): string =>
-  path.split("/").at(-1)?.replace(/\.asc$/, "") ?? path;
+/*
+ * `basename` rather than a split and a pattern. Stripping a known extension
+ * off a path is a solved problem with a name, and the hand-rolled version had
+ * to carry an `?? path` for an `at(-1)` that cannot actually be undefined.
+ * The POSIX variant specifically: these are `import.meta.glob` keys, which are
+ * URL-shaped and always separated by `/`, whatever the host platform is.
+ */
+const stemOf = (path: string): string => basename(path, ".asc");
 
 /** The exact stored bytes, not a re-serialisation. See the note above. */
 const dearmor = async (armored: string): Promise<Uint8Array> => {

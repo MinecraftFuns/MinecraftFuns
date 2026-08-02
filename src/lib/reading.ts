@@ -16,6 +16,15 @@ const WORDS_PER_MINUTE = 200;
  * Markdown syntax is stripped before counting so that fences, link targets,
  * and image URLs do not inflate the estimate: a post is not longer because it
  * links to somewhere with a verbose URL.
+ *
+ * Patterns rather than a parser, and this is the case where that is the right
+ * call rather than a shortcut. Markdown is structured and a real parse is
+ * available in principle, since the toolchain already runs remark; but the
+ * output feeds a word count that is rounded to whole minutes and presented as
+ * an approximation. A parser would have to be threaded through the content
+ * pipeline to change an estimate by less than its own rounding. The patterns
+ * below approximate, which is all the answer needs to be, and each says which
+ * construct it is approximating.
  */
 export const readingMinutes = (markdown: string): number => {
   const prose = markdown
