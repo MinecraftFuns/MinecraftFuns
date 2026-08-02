@@ -110,6 +110,17 @@ export const isoDate = (raw: string): IsoDate =>
   orThrow(parseIsoDate(raw), "invalid date in site content");
 
 /**
+ * Calendar components, read lexically off the fixed-width representation.
+ *
+ * No zone appears here, and that is the point: a calendar date *has* a year
+ * and a month by construction. Recovering them by converting to an instant and
+ * asking a clock is what rendered "Jul 13" for a post dated the fourteenth —
+ * the conversion is the bug, so the correct implementation refuses to make it.
+ */
+export const yearOf = (date: IsoDate): string => date.slice(0, 4);
+export const monthOf = (date: IsoDate): string => date.slice(5, 7);
+
+/**
  * ISO 8601 was designed so lexicographic order coincides with chronological
  * order for fixed-width dates, so this needs no parsing at all. Total,
  * antisymmetric, and transitive — exactly `toSorted`'s contract.

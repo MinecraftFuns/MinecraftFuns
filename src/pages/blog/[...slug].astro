@@ -1,51 +1,60 @@
 ---
-import { render, type CollectionEntry } from "astro:content";
+import { render } from "astro:content";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { publishedPosts, summarise } from "../../lib/posts.ts";
+import { routeOf } from "../../lib/archive.ts";
+import { publishedPosts, summarise, type PublishedPost } from "../../lib/posts.ts";
 import { formatIsoDate } from "../../lib/time.ts";
 import { withBase } from "../../lib/url.ts";
 
 /*
  * Routes are generated only from published posts, so a draft has no URL at all
  * rather than an unlisted one that anybody could guess.
+ *
+ * The parameter comes from the reconciled path rather than the raw entry id,
+ * so the route a page is built at and the href every index links to are two
+ * uses of one value instead of two constructions that could differ.
  */
 export async function getStaticPaths() {
   const posts = await publishedPosts();
-  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+  return posts.map((post) => ({
+    params: { slug: routeOf(post.path) },
+    props: { post },
+  }));
 }
 
-type Props = { readonly post: CollectionEntry<"blog"> };
+type Props = { readonly post: PublishedPost };
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { entry } = post;
+const { Content } = await render(entry);
 
 /* Through `summarise` so the article header and the index row cannot report
    different reading times for the same post. */
 const { readingMinutes: minutes } = summarise(post);
-const published = formatIsoDate(post.data.date);
+const published = formatIsoDate(entry.data.date);
 ---
 
 <BaseLayout
-  title={post.data.title}
-  description={post.data.description}
+  title={entry.data.title}
+  description={entry.data.description}
   type="article"
 >
   <article class="pt-xl pb-lg">
     <header class="border-hairline mb-lg border-b pb-lg">
       <p class="text-ink-tertiary flex items-center gap-2xs font-mono text-caption">
-        <time datetime={post.data.date}>{published}</time>
+        <time datetime={entry.data.date}>{published}</time>
         <span aria-hidden="true">·</span>
         <span>{minutes} min read</span>
       </p>
-      <h1 class="text-display-md text-ink mt-xs">{post.data.title}</h1>
+      <h1 class="text-display-md text-ink mt-xs">{entry.data.title}</h1>
       <p class="text-body-lg text-ink-muted mt-sm max-w-measure">
-        {post.data.description}
+        {entry.data.description}
       </p>
       {
-        post.data.tags.length > 0 && (
+        entry.data.tags.length > 0 && (
           <ul class="mt-md flex flex-wrap gap-2xs" role="list">
-            {post.data.tags.map((tag) => (
+            {entry.data.tags.map((tag) => (
               <li class="border-hairline bg-surface-1 text-ink-subtle rounded-pill border px-2xs py-3xs text-caption">
                 {tag}
               </li>

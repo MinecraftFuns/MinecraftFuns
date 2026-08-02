@@ -17,6 +17,12 @@ import { isoDate, parseIsoDate } from "./lib/time.ts";
  * `date` is parsed into `IsoDate` here, at the boundary, so every consumer
  * downstream receives a value already known to name a real calendar day in the
  * project's zone. Nothing past this point re-checks it.
+ *
+ * Posts are filed at `YYYY/MM/slug.md`, which restates the first two
+ * components of that date. The schema cannot see the file path, so the two are
+ * reconciled a step later in `lib/archive.ts` — see the note there on why the
+ * glob stays permissive and rejects loudly instead of matching narrowly and
+ * dropping a misfiled post in silence.
  */
 const blog = defineCollection({
   loader: glob({ base: "./src/content/blog", pattern: "**/*.md" }),
