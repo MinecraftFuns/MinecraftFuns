@@ -174,7 +174,7 @@ jobs:
   # learn about problems, not to hold the site hostage to a slow browser.
   # ---------------------------------------------------------------------------
   audit:
-    name: Audit pages (non-blocking)
+    name: Audit standalone build (non-blocking)
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -199,22 +199,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Only Chromium. Three engines would triple the runtime for findings that
-      # are, at this level, almost entirely engine-independent.
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      # Latest stable Chrome rather than the Chromium the pinned Playwright
+      # ships: the driver stays reproducible through the lockfile while the
+      # rendering engine tracks what readers actually run. One engine only —
+      # three would triple the runtime for findings that are, at this level,
+      # almost entirely engine-independent.
+      - name: Install the latest stable Chrome
+        run: npx playwright install --with-deps chrome
 
-      # Audit what Pages actually serves, base path included — auditing a
-      # differently-based build would test a page nobody visits.
+      # Audit the standalone build: joefang.org at the root is the eventual
+      # primary target, so that is the configuration worth holding to standard.
       - name: Build
         env:
-          SITE_URL: https://minecraftfuns.github.io
-          SITE_BASE: /MinecraftFuns/
+          SITE_URL: https://joefang.org
+          SITE_BASE: /
         run: npm run build
 
       - name: Audit
         env:
-          SITE_BASE: /MinecraftFuns/
+          SITE_URL: https://joefang.org
+          SITE_BASE: /
         run: npm run audit
 
       - name: Publish report to the job summary

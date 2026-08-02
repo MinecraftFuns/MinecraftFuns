@@ -172,13 +172,20 @@ export type WallClock = {
   readonly second: number;
 };
 
-/** What a clock on the wall in `zone` reads at `instant`. */
+/**
+ * What a clock on the wall in `zone` reads at `instant`.
+ *
+ * The parts are indexed in a single pass. Searching the array once per field
+ * would rescan it six times for a list the formatter already returns in one
+ * piece — and this runs for every rendered date.
+ */
 export const wallClockAt = (instant: Date, zone: TimeZone): WallClock => {
-  const parts = wallClockFormatter(zone).formatToParts(instant);
-  const field = (type: Intl.DateTimeFormatPartTypes): number => {
-    const part = parts.find((candidate) => candidate.type === type);
-    return part === undefined ? 0 : Number(part.value);
-  };
+  const fields = new Map<string, number>();
+  for (const part of wallClockFormatter(zone).formatToParts(instant)) {
+    fields.set(part.type, Number(part.value));
+  }
+
+  const field = (type: string): number => fields.get(type) ?? 0;
 
   return {
     year: field("year"),

@@ -136,8 +136,23 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
 
   const files = await walk(dist);
   const relativeFiles = files.map((path) => relative(dist, path));
-  const htmlFiles = relativeFiles.filter((path) => path.endsWith(".html"));
-  const cssFiles = relativeFiles.filter((path) => path.endsWith(".css"));
+
+  /*
+   * The walk already enumerated every file, so link resolution is a set
+   * membership test rather than a filesystem probe. Statting each candidate
+   * instead would issue O(links x candidates) syscalls and re-probe the same
+   * paths for every page that links to them.
+   */
+  const present = new Set(relativeFiles);
+
+  const htmlFiles = [];
+  const cssFiles = [];
+  const jsFiles = [];
+  for (const path of relativeFiles) {
+    if (path.endsWith(".html")) htmlFiles.push(path);
+    else if (path.endsWith(".css")) cssFiles.push(path);
+    else if (path.endsWith(".js")) jsFiles.push(path);
+  }
 
   // -- The build produced something at all --------------------------------
   if (htmlFiles.length === 0) {
@@ -145,7 +160,7 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
     return found;
   }
   for (const required of ["index.html", "favicon.svg"]) {
-    if (!relativeFiles.includes(required)) {
+    if (!present.has(required)) {
       found.push(violation("output", `missing required file: ${required}`));
     }
   }
@@ -155,13 +170,16 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
   // CSS, so nothing needs scripting. Guarding it means an accidental island or
   // stray <script> is caught rather than silently shipped. Relax this check
   // consciously if the site ever genuinely needs client behaviour.
-  const jsFiles = relativeFiles.filter((path) => path.endsWith(".js"));
   for (const path of jsFiles) {
     found.push(violation("zero-js", `unexpected client script: ${path}`));
   }
 
-  for (const path of htmlFiles) {
-    const html = await readFile(join(dist, path), "utf8");
+  const htmlContents = await Promise.all(
+    htmlFiles.map((path) => readFile(join(dist, path), "utf8")),
+  );
+
+  for (const [index, path] of htmlFiles.entries()) {
+    const html = htmlContents[index];
 
     if (/<script\b/i.test(html)) {
       found.push(violation("zero-js", `inline <script> in ${path}`));
@@ -190,11 +208,7 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
         continue;
       }
 
-      const candidates = candidatePaths(reference, base);
-      const resolved = await Promise.all(
-        candidates.map((candidate) => exists(join(dist, candidate))),
-      );
-      if (!resolved.includes(true)) {
+      if (!candidatePaths(reference, base).some((candidate) => present.has(candidate))) {
         found.push(
           violation("dead-link", `${path}: ${reference} resolves to no file`),
         );
@@ -221,8 +235,12 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
     found.push(violation("palette", "no palette found in the token layer"));
   }
 
-  for (const path of cssFiles) {
-    const css = await readFile(join(dist, path), "utf8");
+  const cssContents = await Promise.all(
+    cssFiles.map((path) => readFile(join(dist, path), "utf8")),
+  );
+
+  for (const [index, path] of cssFiles.entries()) {
+    const css = cssContents[index];
 
     // A typo'd custom property does not fail any build; it silently renders
     // the wrong colour or spacing.
