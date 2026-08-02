@@ -2,6 +2,7 @@
   "name": "minecraftfuns",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Source for the GitHub profile README shown at github.com/MinecraftFuns",
   "homepage": "https://joefang.org",
   "bugs": {
@@ -18,7 +19,9 @@
   "scripts": {
     "lint": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#.github/skills\" \"#.claude/skills\"",
     "lint:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules\" \"#.github/skills\" \"#.claude/skills\"",
-    "test": "npm run lint",
+    "typecheck": "astro check",
+    "test:unit": "node --test \"src/**/*.test.ts\"",
+    "test": "npm run lint && npm run typecheck && npm run test:unit",
     "submodules": "git submodule update --init --recursive",
     "dev": "astro dev",
     "build": "astro build",
@@ -28,7 +31,10 @@
     "node": ">=24"
   },
   "devDependencies": {
-    "markdownlint-cli2": "^0.23.2"
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.1.2",
+    "markdownlint-cli2": "^0.23.2",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
