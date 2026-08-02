@@ -25,7 +25,9 @@ export const nav = [
 ] as const satisfies readonly NavItem[];
 
 /**
- * Pages kept out of the sitemap, as path prefixes.
+ * Routes kept out of the sitemap. Whole routes, matched exactly — not prefixes
+ * and emphatically not substrings, which is what a post slug spelling `/404`
+ * inside it once tripped over.
  *
  * Only pages reach the sitemap at all, so endpoints such as `/pgp` and the key
  * directory need no entry here — they were never candidates. What remains is

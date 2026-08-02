@@ -30,7 +30,11 @@ const MOUNT_ORIGIN = "https://mount.invalid";
 /** Regular by nature: a suffix of one repeated character. */
 const TRAILING_SLASHES = /\/+$/;
 
-const slashTerminated = (path: string): string =>
+/**
+ * The canonical form of a route. Exported because comparing routes is only
+ * sound once both sides are in it — see `isWithin` below and `lib/sitemap.ts`.
+ */
+export const slashTerminated = (path: string): string =>
   path.endsWith("/") ? path : `${path}/`;
 
 /**

@@ -4,7 +4,7 @@ import { defineConfig } from "astro/config";
 
 import sitemap from "@astrojs/sitemap";
 
-import { sitemapExclude } from "./src/config/site.ts";
+import { sitemapFilter } from "./src/lib/sitemap.ts";
 
 /**
  * The deployment target is a parameter, not a constant.
@@ -92,16 +92,11 @@ export default defineConfig({
      * twice: the robots.txt Sitemap directive, and a <link rel="sitemap"> in
      * every document for crawlers that never read robots.txt.
      *
-     * The filter drops pages that exist to be served but not indexed. Only
-     * pages reach it — endpoints such as /pgp and the key directory are never
-     * candidates — so this list stays short by construction.
+     * The filter lives in `lib/sitemap.ts` so it is typed and tested. It was
+     * the one path comparison written inline here, and it was the one that was
+     * wrong.
      */
-    sitemap({
-      filter: (page) => {
-        const { pathname } = new URL(page);
-        return !sitemapExclude.some((route) => pathname.includes(route));
-      },
-    }),
+    sitemap({ filter: sitemapFilter(base) }),
   ],
   markdown: {
     shikiConfig: {
