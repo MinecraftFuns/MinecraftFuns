@@ -52,7 +52,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <SiteHeader />
-    <main id="main" tabindex="-1">
+    {/*
+      The frame lives here, not in the pages. A page renders sections and has
+      no way to state a width, so the column cannot differ between one page and
+      the next — which it previously did, by 26rem.
+    */}
+    <main class="container" id="main" tabindex="-1">
       <slot />
     </main>
     <SiteFooter />

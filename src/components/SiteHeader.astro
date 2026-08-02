@@ -60,27 +60,40 @@ const items = nav.map((item) => ({
     min-height: var(--nav-height);
   }
 
+  /* Brand and nav share one type size; weight and ink separate them, so the
+     hierarchy survives a change to either. */
   .brand {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2xs);
+    min-height: var(--control-height);
     color: var(--ink);
     text-decoration: none;
-    font-size: var(--text-body-sm);
+    font-size: var(--text-body);
     font-weight: var(--weight-medium);
     letter-spacing: var(--tracking-card-title);
   }
 
-  /* One of the few sanctioned uses of the accent: the brand mark. */
+  /* One of the few sanctioned uses of the accent: the brand mark. Sized to the
+     cap height of the name beside it, and on the 4px base like everything else. */
   .brand__mark {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border-radius: var(--radius-xs);
     background-color: var(--accent);
   }
 
+  /*
+   * The chips carry inline padding, so the nav is pulled outward by exactly
+   * that padding: what should line up with the container edge is the last
+   * label, not the hover box around it. Deriving the pull from the same custom
+   * property keeps the two in step when the breakpoint changes one of them.
+   */
   .nav {
+    --nav-link-padding: var(--space-xs);
+
     margin-inline-start: auto;
+    margin-inline-end: calc(-1 * var(--nav-link-padding));
   }
 
   .nav__list {
@@ -90,12 +103,17 @@ const items = nav.map((item) => ({
     margin: 0;
   }
 
+  /* Block-level flex, not inline-flex: an inline box would sit on the list
+     item's baseline and inherit its half-leading, making the chips taller than
+     the token says and misaligning them against the brand. */
   .nav__link {
-    display: block;
-    padding: var(--space-3xs) var(--space-2xs);
+    display: flex;
+    align-items: center;
+    min-height: var(--control-height);
+    padding-inline: var(--nav-link-padding);
     border-radius: var(--radius-md);
     color: var(--ink-subtle);
-    font-size: var(--text-body-sm);
+    font-size: var(--text-body);
     text-decoration: none;
     transition:
       color var(--duration-fast) var(--ease),
@@ -113,24 +131,23 @@ const items = nav.map((item) => ({
     color: var(--ink);
   }
 
-  @media (max-width: 34rem) {
+  /*
+   * The nav keeps its type size at every width — shrinking the only navigation
+   * to 12px was the previous behaviour and it fired at 544px, far wider than
+   * necessary. Chip padding tightens instead, and the brand name gives way only
+   * where the two genuinely cannot share the bar.
+   */
+  @media (max-width: 26rem) {
+    .nav {
+      --nav-link-padding: var(--space-2xs);
+    }
+
     .nav__list {
       gap: 0;
     }
 
-    .nav__link {
-      padding-inline: var(--space-3xs);
-      font-size: var(--text-caption);
-    }
-
     .brand__name {
       display: none;
-    }
-  }
-
-  @media (pointer: coarse) {
-    .nav__link {
-      padding-block: var(--space-xs);
     }
   }
 </style>

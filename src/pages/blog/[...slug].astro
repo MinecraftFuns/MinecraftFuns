@@ -2,8 +2,7 @@
 import { render, type CollectionEntry } from "astro:content";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { publishedPosts } from "../../lib/posts.ts";
-import { readingMinutes } from "../../lib/reading.ts";
+import { publishedPosts, summarise } from "../../lib/posts.ts";
 import { formatIsoDate } from "../../lib/time.ts";
 import { withBase } from "../../lib/url.ts";
 
@@ -21,8 +20,10 @@ type Props = { readonly post: CollectionEntry<"blog"> };
 const { post } = Astro.props;
 const { Content } = await render(post);
 
+/* Through `summarise` so the article header and the index row cannot report
+   different reading times for the same post. */
+const { readingMinutes: minutes } = summarise(post);
 const published = formatIsoDate(post.data.date);
-const minutes = readingMinutes(post.body ?? "");
 ---
 
 <BaseLayout
@@ -30,7 +31,7 @@ const minutes = readingMinutes(post.body ?? "");
   description={post.data.description}
   type="article"
 >
-  <article class="post container container--narrow">
+  <article class="post">
     <header class="post__header">
       <p class="post__meta">
         <time datetime={post.data.date}>{published}</time>

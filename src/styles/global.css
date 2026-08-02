@@ -98,6 +98,10 @@ ol[role="list"] {
 
 /* ---- Primitives ------------------------------------------------------- */
 
+/*
+ * The frame. Applied by the layout and by the two chrome components — never by
+ * a page, which is why there is no modifier to apply wrongly.
+ */
 .container {
   width: 100%;
   max-width: var(--container);
@@ -111,17 +115,16 @@ ol[role="list"] {
   }
 }
 
-.container--narrow {
-  max-width: var(--container-narrow);
-}
-
 /* Skip link — visually hidden until focused. */
 .skip-link {
   position: absolute;
   top: var(--space-2xs);
   left: var(--space-2xs);
   z-index: 100;
-  padding: var(--space-2xs) var(--space-xs);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  padding-inline: var(--space-sm);
   background-color: var(--accent);
   color: var(--on-accent);
   border-radius: var(--radius-md);
@@ -141,6 +144,146 @@ ol[role="list"] {
   letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
   color: var(--ink-subtle);
+}
+
+/* ---- Page composition -------------------------------------------------
+ *
+ * Every page is built from these. They were previously redeclared in four
+ * pages' scoped styles, which is how one `.section` came to be --space-xl tall
+ * on the home page and --space-lg elsewhere, and how section headings acquired
+ * a bottom rule on About but not on Projects. Declared once, they cannot
+ * disagree.
+ *
+ * Titles carry no max-width: the frame is now narrow enough to set the line
+ * length itself, and `text-wrap: balance` handles the ragged edge. The three
+ * different character caps that used to do this job were three guesses at the
+ * same number.
+ */
+
+.page-intro {
+  padding-block: var(--space-xl) var(--space-lg);
+}
+
+.page-intro__title {
+  margin-top: var(--space-xs);
+  font-size: var(--text-display-md);
+  font-weight: var(--weight-display);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display-md);
+}
+
+.page-intro__lede {
+  max-width: var(--measure);
+  margin-top: var(--space-md);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body);
+  color: var(--ink-muted);
+}
+
+.section {
+  padding-block: var(--space-lg);
+}
+
+/* Baseline, not flex-start: the trailing link or count aligns to the heading's
+   first baseline whether the leading side is a bare heading or a heading with
+   a blurb beneath it. One rule covers both arrangements. */
+.section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.section__title {
+  font-size: var(--text-headline);
+  letter-spacing: var(--tracking-headline);
+}
+
+.section__blurb {
+  margin-top: var(--space-3xs);
+  font-size: var(--text-body-sm);
+  color: var(--ink-subtle);
+}
+
+.section__count {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  color: var(--ink-tertiary);
+}
+
+.section__link {
+  flex-shrink: 0;
+  font-size: var(--text-body-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.section__link:hover {
+  text-decoration: underline;
+}
+
+/*
+ * auto-fill, not auto-fit. auto-fit collapses the empty tracks, so a group
+ * holding a single project stretched one card across the entire frame — three
+ * lines of text in a 700px slab, which is precisely the accident that reads as
+ * unfinished. auto-fill keeps the track, and a lone card stays card-sized.
+ */
+.grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+  margin: 0;
+}
+
+.rows > :last-child {
+  border-bottom: none;
+}
+
+/* ---- Controls ---------------------------------------------------------
+ *
+ * One token sets the height of every control on the site, so a button and a
+ * nav link cannot end up two pixels apart.
+ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  padding-inline: var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease);
+}
+
+.button--primary {
+  background-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.button--primary:hover {
+  background-color: var(--accent-hover);
+  color: var(--on-accent);
+}
+
+.button--secondary {
+  background-color: var(--surface-1);
+  border-color: var(--hairline);
+  color: var(--ink);
+}
+
+.button--secondary:hover {
+  background-color: var(--surface-2);
+  border-color: var(--hairline-strong);
+  color: var(--ink);
 }
 
 /* ---- Links ------------------------------------------------------------ */

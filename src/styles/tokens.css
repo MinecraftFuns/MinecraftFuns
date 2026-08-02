@@ -136,9 +136,16 @@
    * An 80px/-3px hero is a landing-page gesture; a personal site opens at
    * display-lg and leads with words, not a product screenshot.
    */
-  --text-display-lg: clamp(2.5rem, 1.6rem + 4.2vw, 4rem); /* 40 → 64 */
-  --text-display-md: clamp(2rem, 1.5rem + 2.3vw, 2.75rem); /* 32 → 44 */
-  --text-headline: clamp(1.5rem, 1.3rem + 0.9vw, 1.75rem); /* 24 → 28 */
+  /*
+   * Every fluid ramp completes at 48rem — the viewport at which --container
+   * stops growing. Type keyed to vw past that point would keep scaling inside a
+   * column that no longer does, so a wide display would show ever-larger
+   * headings over an ever-shorter line. Ceilings are set for the 704px content
+   * column: display-lg holds ~27 characters per line, display-md ~32.
+   */
+  --text-display-lg: clamp(2.25rem, 1.54rem + 3.57vw, 3.25rem); /* 36 → 52 */
+  --text-display-md: clamp(2rem, 1.46rem + 2.68vw, 2.75rem); /* 32 → 44 */
+  --text-headline: clamp(1.5rem, 1.32rem + 0.89vw, 1.75rem); /* 24 → 28 */
   --text-card-title: 1.375rem; /* 22 */
   --text-subhead: 1.25rem; /* 20 */
   --text-body-lg: 1.125rem; /* 18 */
@@ -174,7 +181,7 @@
   --space-md: 1.5rem; /* 24 */
   --space-lg: 2rem; /* 32 */
   --space-xl: 3rem; /* 48 */
-  --space-section: clamp(4rem, 2.5rem + 7vw, 6rem); /* 64 → 96 */
+  --space-section: clamp(4rem, 2.57rem + 7.14vw, 6rem); /* 64 → 96 */
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -183,11 +190,32 @@
   --radius-xl: 16px; /* full-width media panels */
   --radius-pill: 9999px; /* badges and tags only */
 
-  --measure: 68ch; /* reading measure for long-form prose */
-  --container: 72rem; /* 1152px */
-  --container-narrow: 46rem; /* 736px — article column */
+  /*
+   * One frame, for every page.
+   *
+   * The width is derived rather than chosen. Prose capped at --measure runs
+   * ~612px at --text-body-lg, and the widest composite on the site — an index
+   * row of date column, description, and meta — runs ~692px. Both sit inside
+   * 48rem less its padding, and nothing here is wider.
+   *
+   * There was a second, narrower container. Because each page named its own,
+   * the choice was unenforced and the pages drifted: About and articles sat at
+   * 46rem inside a 72rem header, so the left margin jumped on navigation. With
+   * one width there is no second value to pick wrongly; long-form text narrows
+   * by --measure *within* the frame rather than by swapping frames.
+   */
+  --measure: 68ch;
+  --container: 48rem; /* 768px */
 
-  --nav-height: 56px;
+  /*
+   * Interactive geometry. A control is exactly one token tall rather than a
+   * line box plus two paddings, so its height cannot drift with the font size
+   * inside it. The bar is that height plus one space token above and below,
+   * which keeps the header closed under the same scale as its contents.
+   */
+  --target-min: 1.5rem; /* 24 — WCAG 2.5.8 minimum target */
+  --control-height: 2.5rem; /* 40 — nav links, buttons */
+  --nav-height: 4rem; /* 64 = 40 + 12 above + 12 below */
 
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --duration-fast: 120ms;

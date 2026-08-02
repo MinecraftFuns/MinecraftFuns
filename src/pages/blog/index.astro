@@ -10,16 +10,16 @@ const posts = await postSummaries();
   title="Blog"
   description="Technical notes on software, systems, and cognitive science by Joe Fang."
 >
-  <section class="intro container">
+  <section class="page-intro">
     <p class="eyebrow">Blog</p>
-    <h1 class="intro__title">Technical notes, written down so I stop re-deriving them.</h1>
-    <p class="intro__lede">
+    <h1 class="page-intro__title">Technical notes, written down so I stop re-deriving them.</h1>
+    <p class="page-intro__lede">
       Mostly software and systems, occasionally cognitive science. Written for
       the version of me who hits the same problem in a year.
     </p>
   </section>
 
-  <section class="container" aria-label="All posts">
+  <section aria-label="All posts">
     {
       posts.length === 0 ? (
         <p class="empty">No posts published yet.</p>
@@ -35,33 +35,10 @@ const posts = await postSummaries();
 </BaseLayout>
 
 <style>
-  .intro {
-    padding-block: var(--space-xl) var(--space-lg);
-  }
-
-  .intro__title {
-    max-width: 24ch;
-    margin-top: var(--space-xs);
-    font-size: var(--text-display-md);
-    font-weight: var(--weight-display);
-    line-height: var(--leading-display);
-    letter-spacing: var(--tracking-display-md);
-  }
-
-  .intro__lede {
-    max-width: 56ch;
-    margin-top: var(--space-md);
-    font-size: var(--text-body-lg);
-    line-height: var(--leading-body);
-    color: var(--ink-muted);
-  }
-
+  /* This list has no section head above it, so it supplies the rule that a
+     head would otherwise draw. Everywhere else `.rows` inherits it. */
   .rows {
     border-top: 1px solid var(--hairline);
-  }
-
-  .rows > :last-child {
-    border-bottom: none;
   }
 
   .empty {

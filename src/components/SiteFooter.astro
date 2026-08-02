@@ -54,10 +54,12 @@ const year = currentYear();
     font-size: var(--text-body-sm);
   }
 
+  /* 12rem, not 14rem: the track minimum has to fit three columns inside the
+     frame, and 14rem was measured against the old 72rem one. */
   .footer__inner {
     display: grid;
     gap: var(--space-lg);
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   }
 
   .footer__col {
@@ -82,10 +84,19 @@ const year = currentYear();
     margin: 0;
   }
 
+  /*
+   * A column of links is not text flow, so WCAG 2.5.8's inline exception does
+   * not apply and the 21px line box was a real target-size failure. `flex` also
+   * makes `width: fit-content` mean something — on the inline box it was before,
+   * the declaration was inert.
+   */
   .footer__link {
+    display: flex;
+    align-items: center;
+    min-height: var(--target-min);
+    width: fit-content;
     color: var(--ink-subtle);
     text-decoration: none;
-    width: fit-content;
   }
 
   .footer__link:hover {
