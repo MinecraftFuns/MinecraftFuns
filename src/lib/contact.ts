@@ -1,5 +1,7 @@
 import { contact } from "../config/contact.ts";
+import type { Link, PlatformName } from "../config/schema.ts";
 import { site } from "../config/site.ts";
+import { formatFingerprint, publishedKeys } from "./keys.ts";
 import { routeUrl } from "./url.ts";
 
 /**
@@ -18,13 +20,15 @@ const PLATFORMS = {
   twitter: { label: "Twitter", url: (handle: string) => `https://x.com/${handle}` },
 } as const;
 
-export type PlatformName = keyof typeof PLATFORMS;
+/* The table above is the authority; the union in schema.ts must agree with it,
+   which this line checks rather than assumes. */
+const _platformsCoverSchema: Record<PlatformName, unknown> = PLATFORMS;
+void _platformsCoverSchema;
 
-export type Profile = {
-  readonly label: string;
+/** A `Link` that also carries the bare handle, and whether it proves identity. */
+export type Profile = Link & {
   /** As displayed — the handle itself, not a URL. */
   readonly handle: string;
-  readonly href: string;
   /**
    * `rel="me"` asserts "this profile is the same person as this site", which is
    * what Mastodon-style verification consumes. True of an account; false of a
@@ -56,3 +60,16 @@ export const elsewhere = (): readonly Profile[] => [
   ...profiles,
   { label: "PGP", handle: "PGP", href: pgpHref(), isIdentity: false },
 ];
+
+/**
+ * This site's key fingerprint, formatted for reading.
+ *
+ * Derived here so the footer and the About page cannot print different ones —
+ * they each did their own `publishedKeys` call and formatting, which is two
+ * copies of one derivation and exactly what the fingerprint config field was
+ * before it.
+ */
+export const siteFingerprint = async (): Promise<string> => {
+  const [key] = await publishedKeys(contact.mailDomain);
+  return key === undefined ? "" : formatFingerprint(key.fingerprint);
+};

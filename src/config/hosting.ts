@@ -1,4 +1,4 @@
-import type { HostConfig } from "../lib/hosting.ts";
+import type { HostConfig } from "./schema.ts";
 
 /**
  * Directives for the host serving this build.
@@ -12,7 +12,7 @@ import type { HostConfig } from "../lib/hosting.ts";
  * prefixes that would otherwise swallow them. The build rejects a rule that
  * loops or that an earlier rule already covers.
  */
-export const hosting: HostConfig = {
+export const hosting = {
   headers: [
     {
       /*
@@ -54,4 +54,4 @@ export const hosting: HostConfig = {
     { from: "/pgp.*", to: "/pgp" },
     { from: "/gpg.*", to: "/pgp" },
   ],
-};
+} as const satisfies HostConfig;

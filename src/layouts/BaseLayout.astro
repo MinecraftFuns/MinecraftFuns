@@ -42,6 +42,13 @@ const isPrimary = (Astro.site?.origin ?? "") === new URL(site.canonicalOrigin).o
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {/*
+      The second half of sitemap discovery. robots.txt names the sitemap for
+      crawlers that fetch it; this reaches the ones that do not, and it is the
+      only mechanism that works at all beneath a base path, where robots.txt is
+      never read.
+    */}
+    <link rel="sitemap" type="application/xml" href={assetUrl("/sitemap-index.xml")} />
     <link rel="icon" href={assetUrl("/favicon.svg")} type="image/svg+xml" />
     {!isPrimary && <meta name="robots" content="noindex" />}
 

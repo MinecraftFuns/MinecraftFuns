@@ -16,6 +16,7 @@ import {
   type HeaderRule,
   type Redirect,
 } from "./hosting.ts";
+import type { RootedPath } from "../config/schema.ts";
 
 const reasons = (problems: readonly { reason: string }[]) =>
   problems.map((problem) => problem.reason);
@@ -215,7 +216,10 @@ describe("decodeHostConfig", () => {
   it("reports every problem at once rather than the first", () => {
     const decoded = decodeHostConfig(
       {
-        headers: [{ path: "no-slash", set: { a: "b" } }],
+        // `RootedPath` rejects this at compile time, so config cannot reach
+        // the runtime check. The decoder is exported, though, so the check is
+        // still live for callers whose input was never typed — hence the cast.
+        headers: [{ path: "no-slash" as RootedPath, set: { a: "b" } }],
         redirects: [{ from: "/a/*/b", to: "/c" }],
       },
       under,

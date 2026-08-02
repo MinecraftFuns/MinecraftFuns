@@ -1,3 +1,5 @@
+import type { ProjectKindConfig, ProjectStatusConfig } from "./schema.ts";
+
 /**
  * Projects, and the sections they group into.
  *
@@ -24,7 +26,7 @@ export const projectKinds = [
     heading: "Open source",
     blurb: "Contributions to projects maintained by other people.",
   },
-] as const;
+] as const satisfies readonly ProjectKindConfig[];
 
 export type ProjectKind = (typeof projectKinds)[number]["kind"];
 
@@ -36,7 +38,7 @@ export type ProjectKind = (typeof projectKinds)[number]["kind"];
 export const projectStatuses = [
   { status: "active", badge: null },
   { status: "archived", badge: "Archived" },
-] as const;
+] as const satisfies readonly ProjectStatusConfig[];
 
 export type ProjectStatus = (typeof projectStatuses)[number]["status"];
 

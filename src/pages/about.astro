@@ -2,9 +2,7 @@
 import PageIntro from "../components/PageIntro.astro";
 import Section from "../components/Section.astro";
 import { education } from "../config/about.ts";
-import { profiles, pgpHref } from "../lib/contact.ts";
-import { contact } from "../config/contact.ts";
-import { formatFingerprint, publishedKeys } from "../lib/keys.ts";
+import { pgpHref, profiles, siteFingerprint } from "../lib/contact.ts";
 import { routeUrl } from "../lib/url.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
@@ -19,10 +17,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
  * ships to a live CV is worse than a short one.
  */
 
-/* Read off the key rather than written beside it, so rotating the key cannot
-   leave a stale fingerprint printed here. */
-const [key] = await publishedKeys(contact.mailDomain);
-const fingerprint = key === undefined ? "" : formatFingerprint(key.fingerprint);
+/* Read off the key, so rotating it cannot leave a stale one printed here. */
+const fingerprint = await siteFingerprint();
 
 /* Period in a fixed left column, detail beside it — the standard CV rhythm,
    collapsing to stacked rows where the column would crowd the text. */

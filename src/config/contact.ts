@@ -1,4 +1,4 @@
-import type { PlatformName } from "../lib/contact.ts";
+import type { ContactConfig } from "./schema.ts";
 
 /**
  * How to reach me, and where I am.
@@ -22,10 +22,4 @@ export const contact = {
     { platform: "matrix", handle: "@multiset:matrix.org" },
     { platform: "twitter", handle: "SerendipityArk" },
   ],
-} as const satisfies {
-  readonly mailDomain: string;
-  readonly profiles: readonly {
-    readonly platform: PlatformName;
-    readonly handle: string;
-  }[];
-};
+} as const satisfies ContactConfig;

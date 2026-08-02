@@ -1,3 +1,5 @@
+import type { EducationEntry } from "./schema.ts";
+
 /**
  * Facts for the About page.
  *
@@ -13,4 +15,4 @@ export const education = [
     detail: "Minor in Statistics",
     period: "Third year",
   },
-] as const;
+] as const satisfies readonly EducationEntry[];

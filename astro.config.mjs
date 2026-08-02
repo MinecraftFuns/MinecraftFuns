@@ -1,9 +1,10 @@
 // @ts-check
-import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
-import { nonDocumentRoutes } from "./src/config/site.ts";
+import sitemap from "@astrojs/sitemap";
+
+import { sitemapExclude } from "./src/config/site.ts";
 
 /**
  * The deployment target is a parameter, not a constant.
@@ -84,10 +85,21 @@ export default defineConfig({
         },
       },
     },
+    /*
+     * The sitemap. `sitemap-index.xml` plus `sitemap-0.xml` is what this
+     * integration emits and what its own discovery guidance points at, so the
+     * location is the documented one rather than a guess. Discovery is covered
+     * twice: the robots.txt Sitemap directive, and a <link rel="sitemap"> in
+     * every document for crawlers that never read robots.txt.
+     *
+     * The filter drops pages that exist to be served but not indexed. Only
+     * pages reach it — endpoints such as /pgp and the key directory are never
+     * candidates — so this list stays short by construction.
+     */
     sitemap({
       filter: (page) => {
         const { pathname } = new URL(page);
-        return !nonDocumentRoutes.some((route) => pathname.includes(route));
+        return !sitemapExclude.some((route) => pathname.includes(route));
       },
     }),
   ],

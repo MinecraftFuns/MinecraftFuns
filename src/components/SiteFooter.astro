@@ -1,8 +1,6 @@
 ---
-import { contact } from "../config/contact.ts";
 import { site } from "../config/site.ts";
-import { elsewhere } from "../lib/contact.ts";
-import { formatFingerprint, publishedKeys } from "../lib/keys.ts";
+import { elsewhere, siteFingerprint } from "../lib/contact.ts";
 import { currentYear } from "../lib/time.ts";
 
 /*
@@ -13,8 +11,7 @@ import { currentYear } from "../lib/time.ts";
 const year = currentYear();
 
 /* Derived from the key, not restated beside it. */
-const [key] = await publishedKeys(contact.mailDomain);
-const fingerprint = key === undefined ? "" : formatFingerprint(key.fingerprint);
+const fingerprint = await siteFingerprint();
 ---
 
 <footer class="border-hairline text-ink-subtle mt-section border-t py-xl text-body-sm">

@@ -1,4 +1,12 @@
+import type {
+  HeaderConfig,
+  HostConfig,
+  RedirectConfig,
+  RedirectStatus,
+} from "../config/schema.ts";
 import { assertNever, invalid, ok, type Parsed } from "./adt.ts";
+
+export type { HeaderConfig, HostConfig, RedirectConfig, RedirectStatus };
 
 /**
  * Host directives: the two path-keyed declaration files a static host reads.
@@ -84,17 +92,6 @@ export const covers = (outer: PathPattern, inner: PathPattern): boolean =>
 // Redirects
 // ---------------------------------------------------------------------------
 
-/**
- * The status codes the host honours, as a closed set rather than a number.
- *
- * The distinctions are load-bearing and easy to get wrong when the field is
- * typed `number`: 301 and 308 are permanent where 302, 303 and 307 are not,
- * and 307 and 308 preserve the request method where the older codes
- * historically did not. 200 is not a redirect at all — it rewrites the
- * response in place, leaving the address bar untouched.
- */
-export type RedirectStatus = 200 | 301 | 302 | 303 | 307 | 308;
-
 export type Redirect = {
   readonly from: PathPattern;
   /** A rooted path on this site, or an absolute URL leaving it. */
@@ -170,31 +167,6 @@ export const renderHeaders = (rules: readonly HeaderRule[]): string =>
 // structural is what makes matching a comparison. Config is written
 // site-relative and the base is applied during decoding, so nobody editing a
 // rule has to know the deployment has a base path at all.
-
-/** A redirect as written in config. `status` defaults to a permanent move. */
-export type RedirectConfig = {
-  readonly from: string;
-  readonly to: string;
-  readonly status?: RedirectStatus;
-};
-
-/**
- * A header rule as written in config.
- *
- * `set` is a record rather than a list of pairs, which makes a repeated header
- * name unrepresentable in the common case — object keys are unique. Names
- * differing only in case remain expressible, so the check below survives.
- */
-export type HeaderConfig = {
-  readonly path: string;
-  readonly set?: Readonly<Record<string, string>>;
-  readonly remove?: readonly string[];
-};
-
-export type HostConfig = {
-  readonly headers: readonly HeaderConfig[];
-  readonly redirects: readonly RedirectConfig[];
-};
 
 /** Applies the deployment's base to a site-relative path. */
 export type Resolve = (path: string) => string;
