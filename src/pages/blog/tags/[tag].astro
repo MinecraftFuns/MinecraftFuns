@@ -1,9 +1,7 @@
 ---
-import PageIntro from "../../../components/PageIntro.astro";
 import PostRow from "../../../components/PostRow.astro";
-import BaseLayout from "../../../layouts/BaseLayout.astro";
-import { postTags, type PostTag } from "../../../lib/posts.ts";
-import type { PostSummary } from "../../../lib/posts.ts";
+import ListPage from "../../../layouts/ListPage.astro";
+import { postTags, type PostSummary, type PostTag } from "../../../lib/posts.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
 /*
@@ -22,36 +20,25 @@ export async function getStaticPaths() {
 
 type Props = {
   readonly tag: PostTag;
+  /* Non-empty by type: a tag exists only by being on a post, so the empty
+     state `ListPage` can render is unreachable from here. */
   readonly posts: readonly [PostSummary, ...PostSummary[]];
 };
 
 const { tag, posts } = Astro.props;
+
+const count = `${posts.length} post${posts.length === 1 ? "" : "s"}`;
 ---
 
-<BaseLayout
+<ListPage
   title={`Posts tagged ${tag}`}
   description={`Writing tagged ${tag}, newest first.`}
+  eyebrow="Tag"
+  heading={tag}
+  lede={`${count} tagged ${tag}, newest first.`}
+  label={`Posts tagged ${tag}`}
+  empty="No posts published yet."
+  back={{ href: routeUrl("/blog"), label: "All posts" }}
 >
-  <PageIntro
-    kind="page"
-    eyebrow="Tag"
-    title={tag}
-    lede={`${posts.length} post${posts.length === 1 ? "" : "s"} tagged ${tag}, newest first.`}
-  />
-
-  {/*
-    No empty branch. `items` is non-empty by type, because a tag exists only by
-    being on a post, so the state this page would guard against cannot arise.
-  */}
-  <section aria-label={`Posts tagged ${tag}`}>
-    <div class="border-hairline border-t *:last:border-b-0">
-      {posts.map((post) => <PostRow post={post} />)}
-    </div>
-  </section>
-
-  <footer class="border-hairline mt-xl border-t pt-md">
-    <a class="text-accent hover:text-accent-hover" href={routeUrl("/blog")}>
-      ← All posts
-    </a>
-  </footer>
-</BaseLayout>
+  {posts.map((post) => <PostRow post={post} />)}
+</ListPage>

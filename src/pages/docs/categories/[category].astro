@@ -1,7 +1,6 @@
 ---
 import DocRow from "../../../components/DocRow.astro";
-import PageIntro from "../../../components/PageIntro.astro";
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ListPage from "../../../layouts/ListPage.astro";
 import { docCategories, type DocCategory, type DocSummary } from "../../../lib/docs.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
@@ -19,35 +18,25 @@ export async function getStaticPaths() {
 
 type Props = {
   readonly category: DocCategory;
+  /* Non-empty by type: a category exists only by being on a doc. */
   readonly docs: readonly [DocSummary, ...DocSummary[]];
 };
 
 const { category, docs } = Astro.props;
+
+const count = `${docs.length} guide${docs.length === 1 ? "" : "s"}`;
 ---
 
-{/* `document` chrome, like every other page under /docs. */}
-<BaseLayout
+<ListPage
   title={`${category} docs`}
   description={`Reference and troubleshooting guides filed under ${category}.`}
   chrome="document"
+  eyebrow="Category"
+  heading={category}
+  lede={`${count} filed under ${category}.`}
+  label={`Docs in ${category}`}
+  empty="No docs published yet."
+  back={{ href: routeUrl("/docs"), label: "All docs" }}
 >
-  <PageIntro
-    kind="page"
-    eyebrow="Category"
-    title={category}
-    lede={`${docs.length} guide${docs.length === 1 ? "" : "s"} filed under ${category}.`}
-  />
-
-  {/* Non-empty by type: a category exists only by being on a doc. */}
-  <section aria-label={`Docs in ${category}`}>
-    <div class="border-hairline border-t *:last:border-b-0">
-      {docs.map((doc) => <DocRow doc={doc} />)}
-    </div>
-  </section>
-
-  <footer class="border-hairline mt-xl border-t pt-md">
-    <a class="text-accent hover:text-accent-hover" href={routeUrl("/docs")}>
-      ← All docs
-    </a>
-  </footer>
-</BaseLayout>
+  {docs.map((doc) => <DocRow doc={doc} />)}
+</ListPage>

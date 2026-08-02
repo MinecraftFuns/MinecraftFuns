@@ -1,0 +1,39 @@
+---
+import BackLink from "../components/BackLink.astro";
+import BaseLayout from "./BaseLayout.astro";
+import type { Chrome } from "./chrome.ts";
+
+/**
+ * A page that is a header, a body of prose, and a way back.
+ *
+ * Both long-form pages were this shape written twice. The header slot is what
+ * keeps the post and the doc distinct: they pass different components, because
+ * a doc is not a post missing a date, and this layout never looks inside.
+ *
+ * That split is deliberate and it has a cost, which is that `ArticleHeader`
+ * and `DocHeader` still spell out the same meta line and the same lede. The
+ * trade is that the two headers can diverge on purpose while the page around
+ * them cannot diverge by accident, and the page around them is the part that
+ * had already drifted.
+ */
+type Props = {
+  readonly title: string;
+  readonly description: string;
+  readonly chrome?: Chrome;
+  readonly back: { readonly href: string; readonly label: string };
+};
+
+const { title, description, chrome, back } = Astro.props;
+---
+
+<BaseLayout title={title} description={description} type="article" chrome={chrome}>
+  <article class="pb-lg">
+    <slot name="header" />
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    <BackLink href={back.href} label={back.label} />
+  </article>
+</BaseLayout>

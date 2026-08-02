@@ -1,0 +1,67 @@
+---
+import BackLink from "../components/BackLink.astro";
+import PageIntro from "../components/PageIntro.astro";
+import BaseLayout from "./BaseLayout.astro";
+import type { Chrome } from "./chrome.ts";
+
+/**
+ * A page that is an introduction followed by a list of rows.
+ *
+ * Four pages were this shape written out four times: both indexes and both
+ * taxonomy pages. Each carried its own copy of the section wrapper, the rule
+ * above the list, the `*:last:border-b-0` that closes it, and, twice, an empty
+ * state. They agreed, but only because they were written the same week; the
+ * home page's list already differs, having no rule above it.
+ *
+ * What varies between the four is the row component and the words. Everything
+ * structural is here.
+ *
+ * The empty state reads the slot rather than taking a count. A `count` prop
+ * would let a page claim one number and render another, and the honest
+ * question is not "how many items are there" but "did anything render".
+ * Rendering the slot first answers exactly that, so the two cannot disagree.
+ */
+type Props = {
+  /** The document title. Distinct from `heading`, which is the page's h1. */
+  readonly title: string;
+  readonly description: string;
+  readonly chrome?: Chrome;
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly lede: string;
+  /** Names the list for assistive technology. */
+  readonly label: string;
+  /** Shown in place of the list when nothing rendered. */
+  readonly empty: string;
+  /** Present on pages that are a slice of a larger index. */
+  readonly back?: { readonly href: string; readonly label: string };
+};
+
+const { title, description, chrome, eyebrow, heading, lede, label, empty, back } =
+  Astro.props;
+
+const rows = await Astro.slots.render("default");
+const isEmpty = rows.trim() === "";
+---
+
+<BaseLayout title={title} description={description} chrome={chrome}>
+  <PageIntro kind="page" eyebrow={eyebrow} title={heading} lede={lede} />
+
+  <slot name="browse" />
+
+  <section aria-label={label}>
+    {
+      isEmpty ? (
+        <p class="text-ink-subtle py-lg">{empty}</p>
+      ) : (
+        /* This list has no section head above it, so it supplies the rule that
+           a head would otherwise draw. */
+        <div class="border-hairline border-t *:last:border-b-0">
+          <Fragment set:html={rows} />
+        </div>
+      )
+    }
+  </section>
+
+  {back !== undefined && <BackLink href={back.href} label={back.label} />}
+</BaseLayout>

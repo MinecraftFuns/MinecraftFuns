@@ -1,8 +1,7 @@
 ---
 import DocCategories from "../../components/DocCategories.astro";
 import DocRow from "../../components/DocRow.astro";
-import PageIntro from "../../components/PageIntro.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import ListPage from "../../layouts/ListPage.astro";
 import { docCategories, docSummaries } from "../../lib/docs.ts";
 
 const docs = await docSummaries();
@@ -12,33 +11,16 @@ const docs = await docSummaries();
 const categories = (await docCategories()).map((taxon) => taxon.label);
 ---
 
-<BaseLayout
+<ListPage
   title="Docs"
   description="Reference and troubleshooting guides by Joe Fang."
   chrome="document"
+  eyebrow="Docs"
+  heading="Guides worth writing down once."
+  lede="Reference pages and troubleshooting notes. Read when something breaks, rather than in the order they were written."
+  label="All docs"
+  empty="No docs published yet."
 >
-  <PageIntro
-    kind="page"
-    eyebrow="Docs"
-    title="Guides worth writing down once."
-    lede="Reference pages and troubleshooting notes. Read when something breaks, rather than in the order they were written."
-  />
-
-  <DocCategories categories={categories} />
-
-  <section aria-label="All docs">
-    {
-      docs.length === 0 ? (
-        <p class="text-ink-subtle py-lg">No docs published yet.</p>
-      ) : (
-        /* This list has no section head above it, so it supplies the rule that
-           a head would otherwise draw. */
-        <div class="border-hairline border-t *:last:border-b-0">
-          {docs.map((doc) => (
-            <DocRow doc={doc} />
-          ))}
-        </div>
-      )
-    }
-  </section>
-</BaseLayout>
+  <DocCategories slot="browse" categories={categories} />
+  {docs.map((doc) => <DocRow doc={doc} />)}
+</ListPage>

@@ -2,7 +2,7 @@
 import { render } from "astro:content";
 
 import DocHeader from "../../components/DocHeader.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import ArticlePage from "../../layouts/ArticlePage.astro";
 import { publishedDocs, summarise, type PublishedDoc } from "../../lib/docs.ts";
 import { routeUrl } from "../../lib/url.ts";
 
@@ -27,28 +27,19 @@ const { Content } = await render(entry);
 const { readingMinutes: minutes, category } = summarise(doc);
 ---
 
-<BaseLayout
+<ArticlePage
   title={entry.data.title}
   description={entry.data.description}
-  type="article"
   chrome="document"
+  back={{ href: routeUrl("/docs"), label: "All docs" }}
 >
-  <article class="pb-lg">
-    <DocHeader
-      title={entry.data.title}
-      description={entry.data.description}
-      category={category}
-      readingMinutes={minutes}
-    />
+  <DocHeader
+    slot="header"
+    title={entry.data.title}
+    description={entry.data.description}
+    category={category}
+    readingMinutes={minutes}
+  />
 
-    <div class="prose">
-      <Content />
-    </div>
-
-    <footer class="border-hairline mt-xl border-t pt-md">
-      <a class="text-accent hover:text-accent-hover" href={routeUrl("/docs")}>
-        ← All docs
-      </a>
-    </footer>
-  </article>
-</BaseLayout>
+  <Content />
+</ArticlePage>

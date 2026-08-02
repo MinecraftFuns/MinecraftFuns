@@ -1,8 +1,7 @@
 ---
-import PageIntro from "../../components/PageIntro.astro";
 import PostRow from "../../components/PostRow.astro";
 import PostTags from "../../components/PostTags.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import ListPage from "../../layouts/ListPage.astro";
 import { postSummaries, postTags } from "../../lib/posts.ts";
 
 const posts = await postSummaries();
@@ -14,32 +13,15 @@ const posts = await postSummaries();
 const tags = (await postTags()).map((taxon) => taxon.label);
 ---
 
-<BaseLayout
+<ListPage
   title="Blog"
   description="Technical notes on software, systems, and cognitive science by Joe Fang."
+  eyebrow="Blog"
+  heading="Technical notes, written down so I stop re-deriving them."
+  lede="Mostly software and systems, occasionally cognitive science. Written for the version of me who hits the same problem in a year."
+  label="All posts"
+  empty="No posts published yet."
 >
-  <PageIntro
-    kind="page"
-    eyebrow="Blog"
-    title="Technical notes, written down so I stop re-deriving them."
-    lede="Mostly software and systems, occasionally cognitive science. Written for the version of me who hits the same problem in a year."
-  />
-
-  <PostTags tags={tags} />
-
-  <section aria-label="All posts">
-    {
-      posts.length === 0 ? (
-        <p class="text-ink-subtle py-lg">No posts published yet.</p>
-      ) : (
-        /* This list has no section head above it, so it supplies the rule that
-           a head would otherwise draw. */
-        <div class="border-hairline border-t *:last:border-b-0">
-          {posts.map((post) => (
-            <PostRow post={post} />
-          ))}
-        </div>
-      )
-    }
-  </section>
-</BaseLayout>
+  <PostTags slot="browse" tags={tags} />
+  {posts.map((post) => <PostRow post={post} />)}
+</ListPage>

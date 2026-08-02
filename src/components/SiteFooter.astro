@@ -21,7 +21,14 @@ const fingerprint = await siteFingerprint();
     <div class="flex flex-col gap-2xs">
       <p class="text-ink text-control">{site.name}</p>
       <p class="text-caption">
-        © {year} · Built with <a class="text-accent hover:text-accent-hover" href="https://astro.build">Astro</a>
+        {/*
+          Underlined, not merely coloured. This link sits inside a sentence,
+          which is the case WCAG 1.4.1 is about and the one the audit reports
+          as serious on every page: colour alone is not a distinction. The
+          standalone links elsewhere carry no underline because they are not
+          in running text.
+        */}
+        © {year} · Built with <a class="text-accent hover:text-accent-hover underline" href="https://astro.build">Astro</a>
       </p>
     </div>
 
