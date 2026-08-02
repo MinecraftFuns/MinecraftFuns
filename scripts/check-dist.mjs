@@ -104,6 +104,59 @@ export const candidatePaths = (reference, base) => {
   return [bare, `${bare}/index.html`, `${bare}.html`];
 };
 
+/**
+ * Host directive files, parsed back out of the artifact.
+ *
+ * Re-parsed rather than imported, for the reason the whole module keeps its
+ * distance: a check that shares the renderer shares its bugs. These parsers are
+ * deliberately dumb — the formats are line-oriented, and the point is to read
+ * what actually shipped.
+ */
+export const parseRedirects = (text) =>
+  text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line !== "" && !line.startsWith("#"))
+    .map((line) => line.split(/\s+/))
+    .filter((fields) => fields.length >= 2)
+    .map(([from, to, status]) => ({ from, to, status }));
+
+/** Pattern lines are unindented; the operations beneath them are not. */
+export const parseHeaderPatterns = (text) =>
+  text
+    .split("\n")
+    .filter((line) => line.trim() !== "" && !line.startsWith("#") && !/^\s/.test(line))
+    .map((line) => line.trim());
+
+/**
+ * Directives that describe a site other than the one that was built.
+ *
+ * This is the anti-rot check. The legacy files redirected source files that had
+ * stopped being published and pointed a favicon at a CDN, and stayed that way
+ * for years because nothing ever asked whether the paths were real. A rule is a
+ * claim; these are the claims the artifact can settle.
+ */
+export const hostDirectiveViolations = ({ redirects, headerPatterns, resolves }) => {
+  const found = [];
+
+  redirects.forEach(({ from, to }) => {
+    // A destination leaving the site cannot be checked from here.
+    if (!to.startsWith("/") || to.startsWith("//")) return;
+    if (!resolves(to)) {
+      found.push(`_redirects: ${from} points at ${to}, which no file satisfies`);
+    }
+  });
+
+  headerPatterns.forEach((pattern) => {
+    const prefix = pattern.endsWith("*") ? pattern.slice(0, -1) : pattern;
+    if (!resolves(pattern.endsWith("*") ? prefix : pattern, pattern.endsWith("*"))) {
+      found.push(`_headers: ${pattern} matches nothing that was built`);
+    }
+  });
+
+  return found;
+};
+
 /** Z-Base-32, RFC 6189 section 5.1.6. Deliberately not RFC 4648's alphabet. */
 const ZBASE32_NAME = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{32}$/;
 
@@ -327,6 +380,34 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
       );
     }
   }
+
+  // -- Host directives -----------------------------------------------------
+  /*
+   * `resolves` answers both questions the directives raise: whether an exact
+   * path is served, and whether a prefix covers anything at all. Both are set
+   * lookups over the walk that already happened.
+   */
+  const resolves = (reference, isPrefix = false) => {
+    if (!isPrefix) {
+      return candidatePaths(reference, base).some((path) => present.has(path));
+    }
+    const normalised = normaliseBase(base);
+    if (!reference.startsWith(normalised)) return false;
+    const within = reference.slice(normalised.length);
+    return relativeFiles.some((path) => path.startsWith(within));
+  };
+
+  const directiveFiles = await Promise.all(
+    ["_redirects", "_headers"].map(async (name) =>
+      present.has(name) ? readFile(join(dist, name), "utf8") : "",
+    ),
+  );
+
+  hostDirectiveViolations({
+    redirects: parseRedirects(directiveFiles[0]),
+    headerPatterns: parseHeaderPatterns(directiveFiles[1]),
+    resolves,
+  }).forEach((detail) => found.push(violation("host-directives", detail)));
 
   // -- Web Key Directory ---------------------------------------------------
   const HU = join("\.well-known", "openpgpkey", "hu");

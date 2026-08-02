@@ -8,6 +8,9 @@ import {
   candidatePaths,
   isCanonicalWithin,
   wkdViolations,
+  parseRedirects,
+  parseHeaderPatterns,
+  hostDirectiveViolations,
   extractReferences,
   inspect,
   isInternal,
@@ -200,6 +203,75 @@ describe("isCanonicalWithin", () => {
   it("is total — unparseable input is rejected, not thrown", () => {
     assert.doesNotThrow(() => isCanonicalWithin("not a url", SITE, "/"));
     assert.equal(isCanonicalWithin("not a url", SITE, "/"), false);
+  });
+});
+
+describe("host directive parsing", () => {
+  it("reads redirect fields and ignores comments and blank lines", () => {
+    const text = "# a comment\n\n/gpg /pgp 301\n/pgp.* /pgp 301\n";
+    assert.deepEqual(parseRedirects(text), [
+      { from: "/gpg", to: "/pgp", status: "301" },
+      { from: "/pgp.*", to: "/pgp", status: "301" },
+    ]);
+  });
+
+  it("reads header patterns but not the operations indented beneath them", () => {
+    const text = "# c\n/pgp\n  content-type: application/pgp-keys\n\n/x/*\n  ! link\n";
+    assert.deepEqual(parseHeaderPatterns(text), ["/pgp", "/x/*"]);
+  });
+
+  it("is total on an empty file", () => {
+    assert.deepEqual(parseRedirects(""), []);
+    assert.deepEqual(parseHeaderPatterns(""), []);
+  });
+});
+
+describe("hostDirectiveViolations", () => {
+  const resolves = (reference, isPrefix = false) =>
+    isPrefix ? reference === "/real/" : reference === "/real";
+
+  it("passes directives whose paths were built", () => {
+    assert.deepEqual(
+      hostDirectiveViolations({
+        redirects: [{ from: "/old", to: "/real", status: "301" }],
+        headerPatterns: ["/real", "/real/*"],
+        resolves,
+      }),
+      [],
+    );
+  });
+
+  /* Exactly how the legacy files rotted: rules outliving what they described. */
+  it("catches a redirect to a path no file satisfies", () => {
+    const found = hostDirectiveViolations({
+      redirects: [{ from: "/old", to: "/declaration", status: "301" }],
+      headerPatterns: [],
+      resolves,
+    });
+    assert.match(found[0], /\/declaration, which no file satisfies/);
+  });
+
+  it("catches a header rule matching nothing that was built", () => {
+    const found = hostDirectiveViolations({
+      redirects: [],
+      headerPatterns: ["/gone/*"],
+      resolves,
+    });
+    assert.match(found[0], /matches nothing that was built/);
+  });
+
+  it("leaves destinations on other origins alone — it cannot check them", () => {
+    assert.deepEqual(
+      hostDirectiveViolations({
+        redirects: [
+          { from: "/a", to: "https://example.test/x", status: "301" },
+          { from: "/b", to: "//cdn.example.test/x", status: "301" },
+        ],
+        headerPatterns: [],
+        resolves,
+      }),
+      [],
+    );
   });
 });
 

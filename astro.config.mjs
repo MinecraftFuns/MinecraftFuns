@@ -62,6 +62,26 @@ export default defineConfig({
    * them invites a crawler to index a binary blob.
    */
   integrations: [
+    /*
+     * `_headers` and `_redirects` are generated, not static, so their paths
+     * follow the deployment's base instead of assuming the origin root. They
+     * cannot live in `src/pages`: Astro excludes any route file whose name
+     * starts with an underscore, and these two must carry exactly those names.
+     * `injectRoute` maps a URL onto an entrypoint wherever the file happens to
+     * sit, which is the documented way past that.
+     */
+    {
+      name: "host-directives",
+      hooks: {
+        "astro:config:setup": ({ injectRoute }) => {
+          injectRoute({ pattern: "/_headers", entrypoint: "./src/routes/headers.ts" });
+          injectRoute({
+            pattern: "/_redirects",
+            entrypoint: "./src/routes/redirects.ts",
+          });
+        },
+      },
+    },
     sitemap({
       filter: (page) => !/\/(pgp|\.well-known)\b/.test(new URL(page).pathname),
     }),
