@@ -1,0 +1,37 @@
+---
+import DocRow from "../../components/DocRow.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { docSummaries } from "../../lib/docs.ts";
+
+const docs = await docSummaries();
+---
+
+<BaseLayout
+  title="Docs"
+  description="Reference and troubleshooting guides by Joe Fang."
+  chrome="document"
+>
+  <PageIntro
+    kind="page"
+    eyebrow="Docs"
+    title="Guides worth writing down once."
+    lede="Reference pages and troubleshooting notes. Read when something breaks, rather than in the order they were written."
+  />
+
+  <section aria-label="All docs">
+    {
+      docs.length === 0 ? (
+        <p class="text-ink-subtle py-lg">No docs published yet.</p>
+      ) : (
+        /* This list has no section head above it, so it supplies the rule that
+           a head would otherwise draw. */
+        <div class="border-hairline border-t *:last:border-b-0">
+          {docs.map((doc) => (
+            <DocRow doc={doc} />
+          ))}
+        </div>
+      )
+    }
+  </section>
+</BaseLayout>

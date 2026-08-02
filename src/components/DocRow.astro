@@ -1,0 +1,33 @@
+---
+import type { DocSummary } from "../lib/docs.ts";
+
+/**
+ * One row of the docs index.
+ *
+ * `PostRow` with the date column removed rather than a different design: the
+ * two lists are siblings and share every type role, so a reader moving between
+ * them sees one rhythm. What it does not share is the three-column grid, since
+ * a fixed date column reserving space for a date that never comes is a gap
+ * with a reason nobody can see.
+ */
+type Props = { readonly doc: DocSummary };
+
+const { doc } = Astro.props;
+---
+
+<a
+  class="group border-hairline flex items-baseline justify-between gap-md border-b py-md no-underline"
+  href={doc.href}
+>
+  <div>
+    <p class="text-ink-tertiary font-mono text-caption">{doc.category}</p>
+    <h3 class="text-ink group-hover:text-accent mt-3xs text-row-title transition-colors">
+      {doc.title}
+    </h3>
+    <p class="text-ink-subtle mt-3xs max-w-measure text-body-sm">{doc.description}</p>
+  </div>
+
+  <span class="text-ink-tertiary shrink-0 font-mono text-caption whitespace-nowrap">
+    {doc.readingMinutes} min
+  </span>
+</a>

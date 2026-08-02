@@ -29,6 +29,10 @@ const blog = defineCollection({
   schema: z.object({
     title: z.string().min(1),
     description: z.string().min(1),
+    /** Drafts are written but never built. Default keeps frontmatter terse. */
+    draft: z.boolean().default(false),
+    /** The blog's own taxonomy. See `PostTag`; a doc's category is not one. */
+    tags: z.array(z.string()).default([]),
     /*
      * Refine proves validity, transform performs the cast. Splitting them means
      * the failure is reported by Zod with the offending file attached, rather
@@ -49,10 +53,40 @@ const blog = defineCollection({
         message: "expected a real YYYY-MM-DD calendar date (America/Toronto)",
       })
       .transform((raw) => isoDate(raw)),
-    /** Drafts are written but never built. Default keeps frontmatter terse. */
-    draft: z.boolean().default(false),
-    tags: z.array(z.string()).default([]),
   }),
 });
 
-export const collections = { blog };
+/**
+ * Reference pages, read when something breaks rather than when it is written.
+ *
+ * A separate domain, not a second flavour of post. The fields it shares with
+ * the blog are written out again on purpose: the two collections agree today
+ * by coincidence rather than by contract, and factoring the overlap into one
+ * shape would mean every later change to how a post is described arrives in
+ * the docs whether it suits them or not.
+ *
+ * Deliberately dateless. A post is an event and its date is part of what it
+ * means; a troubleshooting guide is a claim about how something works now, and
+ * stamping it invites a reader to discount it for being old rather than for
+ * being wrong. Nothing here is chronological, so the ordering is by title.
+ *
+ * One `category`, not a list of tags. A doc belongs to a subject; tagging is
+ * an affordance for browsing a stream, and a reference section is not one. The
+ * value is read as `DocCategory`, which shares no type with a post's tag even
+ * when the two spell the same word, so nothing can quietly pool them.
+ *
+ * The glob stays permissive for the reason the blog's does: `*.md` would match
+ * only the flat layout and quietly ignore a file somebody nested, where
+ * `**\/*.md` picks it up and `lib/docs.ts` refuses it by name.
+ */
+const docs = defineCollection({
+  loader: glob({ base: "./src/content/docs", pattern: "**/*.md" }),
+  schema: z.object({
+    title: z.string().min(1),
+    description: z.string().min(1),
+    draft: z.boolean().default(false),
+    category: z.string().min(1),
+  }),
+});
+
+export const collections = { blog, docs };

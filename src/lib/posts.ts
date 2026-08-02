@@ -28,13 +28,26 @@ export type PublishedPost = {
   readonly path: PostPath;
 };
 
+declare const postTagBrand: unique symbol;
+
+/**
+ * A label in the blog's taxonomy.
+ *
+ * Branded so it cannot be confused with `DocCategory`, which is a label in a
+ * different one. The two are plain strings at runtime and may well spell the
+ * same word, but "networking" as a post tag and "networking" as a doc category
+ * are claims about different collections; a function that pools them is a bug
+ * the type system can refuse rather than a convention somebody must remember.
+ */
+export type PostTag = string & { readonly [postTagBrand]: true };
+
 export type PostSummary = {
   readonly title: string;
   readonly description: string;
   readonly href: string;
   readonly date: IsoDate;
   readonly readingMinutes: number;
-  readonly tags: readonly string[];
+  readonly tags: readonly PostTag[];
 };
 
 export const summarise = ({ entry, path }: PublishedPost): PostSummary => ({
@@ -43,7 +56,10 @@ export const summarise = ({ entry, path }: PublishedPost): PostSummary => ({
   href: routeUrl(hrefOf(path)),
   date: entry.data.date,
   readingMinutes: readingMinutes(entry.body ?? ""),
-  tags: entry.data.tags,
+  /* Branded per element rather than by casting the array: `string[]` and
+     `PostTag[]` do not overlap as types, and forcing that through `unknown`
+     would assert something the element-wise narrowing actually proves. */
+  tags: entry.data.tags.map((tag) => tag as PostTag),
 });
 
 /**

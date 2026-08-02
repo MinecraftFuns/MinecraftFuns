@@ -1,12 +1,19 @@
 ---
+import type { PostTag } from "../lib/posts.ts";
+
 /**
  * A post's tags, as pills.
+ *
+ * Typed to the blog's taxonomy, so a doc's category cannot be rendered here
+ * even though it is a string too. That is what branding them buys: the two
+ * label sets index different collections, and this component would otherwise
+ * have drawn either without complaint.
  *
  * Renders nothing at all when there are none, so no call site has to guard;
  * the empty list already means "no tags" and a second expression of that in the
  * page would be a condition somebody could get backwards.
  */
-type Props = { readonly tags: readonly string[] };
+type Props = { readonly tags: readonly PostTag[] };
 
 const { tags } = Astro.props;
 ---

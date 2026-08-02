@@ -1,4 +1,5 @@
 import { invalid, ok, type Parsed } from "./adt.ts";
+import { SLUG_SOURCE } from "./slug.ts";
 import { monthOf, yearOf, type IsoDate } from "./time.ts";
 
 /**
@@ -33,7 +34,7 @@ export type PostPath = {
  * deeper than `YYYY/MM/slug` parses; an extra folder level is a mistake
  * rather than a silently accepted nesting.
  */
-const POST_ID = /^(\d{4})\/(0[1-9]|1[0-2])\/([a-z0-9]+(?:-[a-z0-9]+)*)$/;
+const POST_ID = new RegExp(`^(\\d{4})/(0[1-9]|1[0-2])/(${SLUG_SOURCE})$`);
 
 /** Total: every string maps to a variant, none throws. */
 export const parsePostPath = (id: string): Parsed<PostPath> => {

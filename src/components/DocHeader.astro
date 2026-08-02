@@ -1,0 +1,38 @@
+---
+import type { DocCategory } from "../lib/docs.ts";
+import { INTRO } from "./intro.ts";
+
+/**
+ * A doc's opening block.
+ *
+ * Deliberately not `ArticleHeader` with the date made optional. A doc is not a
+ * post missing a field: it carries no date because it is a claim about how
+ * something works now, and one category rather than tags because a reference
+ * page belongs to a subject instead of joining a stream. Sharing the component
+ * would have meant every later change to how a post is introduced landing here
+ * too, which is the coupling and not a saving.
+ *
+ * `INTRO` is shared, because page-top spacing and title size are a decision
+ * about this site rather than about the blog.
+ */
+type Props = {
+  readonly title: string;
+  readonly description: string;
+  readonly category: DocCategory;
+  readonly readingMinutes: number;
+};
+
+const { title, description, category, readingMinutes } = Astro.props;
+
+const { spacing, title: titleClass } = INTRO.page;
+---
+
+<header class:list={["border-hairline mb-lg border-b", spacing]}>
+  <p class="text-ink-tertiary flex items-center gap-2xs font-mono text-caption">
+    <span>{category}</span>
+    <span aria-hidden="true">·</span>
+    <span>{readingMinutes} min read</span>
+  </p>
+  <h1 class:list={["text-ink mt-xs", titleClass]}>{title}</h1>
+  <p class="text-ink-muted mt-sm max-w-measure text-body-lg">{description}</p>
+</header>

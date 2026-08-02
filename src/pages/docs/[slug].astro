@@ -1,0 +1,54 @@
+---
+import { render } from "astro:content";
+
+import DocHeader from "../../components/DocHeader.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { publishedDocs, summarise, type PublishedDoc } from "../../lib/docs.ts";
+import { routeUrl } from "../../lib/url.ts";
+
+/*
+ * `[slug]`, not `[...slug]`: docs are flat, and a single segment says so in
+ * the filename. A rest parameter would accept the nested route that
+ * `publishedDocs` refuses to build.
+ */
+export async function getStaticPaths() {
+  const docs = await publishedDocs();
+  return docs.map((doc) => ({ params: { slug: doc.slug }, props: { doc } }));
+}
+
+type Props = { readonly doc: PublishedDoc };
+
+const { doc } = Astro.props;
+const { entry } = doc;
+const { Content } = await render(entry);
+
+/* Through `summarise` so the header and the index row cannot report different
+   reading times, or a different category, for the same page. */
+const { readingMinutes: minutes, category } = summarise(doc);
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  type="article"
+  chrome="document"
+>
+  <article class="pb-lg">
+    <DocHeader
+      title={entry.data.title}
+      description={entry.data.description}
+      category={category}
+      readingMinutes={minutes}
+    />
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <footer class="border-hairline mt-xl border-t pt-md">
+      <a class="text-accent hover:text-accent-hover" href={routeUrl("/docs")}>
+        ← All docs
+      </a>
+    </footer>
+  </article>
+</BaseLayout>
