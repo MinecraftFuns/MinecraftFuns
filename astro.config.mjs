@@ -16,7 +16,7 @@ import { defineConfig } from "astro/config";
  * otherwise pass in development and 404 in production.
  */
 const site = process.env.SITE_URL ?? "https://minecraftfuns.github.io";
-const base = process.env.SITE_BASE ?? "/MinecraftFuns";
+const base = process.env.SITE_BASE ?? "/MinecraftFuns/";
 
 // Fail the build on a malformed origin rather than emitting broken canonical
 // URLs and sitemaps. Cheap, and the error names the offending value.
