@@ -1,11 +1,50 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isWithin, joinBase, joinRoute } from "./url.ts";
+import { classifyHref, isWithin, joinBase, joinRoute } from "./url.ts";
 
 /** The two base paths this project actually deploys to. */
 const PROJECT_BASE = "/MinecraftFuns/";
 const ROOT_BASE = "/";
+
+describe("classifyHref", () => {
+  it("calls anything with a scheme absolute", () => {
+    // The cases a hand-written scheme grammar has to get right, including a
+    // non-special scheme and a single-letter one.
+    [
+      "https://joefang.org/pgp",
+      "http://example.com",
+      "mailto:someone@example.com",
+      "matrix:u/multiset",
+      "c:/foo",
+    ].forEach((href) => assert.equal(classifyHref(href), "absolute", href));
+  });
+
+  it("separates protocol-relative and fragment hrefs from schemes", () => {
+    // Neither parses as an absolute URL, so neither is reachable by the same
+    // test — which is exactly why one boolean could not express this.
+    assert.equal(classifyHref("//cdn.example.com/asset.js"), "authority");
+    assert.equal(classifyHref("#main"), "fragment");
+  });
+
+  it("claims site paths, including one whose segment contains a colon", () => {
+    ["/blog", "blog", "", "/", "2026/08/post", "/foo:bar"].forEach((href) =>
+      assert.equal(classifyHref(href), "site", href),
+    );
+  });
+
+  it("is a case analysis, not a priority list — the kinds are disjoint", () => {
+    const hrefs = ["https://x", "//x", "#x", "/x", "", "://"];
+    hrefs.forEach((href) => {
+      const matches = [
+        URL.canParse(href),
+        href.startsWith("//"),
+        href.startsWith("#"),
+      ].filter(Boolean).length;
+      assert.ok(matches <= 1, `${href} matched ${matches} kinds`);
+    });
+  });
+});
 
 describe("joinBase", () => {
   it("prefixes rooted paths under a project base", () => {
@@ -107,12 +146,49 @@ describe("joinRoute", () => {
   });
 
   it("is total — no input throws", () => {
-    const paths = ["", "/", "//", "?", "#", "a", "/a/b/c/", "?#"];
+    const paths = ["", "/", "//", "?", "#", "a", "/a/b/c/", "?#", "://", "%"];
     [PROJECT_BASE, ROOT_BASE, ""].forEach((base) => {
       paths.forEach((path) => {
         assert.doesNotThrow(() => joinRoute(base, path));
       });
     });
+  });
+});
+
+/*
+ * Properties the WHATWG parser establishes that the previous string handling
+ * did not. These are the reason for the upgrade, so they are asserted rather
+ * than assumed.
+ */
+describe("mounting is prefixing, not reference resolution", () => {
+  it("keeps the deployment prefix that new URL(path, base) would discard", () => {
+    // `new URL("/blog", ".../MinecraftFuns/")` yields "/blog": a rooted path
+    // replaces the base path outright. Every GitHub Pages link depends on this
+    // NOT happening.
+    assert.equal(joinRoute(PROJECT_BASE, "/blog"), "/MinecraftFuns/blog/");
+    assert.equal(
+      new URL("/blog", "https://mount.invalid/MinecraftFuns/").pathname,
+      "/blog",
+      "reference resolution still behaves as documented",
+    );
+  });
+
+  it("keeps the base's final segment, which an unterminated base would lose", () => {
+    assert.equal(joinRoute("/MinecraftFuns", "/blog"), "/MinecraftFuns/blog/");
+  });
+
+  it("removes dot segments rather than emitting them into an href", () => {
+    assert.equal(joinRoute(PROJECT_BASE, "/blog/../about"), "/MinecraftFuns/about/");
+  });
+
+  it("percent-encodes what is not legal in a path", () => {
+    assert.equal(joinBase(PROJECT_BASE, "/a b.svg"), "/MinecraftFuns/a%20b.svg");
+    assert.equal(joinRoute(ROOT_BASE, "/café"), "/caf%C3%A9/");
+  });
+
+  it("does not re-encode an already-encoded path", () => {
+    const once = joinBase(ROOT_BASE, "/a b.svg");
+    assert.equal(joinBase(ROOT_BASE, once), once);
   });
 });
 

@@ -6,6 +6,7 @@ import { describe, it } from "node:test";
 
 import {
   candidatePaths,
+  isCanonicalWithin,
   extractReferences,
   inspect,
   isInternal,
@@ -120,6 +121,71 @@ describe("candidatePaths", () => {
 
   it("yields nothing for a reference outside the base", () => {
     assert.deepEqual(candidatePaths("/work", "/MinecraftFuns/"), []);
+  });
+
+  it("strips a fragment that itself contains a question mark", () => {
+    // The standard splits the fragment first; a pattern reaching for the
+    // earliest of `?` or `#` would keep "?y" as part of the filename.
+    assert.ok(
+      candidatePaths("/MinecraftFuns/work#a?y", "/MinecraftFuns/").includes(
+        "work/index.html",
+      ),
+    );
+  });
+
+  it("decodes an escaped path so it can name a file on disk", () => {
+    assert.ok(
+      candidatePaths("/MinecraftFuns/caf%C3%A9/", "/MinecraftFuns/").includes(
+        "café/index.html",
+      ),
+    );
+  });
+
+  it("yields nothing for a protocol-relative reference at the root base", () => {
+    // "//evil.example/x" starts with "/" and so passed the old prefix test.
+    assert.deepEqual(candidatePaths("//evil.example/x", "/"), []);
+  });
+
+  it("is total — a malformed escape does not throw", () => {
+    assert.doesNotThrow(() => candidatePaths("/MinecraftFuns/%ZZ", "/MinecraftFuns/"));
+  });
+});
+
+describe("isCanonicalWithin", () => {
+  const SITE = "https://minecraftfuns.github.io";
+
+  it("accepts a canonical under the deployment", () => {
+    assert.ok(
+      isCanonicalWithin(`${SITE}/MinecraftFuns/blog/`, SITE, "/MinecraftFuns/"),
+    );
+  });
+
+  it("rejects a canonical on another origin", () => {
+    assert.equal(
+      isCanonicalWithin("https://evil.example/MinecraftFuns/blog/", SITE, "/MinecraftFuns/"),
+      false,
+    );
+  });
+
+  it("rejects a canonical outside the base path", () => {
+    assert.equal(isCanonicalWithin(`${SITE}/elsewhere/`, SITE, "/MinecraftFuns/"), false);
+  });
+
+  it("is unmoved by a trailing slash on the configured site", () => {
+    // The string-prefix version built "https://…//MinecraftFuns/" here and
+    // failed a build whose canonical tags were entirely correct.
+    assert.ok(
+      isCanonicalWithin(`${SITE}/MinecraftFuns/blog/`, `${SITE}/`, "/MinecraftFuns/"),
+    );
+  });
+
+  it("normalises host case and the default port", () => {
+    assert.ok(isCanonicalWithin("https://JoeFang.org:443/blog/", "https://joefang.org", "/"));
+  });
+
+  it("is total — unparseable input is rejected, not thrown", () => {
+    assert.doesNotThrow(() => isCanonicalWithin("not a url", SITE, "/"));
+    assert.equal(isCanonicalWithin("not a url", SITE, "/"), false);
   });
 });
 

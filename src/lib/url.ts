@@ -8,61 +8,113 @@
  *
  * Two kinds of thing get linked, and they have different canonical forms. A
  * *route* resolves to a directory in the built output and ends in a slash; an
- * *asset* resolves to a file and must not. One function served both, so it
- * could only be right about one of them — which is why internal links emitted
- * `/blog/2026/08/slug` while the canonical tag on the very same page emitted
- * `/blog/2026/08/slug/`. Splitting the two makes the distinction visible at
- * every call site.
+ * *asset* resolves to a file and must not.
  *
- * The functions are layered so the interesting ones are pure: `joinBase` and
- * `joinRoute` take the base as an argument and are directly testable outside a
- * bundler, while `assetUrl`/`routeUrl` are thin wrappers that read it from the
- * environment.
+ * On parsers. URL syntax is not a regular language: scheme handling is
+ * context-sensitive, and percent-encoding, dot-segment removal, and the
+ * query/fragment split all have spec-defined behaviour that a hand-written
+ * pattern can only approximate. Those are delegated to the platform's WHATWG
+ * parser below. The one regex that survives decides a property that genuinely
+ * *is* regular — trailing slashes on a path — which is what regular
+ * expressions are for.
  */
 
 /**
- * Anything already carrying its own authority: a scheme (`https:`, `mailto:`),
- * a protocol-relative `//host`, or a bare fragment. These must pass through
- * untouched — prefixing them would corrupt them.
+ * A syntactically valid origin that can never resolve. Mounting happens
+ * against it and the origin is then discarded; `.invalid` is reserved by
+ * RFC 2606, so a bug that lets one escape into an href is an obvious dead link
+ * rather than a live request to somebody else's server.
  */
-const SELF_ANCHORED = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;
+const MOUNT_ORIGIN = "https://mount.invalid";
 
-/** A path, and any query or fragment trailing it. The slash belongs after the
-    path and before the suffix, so the two are separated before joining. */
-const ROUTE_AND_SUFFIX = /^([^?#]*)([?#].*)?$/;
+/** Regular by nature: a suffix of one repeated character. */
+const TRAILING_SLASHES = /\/+$/;
 
 const slashTerminated = (path: string): string =>
   path.endsWith("/") ? path : `${path}/`;
 
 /**
- * Total: every (base, path) pair maps to a string, and no input throws.
+ * How an authored href relates to this deployment.
  *
- * Normalising both sides before joining is what keeps the result free of the
- * doubled slash that appears when a base ending in `/` meets a rooted path.
+ * The question is never "is this a URL" but "would prefixing this with our
+ * base path corrupt it", and three unrelated shapes answer yes. Collapsing
+ * them into one boolean is what forced the previous version to hand-write a
+ * scheme grammar: the predicate was standing in for a sum it could not name.
+ *
+ * The three are mutually exclusive — anything carrying a scheme begins with
+ * neither `//` nor `#` — so this is a case analysis rather than a priority
+ * list, and no reordering of it can change an answer.
  */
-export const joinBase = (base: string, path: string): string => {
-  if (SELF_ANCHORED.test(path)) return path;
+export type HrefKind = "absolute" | "authority" | "fragment" | "site";
 
-  const trimmedBase = base.replace(/\/+$/, "");
-  const rootedPath = path.startsWith("/") ? path : `/${path}`;
-
-  return `${trimmedBase}${rootedPath}`;
+/**
+ * Total. `URL.canParse` is the standard's own definition of an absolute URL,
+ * which is the half of this that a pattern gets wrong; the other two shapes
+ * are single-token prefixes that a pattern gets right, so they stay exact
+ * string tests rather than becoming parser calls that would answer `false`.
+ */
+export const classifyHref = (href: string): HrefKind => {
+  if (URL.canParse(href)) return "absolute";
+  if (href.startsWith("//")) return "authority";
+  if (href.startsWith("#")) return "fragment";
+  return "site";
 };
 
 /**
- * As `joinBase`, but producing the canonical form of a route.
+ * Mount `path` beneath `base`.
  *
- * A query or fragment is held aside while the slash is applied, so
- * `/about#contact` becomes `/about/#contact` rather than `/about#contact/`.
- * The About page already has addressable sections, so this is a shape the site
- * will link to rather than a hypothetical one.
+ * Deliberately *not* `new URL(path, base)`. That performs RFC 3986 reference
+ * resolution, under which a rooted path replaces the base's path outright:
+ * resolving `/blog` against `…/MinecraftFuns/` yields `/blog`, and the
+ * deployment prefix silently vanishes from every link. Mounting is prefixing.
+ * They are different operations and this site needs the second one.
+ *
+ * The parser is still the right engine, because it owns the parts that are not
+ * regular. Making the path relative and the base slash-terminated is precisely
+ * the shape under which resolution and mounting coincide — so the spec
+ * algorithm is borrowed rather than reimplemented. Both adjustments are
+ * load-bearing: an unterminated base loses its final segment.
  */
-export const joinRoute = (base: string, path: string): string => {
-  if (SELF_ANCHORED.test(path)) return path;
-
-  const [, route = "", suffix = ""] = ROUTE_AND_SUFFIX.exec(path) ?? [];
-  return `${slashTerminated(joinBase(base, route))}${suffix}`;
+const mount = (base: string, path: string): URL => {
+  const root = new URL(
+    `${base.replace(TRAILING_SLASHES, "")}/`,
+    MOUNT_ORIGIN,
+  );
+  return new URL(path.startsWith("/") ? path.slice(1) : path, root);
 };
+
+/**
+ * What each kind of target does to a mounted pathname. A total map over the
+ * closed sum, and the single point at which routes and assets differ.
+ */
+type Target = "route" | "asset";
+
+const TERMINATE: Readonly<Record<Target, (pathname: string) => string>> = {
+  route: slashTerminated,
+  asset: (pathname) => pathname,
+};
+
+/**
+ * Total: every (base, path) pair maps to a string, and no input throws.
+ *
+ * The parser hands back the query and fragment already separated from the
+ * path, so the slash lands where it belongs without any splitting of our own —
+ * `/about#contact` becomes `/about/#contact` rather than `/about#contact/`.
+ */
+const join = (base: string, path: string, target: Target): string => {
+  if (classifyHref(path) !== "site") return path;
+
+  const url = mount(base, path);
+  return `${TERMINATE[target](url.pathname)}${url.search}${url.hash}`;
+};
+
+/** Join a file path to a base. Never slash-terminated. */
+export const joinBase = (base: string, path: string): string =>
+  join(base, path, "asset");
+
+/** Join a page route to a base, in the canonical slash-terminated form. */
+export const joinRoute = (base: string, path: string): string =>
+  join(base, path, "route");
 
 /**
  * Astro injects `BASE_URL`; Node running the tests does not. Reading it
@@ -75,19 +127,19 @@ const currentBase = (): string => {
 };
 
 /** Resolve a page route against the deployment's base path. */
-export const routeUrl = (path: string): string =>
-  joinRoute(currentBase(), path);
+export const routeUrl = (path: string): string => joinRoute(currentBase(), path);
 
-/** Resolve a file against the deployment's base path. Never slash-terminated. */
+/** Resolve a file against the deployment's base path. */
 export const assetUrl = (path: string): string => joinBase(currentBase(), path);
 
 /**
  * Section containment, used to mark the current nav item.
  *
  * Both sides are slash-terminated first, which makes a plain `startsWith`
- * correct: the separator is part of the prefix, so `/blog/` matches
- * `/blog/2026/` but not `/blogroll/`. The previous version appended that
- * separator by hand precisely because targets did not carry one.
+ * correct: the separator becomes part of the prefix, so `/blog/` matches
+ * `/blog/2026/` but not `/blogroll/`. Left as string comparison deliberately —
+ * these are already-resolved pathnames from one origin, so re-parsing them
+ * would buy nothing that the mount above has not already established.
  */
 export const isWithin = (pathname: string, target: string): boolean =>
   slashTerminated(pathname).startsWith(slashTerminated(target));

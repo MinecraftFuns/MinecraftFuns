@@ -34,10 +34,33 @@ const violation = (check, detail) => ({ check, detail });
 // Pure helpers
 // ---------------------------------------------------------------------------
 
+/*
+ * This module deliberately does not import src/lib/url.ts.
+ *
+ * A gate that shares code with the thing it validates shares the thing's bugs:
+ * a mistake in link construction would be reproduced identically here and the
+ * two would agree on a wrong answer. The duplication is the independence, and
+ * it is the point. What is shared instead is the platform's URL parser, which
+ * neither side wrote.
+ */
+
+/** A syntactically valid origin that can never resolve. RFC 2606 reserves it. */
+const PROBE_ORIGIN = "https://probe.invalid";
+
 /** Normalise a base path to exactly one leading and one trailing slash. */
 export const normaliseBase = (base) => {
   const trimmed = base.replace(/^\/+|\/+$/g, "");
   return trimmed === "" ? "/" : `/${trimmed}/`;
+};
+
+/** Total: a malformed escape yields the raw text rather than throwing, so a
+    bad href becomes a reported dead link instead of a crashed gate. */
+const decodedPath = (pathname) => {
+  try {
+    return decodeURIComponent(pathname);
+  } catch {
+    return pathname;
+  }
 };
 
 /**
@@ -64,13 +87,42 @@ export const isInternal = (reference) =>
  */
 export const candidatePaths = (reference, base) => {
   const normalised = normaliseBase(base);
-  if (!reference.startsWith(normalised)) return [];
+  if (!isInternal(reference) || !reference.startsWith(normalised)) return [];
 
-  const withinSite = reference.slice(normalised.length).replace(/[?#].*$/, "");
+  /*
+   * A reference is a URL path, so its query and fragment address a position
+   * within a document rather than naming a file, and percent-encoding has to
+   * be undone before it can name one on disk. Parsing against a throwaway
+   * origin does both, and correctly: `?` and `#` are stripped by the standard's
+   * own rules instead of by a pattern guessing which comes first.
+   */
+  const { pathname } = new URL(reference, PROBE_ORIGIN);
+  const withinSite = decodedPath(pathname.slice(normalised.length));
   if (withinSite === "") return ["index.html"];
 
   const bare = withinSite.replace(/\/+$/, "");
   return [bare, `${bare}/index.html`, `${bare}.html`];
+};
+
+/**
+ * Whether a canonical URL points inside this deployment.
+ *
+ * Compared as URLs rather than as strings. `${site}${base}` is a hand-built
+ * prefix that breaks the moment SITE_URL carries a trailing slash — the
+ * doubled slash matches no correct canonical, and the gate would fail a good
+ * build. Comparing origins also normalises host case and default ports, which
+ * a prefix test silently gets wrong.
+ */
+export const isCanonicalWithin = (canonical, site, base) => {
+  const expected = URL.parse(normaliseBase(base), site);
+  const actual = URL.parse(canonical);
+
+  return (
+    expected !== null &&
+    actual !== null &&
+    actual.origin === expected.origin &&
+    actual.pathname.startsWith(expected.pathname)
+  );
 };
 
 /**
@@ -225,7 +277,7 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
     const canonical = /<link\s+rel="canonical"\s+href="([^"]*)"/i.exec(html);
     if (canonical === null) {
       found.push(violation("canonical", `${path}: no canonical link`));
-    } else if (!canonical[1].startsWith(`${site}${normalisedBase}`)) {
+    } else if (!isCanonicalWithin(canonical[1], site, base)) {
       found.push(
         violation(
           "canonical",
