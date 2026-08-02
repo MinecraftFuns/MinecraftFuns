@@ -9,7 +9,7 @@ import { invalid, ok, type Parsed } from "./adt.ts";
  * address is case-mapped, hashed with SHA-1, and the 160-bit digest encoded
  * with Z-Base-32 (RFC 6189 section 5.1.6) into a fixed 32-character string. A
  * key is then published at `/.well-known/openpgpkey/hu/<hash>` on the address's
- * own domain — the "direct" method. The domain is deliberately excluded from
+ * own domain, the "direct" method. The domain is deliberately excluded from
  * the hash, so an internationalised domain name cannot perturb it.
  *
  * SHA-1 is used here as a *naming* function, not a security one. It derives a
@@ -48,7 +48,7 @@ const ASCII_UPPER = /[A-Z]/g;
  *
  * Emphatically not `String.prototype.toLowerCase`, which is Unicode-aware and
  * would map U+0130 (LATIN CAPITAL LETTER I WITH DOT ABOVE) to "i" followed by a
- * combining dot — two code points where there was one, a different byte
+ * combining dot: two code points where there was one, a different byte
  * sequence to hash, and therefore a key published at a path no client will ever
  * request. Restricting the pattern to A-Z makes the per-character `toLowerCase`
  * exact, because over that domain the Unicode mapping and the ASCII one agree.
@@ -61,8 +61,8 @@ export const mapLocalPart = (local: string): string =>
  *
  * A fold over the bytes carrying a bit accumulator: each byte shifts eight bits
  * in, and every time five or more are available the top five are emitted. The
- * trailing branch pads a final partial group, which WKD never reaches — a
- * SHA-1 digest is 160 bits and 160 is a multiple of 5 — but a partial function
+ * trailing branch pads a final partial group, which WKD never reaches (a
+ * SHA-1 digest is 160 bits and 160 is a multiple of 5), but a partial function
  * that happens never to be called is still a partial function, so it is
  * handled and tested.
  */

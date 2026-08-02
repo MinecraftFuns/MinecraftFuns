@@ -1,7 +1,7 @@
 name: Build and deploy site
 
 # The trigger set is closed and small: the default branch, plus a manual
-# escape hatch. Pull requests deliberately do not run this workflow — a PR
+# escape hatch. Pull requests deliberately do not run this workflow: a PR
 # from a fork must never reach a job holding deployment credentials.
 on:
   push:
@@ -22,7 +22,7 @@ concurrency:
 
 env:
   # The build major. Deliberately not read from `engines.node`, which states a
-  # *minimum* (">=24") — resolving that range would silently move CI onto a new
+  # *minimum* (">=24"); resolving that range would silently move CI onto a new
   # major the day one ships.
   NODE_VERSION: "24"
 
@@ -72,7 +72,7 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Build once per destination. A base path is baked into every generated link,
-  # so the two origins genuinely need two artifacts — the same validated source
+  # so the two origins genuinely need two artifacts, the same validated source
   # compiled against different parameters, not two independent pipelines.
   # ---------------------------------------------------------------------------
   build:
@@ -85,7 +85,7 @@ jobs:
     strategy:
       # Let both targets report. They are two parameterisations of one source,
       # so knowing whether a failure is target-specific or common to both is
-      # the first diagnostic question — cancelling the sibling destroys it.
+      # the first diagnostic question; cancelling the sibling destroys it.
       # `deploy` still requires every leg to succeed.
       fail-fast: false
       matrix:
@@ -132,7 +132,7 @@ jobs:
       # appeared, and no colour outside the palette reached the stylesheet.
       #
       # It runs per target, because the base path it validates differs between
-      # them — the check is worthless if it does not match what was built.
+      # them; the check is worthless if it does not match what was built.
       - name: Check built artifact
         env:
           SITE_URL: ${{ matrix.site }}
@@ -170,7 +170,7 @@ jobs:
   # Deliberately not in `deploy`'s `needs`, so it cannot gate a release even if
   # it fails outright, and `continue-on-error` keeps a crash from reddening the
   # run. Findings land in the job summary and in a downloadable artifact. This
-  # runs in parallel with the deployment rather than after it — the point is to
+  # runs in parallel with the deployment rather than after it; the point is to
   # learn about problems, not to hold the site hostage to a slow browser.
   # ---------------------------------------------------------------------------
   audit:
@@ -201,7 +201,7 @@ jobs:
 
       # Latest stable Chrome rather than the Chromium the pinned Playwright
       # ships: the driver stays reproducible through the lockfile while the
-      # rendering engine tracks what readers actually run. One engine only —
+      # rendering engine tracks what readers actually run. One engine only;
       # three would triple the runtime for findings that are, at this level,
       # almost entirely engine-independent.
       - name: Install the latest stable Chrome
@@ -237,7 +237,7 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # The only job with write access, and the only one that touches anything
-  # outside the runner. It runs no repository code — it just hands GitHub an
+  # outside the runner. It runs no repository code; it just hands GitHub an
   # already-built artifact, so `contents` access is not among its grants.
   # ---------------------------------------------------------------------------
   deploy:

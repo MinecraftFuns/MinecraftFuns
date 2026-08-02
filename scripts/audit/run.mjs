@@ -1,5 +1,5 @@
 /**
- * Browser audit driver — the only effectful module here.
+ * Browser audit driver: the only effectful module here.
  *
  * Non-blocking by construction: it always exits 0 and the workflow does not
  * gate deployment on it, because an audit that can fail a deploy is one that
@@ -44,7 +44,7 @@ const slug = (route) => route.replace(/^\/|\/$/g, "").replaceAll("/", "_") || "h
 
 /**
  * 320 is the narrowest width WCAG reflow expects to work; 1440 is a common
- * desktop. Axe runs at the extremes only — the middle widths exist to catch
+ * desktop. Axe runs at the extremes only; the middle widths exist to catch
  * layout overflow, which is where they actually differ.
  */
 const VIEWPORTS = [
@@ -129,7 +129,7 @@ const DOCUMENT_RULES = [
     rule: "unexpected-script",
     impact: "moderate",
     message: (doc) =>
-      `${doc.scriptCount} script element(s) — this site is intended to ship no client JavaScript`,
+      `${doc.scriptCount} script element(s); this site is intended to ship no client JavaScript`,
   },
   {
     when: (doc) => doc.title.trim() === "",
@@ -157,7 +157,7 @@ const DOCUMENT_RULES = [
     category: "readability",
     rule: "webfont-not-applied",
     impact: "minor",
-    message: (doc) => `body renders in ${doc.bodyFontFamily} — the webfont did not apply`,
+    message: (doc) => `body renders in ${doc.bodyFontFamily}; the webfont did not apply`,
   },
 ];
 
@@ -173,7 +173,7 @@ const RUNTIME_EVENTS = [
     rule: "request-failed",
     impact: "serious",
     message: (request) =>
-      `${request.method()} ${request.url()} — ${request.failure()?.errorText ?? "failed"}`,
+      `${request.method()} ${request.url()}: ${request.failure()?.errorText ?? "failed"}`,
   },
 ];
 
@@ -295,7 +295,7 @@ const auditDocument = async (page, where, interactiveCount) => {
       category: "accessibility",
       rule: "focus-indicator-unclear",
       impact: "info",
-      message: `no outline or shadow under programmatic focus: ${unmarked.join(", ")} — verify by tabbing`,
+      message: `no outline or shadow under programmatic focus: ${unmarked.join(", ")}; verify by tabbing`,
     });
   }
 
@@ -392,7 +392,7 @@ const checkSchemesDiffer = (route, byScheme) => {
       rule: "schemes-identical",
       impact: "serious",
       page: route,
-      message: `light and dark render the same background (${light.backgroundColor}) — the colour scheme is not applying`,
+      message: `light and dark render the same background (${light.backgroundColor}); the colour scheme is not applying`,
     });
   }
 };
@@ -453,7 +453,7 @@ const main = async () => {
 
   const routes = await discoverRoutes(DIST);
   if (routes.length === 0) {
-    console.error("audit: no built pages found — run the build first");
+    console.error("audit: no built pages found; run the build first");
     return [];
   }
   console.log(`audit: ${routes.length} route(s) at ${urlFor("/")}`);
@@ -557,7 +557,7 @@ const write = async (collected, routes) => {
   await writeFile(join(OUT, "report.md"), toMarkdown(collected, meta));
 };
 
-// Findings are reported, never fatal — a crash in the audit is itself recorded
+// Findings are reported, never fatal; a crash in the audit is itself recorded
 // so the failure stays visible without reading as a broken site.
 try {
   const routes = await main();
@@ -569,7 +569,7 @@ try {
     .slice(0, 20)
     .forEach((f) => console.log(`  [${f.impact}] ${f.page} ${f.rule}: ${f.message}`));
 } catch (error) {
-  console.error("audit: driver failed —", error);
+  console.error("audit: driver failed:", error);
   await write(
     [
       {

@@ -5,7 +5,7 @@
  *
  * A utility framework is a combinator library: each class is a nullary term
  * and a class list is their product. Its one hazard is that the stock language
- * is far larger than any design system — `p-[13px]`, `text-red-500`, and
+ * is far larger than any design system: `p-[13px]`, `text-red-500`, and
  * `shadow-lg` all typecheck against a system that contains none of them.
  *
  * So the theme below is subtractive before it is additive. Every namespace we
@@ -19,14 +19,14 @@
  * ======================================================================== */
 
 /* ---------------------------------------------------------------------------
- * Layer 1 — the palette.
+ * Layer 1: the palette.
  *
  * Deliberately outside `@theme`. Anything in the theme's `--color-*` namespace
  * becomes a utility, and `bg-ink-black-500` in a template is precisely the
  * failure this system exists to prevent: it names a pigment rather than a
  * role, so re-theming has to visit every call site. Keeping the ramps here
  * makes the two-layer rule a property of the language instead of a comment
- * asking politely — there is no utility to reach for.
+ * asking politely; there is no utility to reach for.
  * ------------------------------------------------------------------------ */
 
 :root {
@@ -92,7 +92,7 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Layer 2 — the vocabulary.
+ * Layer 2: the vocabulary.
  * ------------------------------------------------------------------------ */
 
 @theme {
@@ -122,7 +122,7 @@
    * source of truth: no in-page control, no stored preference, no theme
    * script. That is what keeps the page correct without JavaScript, free of a
    * first-paint flash, and free of any state that could contradict the
-   * reader's own setting. Tailwind's `dark:` variant is therefore unused —
+   * reader's own setting. Tailwind's `dark:` variant is therefore unused;
    * a second mechanism could only disagree with this one.
    */
   --color-canvas: light-dark(var(--color-eggshell-50), var(--color-ink-black-950));
@@ -146,7 +146,7 @@
    *   ink        16.72:1 light / 16.19:1 dark   AAA
    *   ink-muted   7.95:1 light / 11.55:1 dark   AAA
    *   ink-subtle  5.65:1 light /  8.67:1 dark   AA / AAA
-   * ink-tertiary is decorative only — never for text that must be read.
+   * ink-tertiary is decorative only, never for text that must be read.
    */
   --color-ink: light-dark(var(--color-ink-black-900), var(--color-eggshell-100));
   --color-ink-muted: light-dark(var(--color-blue-slate-700), var(--color-dusty-denim-200));
@@ -154,7 +154,7 @@
   --color-ink-tertiary: light-dark(var(--color-dusty-denim-500), var(--color-dusty-denim-500));
 
   /*
-   * The single chromatic accent — brand mark, focus ring, links, and the one
+   * The single chromatic accent: brand mark, focus ring, links, and the one
    * primary action per view. Never a section background or card fill.
    *
    * ink-black-500 is the only palette step simultaneously legible on the
@@ -180,7 +180,7 @@
    * `text-display-lg` applies a complete typographic style atomically. Under
    * the previous scheme those were four independent tokens applied by hand at
    * each call site, which is a product type spread across four places that
-   * nothing forced to agree — and they had drifted.
+   * nothing forced to agree, and they had drifted.
    *
    * Every fluid ramp completes at 48rem, the viewport at which the frame stops
    * growing. Type keyed to `vw` past that point would keep scaling inside a
@@ -270,15 +270,15 @@
    * inside it. The bar is that height plus one space token above and below,
    * which keeps the header closed under the same scale as its contents.
    */
-  --spacing-target: 1.5rem; /* 24 — WCAG 2.5.8 minimum target */
-  --spacing-control: 2.5rem; /* 40 — nav links, buttons */
+  --spacing-target: 1.5rem; /* 24: WCAG 2.5.8 minimum target */
+  --spacing-control: 2.5rem; /* 40: nav links, buttons */
   --spacing-nav: 4rem; /* 64 = 40 + 12 above + 12 below */
 
   /* ---- Shape ------------------------------------------------------------ */
 
   --radius-xs: 4px;
   --radius-sm: 6px;
-  --radius-md: 8px; /* buttons, inputs — never pill */
+  --radius-md: 8px; /* buttons, inputs; never pill */
   --radius-lg: 12px; /* cards */
   --radius-xl: 16px; /* full-width media panels */
   --radius-pill: 9999px; /* badges and tags only */
@@ -287,8 +287,8 @@
 
   /*
    * One frame, for every page. Its width is derived rather than chosen: prose
-   * capped at the measure runs ~612px, and the widest composite on the site —
-   * an index row of date column, description, and meta — runs ~692px. Both sit
+   * capped at the measure runs ~612px, and the widest composite on the site
+   * (an index row of date column, description, and meta) runs ~692px. Both sit
    * inside 48rem less its padding, and nothing here is wider.
    *
    * There is exactly one, and the layout applies it. A page cannot name a
@@ -315,7 +315,7 @@
 
   /*
    * Three, each named for the single thing that becomes possible at it. The
-   * previous set held 44rem and 48rem — close enough to read as one intent,
+   * previous set held 44rem and 48rem, close enough to read as one intent,
    * far enough apart to behave as two.
    */
   --breakpoint-xs: 26rem; /* the brand name fits beside the nav */
@@ -326,7 +326,7 @@
 
   /*
    * One duration for the whole site. There were two, 120ms and 180ms, applied
-   * to the same class of change — a distinction nobody can perceive and
+   * to the same class of change: a distinction nobody can perceive and
    * everybody has to maintain. Set as the transition defaults, so `transition-
    * colors` in markup needs no duration or easing beside it.
    */
@@ -348,7 +348,7 @@
 /* ---------------------------------------------------------------------------
  * Base.
  *
- * Preflight already handles the reset — box sizing, margins, media defaults,
+ * Preflight already handles the reset: box sizing, margins, media defaults,
  * list and heading normalisation. What remains is what preflight cannot know:
  * the colour scheme, the focus ring, and the motion preference.
  * ------------------------------------------------------------------------ */
@@ -412,7 +412,7 @@
  * The one place utilities genuinely cannot reach: Markdown renders to elements
  * this project never writes, so there is nowhere to put a class. Descendant
  * selectors are the honest tool, and they read the same theme variables the
- * utilities do — there is still exactly one source for every value.
+ * utilities do; there is still exactly one source for every value.
  * ------------------------------------------------------------------------ */
 
 @layer components {

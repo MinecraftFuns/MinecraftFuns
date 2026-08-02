@@ -3,7 +3,7 @@
  * Source gate: no anonymous values in markup.
  *
  * The theme deletes Tailwind's default namespaces, so `p-4` and `text-red-500`
- * genuinely do not exist. One hole remains — bracket syntax compiles whatever
+ * genuinely do not exist. One hole remains: bracket syntax compiles whatever
  * you put in it, so `w-[437px]` would reopen the whole space the theme just
  * closed. This closes it.
  *
@@ -50,7 +50,7 @@ const RULES = [
 
 /**
  * The regions of an `.astro` file that can carry class names: the whole
- * template, and any string literal in the frontmatter — a class list extracted
+ * template, and any string literal in the frontmatter; a class list extracted
  * to a `const` is still markup, and is exactly where a literal would hide.
  */
 export const classRegions = (source) => {
@@ -108,7 +108,7 @@ const main = async () => {
 
   if (found.length === 0) {
     console.log(
-      `check-classes: OK — ${files.length} component(s) carry no anonymous values`,
+      `check-classes: OK, ${files.length} component(s) carry no anonymous values`,
     );
     return;
   }

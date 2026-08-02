@@ -122,7 +122,7 @@ describe("redirectProblems", () => {
     );
   });
 
-  it("is total — an empty policy is not a problem", () => {
+  it("is total: an empty policy is not a problem", () => {
     assert.deepEqual(redirectProblems([]), []);
   });
 });
@@ -151,7 +151,7 @@ describe("parsePathPattern", () => {
     assert.equal(parsePathPattern("/*x").tag, "invalid");
   });
 
-  it("is total — no input throws", () => {
+  it("is total: no input throws", () => {
     ["", "*", "/", "//*", "/a**"].forEach((raw) =>
       assert.doesNotThrow(() => parsePathPattern(raw)),
     );
@@ -218,7 +218,7 @@ describe("decodeHostConfig", () => {
       {
         // `RootedPath` rejects this at compile time, so config cannot reach
         // the runtime check. The decoder is exported, though, so the check is
-        // still live for callers whose input was never typed — hence the cast.
+        // still live for callers whose input was never typed, hence the cast.
         headers: [{ path: "no-slash" as RootedPath, set: { a: "b" } }],
         redirects: [{ from: "/a/*/b", to: "/c" }],
       },

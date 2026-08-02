@@ -10,7 +10,7 @@ import type { ContactConfig } from "./schema.ts";
  *
  * Note the deliberate absence of a plaintext address: correspondence goes
  * through the PGP Primary User ID. The fingerprint is not written down here
- * either — it is read from the key, so rotating the key cannot leave a stale
+ * either; it is read from the key, so rotating the key cannot leave a stale
  * one printed in the footer.
  */
 export const contact = {

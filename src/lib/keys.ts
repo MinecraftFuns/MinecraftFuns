@@ -14,7 +14,7 @@ import {
  * representation the site serves is derived from it: the armored text at
  * `/pgp`, and the binary body at each address's Web Key Directory path. The
  * legacy site stored the same key four times across two encodings, and they had
- * already drifted — its `/pgp` carried 53 packets while the file WKD clients
+ * already drifted: its `/pgp` carried 53 packets while the file WKD clients
  * actually fetched carried 58, so the human-readable copy and the
  * machine-readable copy were different keys in every way that mattered.
  *
@@ -69,8 +69,8 @@ const dearmor = async (armored: string): Promise<Uint8Array> => {
 /**
  * Distinct addresses on `domain`, in key order.
  *
- * A key may carry several User IDs bearing one address — this key has two for
- * `me@joefang.org`, a plain one and a "(Work)" one — and they must collapse to
+ * A key may carry several User IDs bearing one address: this key has two for
+ * `me@joefang.org`, a plain one and a "(Work)" one, and they must collapse to
  * a single directory entry rather than two identical files.
  */
 const addressesOn = (
@@ -122,7 +122,7 @@ const load = async (domain: string): Promise<readonly PublishedKey[]> => {
       const owner = claimed.get(hash);
       if (owner !== undefined && owner !== key.name) {
         throw new TypeError(
-          `${address} is claimed by both ${owner}.asc and ${key.name}.asc — one address, one key`,
+          `${address} is claimed by both ${owner}.asc and ${key.name}.asc; one address, one key`,
         );
       }
       claimed.set(hash, key.name);
@@ -152,7 +152,7 @@ export const publishedKeys = (domain: string): Promise<readonly PublishedKey[]> 
  * A fingerprint as people transcribe it: upper case, in groups of four.
  *
  * Derived rather than written down. It used to be a config string sitting
- * beside the key, which is a second encoding of the same fact — and the one
+ * beside the key, which is a second encoding of the same fact, and the one
  * that goes stale silently, because rotating a key changes the file while
  * leaving the printed fingerprint looking perfectly plausible.
  */

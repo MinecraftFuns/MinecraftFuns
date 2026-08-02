@@ -23,7 +23,7 @@ import {
 /*
  * These are predominantly *negative* tests. A checker that has quietly stopped
  * catching things still reports success, which is the worst possible failure
- * mode for the last gate before production — so each check is fed input it is
+ * mode for the last gate before production, so each check is fed input it is
  * supposed to reject, and asserted to reject it.
  */
 
@@ -163,7 +163,7 @@ describe("candidatePaths", () => {
     assert.deepEqual(candidatePaths("//evil.example/x", "/"), []);
   });
 
-  it("is total — a malformed escape does not throw", () => {
+  it("is total: a malformed escape does not throw", () => {
     assert.doesNotThrow(() => candidatePaths("/MinecraftFuns/%ZZ", "/MinecraftFuns/"));
   });
 });
@@ -200,7 +200,7 @@ describe("isCanonicalWithin", () => {
     assert.ok(isCanonicalWithin("https://JoeFang.org:443/blog/", "https://joefang.org", "/"));
   });
 
-  it("is total — unparseable input is rejected, not thrown", () => {
+  it("is total: unparseable input is rejected, not thrown", () => {
     assert.doesNotThrow(() => isCanonicalWithin("not a url", SITE, "/"));
     assert.equal(isCanonicalWithin("not a url", SITE, "/"), false);
   });
@@ -260,7 +260,7 @@ describe("hostDirectiveViolations", () => {
     assert.match(found[0], /matches nothing that was built/);
   });
 
-  it("leaves destinations on other origins alone — it cannot check them", () => {
+  it("leaves destinations on other origins alone: it cannot check them", () => {
     assert.deepEqual(
       hostDirectiveViolations({
         redirects: [

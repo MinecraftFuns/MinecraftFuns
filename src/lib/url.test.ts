@@ -22,7 +22,7 @@ describe("classifyHref", () => {
 
   it("separates protocol-relative and fragment hrefs from schemes", () => {
     // Neither parses as an absolute URL, so neither is reachable by the same
-    // test — which is exactly why one boolean could not express this.
+    // test, which is exactly why one boolean could not express this.
     assert.equal(classifyHref("//cdn.example.com/asset.js"), "authority");
     assert.equal(classifyHref("#main"), "fragment");
   });
@@ -33,7 +33,7 @@ describe("classifyHref", () => {
     );
   });
 
-  it("is a case analysis, not a priority list — the kinds are disjoint", () => {
+  it("is a case analysis, not a priority list: the kinds are disjoint", () => {
     const hrefs = ["https://x", "//x", "#x", "/x", "", "://"];
     hrefs.forEach((href) => {
       const matches = [
@@ -91,7 +91,7 @@ describe("joinBase", () => {
     }
   });
 
-  it("is total — no input throws", () => {
+  it("is total: no input throws", () => {
     for (const base of ["", "/", "///"]) {
       for (const path of ["", "/", "x", "#", "://"]) {
         assert.doesNotThrow(() => joinBase(base, path));
@@ -104,7 +104,7 @@ describe("joinBase", () => {
     assert.equal(joinBase(ROOT_BASE, once), once);
   });
 
-  it("leaves an asset path unslashed — a file is not a directory", () => {
+  it("leaves an asset path unslashed: a file is not a directory", () => {
     assert.equal(joinBase(PROJECT_BASE, "/favicon.svg"), "/MinecraftFuns/favicon.svg");
   });
 });
@@ -127,7 +127,7 @@ describe("joinRoute", () => {
     assert.equal(joinRoute(ROOT_BASE, "/"), "/");
   });
 
-  it("is idempotent — re-resolving a route does not stack slashes", () => {
+  it("is idempotent: re-resolving a route does not stack slashes", () => {
     const once = joinRoute(ROOT_BASE, "/blog");
     assert.equal(joinRoute(ROOT_BASE, once), once);
   });
@@ -145,7 +145,7 @@ describe("joinRoute", () => {
     );
   });
 
-  it("is total — no input throws", () => {
+  it("is total: no input throws", () => {
     const paths = ["", "/", "//", "?", "#", "a", "/a/b/c/", "?#", "://", "%"];
     [PROJECT_BASE, ROOT_BASE, ""].forEach((base) => {
       paths.forEach((path) => {

@@ -86,7 +86,7 @@ describe("disallowAll", () => {
     assert.deepEqual(lines(disallowAll()), ["User-agent: *", "Disallow: /", ""]);
   });
 
-  it("advertises no sitemap — a map of pages it must not fetch is a contradiction", () => {
+  it("advertises no sitemap: a map of pages it must not fetch is a contradiction", () => {
     assert.equal(renderRobots(disallowAll()).includes("Sitemap"), false);
   });
 });

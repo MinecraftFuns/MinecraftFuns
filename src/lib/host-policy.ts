@@ -7,7 +7,7 @@ import { assetUrl } from "./url.ts";
  * The decoded host policy, bound to this deployment.
  *
  * The two directive files each need the same answer, and each was calling the
- * decoder itself — one derivation written twice, which is how they would
+ * decoder itself, one derivation written twice, which is how they would
  * eventually be given different arguments. `assetUrl` is applied here rather
  * than inside `lib/hosting.ts`, which is what keeps the decoder pure and
  * testable without a bundler.

@@ -42,7 +42,7 @@ describe("readingMinutes", () => {
     assert.equal(readingMinutes(marked), plain);
   });
 
-  it("is total — no input throws", () => {
+  it("is total: no input throws", () => {
     for (const markdown of ["```unclosed", "[](", "![]()", "***"]) {
       assert.doesNotThrow(() => readingMinutes(markdown));
     }

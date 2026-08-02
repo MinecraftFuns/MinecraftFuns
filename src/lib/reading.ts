@@ -3,7 +3,7 @@
  *
  * Derived from the post body rather than authored by hand: a number typed into
  * frontmatter is wrong the moment the post is edited, and nothing would catch
- * it. This is an estimate presented as an estimate — the point is a reader's
+ * it. This is an estimate presented as an estimate; the point is a reader's
  * rough expectation, not precision.
  */
 
@@ -14,7 +14,7 @@ const WORDS_PER_MINUTE = 200;
  * Total: every string maps to a positive integer.
  *
  * Markdown syntax is stripped before counting so that fences, link targets,
- * and image URLs do not inflate the estimate — a post is not longer because it
+ * and image URLs do not inflate the estimate: a post is not longer because it
  * links to somewhere with a verbose URL.
  */
 export const readingMinutes = (markdown: string): number => {

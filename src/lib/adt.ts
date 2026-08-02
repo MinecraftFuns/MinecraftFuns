@@ -8,7 +8,7 @@
 
 /**
  * The result of turning an untrusted representation into a trusted domain
- * value. A sum, not a nullable — the failure carries a reason, so the caller
+ * value. A sum, not a nullable: the failure carries a reason, so the caller
  * can report *why* rather than only *that* parsing failed.
  */
 export type Parsed<T> =
@@ -33,7 +33,7 @@ export const assertNever = (value: never): never => {
 
 /**
  * Eliminates `Parsed` at a boundary where failure is a *defect* rather than an
- * expected outcome — authored site data. Throwing fails the build loudly, which
+ * expected outcome, authored site data. Throwing fails the build loudly, which
  * is the correct effect: a malformed date should never reach a reader.
  *
  * Untrusted input (Markdown frontmatter, an API) should eliminate `Parsed`

@@ -1,8 +1,8 @@
 /**
  * Report rendering. Pure: findings in, strings out.
  *
- * Two consumers with different needs — a person skimming the Actions summary,
- * and a machine diffing runs — so the Markdown is written for reading and the
+ * Two consumers with different needs (a person skimming the Actions summary,
+ * and a machine diffing runs), so the Markdown is written for reading and the
  * JSON for parsing. Neither is derived from the other's formatting.
  */
 
@@ -45,7 +45,7 @@ export const toMarkdown = (findings, meta) => {
   );
   lines.push("");
   lines.push(
-    "> These are findings, not failures. This job never blocks a deploy — it reports what a browser saw so the list stays short by being acted on, not by being disabled.",
+    "> These are findings, not failures. This job never blocks a deploy; it reports what a browser saw so the list stays short by being acted on, not by being disabled.",
   );
   lines.push("");
 
@@ -83,7 +83,7 @@ export const toMarkdown = (findings, meta) => {
   const byPage = Object.groupBy(findings, (finding) => finding.page);
 
   for (const [page, entries] of Object.entries(byPage)) {
-    lines.push(`### \`${page}\` — ${entries?.length ?? 0} finding(s)`);
+    lines.push(`### \`${page}\`: ${entries?.length ?? 0} finding(s)`);
     lines.push("");
     lines.push("| Impact | Category | Rule | Where | Detail |");
     lines.push("| --- | --- | --- | --- | --- |");
@@ -108,7 +108,7 @@ export const toMarkdown = (findings, meta) => {
   lines.push("---");
   lines.push("");
   lines.push(
-    "_Automated checks cover a minority of WCAG success criteria — roughly a third by most estimates. Keyboard, screen-reader, and cognitive-load review remain manual._",
+    "_Automated checks cover a minority of WCAG success criteria, roughly a third by most estimates. Keyboard, screen-reader, and cognitive-load review remain manual._",
   );
 
   return lines.join("\n");

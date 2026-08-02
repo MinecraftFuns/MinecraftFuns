@@ -11,7 +11,7 @@ import { routeUrl } from "./url.ts";
  *
  * Pages consume these types rather than raw collection entries, so the shape a
  * template renders is decided once, here, instead of in each page. Reading time
- * and URL are derived rather than stored — neither can drift out of sync with
+ * and URL are derived rather than stored; neither can drift out of sync with
  * the post, because neither is written down.
  */
 
@@ -73,8 +73,8 @@ export const publishedPosts = async (): Promise<readonly PublishedPost[]> => {
  * Published posts as summaries, newest first.
  *
  * Truncation happens before summarising, not after. `summarise` scans the full
- * body to derive reading time, so mapping first made the home page — which asks
- * for three — pay that scan for every post in the archive.
+ * body to derive reading time, so mapping first made the home page (which asks
+ * for three) pay that scan for every post in the archive.
  */
 export const postSummaries = async (
   limit?: number,

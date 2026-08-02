@@ -56,7 +56,7 @@ describe("parseTimeZone", () => {
     }
   });
 
-  it("is total — no input throws", () => {
+  it("is total: no input throws", () => {
     assert.doesNotThrow(() => parseTimeZone("nonsense"));
   });
 
@@ -210,7 +210,7 @@ describe("formatIsoDate", () => {
   });
 
   it("honours an explicitly supplied zone", () => {
-    // Same calendar date, formatted as that date in any zone — the date is the
+    // Same calendar date, formatted as that date in any zone; the date is the
     // unit of meaning, so it does not shift.
     assert.equal(
       formatDateIn(isoDate("2026-07-14"), timeZone("Asia/Tokyo")),

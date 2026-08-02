@@ -8,8 +8,8 @@ const { project } = Astro.props;
 
 /*
  * The element type *is* the witness that a project is linked. The previous
- * version derived that same fact twice — once to pick `a` versus `div`, and
- * again to emit a `data-interactive` attribute for the hover rule — leaving
+ * version derived that same fact twice: once to pick `a` versus `div`, and
+ * again to emit a `data-interactive` attribute for the hover rule, leaving
  * two encodings of one state that nothing forced to agree. A `group-hover`
  * would restate it a third time, so the hover styling is scoped by `a:hover`
  * in the one place a link is actually produced.
@@ -17,7 +17,7 @@ const { project } = Astro.props;
 const Tag = project.href === undefined ? "div" : "a";
 
 /* The label lives beside the status it belongs to, in config. `null` means
-   "this state shows no badge" — a decision, not a value that went missing. */
+   "this state shows no badge", a decision, not a value that went missing. */
 const badge = badgeFor(project.status);
 
 /* Elevation is a surface step plus a stronger hairline. There are no shadow
@@ -54,7 +54,7 @@ const INTERACTIVE =
       }
     </ul>
     {
-      /* Pill radius is allowed here — badges are the exception, buttons are not. */
+      /* Pill radius is allowed here; badges are the exception, buttons are not. */
       badge !== null && (
         <span class="bg-surface-2 text-ink-muted shrink-0 rounded-pill px-2xs py-3xs text-caption">
           {badge}

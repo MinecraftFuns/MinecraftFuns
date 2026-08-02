@@ -11,7 +11,7 @@ import { isoDate, parseIsoDate } from "./lib/time.ts";
  *
  * Frontmatter is the one genuinely untrusted input in this project: it is
  * hand-written, unchecked by the typechecker, and read at build time. The
- * schema is therefore a decoder, not a formality — a malformed date fails the
+ * schema is therefore a decoder, not a formality: a malformed date fails the
  * build rather than rendering as "Invalid Date" on the live site.
  *
  * `date` is parsed into `IsoDate` here, at the boundary, so every consumer
@@ -20,7 +20,7 @@ import { isoDate, parseIsoDate } from "./lib/time.ts";
  *
  * Posts are filed at `YYYY/MM/slug.md`, which restates the first two
  * components of that date. The schema cannot see the file path, so the two are
- * reconciled a step later in `lib/archive.ts` — see the note there on why the
+ * reconciled a step later in `lib/archive.ts`; see the note there on why the
  * glob stays permissive and rejects loudly instead of matching narrowly and
  * dropping a misfiled post in silence.
  */
@@ -37,13 +37,13 @@ const blog = defineCollection({
     date: z
       /*
        * String-only, deliberately. YAML coerces an unquoted 2026-08-01 into a
-       * timestamp object — the very confusion this project spent a bug fixing,
+       * timestamp object, the very confusion this project spent a bug fixing,
        * arriving through the back door of the frontmatter parser. Rejecting it
        * here keeps a calendar date a calendar date, and the message says how.
        */
       .custom<string>((value) => typeof value === "string", {
         message:
-          'must be quoted, e.g. date: "2026-08-01" — an unquoted YAML date becomes a timestamp with a time zone attached',
+          'must be quoted, e.g. date: "2026-08-01"; an unquoted YAML date becomes a timestamp with a time zone attached',
       })
       .refine((raw) => parseIsoDate(raw).tag === "ok", {
         message: "expected a real YYYY-MM-DD calendar date (America/Toronto)",

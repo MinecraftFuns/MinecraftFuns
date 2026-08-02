@@ -18,12 +18,12 @@ new Date(post.date).toLocaleDateString("en-CA", { /* ... */ });
 ## Two types wearing one costume
 
 `"2026-07-14"` names a box on a wall calendar. It has no hour, and it does not
-identify a moment — "the fourteenth" begins at different instants in Auckland
+identify a moment: "the fourteenth" begins at different instants in Auckland
 and in Toronto.
 
 `new Date("2026-07-14")` does not preserve that. The ECMAScript spec parses a
 date-only ISO string as **UTC midnight**, producing a specific point on the
-timeline. `toLocaleDateString` then projects that point back onto a calendar —
+timeline. `toLocaleDateString` then projects that point back onto a calendar,
 and with no `timeZone` option, it uses the host's. Toronto sits five hours
 behind UTC in winter, so midnight UTC is still 7pm on the thirteenth.
 
@@ -33,7 +33,7 @@ back a day short.
 ## Why it survived CI
 
 The build was green. Types checked, tests passed, and the site deployed. The
-bug reproduced only where the clock disagreed with UTC — which meant it
+bug reproduced only where the clock disagreed with UTC, which meant it
 appeared on my laptop and vanished in CI, the failure mode most likely to be
 dismissed as a fluke.
 
@@ -53,7 +53,7 @@ export type IsoDate = string & { readonly [isoDateBrand]: true };
 export const parseIsoDate = (raw: string): Parsed<IsoDate> => { /* ... */ };
 ```
 
-The brand is erased at runtime — an `IsoDate` is a plain string. Its entire
+The brand is erased at runtime: an `IsoDate` is a plain string. Its entire
 value is that you cannot obtain one without going through the parser, so any
 value of that type has already been checked. Shape alone is not enough:
 `2026-02-31` matches `YYYY-MM-DD` and names no day, which a round trip through
@@ -66,5 +66,5 @@ output in Toronto, Auckland, and CI.
 ## The general shape
 
 Whenever a value converts through another type to be displayed, the conversion
-takes a parameter. Supply it, or the environment will — and the environment
+takes a parameter. Supply it, or the environment will, and the environment
 does not know what you meant.

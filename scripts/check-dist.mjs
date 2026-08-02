@@ -3,7 +3,7 @@
  *
  * Everything else in the gate validates *source*: markdownlint reads Markdown,
  * `astro check` reads types, the unit tests read modules. None of them look at
- * what the build actually emitted — which is how a base-path bug once passed a
+ * what the build actually emitted, which is how a base-path bug once passed a
  * clean typecheck and a full test run while producing a site whose every
  * navigation link 404ed.
  *
@@ -109,7 +109,7 @@ export const candidatePaths = (reference, base) => {
  *
  * Re-parsed rather than imported, for the reason the whole module keeps its
  * distance: a check that shares the renderer shares its bugs. These parsers are
- * deliberately dumb — the formats are line-oriented, and the point is to read
+ * deliberately dumb: the formats are line-oriented, and the point is to read
  * what actually shipped.
  */
 export const parseRedirects = (text) =>
@@ -165,7 +165,7 @@ const ZBASE32_NAME = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{32}$/;
  *
  * A key nobody can fetch is indistinguishable from a key nobody published, and
  * both look like a clean build. The properties below are the ones a mail client
- * depends on, checked without importing any of the code that produced them —
+ * depends on, checked without importing any of the code that produced them:
  * an OpenPGP public-key packet begins with tag 6, which is 0x98 or 0x99 in the
  * old packet format the export uses.
  */
@@ -174,7 +174,7 @@ export const wkdViolations = (entries) => {
   const { policy, keys } = entries;
 
   if (!policy) {
-    found.push("no .well-known/openpgpkey/policy — the specification requires it");
+    found.push("no .well-known/openpgpkey/policy; the specification requires it");
   }
   if (keys.length === 0) {
     found.push("no keys published under .well-known/openpgpkey/hu/");
@@ -202,7 +202,7 @@ export const wkdViolations = (entries) => {
  * Whether a canonical URL points inside this deployment.
  *
  * Compared as URLs rather than as strings. `${site}${base}` is a hand-built
- * prefix that breaks the moment SITE_URL carries a trailing slash — the
+ * prefix that breaks the moment SITE_URL carries a trailing slash; the
  * doubled slash matches no correct canonical, and the gate would fail a good
  * build. Comparing origins also normalises host case and default ports, which
  * a prefix test silently gets wrong.
@@ -226,8 +226,8 @@ export const isCanonicalWithin = (canonical, site, base) => {
  * `--x` is well-defined CSS that renders blue, and Tailwind builds its
  * override slots exactly that way: `var(--tw-leading, var(--text-body--line-
  * height))` means "the leading unless something overrode it", so the property
- * is *meant* to be unset. What renders nothing — and so is worth failing a
- * build over — is a bare read of a name that does not exist.
+ * is *meant* to be unset. What renders nothing (and so is worth failing a
+ * build over) is a bare read of a name that does not exist.
  *
  * The character immediately after the name decides it: `,` opens a fallback,
  * `)` closes a bare read. No nesting analysis is needed to tell them apart.
@@ -250,7 +250,7 @@ export const offPaletteColours = (css, palette) =>
     .filter((colour) => !palette.has(colour))
     .sort();
 
-/** The palette as declared by the token layer — the single source of truth. */
+/** The palette as declared by the token layer, the single source of truth. */
 export const paletteFrom = (tokensCss) =>
   new Set(
     [...tokensCss.matchAll(/--color-[a-z0-9-]+:\s*(#[0-9a-f]{6})/gi)].map((m) =>
@@ -316,7 +316,7 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
 
   // -- The build produced something at all --------------------------------
   if (htmlFiles.length === 0) {
-    found.push(violation("output", "no HTML emitted — the build produced nothing"));
+    found.push(violation("output", "no HTML emitted; the build produced nothing"));
     return found;
   }
   for (const required of ["index.html", "favicon.svg"]) {
@@ -458,7 +458,7 @@ const main = async () => {
   const dist = resolve(process.env.DIST_DIR ?? "dist");
   const base = process.env.SITE_BASE ?? "/MinecraftFuns/";
   const site = process.env.SITE_URL ?? "https://minecraftfuns.github.io";
-  /* The palette lives in global.css, outside `@theme` — a ramp step must not
+  /* The palette lives in global.css, outside `@theme`; a ramp step must not
      become a utility. That `:root` block is still the single source this
      check reads to decide which hex values are sanctioned. */
   const tokensCss = await readFile(
@@ -467,7 +467,7 @@ const main = async () => {
   );
 
   if (!(await exists(dist))) {
-    console.error(`check-dist: ${dist} does not exist — run the build first`);
+    console.error(`check-dist: ${dist} does not exist; run the build first`);
     process.exitCode = 1;
     return;
   }
@@ -475,7 +475,7 @@ const main = async () => {
   const violations = await inspect({ dist, base, site, tokensCss });
 
   if (violations.length === 0) {
-    console.log(`check-dist: OK — ${dist} passes all checks for ${site}${base}`);
+    console.log(`check-dist: OK, ${dist} passes all checks for ${site}${base}`);
     return;
   }
 

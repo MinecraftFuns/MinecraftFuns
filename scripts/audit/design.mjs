@@ -7,7 +7,7 @@
  * has no type system to catch.
  *
  * Alignment is judged as a *near* miss rather than a miss. The design intends
- * a binary — edges line up, or one is deliberately offset — but rendering
+ * a binary (edges line up, or one is deliberately offset), but rendering
  * admits a continuum, and a 2px delta lands between the two: neither equal nor
  * meaningfully different. Rhythm is the matching homogeneity law, since
  * mapping one component over a list should give uniform gaps.
@@ -144,7 +144,7 @@ export const designFindings = (probe, context) => {
           rule: "near-miss-alignment",
           impact: "moderate",
           selector: group.container,
-          message: `children sit ${round(b - a)}px apart on their ${edge} edge (${round(a)} vs ${round(b)}) — too close to read as an intentional offset`,
+          message: `children sit ${round(b - a)}px apart on their ${edge} edge (${round(a)} vs ${round(b)}), too close to read as an intentional offset`,
         }),
       ),
     ),

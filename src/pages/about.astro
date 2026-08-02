@@ -13,14 +13,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
  *
  * Only verifiable facts appear below. Sections for experience, skills, and
  * awards are left as commented templates at the foot of this file rather than
- * filled with plausible-looking placeholder text — an invented internship that
+ * filled with plausible-looking placeholder text: an invented internship that
  * ships to a live CV is worse than a short one.
  */
 
 /* Read off the key, so rotating it cannot leave a stale one printed here. */
 const fingerprint = await siteFingerprint();
 
-/* Period in a fixed left column, detail beside it — the standard CV rhythm,
+/* Period in a fixed left column, detail beside it: the standard CV rhythm,
    collapsing to stacked rows where the column would crowd the text. */
 const ENTRY = "grid gap-md border-b border-hairline py-sm last:border-b-0 sm:grid-cols-entry";
 const ENTRY_PERIOD = "text-ink-tertiary font-mono text-caption";
@@ -28,7 +28,7 @@ const ENTRY_PERIOD = "text-ink-tertiary font-mono text-caption";
 
 <BaseLayout
   title="About"
-  description="Joe Fang — Computer Science and Cognitive Science at the University of Toronto."
+  description="Joe Fang. Computer Science and Cognitive Science at the University of Toronto."
 >
   <PageIntro kind="page" eyebrow="About" title="Joe Fang">
     <div class="prose mt-md">

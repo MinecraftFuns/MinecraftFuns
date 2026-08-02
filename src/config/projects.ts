@@ -4,8 +4,8 @@ import type { ProjectKindConfig, ProjectStatusConfig } from "./schema.ts";
  * Projects, and the sections they group into.
  *
  * `projectKinds` is the single source for the order sections appear in *and*
- * their headings and blurbs. Those used to be three parallel declarations — an
- * order array that had to list exactly the keys of two separate records — which
+ * their headings and blurbs. Those used to be three parallel declarations: an
+ * order array that had to list exactly the keys of two separate records, which
  * is three knobs describing one thing. `ProjectKind` is derived from this
  * array, so adding a kind here is the entire change, and a project naming a
  * kind that does not exist is a type error rather than an unlabelled group.
@@ -31,7 +31,7 @@ export const projectKinds = [
 export type ProjectKind = (typeof projectKinds)[number]["kind"];
 
 /**
- * Statuses and the badge each one shows. `null` means "no badge" — a decision,
+ * Statuses and the badge each one shows. `null` means "no badge": a decision,
  * not a value that went missing. Derived the same way, so the union and the
  * labels cannot disagree.
  */
@@ -54,7 +54,7 @@ export type Project = {
   readonly kind: ProjectKind;
 };
 
-/** Placeholder content — replace with real projects. */
+/** Placeholder content; replace with real projects. */
 export const projects: readonly Project[] = [
   {
     title: "Project One",

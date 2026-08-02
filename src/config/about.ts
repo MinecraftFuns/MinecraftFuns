@@ -4,7 +4,7 @@ import type { EducationEntry } from "./schema.ts";
  * Facts for the About page.
  *
  * Only verifiable ones. Experience, skills and awards are deliberately absent
- * rather than filled with plausible placeholder text — an invented internship
+ * rather than filled with plausible placeholder text: an invented internship
  * that ships to a live CV is worse than a short one. Add entries here; the page
  * renders whatever it finds.
  */

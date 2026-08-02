@@ -1,6 +1,6 @@
 /**
  * Browser-side observation. These run inside the page via `page.evaluate`,
- * which serialises the function alone — so each is self-contained and shares
+ * which serialises the function alone, so each is self-contained and shares
  * nothing with module scope.
  *
  * `pageProbe` merges layout and design measurement into one traversal: both
@@ -308,6 +308,6 @@ export const focusProbe = (selector) => [
   ),
 ];
 
-/** Whether the page overflows its width — used under print emulation. */
+/** Whether the page overflows its width; used under print emulation. */
 export const overflowProbe = () =>
   document.documentElement.scrollWidth > window.innerWidth + 1;

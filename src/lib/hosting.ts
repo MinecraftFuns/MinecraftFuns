@@ -13,8 +13,8 @@ export type { HeaderConfig, HostConfig, RedirectConfig, RedirectStatus };
  *
  * `_headers` and `_redirects` are the only parts of this deployment written in
  * a language the site does not otherwise speak, and they carried the same class
- * of rot as the legacy sitemap. A rule is a claim about a path — that something
- * is served there, or used to be — and nothing checked those claims. The legacy
+ * of rot as the legacy sitemap. A rule is a claim about a path (that something
+ * is served there, or used to be), and nothing checked those claims. The legacy
  * files redirected `/*.md` and `/*.py` for source files that had stopped being
  * published, and pointed `/favicon.ico` at a CDN, years after both became
  * false.
@@ -22,14 +22,14 @@ export type { HeaderConfig, HostConfig, RedirectConfig, RedirectStatus };
  * Three things follow from modelling them instead of writing them out:
  *
  *  1. Paths are resolved against the deployment's base. Written literally they
- *     are correct on exactly one of the two build targets — the same defect as
+ *     are correct on exactly one of the two build targets, the same defect as
  *     the hardcoded sitemap URL, and the one that is impossible to see by
  *     reading the file.
  *  2. The wildcard is structural rather than a character inside a string, so
  *     matching is a comparison rather than a parse and no pattern language
  *     needs escaping.
  *  3. Rules that cannot fire are detectable. A redirect shadowed by an earlier
- *     one, or pointing at itself, is dead config — and dead config is what rot
+ *     one, or pointing at itself, is dead config, and dead config is what rot
  *     is made of.
  *
  * Pure and total. Nothing here reads the clock, the environment, or the disk.
@@ -114,7 +114,7 @@ export const renderRedirects = (redirects: readonly Redirect[]): string =>
 // ---------------------------------------------------------------------------
 
 /**
- * A sum, because `!` is not part of a header's name — it is an operator the
+ * A sum, because `!` is not part of a header's name; it is an operator the
  * format spells by prefixing one. Encoding it in the name string would make
  * `"! link"` a possible value of a field whose type says "header name".
  */
@@ -158,7 +158,7 @@ export const renderHeaders = (rules: readonly HeaderRule[]): string =>
 // ---------------------------------------------------------------------------
 //
 // Everything above is the abstract syntax: what code manipulates. What follows
-// is the concrete syntax — what a person writes in `src/config`, and the
+// is the concrete syntax: what a person writes in `src/config`, and the
 // decoder that turns one into the other.
 //
 // The two differ deliberately. A pattern is a plain string ending in `*`
@@ -173,7 +173,7 @@ export type Resolve = (path: string) => string;
 
 /**
  * Total. The wildcard may only end a pattern, because that is the only shape
- * the domain models — a mid-path splat is rejected loudly rather than silently
+ * the domain models; a mid-path splat is rejected loudly rather than silently
  * mishandled.
  */
 export const parsePathPattern = (raw: string): Parsed<PathPattern> => {
@@ -279,7 +279,7 @@ export type RuleProblem = {
 /**
  * Rules that cannot do what they say.
  *
- * Total, and independent of the filesystem — these are the defects visible in
+ * Total, and independent of the filesystem: these are the defects visible in
  * the declaration alone. Whether a destination actually exists is a property of
  * the artifact, and is checked there.
  */
@@ -291,7 +291,7 @@ export const redirectProblems = (
     const problems: RuleProblem[] = [];
 
     if (patternMatches(redirect.from, redirect.to)) {
-      problems.push({ rule, reason: "redirects to a path it matches — a loop" });
+      problems.push({ rule, reason: "redirects to a path it matches, a loop" });
     }
 
     if (!redirect.to.startsWith("/") && !URL.canParse(redirect.to)) {
@@ -308,7 +308,7 @@ export const redirectProblems = (
     if (shadow !== undefined) {
       problems.push({
         rule,
-        reason: `unreachable — ${renderPattern(shadow.from)} above it already matches`,
+        reason: `unreachable: ${renderPattern(shadow.from)} above it already matches`,
       });
     }
 
@@ -331,7 +331,7 @@ export const headerProblems = (
       return [
         {
           rule: renderPattern(rule.pattern),
-          reason: `sets ${op.name} more than once — only the last would apply`,
+          reason: `sets ${op.name} more than once; only the last would apply`,
         },
       ];
     });

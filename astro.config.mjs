@@ -13,7 +13,7 @@ import { sitemapFilter } from "./src/lib/sitemap.ts";
  * agree on a base path: `MinecraftFuns/MinecraftFuns` is a *project* repository
  * rather than a `<user>.github.io` one, so GitHub Pages serves it beneath
  * `/MinecraftFuns`, while the custom domain serves it at the root. A base path
- * is baked into every generated link, so one artifact cannot satisfy both —
+ * is baked into every generated link, so one artifact cannot satisfy both;
  * the build is parameterised and run once per target instead.
  *
  * Defaults describe the GitHub Pages target so that `astro dev` reproduces the
@@ -38,7 +38,7 @@ export default defineConfig({
   base,
   /*
    * Every page is emitted as `slug/index.html`, so the canonical form of a
-   * route ends in a slash — which is what the canonical tag has always said.
+   * route ends in a slash, which is what the canonical tag has always said.
    * The default, `"ignore"`, lets the dev server answer both forms, so a link
    * missing its slash works locally and costs a redirect in production. Being
    * explicit makes development fail the same way production would.
@@ -55,8 +55,8 @@ export default defineConfig({
   /*
    * The sitemap is derived from the routes the build actually emitted, which
    * is the only description of the site guaranteed to be true. The legacy
-   * sitemap was hand-maintained — a second encoding of the route set that
-   * nothing forced to agree with the first — and by the end it advertised
+   * sitemap was hand-maintained, a second encoding of the route set that
+   * nothing forced to agree with the first, and by the end it advertised
    * three URLs that no longer existed and omitted every page added after it
    * was last edited.
    *

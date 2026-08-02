@@ -29,7 +29,7 @@ export type ProjectSection = {
 };
 
 /**
- * Sections in config order, with empty ones omitted — an empty heading
+ * Sections in config order, with empty ones omitted; an empty heading
  * advertises a gap, where saying nothing simply says nothing.
  */
 export const projectSections = (): readonly ProjectSection[] => {

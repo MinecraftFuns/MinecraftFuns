@@ -6,7 +6,7 @@ import { monthOf, yearOf, type IsoDate } from "./time.ts";
  * `/blog/YYYY/MM/slug/`.
  *
  * The month segments are redundant. A post's authoritative date is its
- * frontmatter `date`, and the folders restate the first two components of it —
+ * frontmatter `date`, and the folders restate the first two components of it,
  * so the interesting question is not how to build the URL but what happens
  * when the two disagree. A file dated 2026-08-01 sitting in `2026/07/` is a
  * representable state, and one nobody would notice: both the folder listing
@@ -30,7 +30,7 @@ export type PostPath = {
 
 /**
  * Four digits, a real month, and a kebab-case slug. Anchored, so nothing
- * deeper than `YYYY/MM/slug` parses — an extra folder level is a mistake
+ * deeper than `YYYY/MM/slug` parses; an extra folder level is a mistake
  * rather than a silently accepted nesting.
  */
 const POST_ID = /^(\d{4})\/(0[1-9]|1[0-2])\/([a-z0-9]+(?:-[a-z0-9]+)*)$/;
@@ -40,7 +40,7 @@ export const parsePostPath = (id: string): Parsed<PostPath> => {
   const match = POST_ID.exec(id);
   return match === null
     ? invalid(
-        `expected YYYY/MM/kebab-case-slug, got ${JSON.stringify(id)} — a post file belongs at src/content/blog/YYYY/MM/slug.md`,
+        `expected YYYY/MM/kebab-case-slug, got ${JSON.stringify(id)}; a post file belongs at src/content/blog/YYYY/MM/slug.md`,
       )
     : ok({ year: match[1], month: match[2], slug: match[3] });
 };

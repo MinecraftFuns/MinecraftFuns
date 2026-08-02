@@ -5,7 +5,7 @@ import type { HostConfig } from "./schema.ts";
  *
  * Paths are written site-relative and a `*` may end one. The deployment's base
  * path is applied when these are decoded, so nothing here needs to know where
- * the site is mounted — and a rule cannot be correct on one target and silently
+ * the site is mounted, and a rule cannot be correct on one target and silently
  * dead on the other, which is what the hand-written files were.
  *
  * `_redirects` is first-match-wins, so order matters: exact paths precede the

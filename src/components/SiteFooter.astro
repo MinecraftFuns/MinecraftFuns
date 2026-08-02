@@ -5,7 +5,7 @@ import { currentYear } from "../lib/time.ts";
 
 /*
  * Reading the clock is an effect, so it happens here at the render edge rather
- * than inside a module constant. It is evaluated once at build time — the year
+ * than inside a module constant. It is evaluated once at build time; the year
  * advances on redeploy, not at midnight.
  */
 const year = currentYear();
@@ -51,7 +51,7 @@ const fingerprint = await siteFingerprint();
 
     <div class="flex flex-col gap-2xs">
       <h2 class="text-eyebrow text-ink-subtle uppercase">PGP fingerprint</h2>
-      {/* Mono is reserved for machine-readable strings — this and code blocks. */}
+      {/* Mono is reserved for machine-readable strings: this and code blocks. */}
       <p class="font-mono text-caption max-w-fingerprint wrap-anywhere">
         {fingerprint}
       </p>

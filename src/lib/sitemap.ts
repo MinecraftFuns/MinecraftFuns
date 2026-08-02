@@ -10,8 +10,8 @@ import { joinRoute, slashTerminated } from "./url.ts";
  * contains `/404`, and so silently vanished from the sitemap.
  *
  * Containment was reached for because the two sides were in different
- * coordinate systems — the page carries the deployment's base, config is
- * written site-relative — so no anchored test could have matched either.
+ * coordinate systems: the page carries the deployment's base, config is
+ * written site-relative, so no anchored test could have matched either.
  * Resolving config through `joinRoute` puts both in the same space, where
  * equality is the correct relation and membership is its implementation. That
  * also makes the check O(1) per page rather than O(excluded).

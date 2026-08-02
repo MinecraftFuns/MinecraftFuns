@@ -6,7 +6,7 @@ import { assertNever } from "./adt.ts";
  * RFC 9309 gives robots.txt a grammar: a file is a sequence of *groups*, each
  * one or more user-agent lines followed by the rules that apply to them, plus
  * records outside any group. Writing that file as a string literal leaves the
- * grammar implicit, and every bug in the legacy file was a consequence — a
+ * grammar implicit, and every bug in the legacy file was a consequence: a
  * hardcoded absolute sitemap URL that was wrong on any other origin, and an
  * empty `Disallow:` whose meaning ("nothing is disallowed") is the opposite of
  * what it looks like at a glance.
@@ -15,7 +15,7 @@ import { assertNever } from "./adt.ts";
  * `allow` and `disallow` cannot be confused for a boolean flag; a group's
  * user-agent list is non-empty by type, because a group with none matches
  * nothing and RFC 9309 requires at least one; and the sitemap is a separate
- * field rather than a rule, which is what it is — the RFC places it outside the
+ * field rather than a rule, which is what it is; the RFC places it outside the
  * group grammar entirely, as a record crawlers MAY interpret.
  *
  * Pure and total: no clock, no environment, no I/O.
@@ -33,7 +33,7 @@ export type Rule =
 /**
  * `readonly [string, ...string[]]` is a non-empty list in the type system. A
  * group with no user-agent line applies to nobody, so the empty case is not a
- * value to validate at runtime — it is a value that cannot be constructed.
+ * value to validate at runtime; it is a value that cannot be constructed.
  */
 export type Group = {
   readonly userAgents: readonly [string, ...string[]];
@@ -92,7 +92,7 @@ export const allowAll = (sitemaps: readonly string[]): Robots => ({
 });
 
 /**
- * Nothing is crawlable, and no sitemap is advertised — offering a crawler a
+ * Nothing is crawlable, and no sitemap is advertised: offering a crawler a
  * map of pages it has just been told not to fetch is a contradiction.
  */
 export const disallowAll = (): Robots => ({

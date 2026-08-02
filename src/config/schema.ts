@@ -2,7 +2,7 @@
  * The shape of this site's configuration.
  *
  * One module, deliberately: the answer to "what can I configure?" should be a
- * file rather than a search. It is a leaf — it declares types and nothing else,
+ * file rather than a search. It is a leaf: it declares types and nothing else,
  * so both the config data and the code that reads it can depend on it without
  * a cycle.
  *
@@ -36,7 +36,7 @@ export type HttpsUrl = `https://${string}`;
 export type Href = RootedPath | HttpsUrl;
 
 /**
- * A labelled hyperlink. Nav items and profiles are both this, refined —
+ * A labelled hyperlink. Nav items and profiles are both this, refined;
  * naming the shape once is what stops three near-identical records drifting
  * into three slightly different ones.
  */
@@ -136,7 +136,7 @@ export type ProjectStatusConfig = {
  * The distinctions are load-bearing and easy to get wrong when the field is
  * typed `number`: 301 and 308 are permanent where 302, 303 and 307 are not,
  * 307 and 308 preserve the request method where the older codes historically
- * did not, and 200 is not a redirect at all — it rewrites in place.
+ * did not, and 200 is not a redirect at all; it rewrites in place.
  */
 export type RedirectStatus = 200 | 301 | 302 | 303 | 307 | 308;
 
@@ -151,7 +151,7 @@ export type RedirectConfig = {
  * A header rule as written in config.
  *
  * `set` is a record rather than a list of pairs, which makes a repeated header
- * name unrepresentable in the common case — object keys are unique. Names
+ * name unrepresentable in the common case: object keys are unique. Names
  * differing only in case remain expressible, so the decoder still checks.
  */
 export type HeaderConfig = {

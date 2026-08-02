@@ -12,7 +12,7 @@ import {
 /*
  * `page.evaluate` serialises the function and nothing else: the browser gets
  * the source text, not the module. A probe that reaches for a module-scope
- * helper therefore throws `x is not defined` inside the page — at which point
+ * helper therefore throws `x is not defined` inside the page, at which point
  * the audit reports a driver failure instead of findings, and does so only in
  * CI, where the browser actually runs.
  *

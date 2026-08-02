@@ -45,7 +45,7 @@ describe("parsePostPath", () => {
     assert.equal(parsePostPath("2026/08/trailing-").tag, "invalid");
   });
 
-  it("is total — no input throws", () => {
+  it("is total: no input throws", () => {
     const inputs = ["", "/", "////", "2026", "2026/08", "2026/08/", "a/b/c"];
     inputs.forEach((input) => {
       assert.doesNotThrow(() => parsePostPath(input));

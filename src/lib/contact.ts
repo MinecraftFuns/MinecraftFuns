@@ -9,8 +9,8 @@ import { routeUrl } from "./url.ts";
  *
  * The split is deliberate: a *handle* is a fact about me and lives in config; a
  * platform's display name and URL shape are facts about the platform and live
- * here. Storing the full URL in config would write each handle twice — once
- * bare and once inside a link — which is exactly the pair that drifts when an
+ * here. Storing the full URL in config would write each handle twice, once
+ * bare and once inside a link, which is exactly the pair that drifts when an
  * account is renamed.
  */
 
@@ -27,7 +27,7 @@ void _platformsCoverSchema;
 
 /** A `Link` that also carries the bare handle, and whether it proves identity. */
 export type Profile = Link & {
-  /** As displayed — the handle itself, not a URL. */
+  /** As displayed: the handle itself, not a URL. */
   readonly handle: string;
   /**
    * `rel="me"` asserts "this profile is the same person as this site", which is
@@ -64,7 +64,7 @@ export const elsewhere = (): readonly Profile[] => [
 /**
  * This site's key fingerprint, formatted for reading.
  *
- * Derived here so the footer and the About page cannot print different ones —
+ * Derived here so the footer and the About page cannot print different ones;
  * they each did their own `publishedKeys` call and formatting, which is two
  * copies of one derivation and exactly what the fingerprint config field was
  * before it.

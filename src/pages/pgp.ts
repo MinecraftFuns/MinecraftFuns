@@ -8,7 +8,7 @@ import { publishedKeys } from "../lib/keys.ts";
  *
  * Served as the stored text verbatim. Re-armouring through openpgp.js would
  * drop the packets it does not model and quietly publish a less complete key
- * than the one in the repository — which is exactly how the legacy site came to
+ * than the one in the repository, which is exactly how the legacy site came to
  * serve 53 packets here and 58 to Web Key Directory clients.
  */
 export const GET: APIRoute = async () => {

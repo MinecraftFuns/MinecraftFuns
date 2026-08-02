@@ -12,8 +12,8 @@ import {
 
 /*
  * The probe runs in a browser CI can start but this machine cannot. Splitting
- * observation from judgement means the judgement — every rule that decides
- * whether something is a defect — is testable here, with synthetic
+ * observation from judgement means the judgement (every rule that decides
+ * whether something is a defect) is testable here, with synthetic
  * measurements standing in for a real page.
  *
  * These are mostly adversarial: values that *should* pass sit right next to
@@ -33,7 +33,7 @@ describe("classifyMeasurement", () => {
     }
   });
 
-  it("accepts zero — absent spacing is not a scale error", () => {
+  it("accepts zero: absent spacing is not a scale error", () => {
     assert.equal(classifyMeasurement(0, TOKENS), "token");
   });
 
@@ -58,7 +58,7 @@ describe("classifyMeasurement", () => {
     assert.equal(classifyMeasurement(10, [], 5), "on-grid");
   });
 
-  it("is total — every input yields a classification", () => {
+  it("is total: every input yields a classification", () => {
     for (const value of [0, -4, 0.1, 1e6, 3.7]) {
       assert.ok(["token", "on-grid", "off-grid"].includes(classifyMeasurement(value, TOKENS)));
     }
