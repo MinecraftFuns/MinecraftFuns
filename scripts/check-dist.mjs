@@ -104,6 +104,47 @@ export const candidatePaths = (reference, base) => {
   return [bare, `${bare}/index.html`, `${bare}.html`];
 };
 
+/** Z-Base-32, RFC 6189 section 5.1.6. Deliberately not RFC 4648's alphabet. */
+const ZBASE32_NAME = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{32}$/;
+
+/**
+ * Web Key Directory integrity, judged from the artifact alone.
+ *
+ * A key nobody can fetch is indistinguishable from a key nobody published, and
+ * both look like a clean build. The properties below are the ones a mail client
+ * depends on, checked without importing any of the code that produced them —
+ * an OpenPGP public-key packet begins with tag 6, which is 0x98 or 0x99 in the
+ * old packet format the export uses.
+ */
+export const wkdViolations = (entries) => {
+  const found = [];
+  const { policy, keys } = entries;
+
+  if (!policy) {
+    found.push("no .well-known/openpgpkey/policy — the specification requires it");
+  }
+  if (keys.length === 0) {
+    found.push("no keys published under .well-known/openpgpkey/hu/");
+  }
+
+  keys.forEach(({ name, bytes }) => {
+    if (!ZBASE32_NAME.test(name)) {
+      found.push(`hu/${name} is not a 32-character Z-Base-32 hash`);
+    }
+    if (bytes.length === 0) {
+      found.push(`hu/${name} is empty`);
+    } else if (bytes[0] !== 0x98 && bytes[0] !== 0x99) {
+      // An armored key here would start with "-" (0x2d), which is the mistake
+      // the specification explicitly warns against.
+      found.push(
+        `hu/${name} does not begin with an OpenPGP public-key packet (0x${bytes[0].toString(16)}); the key must be binary, not armored`,
+      );
+    }
+  });
+
+  return found;
+};
+
 /**
  * Whether a canonical URL points inside this deployment.
  *
@@ -286,6 +327,20 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
       );
     }
   }
+
+  // -- Web Key Directory ---------------------------------------------------
+  const HU = join("\.well-known", "openpgpkey", "hu");
+  const huFiles = relativeFiles.filter((path) => path.startsWith(`${HU}/`));
+
+  wkdViolations({
+    policy: present.has(join("\.well-known", "openpgpkey", "policy")),
+    keys: await Promise.all(
+      huFiles.map(async (path) => ({
+        name: path.slice(HU.length + 1),
+        bytes: await readFile(join(dist, path)),
+      })),
+    ),
+  }).forEach((detail) => found.push(violation("wkd", detail)));
 
   // -- Stylesheet integrity ------------------------------------------------
   const palette = paletteFrom(tokensCss);

@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import {
   candidatePaths,
   isCanonicalWithin,
+  wkdViolations,
   extractReferences,
   inspect,
   isInternal,
@@ -29,10 +30,23 @@ const TOKENS = `
   --color-ink-black-500: #496ab6;
 `;
 
+/*
+ * A well-formed artifact publishes a key directory, so the fixtures carry a
+ * minimal one. Presence is asserted rather than assumed: a build that silently
+ * stopped emitting the key would otherwise look exactly like a clean run.
+ * `wkdViolations` is tested directly for the malformed cases.
+ */
+const WKD_FIXTURE = {
+  ".well-known/openpgpkey/policy": "",
+  ".well-known/openpgpkey/hu/s8y7oh5xrdpu9psba3i5ntk64ohouhga": Buffer.from([
+    0x98, 0x01,
+  ]),
+};
+
 /** Build a throwaway dist tree and inspect it. */
 const inspectTree = async (files, options = {}) => {
   const dist = await mkdtemp(join(tmpdir(), "check-dist-"));
-  for (const [path, contents] of Object.entries(files)) {
+  for (const [path, contents] of Object.entries({ ...WKD_FIXTURE, ...files })) {
     const full = join(dist, path);
     await mkdir(join(full, ".."), { recursive: true });
     await writeFile(full, contents);
@@ -186,6 +200,50 @@ describe("isCanonicalWithin", () => {
   it("is total — unparseable input is rejected, not thrown", () => {
     assert.doesNotThrow(() => isCanonicalWithin("not a url", SITE, "/"));
     assert.equal(isCanonicalWithin("not a url", SITE, "/"), false);
+  });
+});
+
+describe("wkdViolations", () => {
+  const HASH = "s8y7oh5xrdpu9psba3i5ntk64ohouhga";
+  const key = (bytes) => ({ name: HASH, bytes: Uint8Array.from(bytes) });
+
+  it("passes a directory holding a binary key and a policy file", () => {
+    assert.deepEqual(wkdViolations({ policy: true, keys: [key([0x98, 0x01])] }), []);
+  });
+
+  it("accepts the other public-key packet framing", () => {
+    assert.deepEqual(wkdViolations({ policy: true, keys: [key([0x99, 0x01])] }), []);
+  });
+
+  it("catches a missing policy file, which the specification requires", () => {
+    const found = wkdViolations({ policy: false, keys: [key([0x98])] });
+    assert.equal(found.length, 1);
+    assert.match(found[0], /policy/);
+  });
+
+  it("catches a directory with no keys at all", () => {
+    assert.match(wkdViolations({ policy: true, keys: [] })[0], /no keys/);
+  });
+
+  it("catches an armored key where the binary one is mandatory", () => {
+    // "-----BEGIN" starts with 0x2d. This is the specific mistake the spec
+    // warns against, and it would leave clients unable to import the key.
+    const found = wkdViolations({ policy: true, keys: [key([0x2d, 0x2d])] });
+    assert.match(found[0], /binary, not armored/);
+  });
+
+  it("catches an empty key file", () => {
+    assert.match(wkdViolations({ policy: true, keys: [key([])] })[0], /is empty/);
+  });
+
+  it("catches a filename that is not a Z-Base-32 hash", () => {
+    const found = wkdViolations({
+      policy: true,
+      // 'l' and '0' are absent from Z-Base-32; a name using them would mean
+      // the encoder had drifted onto RFC 4648's alphabet.
+      keys: [{ name: "l0" + "a".repeat(30), bytes: Uint8Array.from([0x98]) }],
+    });
+    assert.match(found[0], /Z-Base-32/);
   });
 });
 

@@ -39,6 +39,15 @@ export const nav = [
 export const contact = {
   pgp: "https://joefang.org/pgp",
   pgpFingerprint: "1CA3 EB47 A7FC BCF9 F28D 4346 B522 8030 A919 B27A",
+  /**
+   * The domain whose addresses this site publishes keys for.
+   *
+   * A constant rather than a function of the build target: the key carries
+   * `@joefang.org` User IDs wherever it is deployed, and Web Key Directory
+   * lookups are answered by the address's own domain. Deriving it from
+   * `SITE_URL` would silently publish nothing on the GitHub Pages build.
+   */
+  mailDomain: "joefang.org",
   matrix: "https://matrix.to/#/@multiset:matrix.org",
   github: "https://github.com/MinecraftFuns",
   twitter: "https://x.com/SerendipityArk",
