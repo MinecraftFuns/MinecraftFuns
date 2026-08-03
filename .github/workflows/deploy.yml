@@ -37,6 +37,11 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+    outputs:
+      # The declared deployments, and which of them is canonical. Consumed by
+      # the build matrix and by the joefang-org artifact check.
+      targets: ${{ steps.deployments.outputs.targets }}
+      canonical: ${{ steps.deployments.outputs.canonical }}
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -70,37 +75,43 @@ jobs:
       - name: Verify
         run: npm test
 
+      # The build matrix is *derived*, not written here. Every origin, base
+      # path, and deployment name comes from src/config/deployments.ts, which
+      # is also what the canonical links, the indexing policy, and the artifact
+      # checks read. A matrix entry naming a base the config does not declare
+      # would build a coherent, wrong artifact with nothing to say so; there is
+      # now no second place for one to be written.
+      #
+      # It runs here rather than in its own job because this job has already
+      # paid for the checkout and the install.
+      - name: Resolve deployments
+        id: deployments
+        run: node scripts/deployment-matrix.mjs
+
   # ---------------------------------------------------------------------------
-  # Build once per destination. A base path is baked into every generated link,
+  # Build once per deployment. A base path is baked into every generated link,
   # so the two origins genuinely need two artifacts, the same validated source
   # compiled against different parameters, not two independent pipelines.
+  #
+  # `matrix.id` is the deployment's only name. It is simultaneously the GitHub
+  # environment, the artifact, and the job label, so nothing in this file has
+  # to map one identifier onto another.
   # ---------------------------------------------------------------------------
   build:
-    name: Build ${{ matrix.name }}
+    name: Build ${{ matrix.id }}
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
     strategy:
-      # Let both targets report. They are two parameterisations of one source,
-      # so knowing whether a failure is target-specific or common to both is
-      # the first diagnostic question; cancelling the sibling destroys it.
-      # `deploy` still requires every leg to succeed.
+      # Let both deployments report. They are two parameterisations of one
+      # source, so knowing whether a failure is specific to one or common to
+      # both is the first diagnostic question; cancelling the sibling destroys
+      # it. The publish jobs still require every leg to succeed.
       fail-fast: false
       matrix:
-        include:
-          # Served beneath /MinecraftFuns because this is a project repository
-          # rather than a <user>.github.io one.
-          - name: github-pages
-            site: https://minecraftfuns.github.io
-            base: /MinecraftFuns/
-            pages: true
-          # The eventual primary domain, served at the root.
-          - name: joefang-org
-            site: https://joefang.org
-            base: /
-            pages: false
+        include: ${{ fromJSON(needs.verify.outputs.targets) }}
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -119,44 +130,54 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build for ${{ matrix.site }}${{ matrix.base }}
+      - name: Build ${{ matrix.id }} (${{ matrix.origin }}${{ matrix.base }})
         env:
-          SITE_URL: ${{ matrix.site }}
+          SITE_URL: ${{ matrix.origin }}
           SITE_BASE: ${{ matrix.base }}
         run: npm run build
 
       # Source-level checks cannot see the deployable. This reads dist/ and
       # asserts the properties that only exist after a build: every internal
-      # link carries the base path and resolves to a real file, the canonical
-      # URL matches the target, no template value leaked, no client script
-      # appeared, and no colour outside the palette reached the stylesheet.
+      # link carries the base path and resolves to a real file, every page
+      # canonicalises to the *canonical* deployment rather than to itself, no
+      # template value leaked, no client script appeared, and no colour outside
+      # the palette reached the stylesheet.
       #
-      # It runs per target, because the base path it validates differs between
-      # them; the check is worthless if it does not match what was built.
+      # It runs per deployment, because the base path it validates differs
+      # between them; the check is worthless if it does not match what was
+      # built. The canonical origin it compares against does not vary, and is
+      # read from the same config the build used.
       - name: Check built artifact
         env:
-          SITE_URL: ${{ matrix.site }}
+          SITE_URL: ${{ matrix.origin }}
           SITE_BASE: ${{ matrix.base }}
         run: npm run check:dist
 
-      # Pages expects one specifically named artifact, which the deploy job
-      # consumes. Retention stays at the default single day: it is an
+      # Pages expects one specifically named artifact, which the github-pages
+      # job consumes. Retention stays at the default single day: it is an
       # intermediate, superseded by the next push.
+      #
+      # Selected by name rather than by a `pages:` flag in the matrix. The flag
+      # was a second way of saying "this one is github-pages", and a matrix
+      # entry could set it inconsistently with its own id.
       - name: Upload Pages artifact
-        if: matrix.pages
+        if: matrix.id == 'github-pages'
         uses: actions/upload-pages-artifact@v5
         with:
           path: dist/
           retention-days: 1
 
-      # The second destination has no deployment step yet, so its build is
-      # published as an ordinary downloadable artifact. `if-no-files-found:
-      # error` turns a silently empty upload into a failure.
-      - name: Upload portable artifact
-        if: ${{ !matrix.pages }}
+      # Every other deployment is published by a job of its own rather than by
+      # an official action, so its build travels there as an ordinary artifact
+      # named for the deployment. `if-no-files-found: error` turns a silently
+      # empty upload into a failure, which matters more here than for Pages: an
+      # empty directory would otherwise be committed to the deployment
+      # repository and blank the live site.
+      - name: Upload ${{ matrix.id }} artifact
+        if: matrix.id != 'github-pages'
         uses: actions/upload-artifact@v7
         with:
-          name: site-${{ matrix.name }}
+          name: ${{ matrix.id }}
           path: dist/
           retention-days: 7
           if-no-files-found: error
@@ -236,13 +257,262 @@ jobs:
           overwrite: true
 
   # ---------------------------------------------------------------------------
-  # The only job with write access, and the only one that touches anything
-  # outside the runner. It runs no repository code; it just hands GitHub an
-  # already-built artifact, so `contents` access is not among its grants.
+  # joefang.org, the primary domain.
+  #
+  # Cloudflare Pages serves it, and Cloudflare builds from a git remote rather
+  # than from an artifact, so the deployable is *pushed* to a repository it
+  # watches: git@github.com:McFuns/joefang.org.git. That repository holds
+  # published output only; nothing is ever authored there.
+  #
+  # This is also the only target on which `_headers` and `_redirects` do
+  # anything at all. GitHub Pages ignores both, so every host directive in
+  # src/config/hosting.ts takes effect here or nowhere.
+  #
+  # Least privilege, in three parts:
+  #   - GITHUB_TOKEN gets `actions: read` and nothing else. It is used to fetch
+  #     this run's artifact and for no other purpose; in particular this job
+  #     never checks out, and so never runs, code from this repository.
+  #   - Write access to the destination rides on an SSH *deploy key* scoped to
+  #     that one repository, not on a PAT and not on the token above. Checkout
+  #     confines it to this job's git config; nothing else on the runner can
+  #     reach it.
+  #   - The environment gates the secret, so it can carry required reviewers or
+  #     a branch restriction without touching this file.
+  #
+  # Environment isolation, stated as invariants so they can be checked by
+  # reading rather than by remembering:
+  #
+  #   1. `joefang-org` is named by this job and by no other. An environment
+  #      secret is readable only from a job that declares that environment, so
+  #      the deploy key is unreachable from `verify`, `build`, and `audit` —
+  #      which are precisely the jobs that execute repository code, test code,
+  #      and a browser. Adding `environment:` to any of them would break this.
+  #   2. The environment is restricted to `main`. The `if` below states the
+  #      same rule a second time, in the file, so a `workflow_dispatch` from a
+  #      branch skips cleanly instead of failing at the gate, and so a reader
+  #      does not have to open repository settings to learn the constraint. The
+  #      settings-side rule remains the one that is actually enforced; this is
+  #      defence in depth, not a substitute.
+  #   3. The two deployments never share an artifact. `github-pages` and
+  #      `joefang-org` are built from one source against different parameters,
+  #      and publishing either to the other's origin produces a site whose
+  #      every link is wrong. The verification step below refuses the wrong
+  #      artifact rather than trusting that the names cannot be transposed.
+  #
+  # One name throughout: `joefang-org` is the deployment id in
+  # src/config/deployments.ts, the GitHub environment, the artifact, and this
+  # job. The hosting provider is Cloudflare Pages, which is a fact about how
+  # the deployment is served rather than a second name for it, and appears
+  # nowhere as an identifier.
   # ---------------------------------------------------------------------------
-  deploy:
-    name: Deploy to GitHub Pages
+  joefang-org:
+    name: Publish joefang-org
+    needs: [verify, build]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read # download this run's artifact, and nothing more
+    environment:
+      name: joefang-org
+      url: https://joefang.org
+    env:
+      # The canonical deployment, resolved from config by the `verify` job.
+      # The checks below compare the artifact against these rather than against
+      # literals, so renaming a deployment cannot leave a stale expectation.
+      CANONICAL_ORIGIN: ${{ fromJSON(needs.verify.outputs.canonical).origin }}
+      CANONICAL_BASE: ${{ fromJSON(needs.verify.outputs.canonical).base }}
+    steps:
+      # No `actions/checkout` of this repository: this job publishes an
+      # artifact that has already been built and checked, and giving it the
+      # source would only widen what a compromised step could reach.
+      - name: Download the joefang-org build
+        uses: actions/download-artifact@v7
+        with:
+          name: joefang-org
+          path: build
+
+      # The gate between "an artifact" and "production".
+      #
+      # Two failures are worth spending a step on, because both are silent and
+      # both are only visible once the site is live. The first is an empty
+      # tree, which blanks the site; `if-no-files-found: error` already guards
+      # the upload, but that guard lives two jobs away and this is the step
+      # whose failure mode is the outage. The second is publishing the *Pages*
+      # artifact here, which would ship a site whose every internal link
+      # carries `/MinecraftFuns/` and whose robots.txt forbids all crawling.
+      #
+      # Every marker below is derived from CANONICAL_ORIGIN/CANONICAL_BASE, so
+      # this step states one thing only: "this artifact is the canonical
+      # deployment's". A plain grep for the mirror's base path is deliberately
+      # not among them — a migrated post links a gist under `/MinecraftFuns/`,
+      # so that string appears in the correct artifact too.
+      - name: Verify the artifact is the joefang-org build
+        run: |
+          set -euo pipefail
+
+          fail() { echo "::error::$1"; exit 1; }
+
+          test -f build/index.html || fail "build/index.html is missing; refusing to publish an empty tree"
+
+          # Canonical URL and base path. Every deployment canonicalises to the
+          # canonical origin, so this alone does not identify the artifact;
+          # the base path in _headers does, and both must agree.
+          grep -qF "<link rel=\"canonical\" href=\"${CANONICAL_ORIGIN}${CANONICAL_BASE}\">" build/index.html \
+            || fail "index.html does not canonicalise to ${CANONICAL_ORIGIN}${CANONICAL_BASE}"
+          grep -qxF "${CANONICAL_BASE}*" build/_headers \
+            || fail "_headers is not rooted at ${CANONICAL_BASE}; this is another deployment's artifact"
+
+          # Indexing policy: only the canonical copy asks to be crawled, and
+          # only a mirror carries the noindex meta tag.
+          grep -qF "Sitemap: ${CANONICAL_ORIGIN}${CANONICAL_BASE}sitemap-index.xml" build/robots.txt \
+            || fail "robots.txt does not advertise ${CANONICAL_ORIGIN}${CANONICAL_BASE}sitemap-index.xml"
+          if grep -qF 'Disallow: /' build/robots.txt; then
+            fail "robots.txt forbids crawling; this is a mirror artifact"
+          fi
+          if grep -qF '<meta name="robots" content="noindex">' build/index.html; then
+            fail "index.html is marked noindex; this is a mirror artifact"
+          fi
+
+          echo "Artifact verified as the joefang-org build."
+
+      # `ssh-key` puts the deploy key in this checkout's git config, which is
+      # what lets the push below authenticate. `persist-credentials` therefore
+      # stays at its default of true here, unlike every other checkout in this
+      # workflow: the credential *is* the point of the step. Full history,
+      # because a shallow clone is an awkward base to rebase onto, and this
+      # repository holds nothing but small static files.
+      #
+      # JOEFANG_ORG_DEPLOY_KEY is the *private* half, in OpenSSH format,
+      # pasted with its real line breaks intact:
+      #
+      #     -----BEGIN OPENSSH PRIVATE KEY-----
+      #     b3BlbnNzaC1rZXktdjEAAAAABG5vbmU...
+      #     -----END OPENSSH PRIVATE KEY-----
+      #
+      # It must have **no passphrase**: the action runs `ssh -i <file>` with no
+      # agent and no askpass, so a passphrase-protected key hangs rather than
+      # failing cleanly. Generate a dedicated pair with
+      # `ssh-keygen -t ed25519 -N "" -C joefang.org-deploy`, and register the
+      # `.pub` half on McFuns/joefang.org under Deploy keys with "Allow write
+      # access" ticked. A deploy key may only be attached to one repository
+      # across all of GitHub, so it cannot be a key already in use elsewhere.
+      #
+      # Surrounding whitespace does not matter: checkout writes
+      # `sshKey.trim() + "\n"` at mode 0600, so the usual missing-trailing-
+      # newline failure cannot occur here. Interior line breaks do matter, and
+      # a key flattened to one line will not load.
+      #
+      # No `ssh-known-hosts` is needed: github.com's host keys are bundled with
+      # the action, and `ssh-strict` defaults to true, so host verification is
+      # already on. Because `ssh-key` is set, checkout points the remote at
+      # git@github.com:McFuns/joefang.org.git and writes `core.sshCommand` into
+      # `deploy/.git/config` — which is why the commit-and-push step below runs
+      # with `working-directory: deploy` and never names a URL of its own.
+      - name: Check out the deployment repository
+        uses: actions/checkout@v7
+        with:
+          repository: McFuns/joefang.org
+          ssh-key: ${{ secrets.JOEFANG_ORG_DEPLOY_KEY }}
+          path: deploy
+          fetch-depth: 0
+          show-progress: false
+
+      # Replace the working tree wholesale rather than copying over it, so a
+      # page deleted from the source is deleted from the site. Copying alone
+      # would leave a removed route live and reachable forever, which is the
+      # classic failure of publish-by-copy.
+      - name: Stage the build
+        run: |
+          find deploy -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R build/. deploy/
+
+      # The deployment repository's history is a log of published states: one
+      # commit per deployment, each holding the exact tree that was live and
+      # naming the source commit it was built from. That is the whole of its
+      # value, and it is why nothing is ever squashed or force-pushed here.
+      #
+      # `github.event.head_commit.message` is attacker-controllable text (a
+      # branch can be pushed with any commit message), so it arrives through
+      # `env` rather than being interpolated into the script. Interpolating it
+      # directly would let a commit message run shell in a job holding a
+      # deploy key.
+      - name: Commit and push
+        working-directory: deploy
+        env:
+          SOURCE_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          branch="$(git rev-parse --abbrev-ref HEAD)"
+
+          # Re-parent onto the true remote tip without disturbing the tree.
+          #
+          # This replaces a `git pull --rebase`, which was the wrong tool: the
+          # commit being rebased replaces every file, so any concurrent change
+          # to the same files is a conflict, and rebase would stop and wait for
+          # a resolution that has no meaning here — for published output the
+          # newest build simply wins, wholesale. `reset --soft` moves HEAD and
+          # leaves the index and worktree alone, so the commit below lands on
+          # top of whatever is on the remote, with the artifact as its tree,
+          # and cannot conflict. Nothing is lost: every earlier deployment
+          # keeps its own commit.
+          git fetch --quiet origin "$branch"
+          git reset --soft "origin/$branch"
+          git add --all
+
+          # An identical build is not a failure and not a deployment. Exit
+          # before touching the remote so a no-op does not enter the log as a
+          # release, which would make the history stop meaning "what changed".
+          if git diff --cached --quiet; then
+            echo "No change since the last deployment."
+            exit 0
+          fi
+
+          # Trailers rather than prose, so the provenance is machine-readable:
+          # `git log --format='%(trailers:key=Source-Commit,valueonly)'` maps a
+          # live deployment back to the commit that produced it, and the run
+          # that did it. The subject line of the source commit is carried over
+          # so the log reads as a changelog rather than as a list of hashes.
+          subject="$(printf '%s\n' "${SOURCE_MESSAGE:-}" | head -1)"
+          : "${subject:=manual deployment}"
+
+          git commit \
+            -m "chore(deploy): publish ${GITHUB_SHA:0:7}" \
+            -m "$subject" \
+            -m "Source-Repository: ${GITHUB_REPOSITORY}
+          Source-Commit: ${GITHUB_SHA}
+          Source-Ref: ${GITHUB_REF}
+          Workflow-Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          Run-Attempt: ${GITHUB_RUN_ATTEMPT}"
+
+          # No force, ever. A rejected push means something else wrote to the
+          # deployment repository between the fetch above and here; that is
+          # worth a loud failure and a look, not an overwrite.
+          git push origin "HEAD:$branch"
+
+  # ---------------------------------------------------------------------------
+  # The github-pages deployment: the mirror.
+  #
+  # The only job with write access to this repository's Pages, and the only
+  # other one that touches anything outside the runner. It runs no repository
+  # code; it just hands GitHub an already-built artifact, so `contents` access
+  # is not among its grants.
+  #
+  # Named `github-pages` for the same reason the other publish job is named
+  # `joefang-org`: it is the deployment id from src/config/deployments.ts and
+  # the GitHub environment, and one name is harder to get wrong than two.
+  # ---------------------------------------------------------------------------
+  github-pages:
+    name: Publish github-pages
     needs: build
+    # The same in-file restatement of the environment's branch rule that
+    # `joefang-org` carries, so the two deployments are gated identically
+    # rather than one being stricter by accident.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
