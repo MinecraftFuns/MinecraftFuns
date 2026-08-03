@@ -120,11 +120,16 @@ export type ProjectKindConfig = {
   readonly blurb: string;
 };
 
-/** A status and the badge it shows. `null` is "no badge", a decision. */
-export type ProjectStatusConfig = {
-  readonly status: string;
-  readonly badge: string | null;
-};
+/**
+ * Statuses, mapped to the badge each one shows. `null` is "no badge", a
+ * decision rather than a value that went missing.
+ *
+ * A record rather than a list, because nothing reads these in order and a list
+ * forces every reader through a lookup that can miss. Keyed, the key type is
+ * the set of keys, so `badgeFor` is total and the absent case it used to
+ * coalesce away cannot arise.
+ */
+export type ProjectStatusConfig = Readonly<Record<string, string | null>>;
 
 // ---------------------------------------------------------------------------
 // Hosting

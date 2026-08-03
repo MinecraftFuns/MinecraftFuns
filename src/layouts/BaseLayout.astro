@@ -25,7 +25,18 @@ const {
 } = Astro.props;
 
 const pageTitle = title ? `${title} | ${site.name}` : site.name;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? site.canonicalOrigin);
+
+/*
+ * `Astro.site` is typed as optional because a project may leave it unset;
+ * this one cannot, since `astro.config.mjs` assigns it unconditionally and
+ * throws on a malformed value. Resolved once here so the absent case is
+ * answered in one place instead of twice with two different answers: the
+ * indexing test used to fall back to `""`, which is not an origin and quietly
+ * meant "not primary".
+ */
+const deployedTo = Astro.site ?? new URL(site.canonicalOrigin);
+
+const canonical = new URL(Astro.url.pathname, deployedTo);
 
 /*
  * Only the primary origin should be indexed. The GitHub Pages build is a
@@ -34,7 +45,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.canonicalOrigin
  * origin root, never from beneath a base path, so the request has to travel
  * in the document itself.
  */
-const isPrimary = (Astro.site?.origin ?? "") === new URL(site.canonicalOrigin).origin;
+const isPrimary = deployedTo.origin === new URL(site.canonicalOrigin).origin;
 ---
 
 <!doctype html>

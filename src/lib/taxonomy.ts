@@ -81,18 +81,28 @@ export const taxonomy = <Label extends string, Item>(
     }))
     .toSorted((a, b) => COLLATOR.compare(a.label, b.label));
 
-  /* Two labels on one segment would put two different pages at one URL, and
-     the build would resolve it arbitrarily. Detected the way `lib/keys.ts`
-     detects two keys claiming one address: find the clash, then raise it. */
-  const clash = taxa.find((taxon, index) =>
-    taxa.slice(0, index).some((earlier) => earlier.slug === taxon.slug),
-  );
+  /*
+   * Two labels on one segment would put two different pages at one URL, and
+   * the build would resolve it arbitrarily.
+   *
+   * One pass carrying the first label seen for each segment. Finding the
+   * clash and then searching again for its counterpart meant the second
+   * search was typed as possibly failing, when it provably could not: the
+   * clash was found *because* an earlier taxon shares its slug. That produced
+   * a `?.` and the chance of printing "undefined" in the message. Keeping the
+   * earlier label in hand removes the impossible branch, and the check drops
+   * from quadratic to linear.
+   */
+  const seen = new Map<string, Label>();
 
-  if (clash !== undefined) {
-    const first = taxa.find((taxon) => taxon.slug === clash.slug);
-    throw new TypeError(
-      `${context}: ${JSON.stringify(first?.label)} and ${JSON.stringify(clash.label)} both become "${clash.slug}"; one label, one URL`,
-    );
+  for (const taxon of taxa) {
+    const first = seen.get(taxon.slug);
+    if (first !== undefined) {
+      throw new TypeError(
+        `${context}: ${JSON.stringify(first)} and ${JSON.stringify(taxon.label)} both become "${taxon.slug}"; one label, one URL`,
+      );
+    }
+    seen.set(taxon.slug, taxon.label);
   }
 
   return taxa;

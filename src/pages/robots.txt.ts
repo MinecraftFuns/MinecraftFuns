@@ -24,11 +24,17 @@ import { assetUrl } from "../lib/url.ts";
  * the request there; this file states the same policy for the case where the
  * base is the root.
  */
-export const GET: APIRoute = ({ site: deployedTo }) => {
+export const GET: APIRoute = ({ site: configured }) => {
   const primary = new URL(site.canonicalOrigin);
-  const isPrimary = deployedTo === undefined || deployedTo.origin === primary.origin;
 
-  const sitemapUrl = new URL(assetUrl("/sitemap-index.xml"), deployedTo ?? primary);
+  /* One answer to "which origin is this", rather than two. The absent case
+     cannot arise, since `astro.config.mjs` always sets `site`; resolving it
+     once means the indexing test and the sitemap URL cannot disagree about
+     what to do if it ever did. */
+  const deployedTo = configured ?? primary;
+  const isPrimary = deployedTo.origin === primary.origin;
+
+  const sitemapUrl = new URL(assetUrl("/sitemap-index.xml"), deployedTo);
   const robots = isPrimary ? allowAll([sitemapUrl.href]) : disallowAll();
 
   return new Response(renderRobots(robots), {

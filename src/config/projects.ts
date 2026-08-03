@@ -31,16 +31,15 @@ export const projectKinds = [
 export type ProjectKind = (typeof projectKinds)[number]["kind"];
 
 /**
- * Statuses and the badge each one shows. `null` means "no badge": a decision,
- * not a value that went missing. Derived the same way, so the union and the
- * labels cannot disagree.
+ * The badge each status shows. `null` means "no badge": a decision, not a
+ * value that went missing. Add a status by adding a key.
  */
-export const projectStatuses = [
-  { status: "active", badge: null },
-  { status: "archived", badge: "Archived" },
-] as const satisfies readonly ProjectStatusConfig[];
+export const projectStatuses = {
+  active: null,
+  archived: "Archived",
+} as const satisfies ProjectStatusConfig;
 
-export type ProjectStatus = (typeof projectStatuses)[number]["status"];
+export type ProjectStatus = keyof typeof projectStatuses;
 
 export type Project = {
   readonly title: string;

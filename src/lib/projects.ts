@@ -12,14 +12,17 @@ import {
  * show and in what order is not.
  */
 
-/* Built once. Total by construction: ProjectStatus is derived from the very
-   array this is built from, so every status has an entry. */
-const BADGE = new Map<ProjectStatus, string | null>(
-  projectStatuses.map(({ status, badge }) => [status, badge]),
-);
-
+/**
+ * The badge a status shows, or `null` for none.
+ *
+ * Total by construction, and now visibly so: `ProjectStatus` is the key type
+ * of the very record being indexed, so the lookup cannot miss. The `Map` this
+ * replaces returned `string | null | undefined` and coalesced the impossible
+ * `undefined` into `null`, which put two absences with different meanings
+ * behind one value. Only one of them was ever real.
+ */
 export const badgeFor = (status: ProjectStatus): string | null =>
-  BADGE.get(status) ?? null;
+  projectStatuses[status];
 
 export type ProjectSection = {
   readonly kind: ProjectKind;

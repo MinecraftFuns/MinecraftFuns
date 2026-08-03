@@ -134,25 +134,27 @@ const load = async (domain: string): Promise<readonly PublishedKey[]> => {
    * resolve arbitrarily and a client would never notice. Failing the build is
    * the only honest outcome.
    *
-   * Finding the conflict is separate from raising it. Flattening to claims
-   * first makes the search one `find` over a list rather than a nested walk
-   * mutating a `Map` it is simultaneously reading.
+   * Flattened to claims first, then walked once carrying the owner already
+   * seen for each hash. Searching for the conflict and then searching again
+   * for its counterpart typed that second search as possibly failing, when it
+   * provably could not: the conflict was found *because* an earlier claim
+   * shares the hash. The `?.` that followed could have printed "undefined" as
+   * a key name in the one message that has to be right.
    */
   const claims = keys.flatMap((key) =>
     key.addresses.map(({ address, hash }) => ({ address, hash, owner: key.name })),
   );
 
-  const disputed = claims.find(({ hash, owner }, index) =>
-    claims
-      .slice(0, index)
-      .some((earlier) => earlier.hash === hash && earlier.owner !== owner),
-  );
+  const owners = new Map<string, string>();
 
-  if (disputed !== undefined) {
-    const first = claims.find((claim) => claim.hash === disputed.hash)?.owner;
-    throw new TypeError(
-      `${disputed.address} is claimed by both ${first}.asc and ${disputed.owner}.asc; one address, one key`,
-    );
+  for (const { address, hash, owner } of claims) {
+    const first = owners.get(hash);
+    if (first !== undefined && first !== owner) {
+      throw new TypeError(
+        `${address} is claimed by both ${first}.asc and ${owner}.asc; one address, one key`,
+      );
+    }
+    owners.set(hash, owner);
   }
 
   return keys;
