@@ -18,5 +18,4 @@ export const COLLATOR = new Intl.Collator(site.locale);
  * default, so a report sorted with it is a property of who ran the build.
  * Comparing code points is the same answer everywhere.
  */
-export const byCodepoint = (a: string, b: string): number =>
-  a < b ? -1 : a > b ? 1 : 0;
+export const byCodepoint = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);

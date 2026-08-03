@@ -35,7 +35,10 @@ describe("taxonomy", () => {
      (recency for posts, title for docs) survives into its taxon pages. */
   it("preserves the incoming order of items within a taxon", () => {
     const taxa = build([item("first", "x"), item("second", "x"), item("third", "x")]);
-    assert.deepEqual(taxa[0].items.map((i) => i.name), ["first", "second", "third"]);
+    assert.deepEqual(
+      taxa[0].items.map((i) => i.name),
+      ["first", "second", "third"],
+    );
   });
 
   it("is total on an empty collection", () => {
@@ -55,12 +58,15 @@ describe("taxonomy", () => {
   });
 
   it("names both offenders and the segment they collide on", () => {
-    assert.throws(() => build([item("a", "A-B"), item("b", "a b")]), (error: Error) => {
-      assert.match(error.message, /test labels/);
-      assert.match(error.message, /"A-B"/);
-      assert.match(error.message, /"a b"/);
-      return true;
-    });
+    assert.throws(
+      () => build([item("a", "A-B"), item("b", "a b")]),
+      (error: Error) => {
+        assert.match(error.message, /test labels/);
+        assert.match(error.message, /"A-B"/);
+        assert.match(error.message, /"a b"/);
+        return true;
+      },
+    );
   });
 
   /* Same spelling is the same label, not a collision: it groups. */

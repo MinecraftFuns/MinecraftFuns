@@ -50,9 +50,7 @@ const TOKENS = `
  */
 const WKD_FIXTURE = {
   ".well-known/openpgpkey/policy": "",
-  ".well-known/openpgpkey/hu/s8y7oh5xrdpu9psba3i5ntk64ohouhga": Buffer.from([
-    0x98, 0x01,
-  ]),
+  ".well-known/openpgpkey/hu/s8y7oh5xrdpu9psba3i5ntk64ohouhga": Buffer.from([0x98, 0x01]),
 };
 
 /** Build a throwaway dist tree and inspect it. */
@@ -374,7 +372,10 @@ describe("undefinedCustomProperties", () => {
   });
 
   it("passes a stylesheet whose references all resolve", () => {
-    assert.deepEqual(undefinedCustomProperties(":root{--ink:#000}.a{color:var(--ink)}"), []);
+    assert.deepEqual(
+      undefinedCustomProperties(":root{--ink:#000}.a{color:var(--ink)}"),
+      [],
+    );
   });
 
   it("allows an undefined property that supplies a fallback", () => {
@@ -385,10 +386,9 @@ describe("undefinedCustomProperties", () => {
   });
 
   it("still catches a bare read nested inside a fallback", () => {
-    assert.deepEqual(
-      undefinedCustomProperties(".a{color:var(--tw-x,var(--gone))}"),
-      ["--gone"],
-    );
+    assert.deepEqual(undefinedCustomProperties(".a{color:var(--tw-x,var(--gone))}"), [
+      "--gone",
+    ]);
   });
 });
 
@@ -547,7 +547,8 @@ describe("inspect", () => {
       {
         "index.html": `<!doctype html><html><head><link rel="canonical" href="https://example.test/"/></head><body><a href="/work">w</a></body></html>`,
         "favicon.svg": "<svg/>",
-        "work/index.html": "<html><head><link rel=\"canonical\" href=\"https://example.test/work/\"/></head><body>w</body></html>",
+        "work/index.html":
+          '<html><head><link rel="canonical" href="https://example.test/work/"/></head><body>w</body></html>',
       },
       { base: "/" },
     );
@@ -651,20 +652,30 @@ describe("checks as data", () => {
       artifact({
         base: "/app/",
         normalisedBase: "/app/",
-        html: [doc("index.html", '<a href="/elsewhere/">a</a><a href="/app/gone/">b</a>')],
+        html: [
+          doc("index.html", '<a href="/elsewhere/">a</a><a href="/app/gone/">b</a>'),
+        ],
         present: new Set(["index.html"]),
         relativeFiles: ["index.html"],
       }),
     );
-    assert.deepEqual(found.map(({ check }) => check), ["base-path", "dead-link"]);
+    assert.deepEqual(
+      found.map(({ check }) => check),
+      ["base-path", "dead-link"],
+    );
   });
 
   it("holds every page to the canonical deployment, not the one being built", () => {
     const mirrored = artifact({
       canonical: { origin: "https://canonical.test", base: "/" },
-      html: [doc("a/index.html", '<link rel="canonical" href="https://mirror.test/a/"/>')],
+      html: [
+        doc("a/index.html", '<link rel="canonical" href="https://mirror.test/a/"/>'),
+      ],
     });
-    assert.match(canonicalLinks(mirrored)[0].detail, /should be https:\/\/canonical.test\/a\//);
+    assert.match(
+      canonicalLinks(mirrored)[0].detail,
+      /should be https:\/\/canonical.test\/a\//,
+    );
   });
 
   it("reports a page with no canonical link at all", () => {
@@ -676,11 +687,17 @@ describe("checks as data", () => {
     const found = stylesheetIntegrity(
       artifact({ css: [doc("a.css", ".x{color:var(--nope)}")] }),
     );
-    assert.deepEqual(found.map(({ check }) => check), ["css-var"]);
+    assert.deepEqual(
+      found.map(({ check }) => check),
+      ["css-var"],
+    );
   });
 
   it("treats an empty palette as a defect rather than a vacuous pass", () => {
     const found = stylesheetIntegrity(artifact({ palette: new Set() }));
-    assert.deepEqual(found.map(({ check }) => check), ["palette"]);
+    assert.deepEqual(
+      found.map(({ check }) => check),
+      ["palette"],
+    );
   });
 });

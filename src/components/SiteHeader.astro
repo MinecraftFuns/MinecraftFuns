@@ -16,9 +16,7 @@ const items = nav.map((item) => ({
 }));
 ---
 
-<header
-  class="border-hairline bg-veil sticky top-0 z-50 border-b backdrop-blur-md"
->
+<header class="border-hairline bg-veil sticky top-0 z-50 border-b backdrop-blur-md">
   <div
     class="mx-auto flex w-full max-w-frame items-center gap-md px-md min-h-nav md:px-lg"
   >
@@ -27,17 +25,21 @@ const items = nav.map((item) => ({
       href={routeUrl("/")}
       aria-label={`${site.name}, home`}
     >
-      {/* One of the few sanctioned uses of the accent. Sized to the cap height
-          of the name beside it, and on the 4px base like everything else. */}
+      {
+        /* One of the few sanctioned uses of the accent. Sized to the cap height
+          of the name beside it, and on the 4px base like everything else. */
+      }
       <span class="bg-accent size-xs rounded-xs" aria-hidden="true"></span>
       <span class="hidden xs:inline">{site.name}</span>
     </a>
 
-    {/*
+    {
+      /*
       The chips carry inline padding, so the nav is pulled outward by exactly
       that padding: what should line up with the frame edge is the last label,
       not the hover box around it.
-    */}
+    */
+    }
     <nav class="ms-auto -me-2xs xs:-me-xs" aria-label="Primary">
       <ul class="flex items-center" role="list">
         {

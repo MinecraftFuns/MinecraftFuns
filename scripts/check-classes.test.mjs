@@ -28,7 +28,10 @@ describe("classRegions", () => {
 describe("anonymousValues", () => {
   it("catches an arbitrary value", () => {
     const found = anonymousValues('<p class="w-[437px]">x</p>');
-    assert.deepEqual(found.map((f) => f.text), ["w-[437px]"]);
+    assert.deepEqual(
+      found.map((f) => f.text),
+      ["w-[437px]"],
+    );
     assert.equal(found[0].rule, "arbitrary-value");
   });
 
@@ -122,11 +125,14 @@ describe("typeRolesSet", () => {
    * also matching inside `text-body-sm`.
    */
   it("reports each role once, not once per shorter role it contains", () => {
-    const found = typeRolesSet('<p class="text-body">a</p><p class="text-body-sm">b</p>', roles);
-    assert.deepEqual(
-      found.map((problem) => problem.text).sort(),
-      ["text-body", "text-body-sm"],
+    const found = typeRolesSet(
+      '<p class="text-body">a</p><p class="text-body-sm">b</p>',
+      roles,
     );
+    assert.deepEqual(found.map((problem) => problem.text).sort(), [
+      "text-body",
+      "text-body-sm",
+    ]);
   });
 
   /* Colour and layout are a page's business; only type is not. */
@@ -168,13 +174,17 @@ describe("recipe rules", () => {
       "text-ink-tertiary font-mono text-caption",
       "font-mono text-caption text-ink-tertiary",
     ]) {
-      assert.deepEqual(rules(astro("", `<p class="${list}">x</p>`)), ["inline-meta-style"]);
+      assert.deepEqual(rules(astro("", `<p class="${list}">x</p>`)), [
+        "inline-meta-style",
+      ]);
     }
   });
 
   it("catches the note recipe in either order", () => {
     for (const list of ["text-body-sm text-ink-subtle", "text-ink-subtle text-body-sm"]) {
-      assert.deepEqual(rules(astro("", `<p class="${list}">x</p>`)), ["inline-note-style"]);
+      assert.deepEqual(rules(astro("", `<p class="${list}">x</p>`)), [
+        "inline-note-style",
+      ]);
     }
   });
 
@@ -189,7 +199,10 @@ describe("recipe rules", () => {
   });
 
   it("leaves the named roles alone", () => {
-    const source = astro("", '<p class="meta shrink-0">a</p><p class="note mt-3xs">b</p>');
+    const source = astro(
+      "",
+      '<p class="meta shrink-0">a</p><p class="note mt-3xs">b</p>',
+    );
     assert.deepEqual(rules(source), []);
   });
 

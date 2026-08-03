@@ -1,0 +1,21 @@
+# Not ours to format.
+node_modules/
+.legacy/
+dist/
+audit/
+package-lock.json
+
+# Vendored instruction text: this project follows these, it does not author them.
+.github/skills/
+.claude/skills/
+
+# Symlinks into src/content. Formatting through them would rewrite each file a
+# second time, by a different path, with no way to tell the two apart.
+blog
+docs
+
+# Binary and generated assets.
+public/
+src/keys/
+*.svg
+*.webp

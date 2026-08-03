@@ -133,8 +133,14 @@ describe("joinRoute", () => {
   });
 
   it("puts the slash before a fragment, not after it", () => {
-    assert.equal(joinRoute(PROJECT_BASE, "/about#contact"), "/MinecraftFuns/about/#contact");
-    assert.equal(joinRoute(PROJECT_BASE, "/blog?tag=time"), "/MinecraftFuns/blog/?tag=time");
+    assert.equal(
+      joinRoute(PROJECT_BASE, "/about#contact"),
+      "/MinecraftFuns/about/#contact",
+    );
+    assert.equal(
+      joinRoute(PROJECT_BASE, "/blog?tag=time"),
+      "/MinecraftFuns/blog/?tag=time",
+    );
   });
 
   it("passes through anything that carries its own authority", () => {

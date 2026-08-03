@@ -126,8 +126,14 @@
    * a second mechanism could only disagree with this one.
    */
   --color-canvas: light-dark(var(--color-eggshell-50), var(--color-ink-black-950));
-  --color-surface-1: light-dark(var(--color-eggshell-100), var(--color-deep-space-blue-900));
-  --color-surface-2: light-dark(var(--color-eggshell-200), var(--color-deep-space-blue-800));
+  --color-surface-1: light-dark(
+    var(--color-eggshell-100),
+    var(--color-deep-space-blue-900)
+  );
+  --color-surface-2: light-dark(
+    var(--color-eggshell-200),
+    var(--color-deep-space-blue-800)
+  );
 
   /* The sticky header's translucent backing. Written as a mix over the same
      palette entries the canvas uses, so it cannot drift from it. */
@@ -139,7 +145,10 @@
   /* Hairlines carry all elevation. `--shadow-*` is reset above, so "no
      shadows in this system" is enforced rather than merely intended. */
   --color-hairline: light-dark(var(--color-eggshell-200), var(--color-blue-slate-800));
-  --color-hairline-strong: light-dark(var(--color-eggshell-300), var(--color-blue-slate-700));
+  --color-hairline-strong: light-dark(
+    var(--color-eggshell-300),
+    var(--color-blue-slate-700)
+  );
 
   /*
    * Ink ladder. Contrast against canvas, verified:
@@ -149,9 +158,18 @@
    * ink-tertiary is decorative only, never for text that must be read.
    */
   --color-ink: light-dark(var(--color-ink-black-900), var(--color-eggshell-100));
-  --color-ink-muted: light-dark(var(--color-blue-slate-700), var(--color-dusty-denim-200));
-  --color-ink-subtle: light-dark(var(--color-dusty-denim-600), var(--color-dusty-denim-300));
-  --color-ink-tertiary: light-dark(var(--color-dusty-denim-500), var(--color-dusty-denim-500));
+  --color-ink-muted: light-dark(
+    var(--color-blue-slate-700),
+    var(--color-dusty-denim-200)
+  );
+  --color-ink-subtle: light-dark(
+    var(--color-dusty-denim-600),
+    var(--color-dusty-denim-300)
+  );
+  --color-ink-tertiary: light-dark(
+    var(--color-dusty-denim-500),
+    var(--color-dusty-denim-500)
+  );
 
   /*
    * The single chromatic accent: brand mark, focus ring, links, and the one
@@ -164,16 +182,18 @@
    * colour alone.
    */
   --color-accent: light-dark(var(--color-ink-black-500), var(--color-ink-black-300));
-  --color-accent-hover: light-dark(var(--color-ink-black-600), var(--color-ink-black-200));
+  --color-accent-hover: light-dark(
+    var(--color-ink-black-600),
+    var(--color-ink-black-200)
+  );
   --color-on-accent: light-dark(var(--color-eggshell-50), var(--color-ink-black-950));
 
   /* ---- Type ------------------------------------------------------------ */
 
   --font-sans:
-    "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, system-ui, sans-serif;
-  --font-mono:
-    "JetBrains Mono Variable", ui-monospace, "SF Mono", "Menlo", monospace;
+    "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", "Menlo", monospace;
 
   /*
    * Each role binds size, leading, tracking, and weight together, so

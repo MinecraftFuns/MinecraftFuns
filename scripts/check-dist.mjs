@@ -176,7 +176,9 @@ export const hostDirectiveViolations = ({ redirects, headerPatterns, resolves })
   return [
     ...redirects
       .filter((redirect) => internal(redirect) && !resolves(redirect.to))
-      .map(({ from, to }) => `_redirects: ${from} points at ${to}, which no file satisfies`),
+      .map(
+        ({ from, to }) => `_redirects: ${from} points at ${to}, which no file satisfies`,
+      ),
     ...headerPatterns
       .filter(unmatched)
       .map((pattern) => `_headers: ${pattern} matches nothing that was built`),
@@ -197,9 +199,7 @@ const ZBASE32_NAME = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{32}$/;
  */
 /** What is wrong with an entry's name, or nothing. */
 const namingProblem = ({ name }) =>
-  ZBASE32_NAME.test(name)
-    ? undefined
-    : `hu/${name} is not a 32-character Z-Base-32 hash`;
+  ZBASE32_NAME.test(name) ? undefined : `hu/${name} is not a 32-character Z-Base-32 hash`;
 
 /**
  * What is wrong with an entry's bytes, or nothing. An armored key would start
@@ -217,7 +217,9 @@ const contentProblem = ({ name, bytes }) => {
    independent facts they are. */
 export const wkdViolations = ({ policy, keys }) =>
   [
-    policy ? undefined : "no .well-known/openpgpkey/policy; the specification requires it",
+    policy
+      ? undefined
+      : "no .well-known/openpgpkey/policy; the specification requires it",
     keys.length === 0 ? "no keys published under .well-known/openpgpkey/hu/" : undefined,
     ...keys.flatMap((entry) => [namingProblem(entry), contentProblem(entry)]),
   ].filter((problem) => problem !== undefined);
@@ -356,7 +358,10 @@ export const gather = async ({ dist, base, canonical, tokensCss }) => {
 
   const read = async (paths) =>
     Promise.all(
-      paths.map(async (path) => ({ path, text: await readFile(join(dist, path), "utf8") })),
+      paths.map(async (path) => ({
+        path,
+        text: await readFile(join(dist, path), "utf8"),
+      })),
     );
 
   const directive = async (name) =>
@@ -393,7 +398,8 @@ export const gather = async ({ dist, base, canonical, tokensCss }) => {
  * Whether a reference is served. `isPrefix` asks the weaker question a
  * wildcard directive raises: whether anything at all sits beneath it.
  */
-const resolvesIn = ({ present, relativeFiles, base, normalisedBase }) =>
+const resolvesIn =
+  ({ present, relativeFiles, base, normalisedBase }) =>
   (reference, isPrefix = false) => {
     if (!isPrefix) {
       return candidatePaths(reference, base).some((path) => present.has(path));
@@ -558,10 +564,7 @@ const main = async () => {
   /* The palette lives in global.css, outside `@theme`; a ramp step must not
      become a utility. That `:root` block is still the single source this
      check reads to decide which hex values are sanctioned. */
-  const tokensCss = await readFile(
-    resolve("src/styles/global.css"),
-    "utf8",
-  );
+  const tokensCss = await readFile(resolve("src/styles/global.css"), "utf8");
 
   if (!(await exists(dist))) {
     cannotRun("check-dist", `${dist} does not exist; run the build first`);

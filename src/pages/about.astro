@@ -39,12 +39,10 @@ const educationEntries: readonly Entry[] = education.map((entry) => ({
 
 const contactEntries: readonly Entry[] = [
   { label: "PGP", body: { kind: "mono", value: fingerprint } },
-  ...profiles.map(
-    (item): Entry => ({
-      label: item.label,
-      body: { kind: "link", href: item.href, label: item.handle },
-    }),
-  ),
+  ...profiles.map((item): Entry => ({
+    label: item.label,
+    body: { kind: "link", href: item.href, label: item.handle },
+  })),
 ];
 ---
 
@@ -55,11 +53,10 @@ const contactEntries: readonly Entry[] = [
   <PageIntro kind="page" eyebrow="About" title="Joe Fang">
     <div class="prose">
       <p>
-        I am a fourth-year undergraduate at the University of Toronto, taking a
-        double major in Computer Science and Cognitive Science alongside a minor
-        in Statistics. The combination is deliberate: I am interested in how
-        systems represent and process information, whether the system happens to
-        be a compiler or a mind.
+        I am a fourth-year undergraduate at the University of Toronto, taking a double
+        major in Computer Science and Cognitive Science alongside a minor in Statistics.
+        The combination is deliberate: I am interested in how systems represent and
+        process information, whether the system happens to be a compiler or a mind.
       </p>
       <p>
         This site holds my <a href={routeUrl("/projects")}>projects</a> and a
@@ -75,15 +72,16 @@ const contactEntries: readonly Entry[] = [
   <Section id="contact" title="Contact">
     <div class="prose mb-md">
       <p>
-        For anything substantive, import my <a href={pgpHref()}>PGP key</a> and
-        write to the address in its <strong>Primary User ID</strong>. There is
-        deliberately no plaintext address on this page.
+        For anything substantive, import my <a href={pgpHref()}>PGP key</a> and write to the
+        address in its <strong>Primary User ID</strong>. There is deliberately no
+        plaintext address on this page.
       </p>
     </div>
     <EntryList entries={contactEntries} />
   </Section>
 
-  {/*
+  {
+    /*
     Template for the remaining CV sections. Uncomment and fill; the shape is
     the same data an education entry is built from.
 
@@ -101,5 +99,6 @@ const contactEntries: readonly Entry[] = [
         ]}
       />
     </Section>
-  */}
+  */
+  }
 </BaseLayout>

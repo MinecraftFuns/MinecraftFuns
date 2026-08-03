@@ -17,7 +17,9 @@ const keywords = (found) => found.map(({ keyword }) => keyword);
 describe("jumps", () => {
   it("finds a continue in a loop", () => {
     const source = "for (const x of xs) {\n  if (!x) continue;\n  use(x);\n}";
-    assert.deepEqual(jumps("a.mjs", source), [{ path: "a.mjs", line: 2, keyword: "continue" }]);
+    assert.deepEqual(jumps("a.mjs", source), [
+      { path: "a.mjs", line: 2, keyword: "continue" },
+    ]);
   });
 
   it("finds a break in a loop", () => {
@@ -27,7 +29,9 @@ describe("jumps", () => {
 
   it("finds a break inside a switch, which gets no exemption", () => {
     const source = "switch (k) {\n  case 1:\n    f();\n    break;\n}";
-    assert.deepEqual(jumps("a.ts", source), [{ path: "a.ts", line: 4, keyword: "break" }]);
+    assert.deepEqual(jumps("a.ts", source), [
+      { path: "a.ts", line: 4, keyword: "break" },
+    ]);
   });
 
   it("finds a labelled jump", () => {
@@ -37,8 +41,11 @@ describe("jumps", () => {
 
   it("finds jumps nested inside a function inside a loop", () => {
     // A shallow walk that stopped at the first function boundary would miss it.
-    const source = "for (;;) {\n  g(() => {\n    for (;;) {\n      continue;\n    }\n  });\n}";
-    assert.deepEqual(jumps("a.ts", source), [{ path: "a.ts", line: 4, keyword: "continue" }]);
+    const source =
+      "for (;;) {\n  g(() => {\n    for (;;) {\n      continue;\n    }\n  });\n}";
+    assert.deepEqual(jumps("a.ts", source), [
+      { path: "a.ts", line: 4, keyword: "continue" },
+    ]);
   });
 
   it("reports every jump, not just the first", () => {
@@ -52,19 +59,24 @@ describe("jumps", () => {
   });
 
   it("does not flag the words in a comment", () => {
-    const source = "// escape pipes so a message cannot break the table\n/* continue */\n";
+    const source =
+      "// escape pipes so a message cannot break the table\n/* continue */\n";
     assert.deepEqual(jumps("a.ts", source), []);
   });
 
   it("does not flag identifiers or properties that contain them", () => {
-    const source = "const breakpoint = 1;\nconst c = { continued: 2 }.continued;\nx.break();\n";
+    const source =
+      "const breakpoint = 1;\nconst c = { continued: 2 }.continued;\nx.break();\n";
     assert.deepEqual(jumps("a.ts", source), []);
   });
 
   it("reads .astro frontmatter at the file's own line numbers", () => {
     // Blanking rather than slicing is what keeps this line number honest.
-    const source = "---\nconst xs = [];\nfor (const x of ys) {\n  continue;\n}\n---\n<p>hi</p>\n";
-    assert.deepEqual(jumps("a.astro", source), [{ path: "a.astro", line: 4, keyword: "continue" }]);
+    const source =
+      "---\nconst xs = [];\nfor (const x of ys) {\n  continue;\n}\n---\n<p>hi</p>\n";
+    assert.deepEqual(jumps("a.astro", source), [
+      { path: "a.astro", line: 4, keyword: "continue" },
+    ]);
   });
 
   it("ignores an .astro template, which has no statements to jump out of", () => {

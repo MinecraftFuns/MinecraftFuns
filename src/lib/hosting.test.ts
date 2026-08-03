@@ -82,12 +82,16 @@ describe("redirectProblems", () => {
   });
 
   it("catches a rule that redirects into its own match set", () => {
-    const found = redirectProblems([{ from: prefixPath("/pg"), to: "/pgp", status: 301 }]);
+    const found = redirectProblems([
+      { from: prefixPath("/pg"), to: "/pgp", status: 301 },
+    ]);
     assert.match(reasons(found)[0], /loop/);
   });
 
   it("catches a self-redirect", () => {
-    const found = redirectProblems([{ from: exactPath("/pgp"), to: "/pgp", status: 301 }]);
+    const found = redirectProblems([
+      { from: exactPath("/pgp"), to: "/pgp", status: 301 },
+    ]);
     assert.match(reasons(found)[0], /loop/);
   });
 

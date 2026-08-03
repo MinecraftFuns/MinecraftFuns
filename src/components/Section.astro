@@ -37,13 +37,17 @@ if (trailing !== undefined && trailing.kind !== "link" && trailing.kind !== "cou
 }
 ---
 
-{/*
+{
+  /*
   The head aligns on the baseline rather than the top, so the trailing element
   lines up with the heading whether or not a blurb sits beneath it; one rule
   covering both arrangements.
-*/}
+*/
+}
 <section class="py-lg" aria-labelledby={id}>
-  <div class="border-hairline mb-md flex items-baseline justify-between gap-md border-b pb-md">
+  <div
+    class="border-hairline mb-md flex items-baseline justify-between gap-md border-b pb-md"
+  >
     <div>
       <h2 class="text-headline text-ink" id={id}>{title}</h2>
       {blurb !== undefined && <p class="note mt-3xs">{blurb}</p>}
@@ -51,21 +55,12 @@ if (trailing !== undefined && trailing.kind !== "link" && trailing.kind !== "cou
 
     {
       trailing?.kind === "link" && (
-        <a
-          class="link text-body-sm shrink-0 whitespace-nowrap"
-          href={trailing.href}
-        >
+        <a class="link text-body-sm shrink-0 whitespace-nowrap" href={trailing.href}>
           {trailing.label}
         </a>
       )
     }
-    {
-      trailing?.kind === "count" && (
-        <span class="meta shrink-0">
-          {trailing.value}
-        </span>
-      )
-    }
+    {trailing?.kind === "count" && <span class="meta shrink-0">{trailing.value}</span>}
   </div>
 
   <slot />

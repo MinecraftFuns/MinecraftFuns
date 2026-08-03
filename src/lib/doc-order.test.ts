@@ -3,7 +3,10 @@ import { describe, it } from "node:test";
 
 import { compareDocs, type DocOrder } from "./doc-order.ts";
 
-const doc = (title: string, slug = title.toLowerCase().replaceAll(" ", "-")): DocOrder => ({
+const doc = (
+  title: string,
+  slug = title.toLowerCase().replaceAll(" ", "-"),
+): DocOrder => ({
   title,
   slug,
 });

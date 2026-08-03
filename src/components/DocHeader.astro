@@ -28,16 +28,15 @@ const { spacing, title: titleClass } = INTRO.page;
 ---
 
 <header class:list={["border-hairline border-b", spacing]}>
-  {/*
+  {
+    /*
     The category links to everything filed under it. This one sits in a line of
     running text, which is the case WCAG 2.5.8 exempts, so it needs no minimum
     box of its own; the underline on hover is the affordance instead.
-  */}
+  */
+  }
   <p class="meta flex items-center gap-2xs">
-    <a
-      class="link-muted"
-      href={categoryHref(category)}
-    >
+    <a class="link-muted" href={categoryHref(category)}>
       {category}
     </a>
     <span aria-hidden="true">·</span>

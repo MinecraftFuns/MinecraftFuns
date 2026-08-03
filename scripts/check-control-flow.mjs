@@ -50,7 +50,10 @@ export const jumps = (path, source) => {
   const kind = DIALECT[extensionOf(path)];
   if (kind === undefined) return [];
 
-  const text = kind === ts.ScriptKind.TS && path.endsWith(".astro") ? moduleBodyOnly(source) : source;
+  const text =
+    kind === ts.ScriptKind.TS && path.endsWith(".astro")
+      ? moduleBodyOnly(source)
+      : source;
   const parsed = ts.createSourceFile(path, text, ts.ScriptTarget.ESNext, true, kind);
 
   const found = [];
@@ -102,7 +105,9 @@ const main = async () => {
 
   const found = (
     await Promise.all(
-      files.map(async (path) => jumps(relative(process.cwd(), path), await readFile(path, "utf8"))),
+      files.map(async (path) =>
+        jumps(relative(process.cwd(), path), await readFile(path, "utf8")),
+      ),
     )
   ).flat();
 

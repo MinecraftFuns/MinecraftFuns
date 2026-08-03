@@ -217,8 +217,7 @@ export const wallClockAt = (instant: Date, zone: TimeZone): WallClock => {
       .map((part) => [part.type, Number(part.value)] as const),
   );
 
-  const field = (type: Intl.DateTimeFormatPartTypes): number =>
-    fields.get(type) ?? 0;
+  const field = (type: Intl.DateTimeFormatPartTypes): number => fields.get(type) ?? 0;
 
   return {
     year: field("year"),
@@ -256,10 +255,7 @@ const offsetMsAt = (instant: Date, zone: TimeZone): number => {
  * On a spring-forward day whose midnight does not exist, the result lands on
  * the first instant that does, the standard, and only sensible, resolution.
  */
-export const startOfDayIn = (
-  date: IsoDate,
-  zone: TimeZone = SITE_TIME_ZONE,
-): Date => {
+export const startOfDayIn = (date: IsoDate, zone: TimeZone = SITE_TIME_ZONE): Date => {
   const utcMidnight = Date.parse(`${date}T00:00:00Z`);
   const guess = new Date(utcMidnight - offsetMsAt(new Date(utcMidnight), zone));
   return new Date(utcMidnight - offsetMsAt(guess, zone));

@@ -24,7 +24,8 @@ const recentPosts = await postSummaries(3);
     lede="I study both at the University of Toronto, and I write here about where the analogy leaks: types, time zones, private networks, and the small bugs that turn out to have been category errors all along."
   >
     <div class="flex flex-wrap gap-xs">
-      <Button href={routeUrl("/blog")} tone="primary" size="control">Read the blog</Button>
+      <Button href={routeUrl("/blog")} tone="primary" size="control">Read the blog</Button
+      >
       <Button href={pgpHref()} tone="secondary" size="control">Get in touch</Button>
     </div>
   </PageIntro>
@@ -32,7 +33,10 @@ const recentPosts = await postSummaries(3);
   <Epigraph
     quote="Freedom is the freedom to say that two plus two make four. If that is granted, all else follows."
     author="George Orwell"
-    source={{ href: "https://en.wikipedia.org/wiki/Nineteen_Eighty-Four", label: "Nineteen Eighty-Four" }}
+    source={{
+      href: "https://en.wikipedia.org/wiki/Nineteen_Eighty-Four",
+      label: "Nineteen Eighty-Four",
+    }}
   />
 
   <Section
@@ -41,7 +45,13 @@ const recentPosts = await postSummaries(3);
     trailing={{ kind: "link", href: routeUrl("/projects"), label: "All projects" }}
   >
     <ul class="grid grid-cols-cards gap-md" role="list">
-      {projects.map((project) => <li><ProjectCard project={project} /></li>)}
+      {
+        projects.map((project) => (
+          <li>
+            <ProjectCard project={project} />
+          </li>
+        ))
+      }
     </ul>
   </Section>
 

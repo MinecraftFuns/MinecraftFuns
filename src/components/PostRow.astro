@@ -16,7 +16,8 @@ const { post } = Astro.props;
 const displayDate = formatIsoDate(post.date);
 ---
 
-{/*
+{
+  /*
   Adapted from Linear's changelog row rather than its card grid: writing is a
   chronological list, and rows stay scannable at length where a grid would not.
 
@@ -24,7 +25,8 @@ const displayDate = formatIsoDate(post.date);
   dropping beneath it, so the content column is never squeezed. At `md` every
   explicit placement is released and the three cells auto-place across
   `grid-cols-row`.
-*/}
+*/
+}
 <a
   class="group border-hairline grid grid-cols-row-stacked items-baseline gap-md border-b py-md no-underline md:grid-cols-row"
   href={post.href}

@@ -44,8 +44,7 @@ export const parsePostPath = (id: string): Parsed<PostPath> => {
 };
 
 /** The archive folder a post's own date says it belongs in. */
-export const archiveOf = (date: IsoDate): string =>
-  `${yearOf(date)}/${monthOf(date)}`;
+export const archiveOf = (date: IsoDate): string => `${yearOf(date)}/${monthOf(date)}`;
 
 /**
  * A path parsed *and* reconciled against the date it claims to encode. The

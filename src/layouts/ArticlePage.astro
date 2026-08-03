@@ -30,9 +30,11 @@ const { title, description, chrome, back } = Astro.props;
   <article class="pb-lg">
     <slot name="header" />
 
-    {/* Both gaps declared here: the header and the back link are siblings
+    {
+      /* Both gaps declared here: the header and the back link are siblings
         this layout arranges, and neither can own the space between itself and
-        something it does not know about. */}
+        something it does not know about. */
+    }
     <div class="prose mt-lg mb-xl">
       <slot />
     </div>

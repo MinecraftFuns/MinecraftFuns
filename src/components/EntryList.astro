@@ -67,10 +67,7 @@ entries.forEach(({ body }) => {
             </>
           )}
           {body.kind === "link" && (
-            <a
-              class="link text-control"
-              href={body.href}
-            >
+            <a class="link text-control" href={body.href}>
               {body.label}
             </a>
           )}

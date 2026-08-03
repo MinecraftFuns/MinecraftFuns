@@ -184,7 +184,10 @@ const main = async () => {
       `${files.length} file(s) carry no anonymous values` +
       `, and no page among them sets type (${roles.length} role(s))`,
     failed: "",
-    body: each(({ path, rule, text, remedy }) => `  ${path}\n    ${rule}: ${text}\n    → ${remedy}`),
+    body: each(
+      ({ path, rule, text, remedy }) =>
+        `  ${path}\n    ${rule}: ${text}\n    → ${remedy}`,
+    ),
   });
 };
 

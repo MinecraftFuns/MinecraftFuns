@@ -89,8 +89,10 @@ export const publishedDocs = async (): Promise<readonly PublishedDoc[]> => {
     slug,
   });
 
-  return orThrow(docs, "src/content/docs holds one file per doc, with no folders")
-    .toSorted((a, b) => compareDocs(order(a), order(b)));
+  return orThrow(
+    docs,
+    "src/content/docs holds one file per doc, with no folders",
+  ).toSorted((a, b) => compareDocs(order(a), order(b)));
 };
 
 export const docSummaries = async (): Promise<readonly DocSummary[]> =>

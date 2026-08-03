@@ -9,10 +9,7 @@ import { routeUrl } from "../lib/url.ts";
    here: the reader has stopped and is looking at the address bar. */
 ---
 
-<BaseLayout
-  title="Not found"
-  description="A well-formed address that refers to nothing."
->
+<BaseLayout title="Not found" description="A well-formed address that refers to nothing.">
   <PageIntro
     kind="page"
     eyebrow="404"
@@ -28,19 +25,19 @@ import { routeUrl } from "../lib/url.ts";
   <div class="prose">
     <p>
       Russell ran into this in 1905. &ldquo;The present King of France&rdquo; is
-      grammatical, unambiguous, and built entirely from words that mean things.
-      It still picks out nobody. A name can be in perfect working order with
-      nothing on the other end of it, and a sentence containing one is not
-      thereby nonsense. It is simply false.
+      grammatical, unambiguous, and built entirely from words that mean things. It still
+      picks out nobody. A name can be in perfect working order with nothing on the other
+      end of it, and a sentence containing one is not thereby nonsense. It is simply
+      false.
     </p>
     <p>
-      Whether anything was ever here, a 404 does not say. There is a separate
-      code for that stronger claim, 410 Gone, and it is vanishingly rare
-      because knowing a thing is absent costs far more than failing to find it.
+      Whether anything was ever here, a 404 does not say. There is a separate code for
+      that stronger claim, 410 Gone, and it is vanishingly rare because knowing a thing is
+      absent costs far more than failing to find it.
     </p>
     <p>
-      Probably a typo, and not necessarily yours. If a link on this site sent
-      you here, that is my bug: the <a href={routeUrl("/about")}>about page</a>
+      Probably a typo, and not necessarily yours. If a link on this site sent you here,
+      that is my bug: the <a href={routeUrl("/about")}>about page</a>
       says how to reach me.
     </p>
   </div>

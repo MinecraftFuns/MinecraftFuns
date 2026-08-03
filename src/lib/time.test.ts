@@ -196,9 +196,7 @@ describe("formatIsoDate", () => {
     // off-by-one-day error hides.
     const start = Date.UTC(2026, 0, 1);
     for (let offset = 0; offset < 365; offset += 1) {
-      const day = new Date(start + offset * 86_400_000)
-        .toISOString()
-        .slice(0, 10);
+      const day = new Date(start + offset * 86_400_000).toISOString().slice(0, 10);
       const date = isoDate(day);
       const [, month, dayOfMonth] = day.split("-");
       const rendered = formatDateIn(date);

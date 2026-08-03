@@ -192,15 +192,14 @@ const decodeRedirect = (config: RedirectConfig, resolve: Resolve): Parsed<Redire
   }));
 
 /* `andThen`: a rule that parses may still turn out to do nothing. */
-const decodeHeaderRule = (
-  config: HeaderConfig,
-  resolve: Resolve,
-): Parsed<HeaderRule> =>
+const decodeHeaderRule = (config: HeaderConfig, resolve: Resolve): Parsed<HeaderRule> =>
   andThen(parsePathPattern(config.path), (pattern) => {
     const ops: HeaderOp[] = [
-      ...Object.entries(config.set ?? {}).map(
-        ([name, value]): HeaderOp => ({ kind: "set", name, value }),
-      ),
+      ...Object.entries(config.set ?? {}).map(([name, value]): HeaderOp => ({
+        kind: "set",
+        name,
+        value,
+      })),
       ...(config.remove ?? []).map((name): HeaderOp => ({ kind: "remove", name })),
     ];
 
@@ -218,7 +217,10 @@ const decodeHeaderRule = (
 export const decodeHostConfig = (
   config: HostConfig,
   resolve: Resolve,
-): Parsed<{ readonly headers: readonly HeaderRule[]; readonly redirects: readonly Redirect[] }> =>
+): Parsed<{
+  readonly headers: readonly HeaderRule[];
+  readonly redirects: readonly Redirect[];
+}> =>
   /* Independent, so `both`: a config with a bad header *and* a bad redirect
      names both in one build. */
   andThen(
@@ -234,9 +236,7 @@ export const decodeHostConfig = (
         ...headerProblems(headers),
       ].map(({ rule, reason }) => `${rule}: ${reason}`);
 
-      return first === undefined
-        ? ok({ headers, redirects })
-        : invalid(first, ...rest);
+      return first === undefined ? ok({ headers, redirects }) : invalid(first, ...rest);
     },
   );
 
@@ -286,9 +286,7 @@ export const redirectProblems = (
 const headerName = (op: HeaderOp): string => op.name.toLowerCase();
 
 /** Header rules that quietly lose one of their own declarations. */
-export const headerProblems = (
-  rules: readonly HeaderRule[],
-): readonly RuleProblem[] =>
+export const headerProblems = (rules: readonly HeaderRule[]): readonly RuleProblem[] =>
   rules.flatMap((rule) => {
     const seen = new Set<string>();
     const repeats: HeaderOp[] = [];

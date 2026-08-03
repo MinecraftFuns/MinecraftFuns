@@ -22,14 +22,18 @@ const { quote, author, source } = Astro.props;
     {quote}
   </blockquote>
 
-  {/* The one em dash this project keeps: a typographic convention with a fixed
-      meaning, not a substitute for punctuation somebody should have chosen. */}
+  {
+    /* The one em dash this project keeps: a typographic convention with a fixed
+      meaning, not a substitute for punctuation somebody should have chosen. */
+  }
   <figcaption class="note mt-xs">
     &mdash; {author}{
       source !== undefined && (
         <>
           {", "}
-          <a class="link" href={source.href}>{source.label}</a>
+          <a class="link" href={source.href}>
+            {source.label}
+          </a>
         </>
       )
     }

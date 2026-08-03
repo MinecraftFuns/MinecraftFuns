@@ -3,12 +3,7 @@ import { basename } from "node:path/posix";
 import * as openpgp from "openpgp";
 
 import { byCodepoint } from "./collate.ts";
-import {
-  isOnDomain,
-  parseMailAddress,
-  wkdHash,
-  type WkdHash,
-} from "./wkd.ts";
+import { isOnDomain, parseMailAddress, wkdHash, type WkdHash } from "./wkd.ts";
 
 /**
  * The published OpenPGP keys, and the addresses each one answers for.
@@ -70,10 +65,7 @@ const dearmor = async (armored: string): Promise<Uint8Array> => {
  * `me@joefang.org`, a plain one and a "(Work)" one, and they must collapse to
  * a single directory entry rather than two identical files.
  */
-const addressOn = (
-  user: openpgp.User,
-  domain: string,
-): PublishedAddress | undefined => {
+const addressOn = (user: openpgp.User, domain: string): PublishedAddress | undefined => {
   const email = user.userID?.email;
   if (email === undefined || email === "") return undefined;
 
@@ -84,10 +76,7 @@ const addressOn = (
   return { local, address: email, hash: wkdHash(local) };
 };
 
-const addressesOn = (
-  key: openpgp.Key,
-  domain: string,
-): readonly PublishedAddress[] => {
+const addressesOn = (key: openpgp.Key, domain: string): readonly PublishedAddress[] => {
   const published = key.users
     .map((user) => addressOn(user, domain))
     .filter((address) => address !== undefined);

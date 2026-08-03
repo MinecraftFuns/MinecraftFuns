@@ -24,8 +24,7 @@ export type DeploymentRole = "canonical" | "mirror";
  * `environment: ${{ matrix.id }}`.
  */
 export type DeploymentId =
-  | (typeof deployments.canonical)["id"]
-  | (typeof deployments.mirrors)[number]["id"];
+  (typeof deployments.canonical)["id"] | (typeof deployments.mirrors)[number]["id"];
 
 /** The role is derived from position in the config, never authored. */
 export type DeploymentTarget = DeploymentTargetConfig & {

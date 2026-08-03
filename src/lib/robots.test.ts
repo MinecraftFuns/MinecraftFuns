@@ -3,8 +3,7 @@ import { describe, it } from "node:test";
 
 import { allowAll, disallowAll, renderRobots, type Robots } from "./robots.ts";
 
-const lines = (robots: Robots): readonly string[] =>
-  renderRobots(robots).split("\n");
+const lines = (robots: Robots): readonly string[] => renderRobots(robots).split("\n");
 
 describe("renderRobots", () => {
   it("emits a user-agent line per agent, then the group's rules", () => {
@@ -46,9 +45,9 @@ describe("renderRobots", () => {
 
   it("puts sitemap records outside any group, where the RFC places them", () => {
     const text = renderRobots(allowAll(["https://joefang.org/sitemap-index.xml"]));
-    const sitemapIndex = text.split("\n").indexOf(
-      "Sitemap: https://joefang.org/sitemap-index.xml",
-    );
+    const sitemapIndex = text
+      .split("\n")
+      .indexOf("Sitemap: https://joefang.org/sitemap-index.xml");
     const lastRule = text.split("\n").findLastIndex((line) => line.startsWith("Allow:"));
     assert.ok(sitemapIndex > lastRule, "sitemap must follow the groups");
     assert.match(text, /\n\nSitemap:/);

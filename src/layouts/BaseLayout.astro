@@ -65,12 +65,14 @@ const isIndexable = indexable(target.role);
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {/*
+    {
+      /*
       The second half of sitemap discovery. robots.txt names the sitemap for
       crawlers that fetch it; this reaches the ones that do not, and it is the
       only mechanism that works at all beneath a base path, where robots.txt is
       never read.
-    */}
+    */
+    }
     <link rel="sitemap" type="application/xml" href={assetUrl("/sitemap-index.xml")} />
     <link rel="icon" href={assetUrl("/favicon.svg")} type="image/svg+xml" />
     {!isIndexable && <meta name="robots" content="noindex" />}
@@ -81,19 +83,23 @@ const isIndexable = indexable(target.role);
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary_large_image" />
 
-    {/*
+    {
+      /*
       There is deliberately no theme script here. The system preference is the
       single source of truth, and `color-scheme: light dark` plus `light-dark()`
       resolve it in CSS before first paint, so there is no stored preference to
       restore, no state to desynchronise, and no flash to prevent.
-    */}
+    */
+    }
   </head>
 
   <body class="bg-canvas text-ink font-sans text-body min-h-dvh antialiased">
-    {/*
+    {
+      /*
       `sr-only` plus `focus:not-sr-only` is the whole skip link: no offscreen
       transform to maintain, and it stays reachable if CSS transforms fail.
-    */}
+    */
+    }
     <a
       class="sr-only focus:not-sr-only focus:absolute focus:top-2xs focus:left-2xs focus:z-100 focus:inline-flex focus:min-h-control focus:items-center focus:rounded-md focus:bg-accent focus:px-sm focus:text-control focus:text-on-accent focus:no-underline"
       href="#main"
@@ -103,14 +109,16 @@ const isIndexable = indexable(target.role);
 
     {chrome === "site" && <SiteHeader />}
 
-    {/*
+    {
+      /*
       The frame lives here, not in the pages. A page renders sections and has
       no way to state a width, so the column cannot differ between one page and
       the next, which it previously did, by 26rem.
 
       `outline-none` because this is a programmatic focus target for the skip
       link, not something the reader tabbed to.
-    */}
+    */
+    }
     {/* The gap above the footer belongs to this layout, which owns both. */}
     <main
       class="mx-auto mb-section w-full max-w-frame px-md outline-none md:px-lg"

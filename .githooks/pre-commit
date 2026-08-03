@@ -1,0 +1,9 @@
+#!/bin/sh
+# Format what is about to be committed, and nothing else.
+#
+# Installed by the `prepare` script (`git config core.hooksPath .githooks`),
+# which npm runs on install, so this needs no dependency and no opt-in step.
+#
+# Formatting only, never checking: a hook that can reject a commit is a hook
+# people pass `--no-verify` to. The quality gate is `npm run check`.
+exec node scripts/format-changed.mjs --staged

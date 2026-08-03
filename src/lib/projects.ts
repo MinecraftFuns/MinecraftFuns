@@ -21,8 +21,7 @@ import {
  * `undefined` into `null`, which put two absences with different meanings
  * behind one value. Only one of them was ever real.
  */
-export const badgeFor = (status: ProjectStatus): string | null =>
-  projectStatuses[status];
+export const badgeFor = (status: ProjectStatus): string | null => projectStatuses[status];
 
 export type ProjectSection = {
   readonly kind: ProjectKind;

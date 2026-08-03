@@ -11,6 +11,7 @@ import type { APIRoute } from "astro";
  * Empty but present is the specification's own recommended shape, and its
  * presence is what tells a client the directory exists at all.
  */
-export const GET: APIRoute = () => new Response("", {
-  headers: { "content-type": "text/plain; charset=utf-8" },
-});
+export const GET: APIRoute = () =>
+  new Response("", {
+    headers: { "content-type": "text/plain; charset=utf-8" },
+  });

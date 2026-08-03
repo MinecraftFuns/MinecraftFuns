@@ -1,0 +1,15 @@
+{
+  "plugins": ["prettier-plugin-astro"],
+  "printWidth": 90,
+  "proseWrap": "preserve",
+  "overrides": [
+    {
+      "files": "*.astro",
+      "options": { "parser": "astro" }
+    },
+    {
+      "files": ["*.md", "*.yml", "*.yaml"],
+      "options": { "printWidth": 80 }
+    }
+  ]
+}

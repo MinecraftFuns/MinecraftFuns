@@ -80,7 +80,10 @@ export const publishedPosts = async (): Promise<readonly PublishedPost[]> => {
     ),
   );
 
-  return byRecencyWith(orThrow(posts, "src/content/blog"), (post) => post.entry.data.date);
+  return byRecencyWith(
+    orThrow(posts, "src/content/blog"),
+    (post) => post.entry.data.date,
+  );
 };
 
 /**
@@ -88,9 +91,7 @@ export const publishedPosts = async (): Promise<readonly PublishedPost[]> => {
  * summarising: `summarise` scans the full body for reading time, so mapping
  * first would make the home page pay that scan for the whole archive.
  */
-export const postSummaries = async (
-  limit?: number,
-): Promise<readonly PostSummary[]> => {
+export const postSummaries = async (limit?: number): Promise<readonly PostSummary[]> => {
   const posts = await publishedPosts();
   return (limit === undefined ? posts : posts.slice(0, limit)).map(summarise);
 };
@@ -100,8 +101,7 @@ export const postSummaries = async (
  * and the route `taxonomy` generates are two calls to one function. A tag with
  * no usable segment, or two sharing one, fails the build in `postTags`.
  */
-export const tagHref = (tag: PostTag): string =>
-  routeUrl(`/blog/tags/${slugify(tag)}`);
+export const tagHref = (tag: PostTag): string => routeUrl(`/blog/tags/${slugify(tag)}`);
 
 /** The blog's tags, alphabetically, each with its posts newest first. */
 export const postTags = async (): Promise<readonly Taxon<PostTag, PostSummary>[]> =>

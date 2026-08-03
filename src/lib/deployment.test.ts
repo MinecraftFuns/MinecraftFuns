@@ -132,7 +132,10 @@ describe("siteRelative", () => {
     /* `/MinecraftFunsXL/` starts with `/MinecraftFuns` as a string but is a
        different deployment root. Slash-terminating both sides is what makes
        the prefix test sound. */
-    assert.equal(siteRelative("/MinecraftFuns/", "/MinecraftFunsXL/blog/").tag, "invalid");
+    assert.equal(
+      siteRelative("/MinecraftFuns/", "/MinecraftFunsXL/blog/").tag,
+      "invalid",
+    );
   });
 
   it("is total: no input throws", () => {
@@ -147,10 +150,7 @@ describe("siteRelative", () => {
 describe("canonicalHref", () => {
   it("points a canonical build at itself", () => {
     const href = canonicalHref(canonicalTarget, "/blog/");
-    assert.equal(
-      href.tag === "ok" && href.value,
-      `${canonicalTarget.origin}/blog/`,
-    );
+    assert.equal(href.tag === "ok" && href.value, `${canonicalTarget.origin}/blog/`);
   });
 
   it("points a mirror at the canonical origin, not at itself", () => {

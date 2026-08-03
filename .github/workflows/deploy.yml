@@ -69,11 +69,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # markdownlint, astro check, and the unit tests. Running them in their own
-      # job means one execution gates every target below, instead of repeating
-      # per matrix entry.
-      - name: Verify
-        run: npm test
+      # Formatting, types, project rules, and the unit tests: everything that
+      # does not need a build. Running them in their own job means one
+      # execution gates every target below, instead of repeating per matrix
+      # entry. The build and its artifact checks live in the matrix job, which
+      # is the only place a base path exists.
+      - name: Check
+        run: npm run check
 
       # The build matrix is *derived*, not written here. Every origin, base
       # path, and deployment name comes from src/config/deployments.ts, which
@@ -151,7 +153,7 @@ jobs:
         env:
           SITE_URL: ${{ matrix.origin }}
           SITE_BASE: ${{ matrix.base }}
-        run: npm run check:dist
+        run: npm run dist:check
 
       # Pages expects one specifically named artifact, which the github-pages
       # job consumes. Retention stays at the default single day: it is an

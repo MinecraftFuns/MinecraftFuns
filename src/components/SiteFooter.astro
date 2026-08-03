@@ -14,22 +14,24 @@ const year = currentYear();
 const fingerprint = await siteFingerprint();
 ---
 
-{/* The role is set on the element, so the whole footer inherits it and the
-    children that differ say so rather than restating the default. */}
+{
+  /* The role is set on the element, so the whole footer inherits it and the
+    children that differ say so rather than restating the default. */
+}
 <footer class="note border-hairline border-t py-xl">
-  <div
-    class="mx-auto grid w-full max-w-frame grid-cols-footer gap-lg px-md md:px-lg"
-  >
+  <div class="mx-auto grid w-full max-w-frame grid-cols-footer gap-lg px-md md:px-lg">
     <div class="flex flex-col gap-2xs">
       <p class="text-ink text-control">{site.name}</p>
       <p class="text-caption">
-        {/*
+        {
+          /*
           Underlined, not merely coloured. This link sits inside a sentence,
           which is the case WCAG 1.4.1 is about and the one the audit reports
           as serious on every page: colour alone is not a distinction. The
           standalone links elsewhere carry no underline because they are not
           in running text.
-        */}
+        */
+        }
         © {year} · Built with <a class="link-in-text" href="https://astro.build">Astro</a>
       </p>
     </div>

@@ -63,10 +63,7 @@ export const classifyHref = (href: string): HrefKind => {
  * load-bearing: an unterminated base loses its final segment.
  */
 const mount = (base: string, path: string): URL => {
-  const root = new URL(
-    `${base.replace(TRAILING_SLASHES, "")}/`,
-    MOUNT_ORIGIN,
-  );
+  const root = new URL(`${base.replace(TRAILING_SLASHES, "")}/`, MOUNT_ORIGIN);
   return new URL(path.startsWith("/") ? path.slice(1) : path, root);
 };
 
@@ -92,8 +89,7 @@ const join = (base: string, path: string, target: Target): string => {
 };
 
 /** Join a file path to a base. Never slash-terminated. */
-export const joinBase = (base: string, path: string): string =>
-  join(base, path, "asset");
+export const joinBase = (base: string, path: string): string => join(base, path, "asset");
 
 /** Join a page route to a base, in the canonical slash-terminated form. */
 export const joinRoute = (base: string, path: string): string =>
