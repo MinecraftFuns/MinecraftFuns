@@ -23,6 +23,10 @@ import {
  */
 export const badgeFor = (status: ProjectStatus): string | null => projectStatuses[status];
 
+/** The home page shows a selection, not the list; the flag is where it is chosen. */
+export const featuredProjects = (): readonly Project[] =>
+  projects.filter((project) => project.featured === true);
+
 export type ProjectSection = {
   readonly kind: ProjectKind;
   readonly heading: string;

@@ -6,13 +6,14 @@ import PostRow from "../components/PostRow.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import Section from "../components/Section.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { projects } from "../config/projects.ts";
 import { pgpHref } from "../lib/contact.ts";
 import { postSummaries } from "../lib/posts.ts";
+import { featuredProjects } from "../lib/projects.ts";
 import { routeUrl } from "../lib/url.ts";
 
 // The three most recent posts; the blog index holds the rest.
 const recentPosts = await postSummaries(3);
+const selected = featuredProjects();
 ---
 
 <BaseLayout>
@@ -46,7 +47,7 @@ const recentPosts = await postSummaries(3);
   >
     <ul class="grid grid-cols-cards gap-md" role="list">
       {
-        projects.map((project) => (
+        selected.map((project) => (
           <li>
             <ProjectCard project={project} />
           </li>
