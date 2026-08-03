@@ -6,7 +6,6 @@ import PostRow from "../components/PostRow.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import Section from "../components/Section.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { pgpHref } from "../lib/contact.ts";
 import { postSummaries } from "../lib/posts.ts";
 import { featuredProjects } from "../lib/projects.ts";
 import { routeUrl } from "../lib/url.ts";
@@ -27,7 +26,9 @@ const selected = featuredProjects();
     <div class="flex flex-wrap gap-xs">
       <Button href={routeUrl("/blog")} tone="primary" size="control">Read the blog</Button
       >
-      <Button href={pgpHref()} tone="secondary" size="control">Get in touch</Button>
+      <Button href={routeUrl("/about")} tone="secondary" size="control"
+        >Get in touch</Button
+      >
     </div>
   </PageIntro>
 
