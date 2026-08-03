@@ -1,6 +1,6 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
-import { orThrow } from "./adt.ts";
+import { collect, inContext, mapParsed, orThrow } from "./adt.ts";
 import { hrefOf, reconcile, type PostPath } from "./archive.ts";
 import { readingMinutes } from "./reading.ts";
 import { slugify } from "./slug.ts";
@@ -67,15 +67,20 @@ export const summarise = ({ entry, path }: PublishedPost): PostSummary => ({
 export const publishedPosts = async (): Promise<readonly PublishedPost[]> => {
   const entries = await getCollection("blog", ({ data }) => !data.draft);
 
-  const posts = entries.map((entry) => ({
-    entry,
-    path: orThrow(
-      reconcile(entry.id, entry.data.date),
-      `src/content/blog/${entry.id}.md`,
+  /* `collect`, not `orThrow` per entry: three misfiled posts are three facts
+     about the archive, and reporting them one build at a time turns one
+     mistake into three builds. Each reason carries its own file, since the
+     batch has one context and the mistakes have several. */
+  const posts = collect(
+    entries.map((entry) =>
+      mapParsed(
+        inContext(reconcile(entry.id, entry.data.date), `${entry.id}.md`),
+        (path) => ({ entry, path }),
+      ),
     ),
-  }));
+  );
 
-  return byRecencyWith(posts, (post) => post.entry.data.date);
+  return byRecencyWith(orThrow(posts, "src/content/blog"), (post) => post.entry.data.date);
 };
 
 /**

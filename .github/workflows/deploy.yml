@@ -297,7 +297,7 @@ jobs:
   #
   #   1. `joefang-org` is named by this job and by no other. An environment
   #      secret is readable only from a job that declares that environment, so
-  #      the deploy key is unreachable from `verify`, `build`, and `audit` —
+  #      the deploy key is unreachable from `verify`, `build`, and `audit`,
   #      which are precisely the jobs that execute repository code, test code,
   #      and a browser. Adding `environment:` to any of them would break this.
   #   2. The environment is restricted to `main`. The `if` below states the
@@ -358,7 +358,7 @@ jobs:
       # Every marker below is derived from CANONICAL_ORIGIN/CANONICAL_BASE, so
       # this step states one thing only: "this artifact is the canonical
       # deployment's". A plain grep for the mirror's base path is deliberately
-      # not among them — a migrated post links a gist under `/MinecraftFuns/`,
+      # not among them: a migrated post links a gist under `/MinecraftFuns/`,
       # so that string appears in the correct artifact too.
       - name: Verify the artifact is the joefang-org build
         run: |
@@ -393,14 +393,14 @@ jobs:
       #
       # `_headers` is a list of claims about paths, and it travels *inside* the
       # artifact, so it can be checked against the artifact with no reference
-      # to the source tree — which keeps this job's isolation intact. Anything
+      # to the source tree, which keeps this job's isolation intact. Anything
       # declared and absent means files were lost between the build and here.
       #
       # This is the check that was missing when `.well-known/` silently
       # vanished: every other assertion reads index.html, _headers, or
       # robots.txt, none of which are hidden, so an artifact stripped of its
       # entire key directory and both Matrix delegation documents passed
-      # cleanly. `check:dist` cannot see this either — it runs on `dist/`,
+      # cleanly. `check:dist` cannot see this either, since it runs on `dist/`,
       # before the artifact hop that does the damage.
       - name: Verify the artifact serves what it declares
         run: |
@@ -478,7 +478,7 @@ jobs:
       # the action, and `ssh-strict` defaults to true, so host verification is
       # already on. Because `ssh-key` is set, checkout points the remote at
       # git@github.com:McFuns/joefang.org.git and writes `core.sshCommand` into
-      # `deploy/.git/config` — which is why the commit-and-push step below runs
+      # `deploy/.git/config`, which is why the commit-and-push step below runs
       # with `working-directory: deploy` and never names a URL of its own.
       - name: Check out the deployment repository
         uses: actions/checkout@v7
@@ -525,7 +525,7 @@ jobs:
           # This replaces a `git pull --rebase`, which was the wrong tool: the
           # commit being rebased replaces every file, so any concurrent change
           # to the same files is a conflict, and rebase would stop and wait for
-          # a resolution that has no meaning here — for published output the
+          # a resolution that has no meaning here; for published output the
           # newest build simply wins, wholesale. `reset --soft` moves HEAD and
           # leaves the index and worktree alone, so the commit below lands on
           # top of whatever is on the remote, with the artifact as its tree,

@@ -35,6 +35,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { frontmatter } from "./lib/frontmatter.mjs";
+import { each, report } from "./lib/gate.mjs";
 
 const RULES = [
   {
@@ -170,19 +171,15 @@ const main = async () => {
     )
   ).flat();
 
-  if (found.length === 0) {
-    console.log(
-      `check-classes: OK, ${files.length} file(s) carry no anonymous values` +
-        `, and no page among them sets type (${roles.length} role(s))`,
-    );
-    return;
-  }
-
-  console.error(`check-classes: ${found.length} problem(s)\n`);
-  found.forEach(({ path, rule, text, remedy }) => {
-    console.error(`  ${path}\n    ${rule}: ${text}\n    → ${remedy}\n`);
+  report({
+    name: "check-classes",
+    problems: found,
+    passed:
+      `${files.length} file(s) carry no anonymous values` +
+      `, and no page among them sets type (${roles.length} role(s))`,
+    failed: "",
+    body: each(({ path, rule, text, remedy }) => `  ${path}\n    ${rule}: ${text}\n    → ${remedy}`),
   });
-  process.exitCode = 1;
 };
 
 /* Run only as a program, so the tests can import the pure half. */

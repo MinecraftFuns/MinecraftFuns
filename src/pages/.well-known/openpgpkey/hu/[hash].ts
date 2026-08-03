@@ -12,8 +12,8 @@ import { publishedAddresses, type PublishedKey } from "../../../../lib/keys.ts";
  * would not have created a third, and nothing would have said so.
  *
  * The path is `/.well-known/openpgpkey/hu/<hash>` on the address's own domain.
- * Under a base path it is inert — clients resolve the directory from the
- * address, which has no notion of a subdirectory — but it costs nothing and
+ * Under a base path it is inert, since clients resolve the directory from the
+ * address, which has no notion of a subdirectory, but it costs nothing and
  * keeps the two build targets identical in shape.
  */
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -31,7 +31,7 @@ export const GET: APIRoute<Props> = ({ props }) =>
   /*
    * "The HTTP GET method MUST return the binary representation of the OpenPGP
    * key" and SHOULD NOT return an armored one. These are the stored bytes,
-   * base64-decoded — not a re-serialisation, which would lose signatures.
+   * base64-decoded, not a re-serialisation, which would lose signatures.
    */
   new Response(props.key.binary as BodyInit, {
     headers: { "content-type": "application/octet-stream" },

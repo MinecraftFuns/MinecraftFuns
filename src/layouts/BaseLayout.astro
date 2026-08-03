@@ -42,7 +42,7 @@ const target = orThrow(activeTarget(Astro.site), "deployment");
  * This is the whole point of modelling deployments: a page's authoritative
  * address is a fact about the site, not about the build that emitted it. Each
  * build used to canonicalise to its own origin, so the mirror declared itself
- * authoritative and then separately asked not to be indexed — two derivations
+ * authoritative and then separately asked not to be indexed: two derivations
  * of one decision, disagreeing. Now a crawler landing on any copy is pointed
  * at the same URL.
  */

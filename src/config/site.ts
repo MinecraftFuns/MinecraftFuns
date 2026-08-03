@@ -11,7 +11,7 @@ export const site = {
   name: "Joe Fang",
   handle: "MinecraftFuns",
   /* Origins are not here. Where the site is published, and which copy is
-     authoritative, is `config/deployments.ts` — one declaration, so a mirror
+     authoritative, is `config/deployments.ts`: one declaration, so a mirror
      cannot be added without the canonical link, the indexing policy, and the
      build matrix all following from it. */
   description:

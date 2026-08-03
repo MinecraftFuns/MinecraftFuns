@@ -1,6 +1,6 @@
 import { deployments } from "../config/deployments.ts";
 import type { DeploymentTargetConfig } from "../config/schema.ts";
-import { invalid, ok, type Parsed } from "./adt.ts";
+import { andThen, invalid, ok, type Parsed } from "./adt.ts";
 import { currentBase, joinBase, joinRoute, slashTerminated } from "./url.ts";
 
 /**
@@ -125,17 +125,15 @@ export const siteRelative = (base: string, pathname: string): Parsed<string> => 
 export const canonicalHref = (
   target: DeploymentTarget,
   pathname: string,
-): Parsed<string> => {
-  const route = siteRelative(target.base, pathname);
-  if (route.tag !== "ok") return route;
+): Parsed<string> =>
+  andThen(siteRelative(target.base, pathname), (route) => {
+    const mounted = joinRoute(canonicalTarget.base, route);
+    const url = URL.parse(mounted, canonicalTarget.origin);
 
-  const mounted = joinRoute(canonicalTarget.base, route.value);
-  const url = URL.parse(mounted, canonicalTarget.origin);
-
-  return url === null
-    ? invalid(`cannot resolve ${mounted} against ${canonicalTarget.origin}`)
-    : ok(url.href);
-};
+    return url === null
+      ? invalid(`cannot resolve ${mounted} against ${canonicalTarget.origin}`)
+      : ok(url.href);
+  });
 
 /** Where the canonical deployment publishes its sitemap. */
 export const canonicalSitemapUrl = (): string =>

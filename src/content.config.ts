@@ -4,6 +4,7 @@ import { defineCollection } from "astro:content";
    and from `astro:schema` are both deprecated for removal in Astro 7. */
 import { z } from "astro/zod";
 
+import { explain } from "./lib/adt.ts";
 import { isoDate, parseIsoDate } from "./lib/time.ts";
 
 /**
@@ -49,8 +50,13 @@ const blog = defineCollection({
         message:
           'must be quoted, e.g. date: "2026-08-01"; an unquoted YAML date becomes a timestamp with a time zone attached',
       })
-      .refine((raw) => parseIsoDate(raw).tag === "ok", {
-        message: "expected a real YYYY-MM-DD calendar date (America/Toronto)",
+      /* `superRefine` rather than `refine`, so the reason the parser already
+         computed survives instead of being replaced by a generic message. */
+      .superRefine((raw, ctx) => {
+        const parsed = parseIsoDate(raw);
+        if (parsed.tag === "invalid") {
+          ctx.addIssue({ code: "custom", message: explain(parsed) });
+        }
       })
       .transform((raw) => isoDate(raw)),
   }),

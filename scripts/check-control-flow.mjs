@@ -27,6 +27,7 @@ import { relative, resolve } from "node:path";
 import ts from "typescript";
 
 import { moduleBodyOnly } from "./lib/frontmatter.mjs";
+import { each, report } from "./lib/gate.mjs";
 
 /** Extension to how TypeScript should read the file. */
 const DIALECT = {
@@ -105,16 +106,16 @@ const main = async () => {
     )
   ).flat();
 
-  if (found.length === 0) {
-    console.log(`check-control-flow: OK, ${files.length} file(s) carry no break or continue`);
-    return;
-  }
-
-  console.error(`check-control-flow: ${found.length} jump(s)\n`);
-  found.forEach(({ path, line, keyword }) => {
-    console.error(`  ${path}:${line}\n    ${keyword} is forbidden\n    → ${REMEDY[keyword]}\n`);
+  report({
+    name: "check-control-flow",
+    problems: found,
+    passed: `${files.length} file(s) carry no break or continue`,
+    failed: "",
+    body: each(
+      ({ path, line, keyword }) =>
+        `  ${path}:${line}\n    ${keyword} is forbidden\n    → ${REMEDY[keyword]}`,
+    ),
   });
-  process.exitCode = 1;
 };
 
 /* Run only as a program, so the tests can import the pure half. */

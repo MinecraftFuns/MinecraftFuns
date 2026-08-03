@@ -2,6 +2,7 @@ import { basename } from "node:path/posix";
 
 import * as openpgp from "openpgp";
 
+import { byCodepoint } from "./collate.ts";
 import {
   isOnDomain,
   parseMailAddress,
@@ -104,7 +105,9 @@ const addressesOn = (
 };
 
 const load = async (domain: string): Promise<readonly PublishedKey[]> => {
-  const entries = Object.entries(SOURCES).toSorted(([a], [b]) => a.localeCompare(b));
+  /* Code points, not collation: these are file stems, and their order must
+     not depend on the build machine's locale. */
+  const entries = Object.entries(SOURCES).toSorted(([a], [b]) => byCodepoint(a, b));
 
   const keys = await Promise.all(
     entries.map(async ([path, armored]) => {

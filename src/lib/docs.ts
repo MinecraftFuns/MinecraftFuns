@@ -1,6 +1,6 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
-import { orThrow } from "./adt.ts";
+import { collect, inContext, mapParsed, orThrow } from "./adt.ts";
 import { compareDocs, type DocOrder } from "./doc-order.ts";
 import { readingMinutes } from "./reading.ts";
 import { nav } from "../config/site.ts";
@@ -73,20 +73,24 @@ export const summarise = ({ entry, slug }: PublishedDoc): DocSummary => ({
 export const publishedDocs = async (): Promise<readonly PublishedDoc[]> => {
   const entries = await getCollection("docs", ({ data }) => !data.draft);
 
-  const docs = entries.map((entry) => ({
-    entry,
-    slug: orThrow(
-      parseSlug(entry.id),
-      `src/content/docs/${entry.id}.md: docs are flat, so the file belongs directly in src/content/docs`,
+  /* Every nested file named at once, for the reason `publishedPosts` collects
+     its own: the mistakes are independent of each other. */
+  const docs = collect(
+    entries.map((entry) =>
+      mapParsed(inContext(parseSlug(entry.id), `${entry.id}.md`), (slug) => ({
+        entry,
+        slug,
+      })),
     ),
-  }));
+  );
 
   const order = ({ entry, slug }: PublishedDoc): DocOrder => ({
     title: entry.data.title,
     slug,
   });
 
-  return docs.toSorted((a, b) => compareDocs(order(a), order(b)));
+  return orThrow(docs, "src/content/docs holds one file per doc, with no folders")
+    .toSorted((a, b) => compareDocs(order(a), order(b)));
 };
 
 export const docSummaries = async (): Promise<readonly DocSummary[]> =>

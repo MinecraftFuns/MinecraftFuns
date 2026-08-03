@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { explain } from "./adt.ts";
 import { archiveOf, hrefOf, parsePostPath, reconcile, routeOf } from "./archive.ts";
 import { isoDate } from "./time.ts";
 
@@ -87,8 +88,8 @@ describe("reconcile", () => {
     assert.equal(result.tag, "invalid");
     // The reason has to name both halves, or the author has to go find them.
     if (result.tag === "invalid") {
-      assert.match(result.reason, /2026\/07/);
-      assert.match(result.reason, /2026\/08/);
+      assert.match(explain(result), /2026\/07/);
+      assert.match(explain(result), /2026\/08/);
     }
   });
 
@@ -100,7 +101,7 @@ describe("reconcile", () => {
     const result = reconcile("a-post", isoDate("2026-08-01"));
     assert.equal(result.tag, "invalid");
     if (result.tag === "invalid") {
-      assert.match(result.reason, /YYYY\/MM/);
+      assert.match(explain(result), /YYYY\/MM/);
     }
   });
 });

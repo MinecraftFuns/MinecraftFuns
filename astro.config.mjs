@@ -4,6 +4,7 @@ import { defineConfig } from "astro/config";
 
 import sitemap from "@astrojs/sitemap";
 
+import { explain } from "./src/lib/adt.ts";
 import { developmentTarget, findTarget } from "./src/lib/deployment.ts";
 import { sitemapFilter } from "./src/lib/sitemap.ts";
 
@@ -36,7 +37,7 @@ const base = process.env.SITE_BASE ?? developmentTarget.base;
  * the declared targets, so a typo is one line to fix.
  */
 const target = findTarget(site, base);
-if (target.tag !== "ok") throw new Error(target.reason);
+if (target.tag !== "ok") throw new Error(explain(target));
 
 export default defineConfig({
   site,

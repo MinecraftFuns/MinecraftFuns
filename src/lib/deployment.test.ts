@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { deployments } from "../config/deployments.ts";
+import { explain } from "./adt.ts";
 import {
   activeTarget,
   canonicalHref,
@@ -78,7 +79,7 @@ describe("findTarget", () => {
   it("rejects an origin no deployment declares, naming the ones that exist", () => {
     const found = findTarget("https://typo.example", "/");
     assert.equal(found.tag, "invalid");
-    assert.ok(found.tag === "invalid" && found.reason.includes(canonicalTarget.origin));
+    assert.ok(explain(found).includes(canonicalTarget.origin));
   });
 
   it("rejects a declared origin at the wrong base", () => {
@@ -98,7 +99,7 @@ describe("activeTarget", () => {
   it("reports the absent site as a reason rather than throwing", () => {
     const found = activeTarget(undefined);
     assert.equal(found.tag, "invalid");
-    assert.ok(found.tag === "invalid" && found.reason.includes("astro.config"));
+    assert.ok(explain(found).includes("astro.config"));
   });
 });
 

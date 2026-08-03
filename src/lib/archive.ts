@@ -1,4 +1,4 @@
-import { invalid, ok, type Parsed } from "./adt.ts";
+import { andThen, invalid, ok, type Parsed } from "./adt.ts";
 import { SLUG_SOURCE } from "./slug.ts";
 import { monthOf, yearOf, type IsoDate } from "./time.ts";
 
@@ -52,20 +52,17 @@ export const archiveOf = (date: IsoDate): string =>
  * only constructor callers should use: `parsePostPath` alone proves the shape
  * is well formed, which is the weaker of the two properties that matter.
  */
-export const reconcile = (id: string, date: IsoDate): Parsed<PostPath> => {
-  const parsed = parsePostPath(id);
-  if (parsed.tag !== "ok") return parsed;
+export const reconcile = (id: string, date: IsoDate): Parsed<PostPath> =>
+  andThen(parsePostPath(id), (path) => {
+    const declared = `${path.year}/${path.month}`;
+    const expected = archiveOf(date);
 
-  const { year, month } = parsed.value;
-  const declared = `${year}/${month}`;
-  const expected = archiveOf(date);
-
-  return declared === expected
-    ? parsed
-    : invalid(
-        `filed under ${declared} but dated ${date}, which belongs in ${expected}`,
-      );
-};
+    return declared === expected
+      ? ok(path)
+      : invalid(
+          `filed under ${declared} but dated ${date}, which belongs in ${expected}`,
+        );
+  });
 
 /** The route parameter for `/blog/[...slug]`. */
 export const routeOf = (path: PostPath): string =>

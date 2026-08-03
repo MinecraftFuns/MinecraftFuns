@@ -26,6 +26,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { deployments } from "../src/config/deployments.ts";
+import { cannotRun, report } from "./lib/gate.mjs";
 
 /** @typedef {{ readonly check: string, readonly detail: string }} Violation */
 
@@ -227,7 +228,7 @@ export const wkdViolations = ({ policy, keys }) =>
  * for. A page's canonical URL names the canonical deployment whichever target
  * emitted it, so the mirror's own parameters are irrelevant here by design.
  * The previous check asked only whether the canonical pointed somewhere inside
- * *this* build, which every build satisfied by canonicalising to itself — the
+ * *this* build, which every build satisfied by canonicalising to itself: the
  * check passed on precisely the arrangement it should have caught.
  *
  * Derived from the file's position in the artifact, so it is computed the way
@@ -338,17 +339,16 @@ const exists = async (path) => {
 // ---------------------------------------------------------------------------
 // Checks
 // ---------------------------------------------------------------------------
-
 /**
- * @returns {Promise<readonly Violation[]>} every violation found, in check order
+ * Everything the checks read, gathered once.
+ *
+ * Reading is the only effect in this file. Each check below is a pure function
+ * of this record, which is what lets it be tested against a literal rather
+ * than against a directory somebody had to build first.
+ *
  */
-export const inspect = async ({ dist, base, site, canonical, tokensCss }) => {
-  /** @type {Violation[]} */
-  const found = [];
-  const normalisedBase = normaliseBase(base);
-
-  const files = await walk(dist);
-  const relativeFiles = files.map((path) => relative(dist, path));
+export const gather = async ({ dist, base, canonical, tokensCss }) => {
+  const relativeFiles = (await walk(dist)).map((path) => relative(dist, path));
 
   /*
    * The walk already enumerated every file, so link resolution is a set
@@ -364,153 +364,183 @@ export const inspect = async ({ dist, base, site, canonical, tokensCss }) => {
   const withExtension = (extension) =>
     relativeFiles.filter((path) => path.endsWith(extension));
 
-  const htmlFiles = withExtension(".html");
-  const cssFiles = withExtension(".css");
-  const jsFiles = withExtension(".js");
+  const read = async (paths) =>
+    Promise.all(
+      paths.map(async (path) => ({ path, text: await readFile(join(dist, path), "utf8") })),
+    );
 
-  // -- The build produced something at all --------------------------------
-  if (htmlFiles.length === 0) {
-    found.push(violation("output", "no HTML emitted; the build produced nothing"));
-    return found;
-  }
-  for (const required of ["index.html", "favicon.svg"]) {
-    if (!present.has(required)) {
-      found.push(violation("output", `missing required file: ${required}`));
-    }
-  }
+  const directive = async (name) =>
+    present.has(name) ? readFile(join(dist, name), "utf8") : "";
 
-  // -- Zero client JavaScript ---------------------------------------------
-  // A deliberate design decision: the theme follows the system preference in
-  // CSS, so nothing needs scripting. Guarding it means an accidental island or
-  // stray <script> is caught rather than silently shipped. Relax this check
-  // consciously if the site ever genuinely needs client behaviour.
-  for (const path of jsFiles) {
-    found.push(violation("zero-js", `unexpected client script: ${path}`));
-  }
+  const hu = join("\.well-known", "openpgpkey", "hu");
+  const huFiles = relativeFiles.filter((path) => path.startsWith(`${hu}/`));
 
-  const htmlContents = await Promise.all(
-    htmlFiles.map((path) => readFile(join(dist, path), "utf8")),
-  );
-
-  for (const [index, path] of htmlFiles.entries()) {
-    const html = htmlContents[index];
-
-    if (SCRIPT_ELEMENT.test(html)) {
-      found.push(violation("zero-js", `inline <script> in ${path}`));
-    }
-
-    // -- Template leakage -------------------------------------------------
-    // A rendered "undefined" is the visible symptom of a prop that silently
-    // went missing; it must never reach a reader.
-    for (const leak of ["undefined", "NaN", "[object Object]"]) {
-      if (html.includes(`>${leak}<`) || html.includes(`"${leak}"`)) {
-        found.push(violation("leakage", `rendered ${leak} in ${path}`));
-      }
-    }
-
-    // -- Link integrity ---------------------------------------------------
-    extractReferences(html)
-      .filter(isInternal)
-      .forEach((reference) => {
-        if (!reference.startsWith(normalisedBase)) {
-          found.push(
-            violation("base-path", `${path}: ${reference} does not start with ${normalisedBase}`),
-          );
-        } else if (!candidatePaths(reference, base).some((candidate) => present.has(candidate))) {
-          found.push(violation("dead-link", `${path}: ${reference} resolves to no file`));
-        }
-      });
-
-    // -- Canonical --------------------------------------------------------
-    /*
-     * Exact equality, against the *canonical* deployment rather than the one
-     * being built. Both artifacts must advertise the same URL for the same
-     * page; a mirror that canonicalises to itself is the defect this catches,
-     * and it is the one the previous containment test could not see.
-     */
-    const declared = CANONICAL.exec(html);
-    const expected = expectedCanonical(path, canonical.origin, canonical.base);
-
-    if (declared === null) {
-      found.push(violation("canonical", `${path}: no canonical link`));
-    } else if (declared[1] !== expected) {
-      found.push(
-        violation("canonical", `${path}: ${declared[1]} should be ${expected}`),
-      );
-    }
-  }
-
-  // -- Host directives -----------------------------------------------------
-  /*
-   * `resolves` answers both questions the directives raise: whether an exact
-   * path is served, and whether a prefix covers anything at all. Both are set
-   * lookups over the walk that already happened.
-   */
-  const resolves = (reference, isPrefix = false) => {
-    if (!isPrefix) {
-      return candidatePaths(reference, base).some((path) => present.has(path));
-    }
-    const normalised = normaliseBase(base);
-    if (!reference.startsWith(normalised)) return false;
-    const within = reference.slice(normalised.length);
-    return relativeFiles.some((path) => path.startsWith(within));
-  };
-
-  const directiveFiles = await Promise.all(
-    ["_redirects", "_headers"].map(async (name) =>
-      present.has(name) ? readFile(join(dist, name), "utf8") : "",
-    ),
-  );
-
-  found.push(
-    ...hostDirectiveViolations({
-      redirects: parseRedirects(directiveFiles[0]),
-      headerPatterns: parseHeaderPatterns(directiveFiles[1]),
-      resolves,
-    }).map((detail) => violation("host-directives", detail)),
-  );
-
-  // -- Web Key Directory ---------------------------------------------------
-  const HU = join("\.well-known", "openpgpkey", "hu");
-  const huFiles = relativeFiles.filter((path) => path.startsWith(`${HU}/`));
-
-  found.push(
-    ...wkdViolations({
+  return {
+    base,
+    normalisedBase: normaliseBase(base),
+    canonical,
+    present,
+    relativeFiles,
+    html: await read(withExtension(".html")),
+    css: await read(withExtension(".css")),
+    js: withExtension(".js"),
+    redirects: parseRedirects(await directive("_redirects")),
+    headerPatterns: parseHeaderPatterns(await directive("_headers")),
+    wkd: {
       policy: present.has(join("\.well-known", "openpgpkey", "policy")),
       keys: await Promise.all(
         huFiles.map(async (path) => ({
-          name: path.slice(HU.length + 1),
+          name: path.slice(hu.length + 1),
           bytes: await readFile(join(dist, path)),
         })),
       ),
-    }).map((detail) => violation("wkd", detail)),
+    },
+    palette: paletteFrom(tokensCss),
+  };
+};
+
+/**
+ * Whether a reference is served. `isPrefix` asks the weaker question a
+ * wildcard directive raises: whether anything at all sits beneath it.
+ */
+const resolvesIn = ({ present, relativeFiles, base, normalisedBase }) =>
+  (reference, isPrefix = false) => {
+    if (!isPrefix) {
+      return candidatePaths(reference, base).some((path) => present.has(path));
+    }
+    if (!reference.startsWith(normalisedBase)) return false;
+    const within = reference.slice(normalisedBase.length);
+    return relativeFiles.some((path) => path.startsWith(within));
+  };
+
+/**
+ * A build that emitted nothing. Separate from the list below because it is the
+ * one check the others depend on: every one of them would report an artifact
+ * with no pages as broken in its own way, which is noise rather than news.
+ */
+export const noOutput = ({ html }) =>
+  html.length === 0
+    ? [violation("output", "no HTML emitted; the build produced nothing")]
+    : [];
+
+export const missingRequired = ({ present }) =>
+  ["index.html", "favicon.svg"]
+    .filter((required) => !present.has(required))
+    .map((required) => violation("output", `missing required file: ${required}`));
+
+/**
+ * Zero client JavaScript, a deliberate design decision: the theme follows the
+ * system preference in CSS, so nothing needs scripting. Guarding it means an
+ * accidental island or stray script is caught rather than silently shipped.
+ */
+export const clientScripts = ({ js, html }) => [
+  ...js.map((path) => violation("zero-js", `unexpected client script: ${path}`)),
+  ...html
+    .filter(({ text }) => SCRIPT_ELEMENT.test(text))
+    .map(({ path }) => violation("zero-js", `inline <script> in ${path}`)),
+];
+
+/** A rendered "undefined" is a prop that went missing, visible to a reader. */
+export const templateLeakage = ({ html }) =>
+  html.flatMap(({ path, text }) =>
+    ["undefined", "NaN", "[object Object]"]
+      .filter((leak) => text.includes(`>${leak}<`) || text.includes(`"${leak}"`))
+      .map((leak) => violation("leakage", `rendered ${leak} in ${path}`)),
   );
 
-  // -- Stylesheet integrity ------------------------------------------------
-  const palette = paletteFrom(tokensCss);
-  if (palette.size === 0) {
-    found.push(violation("palette", "no palette found in the token layer"));
-  }
+export const linkIntegrity = (artifact) => {
+  const resolves = resolvesIn(artifact);
 
-  const cssContents = await Promise.all(
-    cssFiles.map((path) => readFile(join(dist, path), "utf8")),
+  return artifact.html.flatMap(({ path, text }) =>
+    extractReferences(text)
+      .filter(isInternal)
+      .flatMap((reference) => {
+        if (!reference.startsWith(artifact.normalisedBase)) {
+          return [
+            violation(
+              "base-path",
+              `${path}: ${reference} does not start with ${artifact.normalisedBase}`,
+            ),
+          ];
+        }
+        return resolves(reference)
+          ? []
+          : [violation("dead-link", `${path}: ${reference} resolves to no file`)];
+      }),
   );
+};
 
-  for (const [index, path] of cssFiles.entries()) {
-    const css = cssContents[index];
+/**
+ * Exact equality, against the *canonical* deployment rather than the one being
+ * built: both artifacts must advertise the same URL for the same page, and a
+ * mirror that canonicalises to itself is the defect this catches.
+ */
+export const canonicalLinks = ({ html, canonical }) =>
+  html.flatMap(({ path, text }) => {
+    const declared = CANONICAL.exec(text);
+    const expected = expectedCanonical(path, canonical.origin, canonical.base);
 
-    // A typo'd custom property does not fail any build; it silently renders
-    // the wrong colour or spacing.
-    for (const name of undefinedCustomProperties(css)) {
-      found.push(violation("css-var", `${path}: var(${name}) is never defined`));
-    }
+    if (declared === null) return [violation("canonical", `${path}: no canonical link`)];
+    return declared[1] === expected
+      ? []
+      : [violation("canonical", `${path}: ${declared[1]} should be ${expected}`)];
+  });
 
-    for (const colour of offPaletteColours(css, palette)) {
-      found.push(violation("palette", `${path}: ${colour} is outside the palette`));
-    }
-  }
+export const hostDirectives = (artifact) =>
+  hostDirectiveViolations({
+    redirects: artifact.redirects,
+    headerPatterns: artifact.headerPatterns,
+    resolves: resolvesIn(artifact),
+  }).map((detail) => violation("host-directives", detail));
 
-  return found;
+export const webKeyDirectory = ({ wkd }) =>
+  wkdViolations(wkd).map((detail) => violation("wkd", detail));
+
+/** A typo'd custom property fails no build; it renders the wrong colour. */
+export const stylesheetIntegrity = ({ css, palette }) => [
+  ...(palette.size === 0
+    ? [violation("palette", "no palette found in the token layer")]
+    : []),
+  ...css.flatMap(({ path, text }) => [
+    ...undefinedCustomProperties(text).map((name) =>
+      violation("css-var", `${path}: var(${name}) is never defined`),
+    ),
+    ...offPaletteColours(text, palette).map((colour) =>
+      violation("palette", `${path}: ${colour} is outside the palette`),
+    ),
+  ]),
+];
+
+/**
+ * The checks, as data.
+ *
+ * A list rather than a run of pushes inside one long function: a check gets a
+ * name, a test that needs no `dist/`, and a place in a count. Order is the
+ * order violations are reported in, and nothing else, because each is a
+ * function of the artifact alone and none can see another's findings.
+ */
+export const CHECKS = [
+  missingRequired,
+  clientScripts,
+  templateLeakage,
+  linkIntegrity,
+  canonicalLinks,
+  hostDirectives,
+  webKeyDirectory,
+  stylesheetIntegrity,
+];
+
+/**
+ * @returns {Promise<readonly Violation[]>} every violation found, in check order
+ */
+export const inspect = async (options) => {
+  const artifact = await gather(options);
+
+  /* Fail fast where the checks depend on the artifact existing, accumulate
+     where they do not: the same distinction `decodeHostConfig` draws between
+     `andThen` and `both`. */
+  const fatal = noOutput(artifact);
+  return fatal.length > 0 ? fatal : CHECKS.flatMap((check) => check(artifact));
 };
 
 // ---------------------------------------------------------------------------
@@ -544,27 +574,26 @@ const main = async () => {
   );
 
   if (!(await exists(dist))) {
-    console.error(`check-dist: ${dist} does not exist; run the build first`);
-    process.exitCode = 1;
+    cannotRun("check-dist", `${dist} does not exist; run the build first`);
     return;
   }
 
-  const violations = await inspect({ dist, base, site, canonical, tokensCss });
-
-  if (violations.length === 0) {
-    console.log(`check-dist: OK, ${dist} passes all checks for ${site}${base}`);
-    return;
-  }
-
-  console.error(
-    `check-dist: ${violations.length} violation(s) for ${site}${base}\n`,
-  );
-  const byCheck = Object.groupBy(violations, (entry) => entry.check);
-  for (const [check, entries] of Object.entries(byCheck)) {
-    console.error(`  ${check} (${entries?.length ?? 0})`);
-    for (const entry of entries ?? []) console.error(`    - ${entry.detail}`);
-  }
-  process.exitCode = 1;
+  report({
+    name: "check-dist",
+    problems: await inspect({ dist, base, site, canonical, tokensCss }),
+    passed: `${dist} passes all ${CHECKS.length} checks for ${site}${base}`,
+    failed: `for ${site}${base}`,
+    /* Its own body rather than `each`: forty dead links are one fact about the
+       artifact, and grouping them says so where forty lines do not. */
+    body: (violations) =>
+      Object.entries(Object.groupBy(violations, (entry) => entry.check))
+        .map(
+          ([check, entries = []]) =>
+            `  ${check} (${entries.length})\n` +
+            entries.map((entry) => `    - ${entry.detail}`).join("\n"),
+        )
+        .join("\n"),
+  });
 };
 
 // Only run when invoked directly, so the test file can import the helpers.

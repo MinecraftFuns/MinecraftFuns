@@ -8,7 +8,7 @@ import { invalid, ok, orThrow, type Parsed } from "./adt.ts";
  *
  *  1. A calendar date ("2026-07-14") and an instant (a point on the timeline)
  *     are different types. Converting between them requires a zone, and if the
- *     zone is left implicit the runtime supplies the host's — which is how this
+ *     zone is left implicit the runtime supplies the host's, which is how this
  *     site once rendered "Jul 13" for a post dated the 14th.
  *  2. That zone is always the project's configured zone. Never the host's, and
  *     never UTC as a silent fallback. UTC appears below only as an intermediate
@@ -46,7 +46,7 @@ export const timeZone = (raw: string): TimeZone =>
   orThrow(parseTimeZone(raw), "invalid time zone");
 
 /**
- * The project's canonical zone — the one configurable option this module has.
+ * The project's canonical zone: the one configurable option this module has.
  *
  * Change this single line to relocate every date the site renders. Everything
  * downstream reads it rather than assuming a zone, and each primitive below
@@ -67,7 +67,7 @@ declare const isoDateBrand: unique symbol;
 /**
  * A `YYYY-MM-DD` calendar date verified to name a real day.
  *
- * The brand is erased at runtime — a plain string with zero representation
+ * The brand is erased at runtime: a plain string with zero representation
  * cost. Its only power is that `parseIsoDate`/`isoDate` are the sole way to
  * obtain one, so any value of this type has already been checked.
  */
@@ -78,7 +78,7 @@ const ISO_DATE_SHAPE = /^\d{4}-\d{2}-\d{2}$/;
 /**
  * Total: every string maps to a variant, none throws.
  *
- * Shape alone is insufficient — "2026-02-31" matches the pattern but names no
+ * Shape alone is insufficient: "2026-02-31" matches the pattern but names no
  * day. Checking that all three components survive a round trip through `Date`
  * rejects it, because the constructor silently overflows February 31st into
  * March 3rd.
@@ -93,7 +93,7 @@ export const parseIsoDate = (raw: string): Parsed<IsoDate> => {
   const month = Number(raw.slice(5, 7));
   const day = Number(raw.slice(8, 10));
 
-  // UTC here is pure arithmetic on a calendar triple — no zone is implied, and
+  // UTC here is pure arithmetic on a calendar triple; no zone is implied, and
   // the value never escapes this function.
   const probe = new Date(Date.UTC(year, month - 1, day));
   const roundTrips =
@@ -115,7 +115,7 @@ export const isoDate = (raw: string): IsoDate =>
  *
  * No zone appears here, and that is the point: a calendar date *has* a year
  * and a month by construction. Recovering them by converting to an instant and
- * asking a clock is what rendered "Jul 13" for a post dated the fourteenth —
+ * asking a clock is what rendered "Jul 13" for a post dated the fourteenth:
  * the conversion is the bug, so the correct implementation refuses to make it.
  */
 export const yearOf = (date: IsoDate): string => date.slice(0, 4);
@@ -124,7 +124,7 @@ export const monthOf = (date: IsoDate): string => date.slice(5, 7);
 /**
  * ISO 8601 was designed so lexicographic order coincides with chronological
  * order for fixed-width dates, so this needs no parsing at all. Total,
- * antisymmetric, and transitive — exactly `toSorted`'s contract.
+ * antisymmetric, and transitive, exactly `toSorted`'s contract.
  */
 export const compareIsoDate = (a: IsoDate, b: IsoDate): number =>
   a < b ? -1 : a > b ? 1 : 0;
@@ -133,7 +133,7 @@ export const compareIsoDate = (a: IsoDate, b: IsoDate): number =>
  * Newest first, without mutating the input.
  *
  * The accessor form is the general one: not every dated record carries its date
- * in a top-level `date` field — a content-collection entry keeps it under
+ * in a top-level `date` field, while a content-collection entry keeps it under
  * `data`. Taking a projection avoids reshaping records just to sort them.
  */
 export const byRecencyWith = <T>(
@@ -204,7 +204,7 @@ export type WallClock = {
  *
  * The parts are indexed in a single pass. Searching the array once per field
  * would rescan it six times for a list the formatter already returns in one
- * piece — and this runs for every rendered date.
+ * piece, and this runs for every rendered date.
  *
  * The `?? 0` branch is unreachable: `wallClockFormatter` requests all six
  * fields a few lines above, so the invariant is established locally and does
@@ -254,7 +254,7 @@ const offsetMsAt = (instant: Date, zone: TimeZone): number => {
  * for every real transition, which never exceeds an hour or two.
  *
  * On a spring-forward day whose midnight does not exist, the result lands on
- * the first instant that does — the standard, and only sensible, resolution.
+ * the first instant that does, the standard, and only sensible, resolution.
  */
 export const startOfDayIn = (
   date: IsoDate,
@@ -295,7 +295,7 @@ export const formatDateIn = (
   locale: string = SITE_LOCALE,
 ): string => displayFormatter(zone, locale).format(startOfDayIn(date, zone));
 
-/** The current year as read in `zone` — the only clock read in the project. */
+/** The current year as read in `zone`: the only clock read in the project. */
 export const currentYearIn = (zone: TimeZone = SITE_TIME_ZONE): number =>
   wallClockAt(new Date(), zone).year;
 
@@ -304,7 +304,7 @@ export const currentYearIn = (zone: TimeZone = SITE_TIME_ZONE): number =>
 // ---------------------------------------------------------------------------
 //
 // Every primitive above already defaults its zone to SITE_TIME_ZONE, so an
-// unqualified date is a Toronto date by construction — an author writing
+// unqualified date is a Toronto date by construction: an author writing
 // `date: isoDate("2026-07-14")` has stated a Toronto day and needs to say
 // nothing further. These aliases are the vocabulary call sites read best.
 

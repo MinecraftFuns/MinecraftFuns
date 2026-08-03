@@ -1,3 +1,5 @@
+import { byCodepoint } from "../../src/lib/collate.ts";
+
 /**
  * Finding bookkeeping: ordering, deduplication, and counting. Pure and total.
  */
@@ -23,9 +25,11 @@ export const compareFindings = (a, b) => {
   if (byImpact !== 0) return byImpact;
 
   // Fields compared directly: concatenating keys would allocate a string per
-  // comparison, and the sort makes many.
-  const byPage = a.page.localeCompare(b.page);
-  return byPage !== 0 ? byPage : a.rule.localeCompare(b.rule);
+  // comparison, and the sort makes many. By code point, since a page path and
+  // a rule name are identifiers, and a report must not sort differently on a
+  // different machine.
+  const byPage = byCodepoint(a.page, b.page);
+  return byPage !== 0 ? byPage : byCodepoint(a.rule, b.rule);
 };
 
 const contextOf = ({ viewport, colorScheme }) =>

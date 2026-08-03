@@ -4,7 +4,16 @@ import type {
   RedirectConfig,
   RedirectStatus,
 } from "../config/schema.ts";
-import { assertNever, invalid, ok, type Parsed } from "./adt.ts";
+import {
+  andThen,
+  assertNever,
+  both,
+  collect,
+  invalid,
+  mapParsed,
+  ok,
+  type Parsed,
+} from "./adt.ts";
 
 export type { HeaderConfig, HostConfig, RedirectConfig, RedirectStatus };
 
@@ -173,42 +182,33 @@ const resolvePattern = (pattern: PathPattern, resolve: Resolve): PathPattern =>
     ? exactPath(resolve(pattern.path))
     : prefixPath(resolve(pattern.path));
 
-const decodeRedirect = (
-  config: RedirectConfig,
-  resolve: Resolve,
-): Parsed<Redirect> => {
-  const from = parsePathPattern(config.from);
-  if (from.tag !== "ok") return from;
-
-  return ok({
-    from: resolvePattern(from.value, resolve),
+/* `mapParsed`: once the pattern parses, the rest of a redirect cannot fail. */
+const decodeRedirect = (config: RedirectConfig, resolve: Resolve): Parsed<Redirect> =>
+  mapParsed(parsePathPattern(config.from), (from) => ({
+    from: resolvePattern(from, resolve),
     /* A destination leaving the site keeps its own authority. */
     to: config.to.startsWith("/") ? resolve(config.to) : config.to,
     status: config.status ?? 301,
-  });
-};
+  }));
 
+/* `andThen`: a rule that parses may still turn out to do nothing. */
 const decodeHeaderRule = (
   config: HeaderConfig,
   resolve: Resolve,
-): Parsed<HeaderRule> => {
-  const pattern = parsePathPattern(config.path);
-  if (pattern.tag !== "ok") return pattern;
+): Parsed<HeaderRule> =>
+  andThen(parsePathPattern(config.path), (pattern) => {
+    const ops: HeaderOp[] = [
+      ...Object.entries(config.set ?? {}).map(
+        ([name, value]): HeaderOp => ({ kind: "set", name, value }),
+      ),
+      ...(config.remove ?? []).map((name): HeaderOp => ({ kind: "remove", name })),
+    ];
 
-  const ops: HeaderOp[] = [
-    ...Object.entries(config.set ?? {}).map(
-      ([name, value]): HeaderOp => ({ kind: "set", name, value }),
-    ),
-    ...(config.remove ?? []).map((name): HeaderOp => ({ kind: "remove", name })),
-  ];
-
-  const [first, ...rest] = ops;
-  if (first === undefined) {
-    return invalid(`${config.path} sets and removes nothing`);
-  }
-
-  return ok({ pattern: resolvePattern(pattern.value, resolve), ops: [first, ...rest] });
-};
+    const [first, ...rest] = ops;
+    return first === undefined
+      ? invalid(`${config.path} sets and removes nothing`)
+      : ok({ pattern: resolvePattern(pattern, resolve), ops: [first, ...rest] });
+  });
 
 /**
  * Decode the whole host policy, reporting every problem rather than the first:
@@ -218,30 +218,27 @@ const decodeHeaderRule = (
 export const decodeHostConfig = (
   config: HostConfig,
   resolve: Resolve,
-): Parsed<{ readonly headers: readonly HeaderRule[]; readonly redirects: readonly Redirect[] }> => {
-  const headers = config.headers.map((rule) => decodeHeaderRule(rule, resolve));
-  const redirects = config.redirects.map((rule) => decodeRedirect(rule, resolve));
+): Parsed<{ readonly headers: readonly HeaderRule[]; readonly redirects: readonly Redirect[] }> =>
+  /* Independent, so `both`: a config with a bad header *and* a bad redirect
+     names both in one build. */
+  andThen(
+    both(
+      collect(config.headers.map((rule) => decodeHeaderRule(rule, resolve))),
+      collect(config.redirects.map((rule) => decodeRedirect(rule, resolve))),
+    ),
+    /* Dependent, so `andThen`: shadowing and duplication are questions about
+       rules that decoded, and there are none to ask of a config that did not. */
+    ([headers, redirects]) => {
+      const [first, ...rest] = [
+        ...redirectProblems(redirects),
+        ...headerProblems(headers),
+      ].map(({ rule, reason }) => `${rule}: ${reason}`);
 
-  const reasons = [...headers, ...redirects]
-    .filter((parsed) => parsed.tag === "invalid")
-    .map((parsed) => parsed.reason);
-  if (reasons.length > 0) return invalid(reasons.join("\n  "));
-
-  const decoded = {
-    headers: headers.filter((parsed) => parsed.tag === "ok").map((parsed) => parsed.value),
-    redirects: redirects
-      .filter((parsed) => parsed.tag === "ok")
-      .map((parsed) => parsed.value),
-  };
-
-  const problems = [
-    ...redirectProblems(decoded.redirects),
-    ...headerProblems(decoded.headers),
-  ];
-  return problems.length > 0
-    ? invalid(problems.map(({ rule, reason }) => `${rule}: ${reason}`).join("\n  "))
-    : ok(decoded);
-};
+      return first === undefined
+        ? ok({ headers, redirects })
+        : invalid(first, ...rest);
+    },
+  );
 
 // ---------------------------------------------------------------------------
 // Structural checks

@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { explain } from "./adt.ts";
+
 import {
   byRecency,
   compareIsoDate,
@@ -113,7 +115,7 @@ describe("parseIsoDate", () => {
   it("explains why it rejected", () => {
     const parsed = parseIsoDate("2026-02-31");
     assert.equal(parsed.tag, "invalid");
-    assert.match(parsed.tag === "invalid" ? parsed.reason : "", /calendar date/);
+    assert.match(explain(parsed), /calendar date/);
   });
 
   it("throws at the build boundary via the smart constructor", () => {

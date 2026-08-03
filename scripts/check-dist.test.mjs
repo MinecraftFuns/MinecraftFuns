@@ -5,7 +5,10 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 
 import {
+  canonicalLinks,
   candidatePaths,
+  CHECKS,
+  clientScripts,
   expectedCanonical,
   wkdViolations,
   parseRedirects,
@@ -14,9 +17,15 @@ import {
   extractReferences,
   inspect,
   isInternal,
+  linkIntegrity,
+  missingRequired,
+  noOutput,
   normaliseBase,
   offPaletteColours,
   paletteFrom,
+  stylesheetIntegrity,
+  templateLeakage,
+  webKeyDirectory,
   undefinedCustomProperties,
 } from "./check-dist.mjs";
 
@@ -543,5 +552,135 @@ describe("inspect", () => {
       { base: "/" },
     );
     assert.deepEqual(violations, []);
+  });
+});
+
+/*
+ * The checks that used to live inside `inspect` as pushes into a shared
+ * accumulator. Each is now a function of an artifact literal, so it can be
+ * tested without writing a directory and building a site into it, and each
+ * appears once in `CHECKS`.
+ */
+
+const artifact = (over = {}) => ({
+  base: "/",
+  normalisedBase: "/",
+  canonical: { origin: "https://example.test", base: "/" },
+  present: new Set(["index.html", "favicon.svg"]),
+  relativeFiles: ["index.html", "favicon.svg"],
+  html: [],
+  css: [],
+  js: [],
+  redirects: [],
+  headerPatterns: [],
+  wkd: { policy: false, keys: [] },
+  palette: new Set(["#5e6ad2"]),
+  ...over,
+});
+
+const doc = (path, text) => ({ path, text });
+
+describe("checks as data", () => {
+  it("names every check exactly once", () => {
+    assert.equal(new Set(CHECKS).size, CHECKS.length);
+    assert.ok(CHECKS.every((check) => typeof check === "function"));
+  });
+
+  /* A conformant artifact, minimal but not empty: an empty one is *not*
+     silent, because the WKD spec requires a policy file and at least one key,
+     and a check that stayed quiet about their absence would be wrong. */
+  it("finds nothing in a conformant artifact", () => {
+    const wkd = {
+      policy: true,
+      keys: [
+        {
+          name: "s8y7oh5xrdpu9psba3i5ntk64ohouhga",
+          bytes: Uint8Array.from([0x98, 0x01]),
+        },
+      ],
+    };
+    assert.deepEqual(
+      CHECKS.flatMap((check) => check(artifact({ wkd }))),
+      [],
+    );
+  });
+
+  it("is not vacuously quiet: an artifact publishing no key says so", () => {
+    assert.deepEqual(
+      webKeyDirectory(artifact()).map(({ check }) => check),
+      ["wkd", "wkd"],
+    );
+  });
+
+  it("reports an emitted build with no pages, and stops there", () => {
+    assert.equal(noOutput(artifact({ html: [] })).length, 1);
+    assert.deepEqual(noOutput(artifact({ html: [doc("index.html", "<html/>")] })), []);
+  });
+
+  it("requires the files a deployment cannot work without", () => {
+    const found = missingRequired(artifact({ present: new Set(["index.html"]) }));
+    assert.deepEqual(
+      found.map(({ detail }) => detail),
+      ["missing required file: favicon.svg"],
+    );
+  });
+
+  it("catches both an emitted script file and an inline one", () => {
+    const found = clientScripts(
+      artifact({
+        js: ["_astro/island.js"],
+        html: [doc("index.html", "<html><body><script>x()</script></body></html>")],
+      }),
+    );
+    assert.equal(found.length, 2);
+    assert.ok(found.every(({ check }) => check === "zero-js"));
+  });
+
+  it("catches a prop that rendered as undefined", () => {
+    const found = templateLeakage(
+      artifact({ html: [doc("a.html", "<p>undefined</p>")] }),
+    );
+    assert.deepEqual(
+      found.map(({ detail }) => detail),
+      ["rendered undefined in a.html"],
+    );
+  });
+
+  it("separates a link outside the base from one that merely resolves nowhere", () => {
+    const found = linkIntegrity(
+      artifact({
+        base: "/app/",
+        normalisedBase: "/app/",
+        html: [doc("index.html", '<a href="/elsewhere/">a</a><a href="/app/gone/">b</a>')],
+        present: new Set(["index.html"]),
+        relativeFiles: ["index.html"],
+      }),
+    );
+    assert.deepEqual(found.map(({ check }) => check), ["base-path", "dead-link"]);
+  });
+
+  it("holds every page to the canonical deployment, not the one being built", () => {
+    const mirrored = artifact({
+      canonical: { origin: "https://canonical.test", base: "/" },
+      html: [doc("a/index.html", '<link rel="canonical" href="https://mirror.test/a/"/>')],
+    });
+    assert.match(canonicalLinks(mirrored)[0].detail, /should be https:\/\/canonical.test\/a\//);
+  });
+
+  it("reports a page with no canonical link at all", () => {
+    const found = canonicalLinks(artifact({ html: [doc("a.html", "<html/>")] }));
+    assert.match(found[0].detail, /no canonical link/);
+  });
+
+  it("reports a stylesheet using a property nothing defines", () => {
+    const found = stylesheetIntegrity(
+      artifact({ css: [doc("a.css", ".x{color:var(--nope)}")] }),
+    );
+    assert.deepEqual(found.map(({ check }) => check), ["css-var"]);
+  });
+
+  it("treats an empty palette as a defect rather than a vacuous pass", () => {
+    const found = stylesheetIntegrity(artifact({ palette: new Set() }));
+    assert.deepEqual(found.map(({ check }) => check), ["palette"]);
   });
 });

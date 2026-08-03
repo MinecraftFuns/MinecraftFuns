@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { explain } from "./adt.ts";
+
 import {
   covers,
   decodeHostConfig,
@@ -243,8 +245,8 @@ describe("decodeHostConfig", () => {
     );
     assert.equal(decoded.tag, "invalid");
     if (decoded.tag !== "invalid") return;
-    assert.match(decoded.reason, /no-slash/);
-    assert.match(decoded.reason, /\/a\/\*\/b/);
+    assert.match(explain(decoded), /no-slash/);
+    assert.match(explain(decoded), /\/a\/\*\/b/);
   });
 
   it("carries the structural checks through, on decoded values", () => {
@@ -254,7 +256,7 @@ describe("decodeHostConfig", () => {
     );
     assert.equal(decoded.tag, "invalid");
     if (decoded.tag !== "invalid") return;
-    assert.match(decoded.reason, /loop/);
+    assert.match(explain(decoded), /loop/);
   });
 });
 
