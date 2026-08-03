@@ -30,7 +30,7 @@ const displayDate = formatIsoDate(post.date);
   href={post.href}
 >
   <time
-    class="text-ink-tertiary col-start-1 row-start-2 font-mono text-caption whitespace-nowrap md:row-auto"
+    class="meta col-start-1 row-start-2 whitespace-nowrap md:row-auto"
     datetime={post.date}
   >
     {displayDate}
@@ -40,12 +40,12 @@ const displayDate = formatIsoDate(post.date);
     <h3 class="text-row-title text-ink group-hover:text-accent transition-colors">
       {post.title}
     </h3>
-    <p class="mt-3xs max-w-measure text-body-sm text-ink-subtle">
+    <p class="note mt-3xs max-w-measure">
       {post.description}
     </p>
   </div>
 
-  <span class="text-ink-tertiary font-mono text-caption whitespace-nowrap">
+  <span class="meta whitespace-nowrap">
     {post.readingMinutes} min
   </span>
 </a>

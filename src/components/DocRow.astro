@@ -20,14 +20,14 @@ const { doc } = Astro.props;
   href={doc.href}
 >
   <div>
-    <p class="text-ink-tertiary font-mono text-caption">{doc.category}</p>
+    <p class="meta">{doc.category}</p>
     <h3 class="text-ink group-hover:text-accent mt-3xs text-row-title transition-colors">
       {doc.title}
     </h3>
-    <p class="text-ink-subtle mt-3xs max-w-measure text-body-sm">{doc.description}</p>
+    <p class="note mt-3xs max-w-measure">{doc.description}</p>
   </div>
 
-  <span class="text-ink-tertiary shrink-0 font-mono text-caption whitespace-nowrap">
+  <span class="meta shrink-0 whitespace-nowrap">
     {doc.readingMinutes} min
   </span>
 </a>

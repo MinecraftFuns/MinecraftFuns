@@ -33,9 +33,9 @@ const { spacing, title: titleClass } = INTRO.page;
     running text, which is the case WCAG 2.5.8 exempts, so it needs no minimum
     box of its own; the underline on hover is the affordance instead.
   */}
-  <p class="text-ink-tertiary flex items-center gap-2xs font-mono text-caption">
+  <p class="meta flex items-center gap-2xs">
     <a
-      class="text-ink-tertiary hover:text-ink no-underline transition-colors hover:underline"
+      class="link-muted"
       href={categoryHref(category)}
     >
       {category}

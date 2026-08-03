@@ -22,10 +22,11 @@
  *    output we generate ourselves; it would not be for arbitrary HTML.
  */
 
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { deployments } from "../src/config/deployments.ts";
+import { filesUnder } from "./lib/files.mjs";
 import { cannotRun, report } from "./lib/gate.mjs";
 
 /** @typedef {{ readonly check: string, readonly detail: string }} Violation */
@@ -316,17 +317,6 @@ export const paletteFrom = (tokensCss) =>
 // Filesystem walk
 // ---------------------------------------------------------------------------
 
-const walk = async (dir) => {
-  const entries = await readdir(dir, { withFileTypes: true });
-  const nested = await Promise.all(
-    entries.map(async (entry) => {
-      const path = join(dir, entry.name);
-      return entry.isDirectory() ? walk(path) : [path];
-    }),
-  );
-  return nested.flat();
-};
-
 const exists = async (path) => {
   try {
     await stat(path);
@@ -348,7 +338,7 @@ const exists = async (path) => {
  *
  */
 export const gather = async ({ dist, base, canonical, tokensCss }) => {
-  const relativeFiles = (await walk(dist)).map((path) => relative(dist, path));
+  const relativeFiles = (await filesUnder(dist)).map((path) => relative(dist, path));
 
   /*
    * The walk already enumerated every file, so link resolution is a set

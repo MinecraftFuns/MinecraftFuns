@@ -56,7 +56,7 @@ export const timeZone = (raw: string): TimeZone =>
 export const SITE_TIME_ZONE: TimeZone = timeZone(site.timeZone);
 
 /** Formatting locale. Separate from the zone: they vary independently. */
-export const SITE_LOCALE: string = site.dateLocale;
+const SITE_LOCALE: string = site.dateLocale;
 
 // ---------------------------------------------------------------------------
 // Calendar dates

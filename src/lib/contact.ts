@@ -46,9 +46,6 @@ export const profiles: readonly Profile[] = contact.profiles.map(
   }),
 );
 
-/** The GitHub account URL, built from the one place the handle is written. */
-export const githubUrl = PLATFORMS.github.url(site.handle);
-
 /** This site's own key route. Not a profile: it is a document, not an account. */
 export const pgpHref = (): string => routeUrl("/pgp");
 

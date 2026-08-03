@@ -14,7 +14,9 @@ const year = currentYear();
 const fingerprint = await siteFingerprint();
 ---
 
-<footer class="border-hairline text-ink-subtle border-t py-xl text-body-sm">
+{/* The role is set on the element, so the whole footer inherits it and the
+    children that differ say so rather than restating the default. */}
+<footer class="note border-hairline border-t py-xl">
   <div
     class="mx-auto grid w-full max-w-frame grid-cols-footer gap-lg px-md md:px-lg"
   >

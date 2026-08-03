@@ -11,12 +11,13 @@
  */
 
 import { spawn } from "node:child_process";
-import { mkdir, readdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { AxeBuilder } from "@axe-core/playwright";
 import { chromium } from "playwright";
 
+import { filesUnder } from "../lib/files.mjs";
 import { dedupeFindings } from "./checks.mjs";
 import { designFindings, TOKEN_NAMES } from "./design.mjs";
 import {
@@ -204,18 +205,7 @@ const startPreview = async () => {
 
 /** Routes discovered from the build, so new pages are covered automatically. */
 const discoverRoutes = async (dir) => {
-  const walk = async (current) => {
-    const entries = await readdir(current, { withFileTypes: true });
-    const nested = await Promise.all(
-      entries.map(async (entry) => {
-        const path = join(current, entry.name);
-        return entry.isDirectory() ? walk(path) : [path];
-      }),
-    );
-    return nested.flat();
-  };
-
-  return (await walk(dir))
+  return (await filesUnder(dir))
     .filter((path) => path.endsWith("index.html"))
     .map((path) => `/${relative(dir, path).replace(/index\.html$/, "")}`.replace(/\/+/g, "/"))
     .sort();
@@ -468,7 +458,18 @@ const main = async () => {
   const browser = await launchBrowser();
 
   try {
+    /* Seeded from `routes`, so every lookup below has a value. Read through a
+       helper rather than asserting one: the map and the loop are built from the
+       same list, and a helper that inserts on miss keeps that a fact rather
+       than a claim. */
     const documentsByRoute = new Map(routes.map((route) => [route, new Map()]));
+    const documentsFor = (route) => {
+      const found = documentsByRoute.get(route);
+      if (found !== undefined) return found;
+      const fresh = new Map();
+      documentsByRoute.set(route, fresh);
+      return fresh;
+    };
     const titles = [];
     const links = new Set();
 
@@ -483,7 +484,7 @@ const main = async () => {
         for (const route of routes) {
           const doc = await auditPage(context, route, viewport, scheme);
           if (doc !== null) {
-            documentsByRoute.get(route).set(scheme, doc);
+            documentsFor(route).set(scheme, doc);
             if (scheme === "light") {
               titles.push([route, doc.title]);
               doc.internalLinks.forEach((href) => links.add(href));

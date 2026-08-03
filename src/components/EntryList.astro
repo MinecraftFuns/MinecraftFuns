@@ -56,13 +56,13 @@ entries.forEach(({ body }) => {
   {
     entries.map(({ label, body }) => (
       <div class="border-hairline grid gap-md border-b py-sm last:border-b-0 sm:grid-cols-entry sm:items-baseline">
-        <dt class="text-ink-tertiary font-mono text-caption">{label}</dt>
+        <dt class="meta">{label}</dt>
         <dd>
           {body.kind === "lines" && (
             <>
               <p class="text-ink text-control">{body.title}</p>
               {body.notes.map((note) => (
-                <p class="text-ink-subtle text-body-sm">{note}</p>
+                <p class="note">{note}</p>
               ))}
             </>
           )}

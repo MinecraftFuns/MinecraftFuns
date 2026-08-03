@@ -31,9 +31,10 @@
  * cannot fall behind the type scale it polices.
  */
 
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
+import { filesUnder } from "./lib/files.mjs";
 import { frontmatter } from "./lib/frontmatter.mjs";
 import { each, report } from "./lib/gate.mjs";
 
@@ -64,6 +65,22 @@ const RULES = [
     rule: "inline-link-style",
     pattern: /hover:text-accent-hover/g,
     remedy: "use .link, or .link-in-text for a link inside a sentence",
+  },
+  {
+    /* Mono and the quietest ink in one class list is the metadata role, which
+       seven components had each decided for themselves. `[^"]*` confines the
+       match to a single attribute, so two unrelated elements cannot combine
+       into a false positive. */
+    rule: "inline-meta-style",
+    pattern:
+      /"[^"]*\btext-ink-tertiary\b[^"]*\bfont-mono\b[^"]*"|"[^"]*\bfont-mono\b[^"]*\btext-ink-tertiary\b[^"]*"/g,
+    remedy: "use .meta; keep only the layout classes at the call site",
+  },
+  {
+    rule: "inline-note-style",
+    pattern:
+      /"[^"]*\btext-body-sm\b[^"]*\btext-ink-subtle\b[^"]*"|"[^"]*\btext-ink-subtle\b[^"]*\btext-body-sm\b[^"]*"/g,
+    remedy: "use .note; keep only the layout classes at the call site",
   },
 ];
 
@@ -130,23 +147,12 @@ export const typeRolesSet = (source, roles) =>
 // Effect boundary
 // ---------------------------------------------------------------------------
 
-const walk = async (dir) => {
-  const entries = await readdir(dir, { withFileTypes: true });
-  const nested = await Promise.all(
-    entries.map(async (entry) => {
-      const path = join(dir, entry.name);
-      return entry.isDirectory() ? walk(path) : [path];
-    }),
-  );
-  return nested.flat();
-};
-
 const main = async () => {
   const root = resolve(process.env.SRC_DIR ?? "src");
 
   /* Component `.ts` is scanned for the same reason frontmatter literals are:
      a class list moved to a `const` is still markup. */
-  const files = (await walk(root)).filter(
+  const files = (await filesUnder(root)).filter(
     (path) =>
       path.endsWith(".astro") ||
       (path.endsWith(".ts") && path.includes(`${join(root, "components")}/`)),

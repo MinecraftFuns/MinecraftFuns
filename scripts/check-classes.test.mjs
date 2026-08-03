@@ -52,7 +52,7 @@ describe("anonymousValues", () => {
   it("passes markup built only from named utilities", () => {
     const source = astro(
       'const ENTRY = "grid gap-md sm:grid-cols-entry";',
-      '<div class={ENTRY}><p class="text-body-sm text-ink-subtle *:last:border-b-0">x</p></div>',
+      '<div class={ENTRY}><p class="note *:last:border-b-0">x</p></div>',
     );
     assert.deepEqual(anonymousValues(source), []);
   });
@@ -147,5 +147,55 @@ describe("typeRolesSet", () => {
 
   it("is total: no roles means nothing to report", () => {
     assert.deepEqual(typeRolesSet('<p class="text-body">x</p>', []), []);
+  });
+});
+
+/*
+ * The recipe rules. Each names a decision that had been made separately in
+ * every component that needed it, so the tell is a *combination* rather than
+ * a single class, and the pattern has to stay inside one attribute.
+ */
+describe("recipe rules", () => {
+  const rules = (source) => anonymousValues(source).map(({ rule }) => rule);
+
+  it("catches a hand-rolled accent link", () => {
+    const source = astro("", '<a class="text-accent hover:text-accent-hover">x</a>');
+    assert.deepEqual(rules(source), ["inline-link-style"]);
+  });
+
+  it("catches the metadata recipe in either order", () => {
+    for (const list of [
+      "text-ink-tertiary font-mono text-caption",
+      "font-mono text-caption text-ink-tertiary",
+    ]) {
+      assert.deepEqual(rules(astro("", `<p class="${list}">x</p>`)), ["inline-meta-style"]);
+    }
+  });
+
+  it("catches the note recipe in either order", () => {
+    for (const list of ["text-body-sm text-ink-subtle", "text-ink-subtle text-body-sm"]) {
+      assert.deepEqual(rules(astro("", `<p class="${list}">x</p>`)), ["inline-note-style"]);
+    }
+  });
+
+  /* The regression the `[^"]*` bound exists for: two elements that each carry
+     half of a recipe are not a recipe. */
+  it("does not combine two elements into one violation", () => {
+    const source = astro(
+      "",
+      '<p class="font-mono text-caption">a</p><span class="text-ink-tertiary">b</span>',
+    );
+    assert.deepEqual(rules(source), []);
+  });
+
+  it("leaves the named roles alone", () => {
+    const source = astro("", '<p class="meta shrink-0">a</p><p class="note mt-3xs">b</p>');
+    assert.deepEqual(rules(source), []);
+  });
+
+  it("leaves a mono value that is not metadata alone", () => {
+    // The fingerprint is mono and small but must be readable, so not tertiary.
+    const source = astro("", '<p class="font-mono text-caption wrap-anywhere">x</p>');
+    assert.deepEqual(rules(source), []);
   });
 });
