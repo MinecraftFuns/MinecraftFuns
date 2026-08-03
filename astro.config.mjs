@@ -4,34 +4,39 @@ import { defineConfig } from "astro/config";
 
 import sitemap from "@astrojs/sitemap";
 
+import { developmentTarget, findTarget } from "./src/lib/deployment.ts";
 import { sitemapFilter } from "./src/lib/sitemap.ts";
 
 /**
  * The deployment target is a parameter, not a constant.
  *
  * The same source builds for more than one origin, and those origins do not
- * agree on a base path: `MinecraftFuns/MinecraftFuns` is a *project* repository
- * rather than a `<user>.github.io` one, so GitHub Pages serves it beneath
- * `/MinecraftFuns`, while the custom domain serves it at the root. A base path
- * is baked into every generated link, so one artifact cannot satisfy both;
- * the build is parameterised and run once per target instead.
+ * agree on a base path. A base path is baked into every generated link, so one
+ * artifact cannot satisfy both; the build is parameterised and run once per
+ * target instead.
  *
- * Defaults describe the GitHub Pages target so that `astro dev` reproduces the
- * deployed URL shape locally; a link that only works at the root would
- * otherwise pass in development and 404 in production.
+ * The origins themselves are *not* here. They live in
+ * `src/config/deployments.ts`, which is the single declaration the canonical
+ * links, the indexing policy, the artifact checks, and the CI matrix are all
+ * derived from. Defaults were previously written out again in this file, where
+ * nothing forced them to match the deployments they were meant to describe.
+ *
+ * The default is a mirror rather than the canonical target, so `astro dev`
+ * reproduces the *harder* URL shape: a link that only works at the root would
+ * otherwise pass locally and 404 in production. See `developmentTarget`.
  */
-const site = process.env.SITE_URL ?? "https://minecraftfuns.github.io";
-const base = process.env.SITE_BASE ?? "/MinecraftFuns/";
+const site = process.env.SITE_URL ?? developmentTarget.origin;
+const base = process.env.SITE_BASE ?? developmentTarget.base;
 
-// Fail the build on a malformed origin rather than emitting broken canonical
-// URLs and sitemaps. Cheap, and the error names the offending value.
-try {
-  new URL(site);
-} catch {
-  throw new Error(
-    `SITE_URL must be an absolute origin, received ${JSON.stringify(site)}`,
-  );
-}
+/*
+ * Fail the build on parameters no deployment declares, rather than emitting
+ * canonical URLs and a sitemap for an origin that does not exist. This is
+ * strictly stronger than the URL parse it replaces: `https://typo.example` is
+ * a perfectly well-formed origin and was accepted silently. The error names
+ * the declared targets, so a typo is one line to fix.
+ */
+const target = findTarget(site, base);
+if (target.tag !== "ok") throw new Error(target.reason);
 
 export default defineConfig({
   site,

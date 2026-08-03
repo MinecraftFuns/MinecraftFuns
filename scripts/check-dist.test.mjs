@@ -6,7 +6,7 @@ import { describe, it } from "node:test";
 
 import {
   candidatePaths,
-  isCanonicalWithin,
+  expectedCanonical,
   wkdViolations,
   parseRedirects,
   parseHeaderPatterns,
@@ -54,17 +54,33 @@ const inspectTree = async (files, options = {}) => {
     await mkdir(join(full, ".."), { recursive: true });
     await writeFile(full, contents);
   }
+  const base = options.base ?? "/MinecraftFuns/";
+  const site = options.site ?? "https://example.test";
+
   return inspect({
     dist,
-    base: options.base ?? "/MinecraftFuns/",
-    site: options.site ?? "https://example.test",
+    base,
+    site,
+    /* Defaults to the build's own parameters, so a fixture that says nothing
+       about deployments behaves as it did. The cases that matter pass a
+       canonical deployment *different* from the one being built, which is the
+       arrangement the exact check exists for. */
+    canonical: options.canonical ?? { origin: site, base },
     tokensCss: options.tokensCss ?? TOKENS,
   });
 };
 
-const page = (body) =>
+/**
+ * A page carrying the canonical URL its own position implies.
+ *
+ * `route` is required for anything but the site root: the canonical check is
+ * an exact comparison, so a helper that stamped one URL onto every fixture
+ * would make every nested page a violation. It previously did exactly that,
+ * and the containment check could not tell.
+ */
+const page = (body, route = "") =>
   `<!doctype html><html><head>
-   <link rel="canonical" href="https://example.test/MinecraftFuns/"/>
+   <link rel="canonical" href="https://example.test/MinecraftFuns/${route}"/>
    </head><body>${body}</body></html>`;
 
 const checksIn = (violations) => new Set(violations.map((v) => v.check));
@@ -168,41 +184,64 @@ describe("candidatePaths", () => {
   });
 });
 
-describe("isCanonicalWithin", () => {
-  const SITE = "https://minecraftfuns.github.io";
+describe("expectedCanonical", () => {
+  const CANONICAL = "https://joefang.org";
 
-  it("accepts a canonical under the deployment", () => {
-    assert.ok(
-      isCanonicalWithin(`${SITE}/MinecraftFuns/blog/`, SITE, "/MinecraftFuns/"),
-    );
+  it("maps the site root to the canonical root", () => {
+    assert.equal(expectedCanonical("index.html", CANONICAL, "/"), `${CANONICAL}/`);
   });
 
-  it("rejects a canonical on another origin", () => {
+  it("maps a directory route to its slash-terminated URL", () => {
     assert.equal(
-      isCanonicalWithin("https://evil.example/MinecraftFuns/blog/", SITE, "/MinecraftFuns/"),
-      false,
+      expectedCanonical("blog/index.html", CANONICAL, "/"),
+      `${CANONICAL}/blog/`,
     );
   });
 
-  it("rejects a canonical outside the base path", () => {
-    assert.equal(isCanonicalWithin(`${SITE}/elsewhere/`, SITE, "/MinecraftFuns/"), false);
+  it("maps a nested archive route", () => {
+    assert.equal(
+      expectedCanonical("blog/2025/04/slug/index.html", CANONICAL, "/"),
+      `${CANONICAL}/blog/2025/04/slug/`,
+    );
   });
 
-  it("is unmoved by a trailing slash on the configured site", () => {
-    // The string-prefix version built "https://…//MinecraftFuns/" here and
-    // failed a build whose canonical tags were entirely correct.
-    assert.ok(
-      isCanonicalWithin(`${SITE}/MinecraftFuns/blog/`, `${SITE}/`, "/MinecraftFuns/"),
+  it("maps a bare .html file, which is how 404 is emitted", () => {
+    assert.equal(expectedCanonical("404.html", CANONICAL, "/"), `${CANONICAL}/404/`);
+  });
+
+  it("mounts on a canonical base path when the canonical copy has one", () => {
+    assert.equal(
+      expectedCanonical("blog/index.html", CANONICAL, "/site/"),
+      `${CANONICAL}/site/blog/`,
     );
+  });
+
+  it("does not depend on the base the artifact was built for", () => {
+    /* The whole point: the same page emitted by any deployment must claim the
+       same canonical URL. The function takes no build parameters, so this is
+       true by construction rather than by care. */
+    assert.equal(
+      expectedCanonical("blog/index.html", CANONICAL, "/"),
+      `${CANONICAL}/blog/`,
+    );
+  });
+
+  it("agrees on every spelling of the canonical base", () => {
+    for (const base of ["", "/", "//"]) {
+      assert.equal(expectedCanonical("index.html", CANONICAL, base), `${CANONICAL}/`);
+    }
   });
 
   it("normalises host case and the default port", () => {
-    assert.ok(isCanonicalWithin("https://JoeFang.org:443/blog/", "https://joefang.org", "/"));
+    assert.equal(
+      expectedCanonical("index.html", "https://JoeFang.org:443", "/"),
+      "https://joefang.org/",
+    );
   });
 
-  it("is total: unparseable input is rejected, not thrown", () => {
-    assert.doesNotThrow(() => isCanonicalWithin("not a url", SITE, "/"));
-    assert.equal(isCanonicalWithin("not a url", SITE, "/"), false);
+  it("is total: an unparseable origin yields undefined rather than throwing", () => {
+    assert.doesNotThrow(() => expectedCanonical("index.html", "not a url", "/"));
+    assert.equal(expectedCanonical("index.html", "not a url", "/"), undefined);
   });
 });
 
@@ -365,7 +404,7 @@ describe("inspect", () => {
     const violations = await inspectTree({
       "index.html": page('<a href="/MinecraftFuns/work">w</a>'),
       "favicon.svg": "<svg/>",
-      "work/index.html": page("work"),
+      "work/index.html": page("work", "work/"),
     });
     assert.deepEqual(violations, []);
   });
@@ -375,7 +414,7 @@ describe("inspect", () => {
     const violations = await inspectTree({
       "index.html": page('<a href="/work">w</a>'),
       "favicon.svg": "<svg/>",
-      "work/index.html": page("work"),
+      "work/index.html": page("work", "work/"),
     });
     assert.ok(checksIn(violations).has("base-path"));
   });
@@ -436,6 +475,41 @@ describe("inspect", () => {
       "favicon.svg": "<svg/>",
     });
     assert.ok(checksIn(foreign).has("canonical"));
+  });
+
+  it("catches a mirror that canonicalises to itself instead of to the canonical copy", async () => {
+    /* The regression that motivated the exact check. This artifact is
+       internally consistent and passes every other gate: its canonical tag
+       points at a real page, on its own origin, under its own base. It is
+       still wrong, because the authoritative copy lives elsewhere. */
+    const selfCanonical = await inspectTree(
+      {
+        "index.html": `<!doctype html><html><head><link rel="canonical" href="https://mirror.test/MinecraftFuns/"/></head><body>x</body></html>`,
+        "favicon.svg": "<svg/>",
+      },
+      {
+        site: "https://mirror.test",
+        base: "/MinecraftFuns/",
+        canonical: { origin: "https://joefang.test", base: "/" },
+      },
+    );
+    assert.ok(checksIn(selfCanonical).has("canonical"));
+  });
+
+  it("accepts a mirror that canonicalises to the canonical copy", async () => {
+    const violations = await inspectTree(
+      {
+        "index.html": `<!doctype html><html><head><link rel="canonical" href="https://joefang.test/"/></head><body><a href="/MinecraftFuns/work">w</a></body></html>`,
+        "favicon.svg": "<svg/>",
+        "work/index.html": `<html><head><link rel="canonical" href="https://joefang.test/work/"/></head><body>w</body></html>`,
+      },
+      {
+        site: "https://mirror.test",
+        base: "/MinecraftFuns/",
+        canonical: { origin: "https://joefang.test", base: "/" },
+      },
+    );
+    assert.deepEqual(violations, []);
   });
 
   it("catches an off-palette colour in emitted CSS", async () => {

@@ -124,8 +124,12 @@ export const joinRoute = (base: string, path: string): string =>
  * Astro injects `BASE_URL`; Node running the tests does not. Reading it
  * defensively keeps this module importable in both, and the `/` fallback is
  * the correct base for an un-based build rather than a silent failure.
+ *
+ * Exported because `lib/deployment.ts` must answer "which deployment is this"
+ * from the same value the links are built against. Two independent reads of
+ * the environment are two chances to disagree about where the site is mounted.
  */
-const currentBase = (): string => {
+export const currentBase = (): string => {
   const env = import.meta.env as { readonly BASE_URL?: string } | undefined;
   return env?.BASE_URL ?? "/";
 };

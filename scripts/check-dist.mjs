@@ -25,6 +25,8 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
+import { deployments } from "../src/config/deployments.ts";
+
 /** @typedef {{ readonly check: string, readonly detail: string }} Violation */
 
 /** @type {(check: string, detail: string) => Violation} */
@@ -42,7 +44,16 @@ const violation = (check, detail) => ({ check, detail });
  * two would agree on a wrong answer. The duplication is the independence, and
  * it is the point. What is shared instead is the platform's URL parser, which
  * neither side wrote.
+ *
+ * Config is a different matter and *is* imported, at the effect boundary
+ * below. `src/config/deployments.ts` is data, not derivation: re-declaring the
+ * canonical origin here would not buy independence, it would only create a
+ * second place for it to be wrong. The rule is to duplicate the reasoning and
+ * share the facts.
  */
+
+/** Local, so the rule above holds: the same one line, not the same module. */
+const slashTerminated = (path) => (path.endsWith("/") ? path : `${path}/`);
 
 /** A syntactically valid origin that can never resolve. RFC 2606 reserves it. */
 const PROBE_ORIGIN = "https://probe.invalid";
@@ -210,24 +221,31 @@ export const wkdViolations = ({ policy, keys }) =>
   ].filter((problem) => problem !== undefined);
 
 /**
- * Whether a canonical URL points inside this deployment.
+ * The canonical URL a given built page must advertise.
  *
- * Compared as URLs rather than as strings. `${site}${base}` is a hand-built
- * prefix that breaks the moment SITE_URL carries a trailing slash; the
- * doubled slash matches no correct canonical, and the gate would fail a good
- * build. Comparing origins also normalises host case and default ports, which
- * a prefix test silently gets wrong.
+ * Note what this does *not* take: the origin and base the artifact was built
+ * for. A page's canonical URL names the canonical deployment whichever target
+ * emitted it, so the mirror's own parameters are irrelevant here by design.
+ * The previous check asked only whether the canonical pointed somewhere inside
+ * *this* build, which every build satisfied by canonicalising to itself — the
+ * check passed on precisely the arrangement it should have caught.
+ *
+ * Derived from the file's position in the artifact, so it is computed the way
+ * a reader would: `blog/index.html` is served at `/blog/`, `404.html` at
+ * `/404/`. Resolution goes through the URL parser, which normalises host case
+ * and a default port that string comparison gets wrong.
+ *
+ * @returns {string | undefined} the expected href, or undefined if the
+ *   canonical deployment's own configuration is unparseable.
  */
-export const isCanonicalWithin = (canonical, site, base) => {
-  const expected = URL.parse(normaliseBase(base), site);
-  const actual = URL.parse(canonical);
+export const expectedCanonical = (path, canonicalOrigin, canonicalBase) => {
+  const route = path
+    .replaceAll("\\", "/")
+    .replace(/\.html$/, "")
+    .replace(/(^|\/)index$/, "$1");
 
-  return (
-    expected !== null &&
-    actual !== null &&
-    actual.origin === expected.origin &&
-    actual.pathname.startsWith(expected.pathname)
-  );
+  const mounted = slashTerminated(`${normaliseBase(canonicalBase)}${route}`);
+  return URL.parse(mounted, canonicalOrigin)?.href;
 };
 
 /**
@@ -324,7 +342,7 @@ const exists = async (path) => {
 /**
  * @returns {Promise<readonly Violation[]>} every violation found, in check order
  */
-export const inspect = async ({ dist, base, site, tokensCss }) => {
+export const inspect = async ({ dist, base, site, canonical, tokensCss }) => {
   /** @type {Violation[]} */
   const found = [];
   const normalisedBase = normaliseBase(base);
@@ -404,15 +422,20 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
       });
 
     // -- Canonical --------------------------------------------------------
-    const canonical = CANONICAL.exec(html);
-    if (canonical === null) {
+    /*
+     * Exact equality, against the *canonical* deployment rather than the one
+     * being built. Both artifacts must advertise the same URL for the same
+     * page; a mirror that canonicalises to itself is the defect this catches,
+     * and it is the one the previous containment test could not see.
+     */
+    const declared = CANONICAL.exec(html);
+    const expected = expectedCanonical(path, canonical.origin, canonical.base);
+
+    if (declared === null) {
       found.push(violation("canonical", `${path}: no canonical link`));
-    } else if (!isCanonicalWithin(canonical[1], site, base)) {
+    } else if (declared[1] !== expected) {
       found.push(
-        violation(
-          "canonical",
-          `${path}: ${canonical[1]} is not under ${site}${normalisedBase}`,
-        ),
+        violation("canonical", `${path}: ${declared[1]} should be ${expected}`),
       );
     }
   }
@@ -496,8 +519,22 @@ export const inspect = async ({ dist, base, site, tokensCss }) => {
 
 const main = async () => {
   const dist = resolve(process.env.DIST_DIR ?? "dist");
-  const base = process.env.SITE_BASE ?? "/MinecraftFuns/";
-  const site = process.env.SITE_URL ?? "https://minecraftfuns.github.io";
+
+  /*
+   * Defaults come from the deployments config, not from literals repeated
+   * here. `mirrors[0] ?? canonical` is the same rule `astro.config.mjs`
+   * applies, and for the same reason: an unparameterised run should reproduce
+   * the harder, based URL shape. Derived locally in two lines rather than
+   * imported from `src/lib/deployment.ts`, keeping the gate's reasoning its
+   * own while the facts stay shared.
+   */
+  const fallback = deployments.mirrors[0] ?? deployments.canonical;
+  const base = process.env.SITE_BASE ?? fallback.base;
+  const site = process.env.SITE_URL ?? fallback.origin;
+  const canonical = {
+    origin: deployments.canonical.origin,
+    base: deployments.canonical.base,
+  };
   /* The palette lives in global.css, outside `@theme`; a ramp step must not
      become a utility. That `:root` block is still the single source this
      check reads to decide which hex values are sanctioned. */
@@ -512,7 +549,7 @@ const main = async () => {
     return;
   }
 
-  const violations = await inspect({ dist, base, site, tokensCss });
+  const violations = await inspect({ dist, base, site, canonical, tokensCss });
 
   if (violations.length === 0) {
     console.log(`check-dist: OK, ${dist} passes all checks for ${site}${base}`);

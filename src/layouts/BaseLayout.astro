@@ -6,6 +6,8 @@ import "../styles/global.css";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import { site } from "../config/site.ts";
+import { orThrow } from "../lib/adt.ts";
+import { activeTarget, canonicalHref, indexable } from "../lib/deployment.ts";
 import { assetUrl } from "../lib/url.ts";
 import type { Chrome } from "./chrome.ts";
 
@@ -27,25 +29,32 @@ const {
 const pageTitle = title ? `${title} | ${site.name}` : site.name;
 
 /*
- * `Astro.site` is typed as optional because a project may leave it unset;
- * this one cannot, since `astro.config.mjs` assigns it unconditionally and
- * throws on a malformed value. Resolved once here so the absent case is
- * answered in one place instead of twice with two different answers: the
- * indexing test used to fall back to `""`, which is not an origin and quietly
- * meant "not primary".
+ * Which deployment is being built, decided once, from the one declaration in
+ * `config/deployments.ts`. Failure is a defect rather than an expected
+ * outcome: a build that cannot identify its own target would emit canonical
+ * URLs and an indexing policy that are guesses, so it fails instead.
  */
-const deployedTo = Astro.site ?? new URL(site.canonicalOrigin);
-
-const canonical = new URL(Astro.url.pathname, deployedTo);
+const target = orThrow(activeTarget(Astro.site), "deployment");
 
 /*
- * Only the primary origin should be indexed. The GitHub Pages build is a
- * mirror, and two indexed copies of one site compete as duplicates of each
- * other. robots.txt cannot say this there: a crawler reads it only from the
- * origin root, never from beneath a base path, so the request has to travel
- * in the document itself.
+ * The canonical URL names the *canonical* deployment, on every target.
+ *
+ * This is the whole point of modelling deployments: a page's authoritative
+ * address is a fact about the site, not about the build that emitted it. Each
+ * build used to canonicalise to its own origin, so the mirror declared itself
+ * authoritative and then separately asked not to be indexed — two derivations
+ * of one decision, disagreeing. Now a crawler landing on any copy is pointed
+ * at the same URL.
  */
-const isPrimary = deployedTo.origin === new URL(site.canonicalOrigin).origin;
+const canonical = orThrow(canonicalHref(target, Astro.url.pathname), "canonical URL");
+
+/*
+ * Only the canonical copy asks to be indexed; two indexed copies of one site
+ * compete as duplicates. robots.txt cannot carry this to a mirror served
+ * beneath a base path, because a crawler reads robots.txt only from the origin
+ * root, so the request travels in the document itself.
+ */
+const isIndexable = indexable(target.role);
 ---
 
 <!doctype html>
@@ -64,7 +73,7 @@ const isPrimary = deployedTo.origin === new URL(site.canonicalOrigin).origin;
     */}
     <link rel="sitemap" type="application/xml" href={assetUrl("/sitemap-index.xml")} />
     <link rel="icon" href={assetUrl("/favicon.svg")} type="image/svg+xml" />
-    {!isPrimary && <meta name="robots" content="noindex" />}
+    {!isIndexable && <meta name="robots" content="noindex" />}
 
     <meta property="og:type" content={type} />
     <meta property="og:title" content={pageTitle} />

@@ -46,6 +46,66 @@ export type Link = {
 };
 
 // ---------------------------------------------------------------------------
+// Deployments
+// ---------------------------------------------------------------------------
+
+/**
+ * A base path: rooted, and slash-terminated.
+ *
+ * Two literal alternatives rather than one, because the root is the case a
+ * single pattern gets wrong. `` `/${string}/` `` needs at least two characters
+ * and so rejects `"/"`, while `` `/${string}` `` accepts `"/MinecraftFuns"`
+ * without its trailing slash, which is precisely the value that silently
+ * mounts every link one segment too high. The union admits exactly the two
+ * shapes that are correct.
+ */
+export type BasePath = "/" | `/${string}/`;
+
+/**
+ * One place the site is published.
+ *
+ * There is deliberately no separate "host" or "provider" field. A deployment
+ * has exactly one name, `id`, and that name is used everywhere: the GitHub
+ * environment, the CI job, the artifact, and the build matrix all spell it the
+ * same way. A second identifier for the same thing is the mechanism by which
+ * the pipeline and the config come to disagree about which deployment is
+ * being discussed.
+ */
+export type DeploymentTargetConfig = {
+  /**
+   * The deployment's name, and the only one it has.
+   *
+   * Must match the GitHub environment of the same name, which is what makes
+   * `environment: ${{ matrix.id }}` in the workflow correct rather than a
+   * coincidence.
+   */
+  readonly id: string;
+  readonly origin: HttpsUrl;
+  readonly base: BasePath;
+};
+
+/**
+ * Every place this site is published, and which one is authoritative.
+ *
+ * The canonical target is a *field*, not a flagged member of a list. That is
+ * the whole design: `{ canonical, mirrors }` cannot express zero canonical
+ * targets or two of them, so "exactly one deployment is authoritative" is a
+ * property of the type rather than an invariant some validator has to defend.
+ * A list of `{ ..., canonical: boolean }` would admit both broken states and
+ * would need a runtime check that could only ever report a mistake already
+ * made.
+ *
+ * Everything downstream is derived from this one declaration: the canonical
+ * link on every page of every build, which build asks to be indexed, the
+ * robots policy, the Astro defaults, and the CI matrix. There is nowhere for a
+ * second opinion about an origin to live.
+ */
+export type DeploymentsConfig = {
+  readonly canonical: DeploymentTargetConfig;
+  readonly mirrors: readonly DeploymentTargetConfig[];
+};
+
+// ---------------------------------------------------------------------------
 // Site
 // ---------------------------------------------------------------------------
 
@@ -54,12 +114,6 @@ export type SiteConfig = {
   readonly name: string;
   /** GitHub account. Profile URLs are built from it; never repeat it. */
   readonly handle: string;
-  /**
-   * The origin this site is *canonically* published at. Distinct from the
-   * origin a given build targets, which comes from SITE_URL and may be a
-   * mirror; the two are compared to decide whether a build asks to be indexed.
-   */
-  readonly canonicalOrigin: HttpsUrl;
   readonly description: string;
   /** Document language, for `<html lang>`. */
   readonly locale: string;
