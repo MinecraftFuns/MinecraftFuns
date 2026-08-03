@@ -50,6 +50,29 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
       .join("")
       .trim();
 
+  /**
+   * Conjunction of predicates, so a chain of filters becomes one pass.
+   *
+   * Predicates over a value form a monoid under `&&` with identity `true`,
+   * and this is its fold: `xs.filter(p).filter(q)` and `xs.filter(allOf(p, q))`
+   * accept the same elements in the same order whenever the predicates are
+   * pure, which every predicate below is.
+   *
+   * It is not free the way fusion is in a language that performs it. Both
+   * forms evaluate each predicate exactly as many times, since both stop at
+   * the first failure; what the fused form removes is one traversal and one
+   * intermediate array per stage. That is the cost worth removing here,
+   * because these run over every element in the document.
+   */
+  const allOf =
+    (...predicates) =>
+    (value) => {
+      for (const predicate of predicates) {
+        if (!predicate(value)) return false;
+      }
+      return true;
+    };
+
   /** First occurrence wins, so the reported selector is the first offender. */
   const dedupeBy = (items, keyOf) => {
     const seen = new Map();
@@ -60,20 +83,38 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
     return [...seen.values()];
   };
 
-  // One decoration pass: style and geometry resolved exactly once per element.
-  const visible = [...document.body.querySelectorAll("*")]
-    .map((element) => ({ element, style: getComputedStyle(element) }))
-    .filter(
-      ({ style }) =>
-        style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0,
-    )
-    .map((entry) => ({
-      ...entry,
-      box: entry.element.getBoundingClientRect(),
-      text: ownText(entry.element),
-      interactive: entry.element.matches(interactiveSelector),
-    }))
-    .filter(({ box }) => box.width > 0 && box.height > 0);
+  /*
+   * One pass, one record per surviving element.
+   *
+   * `allOf` cannot express this one: the stages alternate between deciding
+   * and decorating, and the array API has no combinator for that, so the
+   * fusion is written out. The chain it replaces walked the document four
+   * times and left three intermediate arrays behind, the last of which copied
+   * every record again through a spread. `querySelectorAll("*")` is the
+   * largest collection this file touches, which is what makes the stages
+   * worth spending clarity on here and nowhere else.
+   *
+   * Each `continue` is a filter that kept its name: a hidden element has no
+   * geometry to measure, and a zero-area box has no edges to compare.
+   */
+  const visible = [];
+  for (const element of document.body.querySelectorAll("*")) {
+    const style = getComputedStyle(element);
+    if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) {
+      continue;
+    }
+
+    const box = element.getBoundingClientRect();
+    if (box.width <= 0 || box.height <= 0) continue;
+
+    visible.push({
+      element,
+      style,
+      box,
+      text: ownText(element),
+      interactive: element.matches(interactiveSelector),
+    });
+  }
 
   const viewportWidth = window.innerWidth;
 
@@ -96,13 +137,15 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
         sample: text.slice(0, 40),
       })),
 
-    // Overflow style is checked first so scrollWidth, which forces layout, is
-    // read only for the few elements that could possibly clip.
     clipped: visible
-      .filter(({ style }) => style.overflowX === "hidden" || style.overflow === "hidden")
       .filter(
-        ({ element }) =>
-          element.clientWidth > 0 && element.scrollWidth > element.clientWidth + 1,
+        allOf(
+          // Ordered, not merely conjoined: `scrollWidth` below forces layout,
+          // so it is read only for the few elements that could possibly clip.
+          ({ style }) => style.overflowX === "hidden" || style.overflow === "hidden",
+          ({ element }) =>
+            element.clientWidth > 0 && element.scrollWidth > element.clientWidth + 1,
+        ),
       )
       .slice(0, limits.findings)
       .map(({ element }) => ({
@@ -153,15 +196,19 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
   }));
 
   const rhythmGroups = containers
-    .filter(({ children }) => children.length >= 3)
-    // Like compared with like: a heading followed by paragraphs is not a
-    // repeated structure and owes no uniform rhythm.
-    .filter(({ children }) =>
-      children.every(({ element }) => signature(element) === signature(children[0].element)),
-    )
-    // Vertically stacked only; a horizontal row has no vertical rhythm.
-    .filter(({ children }) =>
-      children.every(({ box }, index) => index === 0 || box.top >= children[index - 1].box.bottom - 1),
+    .filter(
+      allOf(
+        ({ children }) => children.length >= 3,
+        // Like compared with like: a heading followed by paragraphs is not a
+        // repeated structure and owes no uniform rhythm.
+        ({ children }) =>
+          children.every(({ element }) => signature(element) === signature(children[0].element)),
+        // Vertically stacked only; a horizontal row has no vertical rhythm.
+        ({ children }) =>
+          children.every(
+            ({ box }, index) => index === 0 || box.top >= children[index - 1].box.bottom - 1,
+          ),
+      ),
     )
     .map(({ element, children }) => ({
       container: describe(element),
@@ -183,11 +230,7 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
    * placed in one slot brought opposite margins, one leading and one trailing,
    * so a row of tags sat flush on the rule beneath it.
    *
-   * Three conditions keep it quiet. Repeated siblings are excluded, because a
-   * list's rows are meant to touch and are separated by their own borders.
-   * Stacked pairs only, since side-by-side boxes share no vertical edge. And
-   * padding at the boundary counts as separation, so a block that spaces its
-   * own contents is not reported for meeting its neighbour.
+   * Three conditions keep it quiet, each stated at its own predicate below.
    */
   const edge = (value) => Number.parseFloat(value) || 0;
 
@@ -199,20 +242,27 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
         after,
       })),
     )
-    .filter(({ before, after }) => after.box.top >= before.box.bottom - 1)
-    .filter(({ before, after }) => signature(before.element) !== signature(after.element))
     .filter(
-      ({ before, after }) =>
-        after.box.top - before.box.bottom <= 1 &&
-        edge(before.style.paddingBottom) <= 1 &&
-        edge(after.style.paddingTop) <= 1,
+      allOf(
+        // Stacked, since side-by-side boxes share no vertical edge.
+        ({ before, after }) => after.box.top >= before.box.bottom - 1,
+        // A list's rows are meant to touch, separated by their own borders.
+        ({ before, after }) => signature(before.element) !== signature(after.element),
+        // Nothing between them, and no padding standing in for the gap.
+        ({ before, after }) =>
+          after.box.top - before.box.bottom <= 1 &&
+          edge(before.style.paddingBottom) <= 1 &&
+          edge(after.style.paddingTop) <= 1,
+      ),
     )
+    // Truncate before describing: a pair beyond the cap is never reported, so
+    // building its selectors is work thrown away.
+    .slice(0, 20)
     .map(({ container, before, after }) => ({
       container: describe(container),
       before: describe(before.element),
       after: describe(after.element),
-    }))
-    .slice(0, 20);
+    }));
 
   const sampled = laidOut.slice(0, limits.sampled);
   // Token values come from the live page, so clamp()-based fluid scales
