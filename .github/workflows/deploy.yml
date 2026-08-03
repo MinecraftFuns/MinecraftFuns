@@ -166,6 +166,14 @@ jobs:
         with:
           path: dist/
           retention-days: 1
+          # Mandatory here, and the reason is not obvious: this action tars the
+          # directory with `--exclude=.[^/]*` unless this is exactly 'true', so
+          # every dot-directory is silently dropped on the way to the artifact.
+          # `dist/.well-known/` is the only one, and it holds the entire Web
+          # Key Directory and both Matrix delegation documents. Losing it
+          # breaks PGP key discovery and Matrix federation while every other
+          # check still passes, because nothing else in the build is hidden.
+          include-hidden-files: true
 
       # Every other deployment is published by a job of its own rather than by
       # an official action, so its build travels there as an ordinary artifact
@@ -181,6 +189,11 @@ jobs:
           path: dist/
           retention-days: 7
           if-no-files-found: error
+          # Defaults to false, which excludes every dot-path from the artifact.
+          # See the note on the Pages upload above: `.well-known/` is the whole
+          # Web Key Directory and both Matrix delegation documents, and it
+          # disappears here with no warning and no failed check.
+          include-hidden-files: true
           # Re-running a failed job would otherwise collide with the artifact
           # left by the previous attempt and fail on upload.
           overwrite: true
@@ -375,6 +388,64 @@ jobs:
           fi
 
           echo "Artifact verified as the joefang-org build."
+
+      # Does the artifact still serve everything it claims to serve?
+      #
+      # `_headers` is a list of claims about paths, and it travels *inside* the
+      # artifact, so it can be checked against the artifact with no reference
+      # to the source tree — which keeps this job's isolation intact. Anything
+      # declared and absent means files were lost between the build and here.
+      #
+      # This is the check that was missing when `.well-known/` silently
+      # vanished: every other assertion reads index.html, _headers, or
+      # robots.txt, none of which are hidden, so an artifact stripped of its
+      # entire key directory and both Matrix delegation documents passed
+      # cleanly. `check:dist` cannot see this either — it runs on `dist/`,
+      # before the artifact hop that does the damage.
+      - name: Verify the artifact serves what it declares
+        run: |
+          set -euo pipefail
+
+          # Unindented, non-blank, non-comment lines are the path patterns;
+          # the operations beneath them are indented.
+          patterns="$(grep -v -e '^[[:space:]]' -e '^$' -e '^#' build/_headers)"
+
+          # Read line by line rather than iterating an unquoted variable. A
+          # `for pattern in $patterns` loop word-splits *and* glob-expands, so
+          # the `/*` rule expands against the runner's filesystem root and the
+          # loop reports every directory on the machine as a missing path.
+          missing=0
+          while IFS= read -r pattern; do
+            [ -n "$pattern" ] || continue
+
+            # Patterns carry the deployment's base; the artifact is rooted at
+            # it, so the base comes off to get a path within `build/`.
+            rel="${pattern#"$CANONICAL_BASE"}"
+
+            case "$pattern" in
+              *'*')
+                # A prefix rule must cover at least one file, or it is a claim
+                # about a part of the site that was not published.
+                if ! find "build/${rel%'*'}" -mindepth 1 -type f -print -quit 2>/dev/null | grep -q .; then
+                  echo "::error::_headers declares $pattern but the artifact has nothing beneath it"
+                  missing=1
+                fi
+                ;;
+              *)
+                if [ ! -e "build/$rel" ] && [ ! -e "build/$rel/index.html" ]; then
+                  echo "::error::_headers declares $pattern but the artifact has no such file"
+                  missing=1
+                fi
+                ;;
+            esac
+          done <<< "$patterns"
+
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::refusing to publish an artifact that cannot serve its own directives"
+            exit 1
+          fi
+
+          echo "Every path _headers declares is present in the artifact."
 
       # `ssh-key` puts the deploy key in this checkout's git config, which is
       # what lets the push below authenticate. `persist-credentials` therefore
