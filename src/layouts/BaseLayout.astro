@@ -102,8 +102,9 @@ const isPrimary = deployedTo.origin === new URL(site.canonicalOrigin).origin;
       `outline-none` because this is a programmatic focus target for the skip
       link, not something the reader tabbed to.
     */}
+    {/* The gap above the footer belongs to this layout, which owns both. */}
     <main
-      class="mx-auto w-full max-w-frame px-md outline-none md:px-lg"
+      class="mx-auto mb-section w-full max-w-frame px-md outline-none md:px-lg"
       id="main"
       tabindex="-1"
     >

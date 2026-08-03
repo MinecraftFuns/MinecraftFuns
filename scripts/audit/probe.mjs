@@ -174,6 +174,46 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
     .filter(({ gaps }) => gaps.length >= 2)
     .slice(0, 20);
 
+  /*
+   * Siblings whose boxes meet with nothing between them.
+   *
+   * This is the shape of a spacing bug the other rules cannot see: each block
+   * is on the grid, each is aligned, and the gap between two of them is simply
+   * absent because neither declared it. It happened here when two components
+   * placed in one slot brought opposite margins, one leading and one trailing,
+   * so a row of tags sat flush on the rule beneath it.
+   *
+   * Three conditions keep it quiet. Repeated siblings are excluded, because a
+   * list's rows are meant to touch and are separated by their own borders.
+   * Stacked pairs only, since side-by-side boxes share no vertical edge. And
+   * padding at the boundary counts as separation, so a block that spaces its
+   * own contents is not reported for meeting its neighbour.
+   */
+  const edge = (value) => Number.parseFloat(value) || 0;
+
+  const flushPairs = containers
+    .flatMap(({ element, children }) =>
+      children.slice(1).map((after, index) => ({
+        container: element,
+        before: children[index],
+        after,
+      })),
+    )
+    .filter(({ before, after }) => after.box.top >= before.box.bottom - 1)
+    .filter(({ before, after }) => signature(before.element) !== signature(after.element))
+    .filter(
+      ({ before, after }) =>
+        after.box.top - before.box.bottom <= 1 &&
+        edge(before.style.paddingBottom) <= 1 &&
+        edge(after.style.paddingTop) <= 1,
+    )
+    .map(({ container, before, after }) => ({
+      container: describe(container),
+      before: describe(before.element),
+      after: describe(after.element),
+    }))
+    .slice(0, 20);
+
   const sampled = laidOut.slice(0, limits.sampled);
   // Token values come from the live page, so clamp()-based fluid scales
   // resolve to whatever they are at this viewport.
@@ -197,6 +237,7 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
     ),
     alignmentGroups,
     rhythmGroups,
+    flushPairs,
     measurements: {
       spacing: measure(
         sampled.flatMap(({ element, style }) =>

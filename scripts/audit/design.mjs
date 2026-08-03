@@ -189,6 +189,21 @@ export const designFindings = (probe, context) => {
       });
   });
 
+  /*
+   * A gap that nobody declared. Every other rule here checks that a value is
+   * on the scale; this one checks that a value exists at all, which is the
+   * failure mode when two components each assume the other owns the space
+   * between them.
+   */
+  const flush = (probe.flushPairs ?? []).map((pair) =>
+    at({
+      rule: "siblings-flush",
+      impact: "moderate",
+      selector: `${pair.container} > ${pair.after}`,
+      message: `${pair.before} and ${pair.after} meet with no space between them and no padding inside either; the gap between two siblings is the container's to declare`,
+    }),
+  );
+
   const symmetry = (probe.asymmetricPadding ?? []).map((box) =>
     at({
       rule: "asymmetric-padding",
@@ -198,5 +213,5 @@ export const designFindings = (probe, context) => {
     }),
   );
 
-  return [...alignment, ...rhythm, ...lattice, ...symmetry];
+  return [...alignment, ...rhythm, ...flush, ...lattice, ...symmetry];
 };

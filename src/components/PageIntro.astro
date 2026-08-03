@@ -23,6 +23,16 @@ type Props = {
 const { kind, eyebrow, title, lede } = Astro.props;
 
 const { spacing, title: titleClass } = INTRO[kind];
+
+/*
+ * The gap to whatever a page puts below the lede belongs here, not to the
+ * page. Three pages each brought their own and one of them disagreed: two
+ * spaced their buttons by `lg` and About spaced its prose by `md`, so one
+ * structural position had two answers. Rendered first so an empty slot leaves
+ * no margin behind.
+ */
+const extra = Astro.slots.has("default") ? await Astro.slots.render("default") : "";
+const hasExtra = extra.trim() !== "";
 ---
 
 <section class:list={[spacing]}>
@@ -33,5 +43,5 @@ const { spacing, title: titleClass } = INTRO[kind];
       <p class="mt-md max-w-measure text-body-lg text-ink-muted">{lede}</p>
     )
   }
-  <slot />
+  {hasExtra && <div class="mt-lg" set:html={extra} />}
 </section>

@@ -27,7 +27,7 @@ const { title, description, category, readingMinutes } = Astro.props;
 const { spacing, title: titleClass } = INTRO.page;
 ---
 
-<header class:list={["border-hairline mb-lg border-b", spacing]}>
+<header class:list={["border-hairline border-b", spacing]}>
   {/*
     The category links to everything filed under it. This one sits in a line of
     running text, which is the case WCAG 2.5.8 exempts, so it needs no minimum

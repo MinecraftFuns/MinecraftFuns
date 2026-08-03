@@ -34,7 +34,7 @@ const { title, description, date, readingMinutes, tags } = Astro.props;
 const { spacing, title: titleClass } = INTRO.page;
 ---
 
-<header class:list={["border-hairline mb-lg border-b", spacing]}>
+<header class:list={["border-hairline border-b", spacing]}>
   <p class="text-ink-tertiary flex items-center gap-2xs font-mono text-caption">
     <time datetime={date}>{formatIsoDate(date)}</time>
     <span aria-hidden="true">·</span>
@@ -42,5 +42,13 @@ const { spacing, title: titleClass } = INTRO.page;
   </p>
   <h1 class:list={["text-ink mt-xs", titleClass]}>{title}</h1>
   <p class="text-ink-muted mt-sm max-w-measure text-body-lg">{description}</p>
-  <PostTags tags={tags} />
+  {/* The gap belongs to this header, not to the tag list, which is also used
+      on the blog index where the spacing above it is different. Conditioned on
+      the same emptiness `PostTags` checks, so no margin is left behind when a
+      post carries no tags. */}
+  {tags.length > 0 && (
+    <div class="mt-md">
+      <PostTags tags={tags} />
+    </div>
+  )}
 </header>

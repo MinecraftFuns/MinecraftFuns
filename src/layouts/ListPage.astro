@@ -40,6 +40,16 @@ type Props = {
 const { title, description, chrome, eyebrow, heading, lede, label, empty, back } =
   Astro.props;
 
+/*
+ * Both slots are rendered before anything is laid out, because the spacing
+ * around a slot must not exist when the slot produced nothing. A component
+ * that renders conditionally cannot be trusted to have rendered, so asking it
+ * is the only way to know; a wrapper placed unconditionally would leave its
+ * margin behind and open a gap under an absent row of tags.
+ */
+const browse = Astro.slots.has("browse") ? await Astro.slots.render("browse") : "";
+const hasBrowse = browse.trim() !== "";
+
 const rows = await Astro.slots.render("default");
 const isEmpty = rows.trim() === "";
 ---
@@ -47,9 +57,16 @@ const isEmpty = rows.trim() === "";
 <BaseLayout title={title} description={description} chrome={chrome}>
   <PageIntro kind="page" eyebrow={eyebrow} title={heading} lede={lede} />
 
-  <slot name="browse" />
+  {/*
+    Every gap on this page is declared here, by the container that owns it.
+    `PostTags` and `DocCategories` used to bring their own, one with a top
+    margin and one with a bottom, so the same slot spaced differently on the
+    blog and the docs and the blog's tags sat flush against the rule below.
+    Neither child could own a gap it shares with a sibling it never sees.
+  */}
+  {hasBrowse && <div class="mb-lg" set:html={browse} />}
 
-  <section aria-label={label}>
+  <section aria-label={label} class:list={[back !== undefined && "mb-xl"]}>
     {
       isEmpty ? (
         <p class="text-ink-subtle py-lg">{empty}</p>

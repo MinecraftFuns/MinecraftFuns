@@ -125,6 +125,30 @@ describe("designFindings", () => {
     assert.deepEqual(designFindings(probe, context), []);
   });
 
+  /*
+   * The regression the rule exists for. Two components placed in one slot
+   * brought opposite margins, one leading and one trailing, so the tag row on
+   * the blog index sat flush on the rule beneath it. Every other rule passed:
+   * both blocks were aligned, and every value they did declare was a token.
+   */
+  it("catches siblings that meet with no gap", () => {
+    const probe = {
+      flushPairs: [{ container: "main", before: "nav.tags", after: "section" }],
+    };
+    const found = designFindings(probe, context);
+    assert.deepEqual(rules(found), ["siblings-flush"]);
+    assert.match(found[0].message, /no space between them/);
+    assert.equal(found[0].selector, "main > section");
+  });
+
+  it("reports nothing when no pair is flush", () => {
+    assert.deepEqual(designFindings({ flushPairs: [] }, context), []);
+  });
+
+  it("is total on a probe that predates the rule", () => {
+    assert.deepEqual(designFindings({}, context), []);
+  });
+
   it("catches a near-miss alignment", () => {
     const probe = {
       alignmentGroups: [{ container: "div.card", lefts: [24, 26], rights: [] }],
