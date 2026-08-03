@@ -83,37 +83,46 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
     return [...seen.values()];
   };
 
-  /*
-   * One pass, one record per surviving element.
+  /**
+   * One element measured, or nothing when it has no geometry worth measuring.
    *
-   * `allOf` cannot express this one: the stages alternate between deciding
-   * and decorating, and the array API has no combinator for that, so the
-   * fusion is written out. The chain it replaces walked the document four
-   * times and left three intermediate arrays behind, the last of which copied
-   * every record again through a spread. `querySelectorAll("*")` is the
-   * largest collection this file touches, which is what makes the stages
-   * worth spending clarity on here and nowhere else.
-   *
-   * Each `continue` is a filter that kept its name: a hidden element has no
-   * geometry to measure, and a zero-area box has no edges to compare.
+   * `allOf` cannot express this: the stages alternate between deciding and
+   * decorating, and the array API has no combinator for that shape. So the
+   * partiality moves into the return type instead, and each early return is
+   * the filter it replaces: a hidden element has no geometry to measure, and
+   * a zero-area box has no edges to compare.
    */
-  const visible = [];
-  for (const element of document.body.querySelectorAll("*")) {
+  const measured = (element) => {
     const style = getComputedStyle(element);
     if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) {
-      continue;
+      return undefined;
     }
 
     const box = element.getBoundingClientRect();
-    if (box.width <= 0 || box.height <= 0) continue;
+    if (box.width <= 0 || box.height <= 0) return undefined;
 
-    visible.push({
+    return {
       element,
       style,
       box,
       text: ownText(element),
       interactive: element.matches(interactiveSelector),
-    });
+    };
+  };
+
+  /*
+   * `mapMaybe`, in the one place the array API cannot spell it: `flatMap`
+   * would allocate a cell per element just to encode absence, and the chain
+   * this replaces walked the document four times, leaving three intermediate
+   * arrays behind and copying every surviving record through a spread.
+   * `querySelectorAll("*")` is the largest collection this file touches,
+   * which is what makes a hand-written traversal worth it here and nowhere
+   * else.
+   */
+  const visible = [];
+  for (const element of document.body.querySelectorAll("*")) {
+    const entry = measured(element);
+    if (entry !== undefined) visible.push(entry);
   }
 
   const viewportWidth = window.innerWidth;

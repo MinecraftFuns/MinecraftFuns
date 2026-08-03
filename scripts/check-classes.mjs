@@ -34,8 +34,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
-/** Frontmatter fence and the module body it encloses. */
-const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---/;
+import { frontmatter } from "./lib/frontmatter.mjs";
 
 const RULES = [
   {
@@ -66,13 +65,13 @@ const RULES = [
  * to a `const` is still markup, and is exactly where a literal would hide.
  */
 export const classRegions = (source) => {
-  const match = FRONTMATTER.exec(source);
-  if (match === null) return [source];
+  const parsed = frontmatter(source);
+  if (parsed === undefined) return [source];
 
-  const literals = [...match[1].matchAll(/"([^"\\\n]*)"|'([^'\\\n]*)'/g)].map(
+  const literals = [...parsed.body.matchAll(/"([^"\\\n]*)"|'([^'\\\n]*)'/g)].map(
     (literal) => literal[1] ?? literal[2],
   );
-  return [source.slice(match[0].length), ...literals];
+  return [source.slice(parsed.after), ...literals];
 };
 
 /** Every anonymous value in one file's class regions. Pure and total. */
