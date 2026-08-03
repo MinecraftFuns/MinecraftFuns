@@ -91,7 +91,10 @@ describe("compareFindings", () => {
       finding({ impact: undefined, rule: "a" }),
       finding({ impact: "minor", rule: "b" }),
     ].sort(compareFindings);
-    assert.equal(sorted[0].impact, "minor");
+    assert.deepEqual(
+      sorted.map(({ impact }) => impact),
+      ["minor", undefined],
+    );
   });
 });
 
@@ -157,7 +160,7 @@ describe("toMarkdown", () => {
       .filter((line) => line.startsWith("| ") && line.includes("color-contrast"));
     assert.equal(tableRows.length, 1);
     // Five columns means six pipes; an unescaped message would add more.
-    assert.equal((tableRows[0].match(/(?<!\\)\|/g) ?? []).length, 6);
+    assert.equal((tableRows.join("").match(/(?<!\\)\|/g) ?? []).length, 6);
   });
 
   it("marks non-blocking status explicitly", () => {

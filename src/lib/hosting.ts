@@ -1,8 +1,10 @@
 import type {
   HeaderConfig,
   HostConfig,
+  Href,
   RedirectConfig,
   RedirectStatus,
+  RootedPath,
 } from "../config/schema.ts";
 import {
   andThen,
@@ -155,18 +157,32 @@ export const renderHeaders = (rules: readonly HeaderRule[]): string =>
 // written site-relative, so nobody editing a rule needs to know the deployment
 // has a base path at all.
 
-/** Applies the deployment's base to a site-relative path. */
+/**
+ * Applies the deployment's base to a site-relative path. The parameter is a
+ * plain string rather than a `RootedPath` because a pattern's path is one, for
+ * the reason given below.
+ */
 export type Resolve = (path: string) => string;
 
 /**
- * Total. The wildcard may only end a pattern, since that is the only shape the
- * domain models; a mid-path splat is rejected rather than mishandled.
+ * The decision procedure for `Href`. An `HttpsUrl` cannot begin with a slash
+ * and a `RootedPath` must, so the leading slash is not a heuristic about the
+ * string but the discriminant of the union, and this eliminates it.
  */
-export const parsePathPattern = (raw: string): Parsed<PathPattern> => {
-  if (!raw.startsWith("/")) {
-    return invalid(`path must start with "/": ${JSON.stringify(raw)}`);
-  }
+const isRooted = (href: Href): href is RootedPath => href.startsWith("/");
 
+/**
+ * Total, and now smaller than it was: the leading slash is `RootedPath`'s to
+ * prove, so this parses the one property a type cannot state. TypeScript has
+ * no negation, and "contains no `*` except at the end" is the complement of a
+ * pattern; a conditional type could decide it for a literal, at a cost in
+ * diagnostics that a build-time reason paid in plain English does not.
+ *
+ * `RootedPath` proves less than it looks: `//host` is one, and is an authority
+ * rather than a path. Resolution is where that is caught, and is why a pattern
+ * holds a plain string once resolved.
+ */
+export const parsePathPattern = (raw: RootedPath): Parsed<PathPattern> => {
   const star = raw.indexOf("*");
   if (star === -1) return ok(exactPath(raw));
   if (star !== raw.length - 1) {
@@ -187,7 +203,7 @@ const decodeRedirect = (config: RedirectConfig, resolve: Resolve): Parsed<Redire
   mapParsed(parsePathPattern(config.from), (from) => ({
     from: resolvePattern(from, resolve),
     /* A destination leaving the site keeps its own authority. */
-    to: config.to.startsWith("/") ? resolve(config.to) : config.to,
+    to: isRooted(config.to) ? resolve(config.to) : config.to,
     status: config.status ?? 301,
   }));
 

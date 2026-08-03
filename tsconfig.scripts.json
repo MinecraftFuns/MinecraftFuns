@@ -3,6 +3,11 @@
   // main tsconfig, and that includes only `.ts`/`.astro`. Some two thousand
   // lines deciding whether a build ships were the least checked code here.
   //
+  // `strictest`, which is `strict` plus the checks that matter most to code
+  // shaped like this: `noUncheckedIndexedAccess`, since these scripts walk
+  // arrays and match regexes all day, and `noUnusedLocals`, since a gate that
+  // stopped being called still looks like one.
+  //
   // `noImplicitAny` is off, and that is the point rather than a concession.
   // Turning it on reports 202 unannotated parameters and 32 real problems; the
   // 202 would be answered by JSDoc that restates what the call sites already
@@ -10,7 +15,7 @@
   // catches the mistakes worth catching: a possibly-undefined value used as a
   // number, an argument that may be undefined, a catch binding treated as an
   // Error.
-  "extends": "astro/tsconfigs/strict",
+  "extends": "astro/tsconfigs/strictest",
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,

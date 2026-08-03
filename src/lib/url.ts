@@ -1,3 +1,5 @@
+import type { RootedPath } from "../config/schema.ts";
+
 /**
  * Base-aware link construction, and the only module that knows the base path.
  * A literal `href="/blog"` is correct on the custom domain and 404s on GitHub
@@ -102,14 +104,27 @@ export const joinRoute = (base: string, path: string): string =>
  * same value the links are built against.
  */
 export const currentBase = (): string => {
-  const env = import.meta.env as { readonly BASE_URL?: string } | undefined;
+  /* The optional is the *environment*, not the field: where `import.meta.env`
+     exists at all, Astro has already put a base in it. */
+  const env = import.meta.env as { readonly BASE_URL: string } | undefined;
   return env?.BASE_URL ?? "/";
 };
 
-/** Resolve a page route against the deployment's base path. */
-export const routeUrl = (path: string): string => joinRoute(currentBase(), path);
+/**
+ * Resolve a page route against the deployment's base path. `RootedPath`
+ * because a bare `blog` is the mistake this module exists to prevent, and one
+ * a template literal type can refuse before the build reaches a browser.
+ */
+export const routeUrl = (path: RootedPath): string => joinRoute(currentBase(), path);
 
-/** Resolve a file against the deployment's base path. */
+/**
+ * Resolve a file against the deployment's base path.
+ *
+ * Deliberately wider than `routeUrl`: this doubles as the host directives'
+ * resolver, and a path pattern that has already been resolved once is a plain
+ * string. Narrowing the parameter would buy a rooted asset link and cost an
+ * assertion at that boundary, which is the worse of the two trades.
+ */
 export const assetUrl = (path: string): string => joinBase(currentBase(), path);
 
 /**

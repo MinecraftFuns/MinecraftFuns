@@ -14,14 +14,14 @@ const FENCE = /^(---\r?\n)([\s\S]*?)(\r?\n---)/;
  * the template's, so the two halves partition the file exactly.
  */
 export const frontmatter = (source) => {
-  const match = FENCE.exec(source);
-  if (match === null) return undefined;
+  /* Destructured rather than indexed: `RegExp` is typed without reference to
+     its pattern, so a group this one guarantees looks optional to a checker.
+     Naming the three costs one comparison and leaves `body` a definite string
+     for every caller downstream. */
+  const [whole, open, body] = FENCE.exec(source) ?? [];
+  if (whole === undefined || open === undefined || body === undefined) return undefined;
 
-  return {
-    body: match[2],
-    start: match[1].length,
-    after: match[0].length,
-  };
+  return { body, start: open.length, after: whole.length };
 };
 
 /**

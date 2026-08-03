@@ -1,3 +1,4 @@
+import type { RootedPath } from "../config/schema.ts";
 import { andThen, invalid, ok, type Parsed } from "./adt.ts";
 import { SLUG_SOURCE } from "./slug.ts";
 import { monthOf, yearOf, type IsoDate } from "./time.ts";
@@ -33,14 +34,24 @@ export type PostPath = {
  */
 const POST_ID = new RegExp(`^(\\d{4})/(0[1-9]|1[0-2])/(${SLUG_SOURCE})$`);
 
-/** Total: every string maps to a variant, none throws. */
+/**
+ * Total: every string maps to a variant, none throws.
+ *
+ * The three captures are read by destructuring rather than by index, because
+ * `RegExp` is typed without reference to its pattern: to the checker a group
+ * that the anchored expression above guarantees is indistinguishable from one
+ * that may not have participated. Testing them costs one comparison and keeps
+ * the module free of an assertion that only a reader of the pattern can
+ * discharge. There is still exactly one way to fail.
+ */
 export const parsePostPath = (id: string): Parsed<PostPath> => {
-  const match = POST_ID.exec(id);
-  return match === null
+  const [, year, month, slug] = POST_ID.exec(id) ?? [];
+
+  return year === undefined || month === undefined || slug === undefined
     ? invalid(
         `expected YYYY/MM/kebab-case-slug, got ${JSON.stringify(id)}; a post file belongs at src/content/blog/YYYY/MM/slug.md`,
       )
-    : ok({ year: match[1], month: match[2], slug: match[3] });
+    : ok({ year, month, slug });
 };
 
 /** The archive folder a post's own date says it belongs in. */
@@ -68,4 +79,4 @@ export const routeOf = (path: PostPath): string =>
   `${path.year}/${path.month}/${path.slug}`;
 
 /** The site-relative URL, before the deployment base is applied. */
-export const hrefOf = (path: PostPath): string => `/blog/${routeOf(path)}`;
+export const hrefOf = (path: PostPath): RootedPath => `/blog/${routeOf(path)}`;

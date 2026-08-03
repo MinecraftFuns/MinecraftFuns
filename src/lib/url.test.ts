@@ -215,11 +215,13 @@ describe("isWithin", () => {
   });
 
   it("is indifferent to which side already carries its slash", () => {
+    /* `as const`: a pair is a pair, and an array of arrays destructures to
+       `string | undefined` for want of that fact. */
     const pairs = [
       ["/MinecraftFuns/blog/", "/MinecraftFuns/blog/"],
       ["/MinecraftFuns/blog", "/MinecraftFuns/blog/"],
       ["/MinecraftFuns/blog/", "/MinecraftFuns/blog"],
-    ];
+    ] as const;
     pairs.forEach(([pathname, target]) => {
       assert.ok(isWithin(pathname, target), `${pathname} within ${target}`);
     });

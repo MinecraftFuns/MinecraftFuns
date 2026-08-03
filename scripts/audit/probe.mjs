@@ -15,13 +15,17 @@ export const INTERACTIVE_SELECTOR =
 /** Caps keep one pathological page from flooding the report. */
 const LIMITS = { findings: 10, containers: 60, children: 12, sampled: 150, asymmetric: 5 };
 
+/* CSS spelling, because these are read with `getPropertyValue`, which is the
+   only accessor that takes a name computed at runtime. Indexing the style
+   declaration with a variable reaches its numeric index signature instead, and
+   answers a typo with `undefined` rather than with an error. */
 const SPACING_PROPERTIES = [
-  "paddingTop",
-  "paddingBottom",
-  "paddingLeft",
-  "paddingRight",
-  "rowGap",
-  "columnGap",
+  "padding-top",
+  "padding-bottom",
+  "padding-left",
+  "padding-right",
+  "row-gap",
+  "column-gap",
 ];
 
 /**
@@ -65,6 +69,25 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
       }
       return true;
     };
+
+  /**
+   * Consecutive pairs: `[a, b, c]` gives `[[a, b], [b, c]]`.
+   *
+   * Three questions below are about neighbours, and each was spelled as an
+   * offset index into the list being walked, which is the relationship stated
+   * as arithmetic. Carrying the previous element says it once, and says it
+   * without an index that only the surrounding `slice` proves is in range.
+   */
+  const consecutive = (items) => {
+    const pairs = [];
+    let previous;
+
+    for (const item of items) {
+      if (previous !== undefined) pairs.push([previous, item]);
+      previous = item;
+    }
+    return pairs;
+  };
 
   /** First occurrence wins, so the reported selector is the first offender. */
   const dedupeBy = (items, keyOf) => {
@@ -177,10 +200,21 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
       .filter((entry) => entry !== undefined)
       .slice(0, limits.children);
 
+  /* The first child is named here rather than indexed later. Two children is
+     the threshold for every question below, and `first` is the witness that
+     the group is not empty: a filter is a predicate to a reader and nothing at
+     all to a checker, so the one place that establishes the fact is the place
+     that should carry it. */
   const containers = laidOut
     .filter(({ element }) => element.children.length >= 2)
-    .map(({ element }) => ({ element, children: childrenOf(element) }))
-    .filter(({ children }) => children.length >= 2)
+    .flatMap(({ element }) => {
+      const children = childrenOf(element);
+      const [first] = children;
+
+      return first === undefined || children.length < 2
+        ? []
+        : [{ element, children, first }];
+    })
     .slice(0, limits.containers);
 
   const alignmentGroups = containers.map(({ element, children }) => ({
@@ -195,21 +229,20 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
         ({ children }) => children.length >= 3,
         // Like compared with like: a heading followed by paragraphs is not a
         // repeated structure and owes no uniform rhythm.
-        ({ children }) =>
-          children.every(({ element }) => signature(element) === signature(children[0].element)),
+        ({ children, first }) =>
+          children.every(({ element }) => signature(element) === signature(first.element)),
         // Vertically stacked only; a horizontal row has no vertical rhythm.
         ({ children }) =>
-          children.every(
-            ({ box }, index) => index === 0 || box.top >= children[index - 1].box.bottom - 1,
+          consecutive(children).every(
+            ([before, after]) => after.box.top >= before.box.bottom - 1,
           ),
       ),
     )
-    .map(({ element, children }) => ({
+    .map(({ element, children, first }) => ({
       container: describe(element),
-      signature: signature(children[0].element),
-      gaps: children
-        .slice(1)
-        .map(({ box }, index) => box.top - children[index].box.bottom)
+      signature: signature(first.element),
+      gaps: consecutive(children)
+        .map(([before, after]) => after.box.top - before.box.bottom)
         .filter((gap) => gap >= 0),
     }))
     .filter(({ gaps }) => gaps.length >= 2)
@@ -225,11 +258,7 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
 
   const flushPairs = containers
     .flatMap(({ element, children }) =>
-      children.slice(1).map((after, index) => ({
-        container: element,
-        before: children[index],
-        after,
-      })),
+      consecutive(children).map(([before, after]) => ({ container: element, before, after })),
     )
     .filter(
       allOf(
@@ -281,7 +310,7 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
       spacing: measure(
         sampled.flatMap(({ element, style }) =>
           spacingProperties.map((property) => ({
-            value: Number.parseFloat(style[property]),
+            value: Number.parseFloat(style.getPropertyValue(property)),
             selector: describe(element),
             property,
           })),

@@ -116,7 +116,7 @@ describe("designFindings", () => {
       alignmentGroups: [{ container: "div.a", lefts: [10, 10], rights: [200, 200] }],
       rhythmGroups: [{ container: "ul.rows", signature: "li", gaps: [24, 24, 24] }],
       measurements: {
-        spacing: [{ value: 16, selector: "div.a", property: "paddingTop" }],
+        spacing: [{ value: 16, selector: "div.a", property: "padding-top" }],
         radii: [{ value: 12, selector: "div.a", property: "borderRadius" }],
         fontSizes: [{ value: 16, selector: "p", property: "fontSize" }],
       },
@@ -187,8 +187,8 @@ describe("designFindings", () => {
       tokens: { spacing: TOKENS, radius: [], text: [] },
       measurements: {
         spacing: [
-          { value: 13, selector: "div.a", property: "paddingTop" },
-          { value: 20, selector: "div.b", property: "paddingTop" },
+          { value: 13, selector: "div.a", property: "padding-top" },
+          { value: 20, selector: "div.b", property: "padding-top" },
         ],
         radii: [],
         fontSizes: [],

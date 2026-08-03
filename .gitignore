@@ -3,3 +3,6 @@
 **/.astro/
 **/*.log
 **/.DS_Store
+# The browser audit writes here. Root-anchored: `**/audit/` would also
+# swallow scripts/audit, which is source.
+/audit/

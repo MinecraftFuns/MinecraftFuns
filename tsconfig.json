@@ -1,5 +1,9 @@
 {
-  "extends": "astro/tsconfigs/strict",
+  // `strictest`, not `strict`. Two of its additions changed code here:
+  // `noUncheckedIndexedAccess`, which makes `array[0]` admit it may find
+  // nothing, and `exactOptionalPropertyTypes`, which separates "omitted" from
+  // "passed as undefined" and so decides what a forwarded prop must declare.
+  "extends": "astro/tsconfigs/strictest",
   "include": [".astro/types.d.ts", "**/*.ts", "**/*.tsx", "**/*.astro"],
   "exclude": ["dist", "node_modules", ".github/skills", ".claude/skills"]
 }

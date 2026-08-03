@@ -1,5 +1,5 @@
 import { contact } from "../config/contact.ts";
-import type { Link, PlatformName } from "../config/schema.ts";
+import type { HttpsUrl, Link, PlatformName } from "../config/schema.ts";
 import { formatFingerprint, publishedKeys } from "./keys.ts";
 import { routeUrl } from "./url.ts";
 
@@ -13,16 +13,21 @@ import { routeUrl } from "./url.ts";
  * account is renamed.
  */
 
+/**
+ * `satisfies` is the whole agreement between this table and `PlatformName`: a
+ * missing platform and a platform the union never named are both errors here,
+ * and the annotation types each `url` so its template literal is checked to be
+ * an absolute URL rather than merely a string. This replaced a dummy binding
+ * that asserted the same coverage in runtime code nobody could run.
+ */
 const PLATFORMS = {
   github: { label: "GitHub", url: (handle: string) => `https://github.com/${handle}` },
   matrix: { label: "Matrix", url: (handle: string) => `https://matrix.to/#/${handle}` },
   twitter: { label: "Twitter", url: (handle: string) => `https://x.com/${handle}` },
-} as const;
-
-/* The table above is the authority; the union in schema.ts must agree with it,
-   which this line checks rather than assumes. */
-const _platformsCoverSchema: Record<PlatformName, unknown> = PLATFORMS;
-void _platformsCoverSchema;
+} as const satisfies Record<
+  PlatformName,
+  { readonly label: string; readonly url: (handle: string) => HttpsUrl }
+>;
 
 /** A `Link` that also carries the bare handle, and whether it proves identity. */
 export type Profile = Link & {
@@ -67,5 +72,12 @@ export const elsewhere = (): readonly Profile[] => [
  */
 export const siteFingerprint = async (): Promise<string> => {
   const [key] = await publishedKeys(contact.mailDomain);
-  return key === undefined ? "" : formatFingerprint(key.fingerprint);
+
+  /* No key is a defect, not an empty string. Correspondence here goes through
+     the Primary User ID, so a build with nothing to print would ship a page
+     offering a way to reach me and no way to reach me. */
+  if (key === undefined) {
+    throw new TypeError(`src/keys: no key published for ${contact.mailDomain}`);
+  }
+  return formatFingerprint(key.fingerprint);
 };

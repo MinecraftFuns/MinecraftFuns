@@ -90,11 +90,15 @@ export const publishedPosts = async (): Promise<readonly PublishedPost[]> => {
  * Published posts as summaries, newest first. Truncation happens before
  * summarising: `summarise` scans the full body for reading time, so mapping
  * first would make the home page pay that scan for the whole archive.
+ *
+ * "All of them" is a limit like any other, spelled as the one number that
+ * cannot truncate. An optional parameter would have made absence a second way
+ * to say it, and a branch to tell the two apart.
  */
-export const postSummaries = async (limit?: number): Promise<readonly PostSummary[]> => {
-  const posts = await publishedPosts();
-  return (limit === undefined ? posts : posts.slice(0, limit)).map(summarise);
-};
+export const postSummaries = async (
+  limit: number = Number.POSITIVE_INFINITY,
+): Promise<readonly PostSummary[]> =>
+  (await publishedPosts()).slice(0, limit).map(summarise);
 
 /**
  * Where a tag leads, derived rather than stored, so the link a post renders

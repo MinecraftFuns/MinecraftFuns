@@ -3,6 +3,7 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import { collect, inContext, mapParsed, orThrow } from "./adt.ts";
 import { compareDocs, type DocOrder } from "./doc-order.ts";
 import { readingMinutes } from "./reading.ts";
+import type { RootedPath } from "../config/schema.ts";
 import { nav } from "../config/site.ts";
 import { parseSlug, slugify } from "./slug.ts";
 import { taxonomy, type Taxon } from "./taxonomy.ts";
@@ -44,7 +45,7 @@ export type DocSummary = {
 };
 
 /** The site-relative URL, before the deployment base is applied. */
-export const hrefOf = (slug: string): string => `/docs/${slug}`;
+export const hrefOf = (slug: string): RootedPath => `/docs/${slug}`;
 
 /**
  * Docs are never in the site nav: the nav frames the personal site in the

@@ -11,12 +11,18 @@ import { activeTarget, canonicalHref, indexable } from "../lib/deployment.ts";
 import { assetUrl } from "../lib/url.ts";
 import type { Chrome } from "./chrome.ts";
 
+/*
+ * Every prop here has a default below, which is why each admits `undefined`
+ * explicitly. Under `exactOptionalPropertyTypes` a bare `?:` means "omit me",
+ * and a layout forwarding its own optional prop has no way to omit anything;
+ * `| undefined` is the type saying the default answers both absences alike.
+ */
 type Props = {
-  readonly title?: string;
-  readonly description?: string;
+  readonly title?: string | undefined;
+  readonly description?: string | undefined;
   /** Set on article pages so the OG type is accurate. */
-  readonly type?: "website" | "article";
-  readonly chrome?: Chrome;
+  readonly type?: "website" | "article" | undefined;
+  readonly chrome?: Chrome | undefined;
 };
 
 const {

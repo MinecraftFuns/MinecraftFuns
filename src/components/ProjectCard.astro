@@ -6,30 +6,18 @@ type Props = { readonly project: Project };
 
 const { project } = Astro.props;
 
-/*
- * The element type *is* the witness that a project is linked. The previous
- * version derived that same fact twice: once to pick `a` versus `div`, and
- * again to emit a `data-interactive` attribute for the hover rule, leaving
- * two encodings of one state that nothing forced to agree. A `group-hover`
- * would restate it a third time, so the hover styling is scoped by `a:hover`
- * in the one place a link is actually produced.
- */
-const Tag = project.href === undefined ? "div" : "a";
-
 /* The label lives beside the status it belongs to, in config. `null` means
    "this state shows no badge", a decision, not a value that went missing. */
 const badge = badgeFor(project.status);
-
-/* Elevation is a surface step plus a stronger hairline. There are no shadow
-   utilities in this theme, so that is enforced rather than merely intended. */
-const INTERACTIVE = "hover:border-hairline-strong hover:bg-surface-2 transition-colors";
 ---
 
-<Tag
-  class:list={[
-    "border-hairline bg-surface-1 flex h-full flex-col gap-xs rounded-lg border p-md no-underline",
-    project.href !== undefined && INTERACTIVE,
-  ]}
+{
+  /* Always an anchor: `href` is required, so the card has one shape and the
+     hover treatment needs no condition to guard it. Elevation is a surface
+     step plus a stronger hairline; this theme has no shadow utilities. */
+}
+<a
+  class="border-hairline bg-surface-1 hover:border-hairline-strong hover:bg-surface-2 flex h-full flex-col gap-xs rounded-lg border p-md no-underline transition-colors"
   href={project.href}
 >
   <div class="flex items-baseline justify-between gap-2xs">
@@ -61,4 +49,4 @@ const INTERACTIVE = "hover:border-hairline-strong hover:bg-surface-2 transition-
       )
     }
   </div>
-</Tag>
+</a>

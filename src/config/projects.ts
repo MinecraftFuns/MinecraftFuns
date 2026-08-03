@@ -1,4 +1,4 @@
-import type { ProjectKindConfig, ProjectStatusConfig } from "./schema.ts";
+import type { HttpsUrl, ProjectKindConfig, ProjectStatusConfig } from "./schema.ts";
 
 /**
  * Projects, and the sections they group into.
@@ -44,12 +44,20 @@ export type ProjectStatus = keyof typeof projectStatuses;
 export type Project = {
   readonly title: string;
   readonly description: string;
-  /** Absent when a project has no public link. */
-  readonly href?: string;
-  /** A year, or a range when the work spans one. */
-  readonly year: string;
-  /** Rendered as tags on the card. Keep to three or fewer. */
-  readonly tags: readonly string[];
+  /** A project nobody can look at is a claim; every card is a link. */
+  readonly href: HttpsUrl;
+  /**
+   * A year, or a range. `${number}` admits neither a range written with a
+   * hyphen nor one written with an em dash, so the punctuation this project
+   * uses is the punctuation that typechecks.
+   */
+  readonly year: `${number}` | `${number}–${number}`;
+  /**
+   * One to three, which is what the card lays out. A tuple union says so; the
+   * comment that used to say it could be read and ignored.
+   */
+  readonly tags:
+    readonly [string] | readonly [string, string] | readonly [string, string, string];
   readonly status: ProjectStatus;
   readonly kind: ProjectKind;
   /**

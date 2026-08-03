@@ -29,10 +29,9 @@ describe("anonymousValues", () => {
   it("catches an arbitrary value", () => {
     const found = anonymousValues('<p class="w-[437px]">x</p>');
     assert.deepEqual(
-      found.map((f) => f.text),
-      ["w-[437px]"],
+      found.map(({ rule, text }) => ({ rule, text })),
+      [{ rule: "arbitrary-value", text: "w-[437px]" }],
     );
-    assert.equal(found[0].rule, "arbitrary-value");
   });
 
   it("catches an arbitrary property", () => {

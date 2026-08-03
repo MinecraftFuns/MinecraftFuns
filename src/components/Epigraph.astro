@@ -1,4 +1,6 @@
 ---
+import type { HttpsUrl } from "../config/schema.ts";
+
 /**
  * A quotation, set as page furniture rather than as content.
  *
@@ -7,18 +9,19 @@
  * says so to a screen reader. `cite` carries the source for machines; the
  * visible link is the one a human follows.
  */
+/* A quotation nobody can check is worth less than no quotation, so the source
+   is required rather than defaulted away. */
 type Props = {
   readonly quote: string;
   readonly author: string;
-  /** Where the quotation can be checked. Absent when there is nowhere to point. */
-  readonly source?: { readonly href: string; readonly label: string };
+  readonly source: { readonly href: HttpsUrl; readonly label: string };
 };
 
 const { quote, author, source } = Astro.props;
 ---
 
 <figure class="border-hairline-strong my-lg border-l pl-md">
-  <blockquote class="max-w-measure text-body-lg text-ink-muted" cite={source?.href}>
+  <blockquote class="max-w-measure text-body-lg text-ink-muted" cite={source.href}>
     {quote}
   </blockquote>
 
@@ -27,15 +30,7 @@ const { quote, author, source } = Astro.props;
       meaning, not a substitute for punctuation somebody should have chosen. */
   }
   <figcaption class="note mt-xs">
-    &mdash; {author}{
-      source !== undefined && (
-        <>
-          {", "}
-          <a class="link" href={source.href}>
-            {source.label}
-          </a>
-        </>
-      )
-    }
+    &mdash; {author},{" "}
+    <a class="link" href={source.href}>{source.label}</a>
   </figcaption>
 </figure>

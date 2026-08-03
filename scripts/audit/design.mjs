@@ -128,10 +128,9 @@ const SCALES = [
   { key: "fontSizes", tokenKey: "text", label: "font size" },
 ];
 
-const EDGES = [
-  ["lefts", "left"],
-  ["rights", "right"],
-];
+/* The probe's group key to the edge it names. A record rather than a list of
+   pairs: `Object.entries` yields the pair type a bare array of arrays loses. */
+const EDGES = { lefts: "left", rights: "right" };
 
 /** Raw observations to findings. Pure and total on a partial probe. */
 export const designFindings = (probe, context) => {
@@ -143,7 +142,7 @@ export const designFindings = (probe, context) => {
   });
 
   const alignment = (probe.alignmentGroups ?? []).flatMap((group) =>
-    EDGES.flatMap(([key, edge]) =>
+    Object.entries(EDGES).flatMap(([key, edge]) =>
       nearMissPairs(group[key] ?? []).map(([a, b]) =>
         at({
           rule: "near-miss-alignment",

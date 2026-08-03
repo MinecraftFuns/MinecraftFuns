@@ -36,8 +36,8 @@ describe("taxonomy", () => {
   it("preserves the incoming order of items within a taxon", () => {
     const taxa = build([item("first", "x"), item("second", "x"), item("third", "x")]);
     assert.deepEqual(
-      taxa[0].items.map((i) => i.name),
-      ["first", "second", "third"],
+      taxa.map((taxon) => taxon.items.map((i) => i.name)),
+      [["first", "second", "third"]],
     );
   });
 
@@ -72,8 +72,10 @@ describe("taxonomy", () => {
   /* Same spelling is the same label, not a collision: it groups. */
   it("does not mistake one label used twice for a collision", () => {
     const taxa = build([item("a", "Mail"), item("b", "Mail")]);
-    assert.equal(taxa.length, 1);
-    assert.equal(taxa[0].items.length, 2);
+    assert.deepEqual(
+      taxa.map((taxon) => taxon.items.length),
+      [2],
+    );
   });
 
   it("fails the build when a label has no usable URL segment", () => {

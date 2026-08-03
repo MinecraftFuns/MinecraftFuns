@@ -18,10 +18,12 @@ import {
   type HeaderRule,
   type Redirect,
 } from "./hosting.ts";
-import type { HeaderConfig, RootedPath } from "../config/schema.ts";
 
-const reasons = (problems: readonly { reason: string }[]) =>
-  problems.map((problem) => problem.reason);
+/* Joined rather than indexed: `assert.match` needs a string, and the first
+   element of a possibly-empty array is not one. An empty list joins to "" and
+   fails every match, which is the answer indexing was reaching for. */
+const reasons = (problems: readonly { readonly reason: string }[]): string =>
+  problems.map((problem) => problem.reason).join("\n");
 
 describe("PathPattern", () => {
   it("renders a prefix with the splat the format expects", () => {
@@ -85,14 +87,14 @@ describe("redirectProblems", () => {
     const found = redirectProblems([
       { from: prefixPath("/pg"), to: "/pgp", status: 301 },
     ]);
-    assert.match(reasons(found)[0], /loop/);
+    assert.match(reasons(found), /loop/);
   });
 
   it("catches a self-redirect", () => {
     const found = redirectProblems([
       { from: exactPath("/pgp"), to: "/pgp", status: 301 },
     ]);
-    assert.match(reasons(found)[0], /loop/);
+    assert.match(reasons(found), /loop/);
   });
 
   /* First match wins, so anything an earlier rule covers can never fire. */
@@ -101,7 +103,7 @@ describe("redirectProblems", () => {
       { from: prefixPath("/p"), to: "/x", status: 301 },
       { from: exactPath("/pgp"), to: "/y", status: 301 },
     ]);
-    assert.match(reasons(found)[0], /unreachable/);
+    assert.match(reasons(found), /unreachable/);
   });
 
   it("does not call a later rule shadowed when order is right", () => {
@@ -116,7 +118,7 @@ describe("redirectProblems", () => {
 
   it("catches a destination that is neither rooted nor absolute", () => {
     const found = redirectProblems([{ from: exactPath("/a"), to: "pgp", status: 301 }]);
-    assert.match(reasons(found)[0], /rooted path nor an absolute URL/);
+    assert.match(reasons(found), /rooted path nor an absolute URL/);
   });
 
   it("accepts a destination leaving the site", () => {
@@ -146,19 +148,17 @@ describe("parsePathPattern", () => {
     });
   });
 
-  it("rejects a path that is not rooted", () => {
-    assert.equal(parsePathPattern("pgp").tag, "invalid");
-  });
-
   /* The domain models a trailing wildcard only, so a mid-path one is refused
-     rather than silently treated as a literal asterisk. */
+     rather than silently treated as a literal asterisk. This is the whole of
+     what the parser decides: `RootedPath` owns the leading slash, so there is
+     no test here for an unrooted path and no way to write one. */
   it("rejects a star anywhere but the end", () => {
     assert.equal(parsePathPattern("/a/*/b").tag, "invalid");
     assert.equal(parsePathPattern("/*x").tag, "invalid");
   });
 
-  it("is total: no input throws", () => {
-    ["", "*", "/", "//*", "/a**"].forEach((raw) =>
+  it("is total on every rooted path: none throws", () => {
+    (["/", "//*", "/a**", "/*", "/a*b*"] as const).forEach((raw) =>
       assert.doesNotThrow(() => parsePathPattern(raw)),
     );
   });
@@ -213,19 +213,10 @@ describe("decodeHostConfig", () => {
   });
 
   /*
-   * `HeaderConfig` now requires one of `set`/`remove`, so config cannot reach
-   * this and the cast is what lets the test still describe it. The decoder is
-   * exported, though, and the check stays live for callers whose input was
-   * never typed. The case a type cannot reach is the empty record below.
+   * `HeaderConfig` requires one of `set`/`remove`, so a rule declaring neither
+   * is a compile error and has no test. A type cannot say a record has keys,
+   * which leaves exactly this case for the decoder.
    */
-  it("rejects a header rule that does nothing", () => {
-    const nothing = { path: "/a" } as unknown as HeaderConfig;
-    assert.equal(
-      decodeHostConfig({ headers: [nothing], redirects: [] }, under).tag,
-      "invalid",
-    );
-  });
-
   it("rejects a header rule whose only declaration is empty", () => {
     const decoded = decodeHostConfig(
       { headers: [{ path: "/a", set: {} }], redirects: [] },
@@ -239,18 +230,15 @@ describe("decodeHostConfig", () => {
   it("reports every problem at once rather than the first", () => {
     const decoded = decodeHostConfig(
       {
-        // `RootedPath` rejects this at compile time, so config cannot reach
-        // the runtime check. The decoder is exported, though, so the check is
-        // still live for callers whose input was never typed, hence the cast.
-        headers: [{ path: "no-slash" as RootedPath, set: { a: "b" } }],
-        redirects: [{ from: "/a/*/b", to: "/c" }],
+        headers: [{ path: "/a*/b", set: { a: "b" } }],
+        redirects: [{ from: "/c/*/d", to: "/e" }],
       },
       under,
     );
     assert.equal(decoded.tag, "invalid");
     if (decoded.tag !== "invalid") return;
-    assert.match(explain(decoded), /no-slash/);
-    assert.match(explain(decoded), /\/a\/\*\/b/);
+    assert.match(explain(decoded), /\/a\*\/b/);
+    assert.match(explain(decoded), /\/c\/\*\/d/);
   });
 
   it("carries the structural checks through, on decoded values", () => {
@@ -321,6 +309,6 @@ describe("headerProblems", () => {
       },
     ]);
     assert.equal(found.length, 1, "header names are case-insensitive");
-    assert.match(found[0].reason, /more than once/);
+    assert.match(reasons(found), /more than once/);
   });
 });
