@@ -1,10 +1,10 @@
 ---
-title: "Cloudflare WARP Self-Service Troubleshooting"
+title: "multiset / Self-Service Troubleshooting Guide for Cloudflare WARP"
 description: "Diagnosing the most frequent Cloudflare WARP and Cloudflare One Agent failures, in the order the checks build on each other."
 category: "Networking"
 ---
 
-Welcome! This page helps **multiset** employees diagnose and resolve the most frequent problems encountered when using **Cloudflare WARP / Cloudflare One Agent**. Work through the sections in order: each builds on the previous checks. If you remain stuck, the [contact section](../../about/#contact) lists the ways to reach me.
+Welcome! This page helps **multiset** employees diagnose and resolve the most frequent problems encountered when using **Cloudflare WARP / Cloudflare One Agent**. Work through the sections in order: each builds on the previous checks. If you remain stuck, email **<nic@joefang.org>**.
 
 ***
 
@@ -137,7 +137,7 @@ Check, in order:
 
 ## Need Help?
 
-Get in touch through the [contact section](../../about/#contact) with:
+Email **<nic@joefang.org>** with:
 
 - Device OS and version
 - WARP client version (`warp-cli --version`)

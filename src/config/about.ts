@@ -13,6 +13,6 @@ export const education = [
     institution: "University of Toronto",
     credential: "Double major in Computer Science and Cognitive Science",
     detail: "Minor in Statistics",
-    period: "Third year",
+    period: "Fourth year",
   },
 ] as const satisfies readonly EducationEntry[];
