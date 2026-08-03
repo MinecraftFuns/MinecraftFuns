@@ -1,5 +1,6 @@
 ---
 import Button from "../components/Button.astro";
+import Epigraph from "../components/Epigraph.astro";
 import PageIntro from "../components/PageIntro.astro";
 import PostRow from "../components/PostRow.astro";
 import ProjectCard from "../components/ProjectCard.astro";
@@ -15,17 +16,30 @@ const recentPosts = await postSummaries(3);
 ---
 
 <BaseLayout>
+  {/*
+    The opening states a question this site is about, not a résumé. What I am
+    enrolled in is context for the question and belongs after it; the About
+    page is where someone goes when they want the credential, and it is one
+    click away in the nav. A homepage that leads with standing asks the reader
+    to be impressed before it has given them anything to be interested in.
+  */}
   <PageIntro
     kind="hero"
-    eyebrow="Toronto, Canada"
-    title="Joe Fang builds software and studies how minds work."
-    lede="Third-year undergraduate at the University of Toronto, double majoring in Computer Science and Cognitive Science with a minor in Statistics."
+    eyebrow="Toronto"
+    title="A compiler and a mind are both machines for turning symbols into meaning."
+    lede="I study both at the University of Toronto, and I write here about where the analogy leaks: types, time zones, private networks, and the small bugs that turn out to have been category errors all along."
   >
     <div class="flex flex-wrap gap-xs">
-      <Button href={routeUrl("/projects")} tone="primary" size="control">View projects</Button>
+      <Button href={routeUrl("/blog")} tone="primary" size="control">Read the blog</Button>
       <Button href={pgpHref()} tone="secondary" size="control">Get in touch</Button>
     </div>
   </PageIntro>
+
+  <Epigraph
+    quote="Freedom is the freedom to say that two plus two make four. If that is granted, all else follows."
+    author="George Orwell"
+    source={{ href: "https://en.wikipedia.org/wiki/Nineteen_Eighty-Four", label: "Nineteen Eighty-Four" }}
+  />
 
   <Section
     id="work-heading"
