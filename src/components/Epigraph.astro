@@ -2,20 +2,10 @@
 /**
  * A quotation, set as page furniture rather than as content.
  *
- * The legacy site opened on an epigraph, and the rebuild dropped it along with
- * the branding it belonged to. The branding is gone deliberately; the register
- * is not. A page that opens by stating what somebody thought is a different
- * kind of page from one that opens by stating what its author has achieved,
- * and this component is how the first kind stays cheap to build.
- *
  * `figure`/`blockquote`/`figcaption` rather than a styled `div`: the
  * attribution is the caption *of* the quotation, and only the figure element
- * says so to a screen reader. `cite` on the blockquote carries the source URL
- * for machines, which is what that attribute is for; the visible link is the
- * one a human follows.
- *
- * The component owns its type roles, as every component here does. A page may
- * place an epigraph but may not decide how loud it is.
+ * says so to a screen reader. `cite` carries the source for machines; the
+ * visible link is the one a human follows.
  */
 type Props = {
   readonly quote: string;
@@ -32,22 +22,14 @@ const { quote, author, source } = Astro.props;
     {quote}
   </blockquote>
 
-  {/*
-    An em dash is the conventional mark before an attribution and the one place
-    this project keeps it: here it is a typographic convention with a fixed
-    meaning, not a substitute for punctuation somebody should have chosen.
-  */}
+  {/* The one em dash this project keeps: a typographic convention with a fixed
+      meaning, not a substitute for punctuation somebody should have chosen. */}
   <figcaption class="mt-xs text-body-sm text-ink-subtle">
     &mdash; {author}{
       source !== undefined && (
         <>
           {", "}
-          <a
-            class="text-accent hover:text-accent-hover no-underline hover:underline"
-            href={source.href}
-          >
-            {source.label}
-          </a>
+          <a class="link" href={source.href}>{source.label}</a>
         </>
       )
     }

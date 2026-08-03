@@ -2,22 +2,16 @@
 /**
  * The CI build matrix, derived from `src/config/deployments.ts`.
  *
- * The workflow used to spell every origin and base path out again in YAML,
- * which was a third copy of facts already stated in the config and in the
- * Astro defaults. Nothing could have made the three agree, and the failure
- * mode was silent: a matrix entry naming a base the config did not declare
- * builds an artifact that is internally consistent and wrong.
+ * A matrix entry naming a base the config does not declare builds an artifact
+ * that is internally consistent and wrong, and nothing could have caught it.
+ * Emitting the matrix makes that unrepresentable: a deployment exists in one
+ * file, and the jobs that build and publish it follow.
  *
- * Emitting the matrix instead makes that unrepresentable. A deployment exists
- * in one file; the jobs that build and publish it follow.
+ * Values come from `lib/deployment.ts`, so a job's `role` is the one the pages
+ * see. That module is pure, which is why it loads under plain Node.
  *
- * The values are read from `lib/deployment.ts` rather than re-derived here,
- * so the `role` a job sees is the same one the pages see. That module is pure
- * and its only environment read is defensive, which is why it loads under
- * plain Node with no bundler.
- *
- * Usage: run in CI with GITHUB_OUTPUT set; run locally with no arguments to
- * print what CI would receive.
+ * Run in CI with GITHUB_OUTPUT set; run with no arguments to print what CI
+ * would receive.
  */
 
 import { appendFile } from "node:fs/promises";
@@ -25,11 +19,11 @@ import { appendFile } from "node:fs/promises";
 import { canonicalTarget, targets } from "../src/lib/deployment.ts";
 
 /**
- * `include` entries for `strategy.matrix`.
+ * `include` entries for `strategy.matrix`. The projection is explicit so that
+ * a field added to a deployment does not silently widen the CI contract.
  *
  * `id` is the deployment's only name: the GitHub environment, the job, the
- * artifact, and the matrix leg all use it, so nothing downstream has to map
- * one identifier onto another.
+ * artifact, and the matrix leg all use it.
  */
 export const matrixInclude = (deployments) =>
   deployments.map(({ id, origin, base, role }) => ({ id, origin, base, role }));

@@ -4,28 +4,19 @@ import PageIntro from "../components/PageIntro.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { routeUrl } from "../lib/url.ts";
 
-/*
- * GitHub Pages and Cloudflare Pages both serve /404.html for an unmatched
- * path, so this needs no route configuration, only to exist. The legacy site
- * had one; the rebuild did not, which meant every mistyped URL fell through to
- * the host's default page with none of this site's chrome on it.
- *
- * The legacy page was a Shakespearean pastiche. That particular joke does not
- * survive the rebrand, but its premise does: a 404 is read more attentively
- * than almost any other page here, because the reader has stopped and is
- * looking at the address bar for the first time all day. It is worth writing.
- */
+/* Both hosts serve /404.html for an unmatched path, so this needs no route
+   configuration, only to exist. It is read more attentively than most pages
+   here: the reader has stopped and is looking at the address bar. */
 ---
 
 <BaseLayout
   title="Not found"
-  description="A well-formed address that refers to nothing, and a short note on why that is more interesting than it sounds."
+  description="A well-formed address that refers to nothing."
 >
   <PageIntro
     kind="page"
     eyebrow="404"
     title="This address is perfectly well formed, and refers to nothing."
-    lede="Which is a stranger state of affairs than the status code makes it sound."
   >
     <div class="flex flex-wrap gap-xs">
       <Button href={routeUrl("/")} tone="primary" size="control">Home</Button>
@@ -36,31 +27,21 @@ import { routeUrl } from "../lib/url.ts";
 
   <div class="prose">
     <p>
-      Russell ran into this in 1905, without the benefit of a browser.
-      &ldquo;The present King of France&rdquo; is grammatical, unambiguous, and
-      built entirely out of words that mean things. It still picks out nobody.
-      A name can be in perfect working order and have nothing on the other end
-      of it, and a sentence containing one is not thereby nonsense. It is
-      simply false.
+      Russell ran into this in 1905. &ldquo;The present King of France&rdquo; is
+      grammatical, unambiguous, and built entirely from words that mean things.
+      It still picks out nobody. A name can be in perfect working order with
+      nothing on the other end of it, and a sentence containing one is not
+      thereby nonsense. It is simply false.
     </p>
     <p>
-      The address you just followed is in that condition. The server parsed it,
-      understood it, went looking, and came back with the web's version of
-      &ldquo;there is no such thing&rdquo;.
+      Whether anything was ever here, a 404 does not say. There is a separate
+      code for that stronger claim, 410 Gone, and it is vanishingly rare
+      because knowing a thing is absent costs far more than failing to find it.
     </p>
     <p>
-      What it did not tell you is whether there ever was. A 404 is deliberately
-      silent on the point. There is a separate code, 410 Gone, for the stronger
-      claim that a page existed and has been deliberately withdrawn, and it is
-      vanishingly rare in the wild precisely because almost nobody keeps records
-      good enough to assert it. Not finding something gets a status code of its
-      own; knowing it is absent turns out to be much more expensive.
-    </p>
-    <p>
-      In the ordinary case one of us has made a typing mistake, and it is not
-      usually you. If a link on this site sent you here, that is my bug, and the
-      contact section of the <a href={routeUrl("/about")}>about page</a> is the
-      fastest way to tell me about it.
+      Probably a typo, and not necessarily yours. If a link on this site sent
+      you here, that is my bug: the <a href={routeUrl("/about")}>about page</a>
+      says how to reach me.
     </p>
   </div>
 </BaseLayout>

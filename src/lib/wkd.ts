@@ -12,15 +12,13 @@ import { invalid, ok, type Parsed } from "./adt.ts";
  * own domain, the "direct" method. The domain is deliberately excluded from
  * the hash, so an internationalised domain name cannot perturb it.
  *
- * SHA-1 is used here as a *naming* function, not a security one. It derives a
- * stable filename from an address; nothing is authenticated by it, and the key
- * served at that path carries its own signatures. Its collision resistance is
- * irrelevant to the property being used, which is why a standard published in
- * 2016 still specifies it and why substituting SHA-256 would simply produce
- * files no client would look for.
+ * SHA-1 is a *naming* function here, not a security one: it derives a stable
+ * filename, nothing is authenticated by it, and the key served at that path
+ * carries its own signatures. Substituting SHA-256 would produce files no
+ * client looks for.
  *
- * This module is pure and total, and imports nothing from the site. Everything
- * here is checkable against the specification's own test vector.
+ * Pure, total, and importing nothing from the site, so everything here is
+ * checkable against the specification's own test vector.
  */
 
 declare const wkdHashBrand: unique symbol;

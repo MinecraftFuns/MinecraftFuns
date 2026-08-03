@@ -12,23 +12,16 @@ import {
 /**
  * The published OpenPGP keys, and the addresses each one answers for.
  *
- * One armored file per key under `src/keys` is the whole source of truth. Every
- * representation the site serves is derived from it: the armored text at
- * `/pgp`, and the binary body at each address's Web Key Directory path. The
- * legacy site stored the same key four times across two encodings, and they had
- * already drifted: its `/pgp` carried 53 packets while the file WKD clients
- * actually fetched carried 58, so the human-readable copy and the
- * machine-readable copy were different keys in every way that mattered.
- *
- * Two rules keep that from recurring:
+ * One armored file per key under `src/keys` is the whole source of truth: the
+ * armored text at `/pgp` and the binary at each Web Key Directory path are
+ * both derived from it. Two rules keep the copies from drifting apart, which
+ * is what the legacy site's four stored copies had already done.
  *
  *  1. The binary is obtained by *dearmouring*, never by re-serialising a parsed
  *     key. `readKey().write()` emits only the packets openpgp.js models, which
- *     for this key silently discards five signatures. Base64-decoding the
- *     stored block yields the author's exact bytes.
- *  2. Addresses are read from the key itself. A published address that is not
- *     in the key is unrepresentable, because there is nowhere to write one
- *     down.
+ *     for this key silently discards five signatures.
+ *  2. Addresses are read from the key itself, so a published address that is
+ *     not in the key has nowhere to be written down.
  */
 
 export type PublishedAddress = {
@@ -57,13 +50,8 @@ const SOURCES = import.meta.glob("../keys/*.asc", {
   eager: true,
 }) as Readonly<Record<string, string>>;
 
-/*
- * `basename` rather than a split and a pattern. Stripping a known extension
- * off a path is a solved problem with a name, and the hand-rolled version had
- * to carry an `?? path` for an `at(-1)` that cannot actually be undefined.
- * The POSIX variant specifically: these are `import.meta.glob` keys, which are
- * URL-shaped and always separated by `/`, whatever the host platform is.
- */
+/* The POSIX variant specifically: these are `import.meta.glob` keys, which are
+   URL-shaped and separated by `/` whatever the host platform is. */
 const stemOf = (path: string): string => basename(path, ".asc");
 
 /** The exact stored bytes, not a re-serialisation. See the note above. */
@@ -103,16 +91,9 @@ const addressesOn = (
     .map((user) => addressOn(user, domain))
     .filter((address) => address !== undefined);
 
-  /*
-   * The first occurrence of each hash, kept by asking before writing rather
-   * than by overwriting. `Map` insertion order preserves the sequence, and
-   * `has` states "first wins" instead of leaving it to a collection's
-   * overwrite rule, which keeps the last.
-   *
-   * Hashed rather than scanned. The `findIndex` this replaces re-walked the
-   * whole list for every address to ask a question a `Set` answers in one
-   * step: quadratic work to compute a distinctness that is a lookup.
-   */
+  /* First occurrence wins, stated by asking before writing rather than left to
+     a collection's overwrite rule, which keeps the last. `Map` preserves
+     insertion order, and distinctness is a lookup rather than a scan. */
   const byHash = new Map<WkdHash, PublishedAddress>();
 
   for (const address of published) {
@@ -138,19 +119,10 @@ const load = async (domain: string): Promise<readonly PublishedKey[]> => {
     }),
   );
 
-  /*
-   * The address-to-key mapping has to be a function: two keys claiming one
-   * address would mean two different files at one URL, which Astro would
-   * resolve arbitrarily and a client would never notice. Failing the build is
-   * the only honest outcome.
-   *
-   * Flattened to claims first, then walked once carrying the owner already
-   * seen for each hash. Searching for the conflict and then searching again
-   * for its counterpart typed that second search as possibly failing, when it
-   * provably could not: the conflict was found *because* an earlier claim
-   * shares the hash. The `?.` that followed could have printed "undefined" as
-   * a key name in the one message that has to be right.
-   */
+  /* The address-to-key mapping has to be a function: two keys claiming one
+     address would mean two files at one URL, resolved arbitrarily and never
+     noticed by a client. One pass carrying the owner already seen keeps the
+     counterpart in hand, so the message cannot print "undefined". */
   const claims = keys.flatMap((key) =>
     key.addresses.map(({ address, hash }) => ({ address, hash, owner: key.name })),
   );
@@ -188,11 +160,8 @@ export const publishedKeys = (domain: string): Promise<readonly PublishedKey[]> 
 
 /**
  * A fingerprint as people transcribe it: upper case, in groups of four.
- *
- * Derived rather than written down. It used to be a config string sitting
- * beside the key, which is a second encoding of the same fact, and the one
- * that goes stale silently, because rotating a key changes the file while
- * leaving the printed fingerprint looking perfectly plausible.
+ * Derived rather than written down, because rotating a key changes the file
+ * while leaving a printed fingerprint looking perfectly plausible.
  */
 export const formatFingerprint = (fingerprint: string): string =>
   (fingerprint.toUpperCase().match(/.{1,4}/g) ?? []).join(" ");

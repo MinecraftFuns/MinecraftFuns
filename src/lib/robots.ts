@@ -1,39 +1,23 @@
-import { assertNever } from "./adt.ts";
-
 /**
  * The Robots Exclusion Protocol, as data.
  *
- * RFC 9309 gives robots.txt a grammar: a file is a sequence of *groups*, each
- * one or more user-agent lines followed by the rules that apply to them, plus
- * records outside any group. Writing that file as a string literal leaves the
- * grammar implicit, and every bug in the legacy file was a consequence: a
- * hardcoded absolute sitemap URL that was wrong on any other origin, and an
- * empty `Disallow:` whose meaning ("nothing is disallowed") is the opposite of
- * what it looks like at a glance.
- *
- * Modelling the grammar instead makes those unsayable. A rule is a sum, so
- * `allow` and `disallow` cannot be confused for a boolean flag; a group's
- * user-agent list is non-empty by type, because a group with none matches
- * nothing and RFC 9309 requires at least one; and the sitemap is a separate
- * field rather than a rule, which is what it is; the RFC places it outside the
- * group grammar entirely, as a record crawlers MAY interpret.
+ * RFC 9309 gives robots.txt a grammar: a sequence of *groups*, each one or
+ * more user-agent lines followed by the rules applying to them, plus records
+ * outside any group. Modelling the grammar rather than writing the file as a
+ * string literal is what makes its failure modes unsayable, and the sitemap a
+ * separate field, which the RFC places outside the group grammar entirely.
  *
  * Pure and total: no clock, no environment, no I/O.
  */
 
-/**
- * A sum, not `{ allow: boolean; path: string }`. The boolean form reads
- * identically at every call site whichever way it is set, which is the
- * definition of boolean blindness.
- */
+/** A sum, not `{ allow: boolean }`, which reads the same however it is set. */
 export type Rule =
   | { readonly kind: "allow"; readonly path: string }
   | { readonly kind: "disallow"; readonly path: string };
 
 /**
- * `readonly [string, ...string[]]` is a non-empty list in the type system. A
- * group with no user-agent line applies to nobody, so the empty case is not a
- * value to validate at runtime; it is a value that cannot be constructed.
+ * A non-empty list in the type system. A group with no user-agent line applies
+ * to nobody, so the empty case is not validated at runtime; it cannot be built.
  */
 export type Group = {
   readonly userAgents: readonly [string, ...string[]];
@@ -46,17 +30,13 @@ export type Robots = {
   readonly sitemaps: readonly string[];
 };
 
-/** Total elimination over the rule sum. */
-const renderRule = (rule: Rule): string => {
-  switch (rule.kind) {
-    case "allow":
-      return `Allow: ${rule.path}`;
-    case "disallow":
-      return `Disallow: ${rule.path}`;
-    default:
-      return assertNever(rule);
-  }
+/** Total by construction: a new kind of rule is a missing key, not a lost case. */
+const FIELD: Readonly<Record<Rule["kind"], string>> = {
+  allow: "Allow",
+  disallow: "Disallow",
 };
+
+const renderRule = (rule: Rule): string => `${FIELD[rule.kind]}: ${rule.path}`;
 
 const renderGroup = (group: Group): readonly string[] => [
   ...group.userAgents.map((agent) => `User-agent: ${agent}`),
@@ -64,11 +44,8 @@ const renderGroup = (group: Group): readonly string[] => [
 ];
 
 /**
- * Groups first, then the sitemap records, separated by blank lines.
- *
- * Ordering matters to readers rather than to parsers: RFC 9309 requires a
- * crawler to merge groups by user-agent regardless of position, and to ignore
- * records it does not recognise wherever they appear.
+ * Groups first, then the sitemap records. The order is for readers: RFC 9309
+ * has crawlers merge groups by user-agent regardless of position.
  */
 export const renderRobots = (robots: Robots): string => {
   const blocks = [
@@ -81,20 +58,15 @@ export const renderRobots = (robots: Robots): string => {
   return `${blocks.join("\n\n")}\n`;
 };
 
-/**
- * Everything is crawlable. `Allow: /` rather than the legacy's bare
- * `Disallow:`; both mean the same thing to a conformant parser, but one of
- * them says so.
- */
+/** Everything is crawlable. `Allow: /`, since a bare `Disallow:` means this
+ *  but does not say it. */
 export const allowAll = (sitemaps: readonly string[]): Robots => ({
   groups: [{ userAgents: ["*"], rules: [{ kind: "allow", path: "/" }] }],
   sitemaps,
 });
 
-/**
- * Nothing is crawlable, and no sitemap is advertised: offering a crawler a
- * map of pages it has just been told not to fetch is a contradiction.
- */
+/** Nothing is crawlable, and no sitemap: offering a map of pages a crawler was
+ *  just told not to fetch is a contradiction. */
 export const disallowAll = (): Robots => ({
   groups: [{ userAgents: ["*"], rules: [{ kind: "disallow", path: "/" }] }],
   sitemaps: [],

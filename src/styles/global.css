@@ -461,14 +461,32 @@
     font-weight: var(--text-card-title--font-weight);
   }
 
-  .prose a {
+  /*
+   * Accent links, in one place. Two variants because the underline is a WCAG
+   * 1.4.1 requirement only inside running text, where colour alone cannot
+   * distinguish a link from the words around it; a link standing on its own
+   * has nothing to be confused with and underlines on hover.
+   */
+  .prose a,
+  .link,
+  .link-in-text {
     color: var(--color-accent);
     text-decoration-thickness: 1px;
     text-underline-offset: 0.2em;
   }
 
-  .prose a:hover {
+  .prose a:hover,
+  .link:hover,
+  .link-in-text:hover {
     color: var(--color-accent-hover);
+  }
+
+  .link {
+    text-decoration: none;
+  }
+
+  .link:hover {
+    text-decoration: underline;
   }
 
   .prose ul,

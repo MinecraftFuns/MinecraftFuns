@@ -51,18 +51,11 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
       .trim();
 
   /**
-   * Conjunction of predicates, so a chain of filters becomes one pass.
-   *
-   * Predicates over a value form a monoid under `&&` with identity `true`,
-   * and this is its fold: `xs.filter(p).filter(q)` and `xs.filter(allOf(p, q))`
-   * accept the same elements in the same order whenever the predicates are
-   * pure, which every predicate below is.
-   *
-   * It is not free the way fusion is in a language that performs it. Both
-   * forms evaluate each predicate exactly as many times, since both stop at
-   * the first failure; what the fused form removes is one traversal and one
-   * intermediate array per stage. That is the cost worth removing here,
-   * because these run over every element in the document.
+   * Conjunction of predicates: the fold of the `&&` monoid, so a chain of
+   * filters becomes one pass. Both forms accept the same elements and evaluate
+   * each predicate the same number of times, since both stop at the first
+   * failure; what fusing removes is a traversal and an intermediate array per
+   * stage, which is worth removing over every element in the document.
    */
   const allOf =
     (...predicates) =>
@@ -85,12 +78,9 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
 
   /**
    * One element measured, or nothing when it has no geometry worth measuring.
-   *
-   * `allOf` cannot express this: the stages alternate between deciding and
-   * decorating, and the array API has no combinator for that shape. So the
-   * partiality moves into the return type instead, and each early return is
-   * the filter it replaces: a hidden element has no geometry to measure, and
-   * a zero-area box has no edges to compare.
+   * The stages alternate between deciding and decorating, which no predicate
+   * combinator expresses, so the partiality is in the return type and each
+   * early return is the filter it replaces.
    */
   const measured = (element) => {
     const style = getComputedStyle(element);
@@ -110,15 +100,10 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
     };
   };
 
-  /*
-   * `mapMaybe`, in the one place the array API cannot spell it: `flatMap`
-   * would allocate a cell per element just to encode absence, and the chain
-   * this replaces walked the document four times, leaving three intermediate
-   * arrays behind and copying every surviving record through a spread.
-   * `querySelectorAll("*")` is the largest collection this file touches,
-   * which is what makes a hand-written traversal worth it here and nowhere
-   * else.
-   */
+  /* `mapMaybe`, written out because `flatMap` would allocate a cell per
+     element just to encode absence. `querySelectorAll("*")` is the largest
+     collection this file touches, which is what makes the traversal worth
+     spelling here and nowhere else. */
   const visible = [];
   for (const element of document.body.querySelectorAll("*")) {
     const entry = measured(element);
@@ -231,15 +216,10 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
     .slice(0, 20);
 
   /*
-   * Siblings whose boxes meet with nothing between them.
-   *
-   * This is the shape of a spacing bug the other rules cannot see: each block
-   * is on the grid, each is aligned, and the gap between two of them is simply
-   * absent because neither declared it. It happened here when two components
-   * placed in one slot brought opposite margins, one leading and one trailing,
-   * so a row of tags sat flush on the rule beneath it.
-   *
-   * Three conditions keep it quiet, each stated at its own predicate below.
+   * Siblings whose boxes meet with nothing between them: the spacing bug no
+   * other rule sees, because each block is on the grid and aligned and the gap
+   * is simply absent, neither of them having declared it. Three conditions
+   * keep it quiet, each stated at its own predicate below.
    */
   const edge = (value) => Number.parseFloat(value) || 0;
 

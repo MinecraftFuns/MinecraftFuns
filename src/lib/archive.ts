@@ -6,21 +6,18 @@ import { monthOf, yearOf, type IsoDate } from "./time.ts";
  * The archive scheme: a post lives at `YYYY/MM/slug` and is served from
  * `/blog/YYYY/MM/slug/`.
  *
- * The month segments are redundant. A post's authoritative date is its
- * frontmatter `date`, and the folders restate the first two components of it,
- * so the interesting question is not how to build the URL but what happens
- * when the two disagree. A file dated 2026-08-01 sitting in `2026/07/` is a
- * representable state, and one nobody would notice: both the folder listing
- * and the rendered page look entirely correct on their own.
+ * The folders restate the first two components of the frontmatter `date`,
+ * which is authoritative, so the interesting question is what happens when the
+ * two disagree. A file dated 2026-08-01 sitting in `2026/07/` is representable
+ * and invisible: the folder listing and the rendered page each look correct.
  *
  * Redundancy is safe exactly when one copy is authoritative and something
- * checks the other against it. `reconcile` is that check. It runs at the
- * collection boundary, so every value downstream carries a path already proven
- * to agree with the date it came from.
+ * checks the other against it. `reconcile` is that check, and it runs at the
+ * collection boundary, so every path downstream already agrees with its date.
  *
- * The glob pattern stays `**\/*.md` rather than tightening to `*\/*\/*.md`,
- * because a pattern that excludes a misplaced file makes it vanish silently.
- * Loading it and refusing it names the file and fails the build.
+ * The glob stays `**\/*.md` rather than tightening to `*\/*\/*.md`: a pattern
+ * that excludes a misplaced file makes it vanish silently, where loading and
+ * refusing it names the file and fails the build.
  */
 
 export type PostPath = {

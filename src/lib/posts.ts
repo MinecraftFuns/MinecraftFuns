@@ -9,21 +9,16 @@ import { byRecencyWith, type IsoDate } from "./time.ts";
 import { routeUrl } from "./url.ts";
 
 /**
- * The blog's read model.
- *
- * Pages consume these types rather than raw collection entries, so the shape a
- * template renders is decided once, here, instead of in each page. Reading time
- * and URL are derived rather than stored; neither can drift out of sync with
- * the post, because neither is written down.
+ * The blog's read model. Pages consume these types rather than raw collection
+ * entries, so the shape a template renders is decided once. Reading time and
+ * URL are derived, so neither can drift out of sync with the post.
  */
 
 /**
- * An entry paired with its archive path, decoded once at the boundary.
- *
- * The pairing is what makes the path trustworthy downstream: a
- * `CollectionEntry` carries a raw `id` string that nothing has checked, while
- * this type can only be built by `publishedPosts`, which refuses any entry
- * whose folder contradicts its date.
+ * An entry paired with its archive path, decoded once at the boundary. A
+ * `CollectionEntry` carries a raw `id` that nothing has checked; this can only
+ * be built by `publishedPosts`, which refuses an entry whose folder
+ * contradicts its date.
  */
 export type PublishedPost = {
   readonly entry: CollectionEntry<"blog">;
@@ -33,13 +28,11 @@ export type PublishedPost = {
 declare const postTagBrand: unique symbol;
 
 /**
- * A label in the blog's taxonomy.
- *
- * Branded so it cannot be confused with `DocCategory`, which is a label in a
- * different one. The two are plain strings at runtime and may well spell the
- * same word, but "networking" as a post tag and "networking" as a doc category
- * are claims about different collections; a function that pools them is a bug
- * the type system can refuse rather than a convention somebody must remember.
+ * A label in the blog's taxonomy, branded so it cannot be confused with
+ * `DocCategory`. Both are plain strings at runtime and may spell the same word,
+ * but "networking" as a post tag and as a doc category are claims about
+ * different collections, and a function pooling them is a bug the type system
+ * can refuse rather than a convention somebody must remember.
  */
 export type PostTag = string & { readonly [postTagBrand]: true };
 
@@ -59,19 +52,17 @@ export const summarise = ({ entry, path }: PublishedPost): PostSummary => ({
   date: entry.data.date,
   readingMinutes: readingMinutes(entry.body ?? ""),
   /* Branded per element rather than by casting the array: `string[]` and
-     `PostTag[]` do not overlap as types, and forcing that through `unknown`
-     would assert something the element-wise narrowing actually proves. */
+     `PostTag[]` do not overlap, and forcing it through `unknown` would assert
+     what the element-wise narrowing actually proves. */
   tags: entry.data.tags.map((tag) => tag as PostTag),
 });
 
 /**
- * Published posts, newest first.
- *
- * Two policies live here rather than in each page. Draft filtering, because a
- * draft leaking onto one page that forgot the predicate is exactly the mistake
- * a single choke point removes; and path reconciliation, because a misfiled
- * post should fail the build once rather than render a plausible wrong URL on
- * every page that lists it.
+ * Published posts, newest first. Two policies live here rather than in each
+ * page: draft filtering, since a draft leaking onto the one page that forgot
+ * the predicate is what a choke point removes, and path reconciliation, since
+ * a misfiled post should fail the build once rather than render a plausible
+ * wrong URL everywhere it is listed.
  */
 export const publishedPosts = async (): Promise<readonly PublishedPost[]> => {
   const entries = await getCollection("blog", ({ data }) => !data.draft);
@@ -88,11 +79,9 @@ export const publishedPosts = async (): Promise<readonly PublishedPost[]> => {
 };
 
 /**
- * Published posts as summaries, newest first.
- *
- * Truncation happens before summarising, not after. `summarise` scans the full
- * body to derive reading time, so mapping first made the home page (which asks
- * for three) pay that scan for every post in the archive.
+ * Published posts as summaries, newest first. Truncation happens before
+ * summarising: `summarise` scans the full body for reading time, so mapping
+ * first would make the home page pay that scan for the whole archive.
  */
 export const postSummaries = async (
   limit?: number,
@@ -102,22 +91,13 @@ export const postSummaries = async (
 };
 
 /**
- * Where a tag leads.
- *
- * Derived from the tag rather than stored beside it, so the link a post
- * renders and the route `taxonomy` generates are two calls to one function
- * instead of two spellings that have to agree. A tag with no usable segment,
- * or two tags sharing one, fails the build in `postTags` below.
+ * Where a tag leads, derived rather than stored, so the link a post renders
+ * and the route `taxonomy` generates are two calls to one function. A tag with
+ * no usable segment, or two sharing one, fails the build in `postTags`.
  */
 export const tagHref = (tag: PostTag): string =>
   routeUrl(`/blog/tags/${slugify(tag)}`);
 
-/**
- * The blog's tags, alphabetically, each with its posts newest first.
- *
- * `taxonomy` is instantiated at `PostTag` here and at `DocCategory` in
- * `lib/docs.ts`, so the two lists cannot be mixed even though one function
- * built both.
- */
+/** The blog's tags, alphabetically, each with its posts newest first. */
 export const postTags = async (): Promise<readonly Taxon<PostTag, PostSummary>[]> =>
   taxonomy(await postSummaries(), (post) => post.tags, "blog tags");

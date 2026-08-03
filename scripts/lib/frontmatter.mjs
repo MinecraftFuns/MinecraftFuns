@@ -1,13 +1,8 @@
 /**
- * The frontmatter fence of an `.astro` file, parsed once for every gate.
- *
- * Two source checks need to tell the module body from the template, and a
- * fence matched by two different patterns is a fence with two definitions of
- * where it ends. This is the one.
- *
- * Offsets, not substrings alone: a caller that reports a position needs the
- * body's place in the file, and recovering that from the body's length is
- * exactly how the two drift apart.
+ * The frontmatter fence of an `.astro` file, parsed once for every gate: a
+ * fence matched by two patterns is a fence with two definitions of where it
+ * ends. Offsets are returned alongside the body, since a caller that reports a
+ * position needs the body's place in the file.
  */
 
 /** Opening fence, module body, closing fence. */
@@ -30,13 +25,10 @@ export const frontmatter = (source) => {
 };
 
 /**
- * The file rewritten so only its module body survives, with every other
- * character replaced by a space and every newline kept.
- *
- * This is what lets a parser read `.astro` frontmatter while still reporting
- * positions that match the file on disk: blanking preserves offsets, whereas
- * slicing the body out would make every line number a lie by however many
- * lines the fence occupies.
+ * The file with everything outside the module body blanked to spaces, newlines
+ * kept. Blanking preserves offsets, so a parser reads `.astro` frontmatter and
+ * still reports lines that match the file; slicing the body out would put
+ * every line number off by the height of the fence.
  */
 export const moduleBodyOnly = (source) => {
   const parsed = frontmatter(source);

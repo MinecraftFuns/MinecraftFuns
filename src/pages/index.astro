@@ -16,13 +16,7 @@ const recentPosts = await postSummaries(3);
 ---
 
 <BaseLayout>
-  {/*
-    The opening states a question this site is about, not a résumé. What I am
-    enrolled in is context for the question and belongs after it; the About
-    page is where someone goes when they want the credential, and it is one
-    click away in the nav. A homepage that leads with standing asks the reader
-    to be impressed before it has given them anything to be interested in.
-  */}
+  {/* Opens on a question, not a résumé; the credential is one click away. */}
   <PageIntro
     kind="hero"
     eyebrow="Toronto"

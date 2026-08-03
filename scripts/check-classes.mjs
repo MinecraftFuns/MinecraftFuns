@@ -57,6 +57,13 @@ const RULES = [
     pattern: /\[&[^\]]*\]:/g,
     remedy: "declare a @custom-variant so the state has a name",
   },
+  {
+    /* The tell of a hand-rolled accent link. Five components had spelled the
+       recipe out, three of them differently. */
+    rule: "inline-link-style",
+    pattern: /hover:text-accent-hover/g,
+    remedy: "use .link, or .link-in-text for a link inside a sentence",
+  },
 ];
 
 /**

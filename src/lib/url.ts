@@ -1,29 +1,22 @@
 /**
- * Base-aware link construction.
+ * Base-aware link construction, and the only module that knows the base path.
+ * A literal `href="/blog"` is correct on the custom domain and 404s on GitHub
+ * Pages, where the site is served beneath `/MinecraftFuns`.
  *
- * The site is served from different base paths depending on the target:
- * `/MinecraftFuns` on GitHub Pages, `/` on the custom domain, so a literal
- * `href="/blog"` is only correct on one of them. Every internal link goes
- * through this module, which is the single place that knows the base path.
+ * Two kinds of target with different canonical forms: a *route* resolves to a
+ * directory and ends in a slash, an *asset* resolves to a file and must not.
  *
- * Two kinds of thing get linked, and they have different canonical forms. A
- * *route* resolves to a directory in the built output and ends in a slash; an
- * *asset* resolves to a file and must not.
- *
- * On parsers. URL syntax is not a regular language: scheme handling is
- * context-sensitive, and percent-encoding, dot-segment removal, and the
- * query/fragment split all have spec-defined behaviour that a hand-written
- * pattern can only approximate. Those are delegated to the platform's WHATWG
- * parser below. The one regex that survives decides a property that genuinely
- * *is* regular (trailing slashes on a path), which is what regular
- * expressions are for.
+ * URL syntax is not a regular language, so scheme handling, percent-encoding,
+ * dot-segment removal, and the query/fragment split are delegated to the
+ * platform's WHATWG parser. The one surviving regex decides something that
+ * genuinely is regular.
  */
 
 /**
  * A syntactically valid origin that can never resolve. Mounting happens
- * against it and the origin is then discarded; `.invalid` is reserved by
- * RFC 2606, so a bug that lets one escape into an href is an obvious dead link
- * rather than a live request to somebody else's server.
+ * against it and it is then discarded; `.invalid` is reserved by RFC 2606, so
+ * one that escapes into an href is a dead link rather than a live request to
+ * somebody else's server.
  */
 const MOUNT_ORIGIN = "https://mount.invalid";
 
@@ -32,30 +25,24 @@ const TRAILING_SLASHES = /\/+$/;
 
 /**
  * The canonical form of a route. Exported because comparing routes is only
- * sound once both sides are in it; see `isWithin` below and `lib/sitemap.ts`.
+ * sound once both sides are in it; see `isWithin` and `lib/sitemap.ts`.
  */
 export const slashTerminated = (path: string): string =>
   path.endsWith("/") ? path : `${path}/`;
 
 /**
- * How an authored href relates to this deployment.
- *
- * The question is never "is this a URL" but "would prefixing this with our
- * base path corrupt it", and three unrelated shapes answer yes. Collapsing
- * them into one boolean is what forced the previous version to hand-write a
- * scheme grammar: the predicate was standing in for a sum it could not name.
- *
- * The three are mutually exclusive (anything carrying a scheme begins with
- * neither `//` nor `#`), so this is a case analysis rather than a priority
- * list, and no reordering of it can change an answer.
+ * How an authored href relates to this deployment. The question is never "is
+ * this a URL" but "would prefixing our base corrupt it", and three unrelated
+ * shapes answer yes. They are mutually exclusive, since anything carrying a
+ * scheme begins with neither `//` nor `#`, so this is a case analysis and no
+ * reordering of it can change an answer.
  */
 export type HrefKind = "absolute" | "authority" | "fragment" | "site";
 
 /**
- * Total. `URL.canParse` is the standard's own definition of an absolute URL,
- * which is the half of this that a pattern gets wrong; the other two shapes
- * are single-token prefixes that a pattern gets right, so they stay exact
- * string tests rather than becoming parser calls that would answer `false`.
+ * `URL.canParse` is the standard's own definition of an absolute URL, which is
+ * the half a pattern gets wrong; the other two are single-token prefixes,
+ * which a pattern gets right and the parser would answer `false` for.
  */
 export const classifyHref = (href: string): HrefKind => {
   if (URL.canParse(href)) return "absolute";
@@ -65,18 +52,14 @@ export const classifyHref = (href: string): HrefKind => {
 };
 
 /**
- * Mount `path` beneath `base`.
+ * Mount `path` beneath `base`, which is prefixing, not resolution.
  *
- * Deliberately *not* `new URL(path, base)`. That performs RFC 3986 reference
- * resolution, under which a rooted path replaces the base's path outright:
- * resolving `/blog` against `…/MinecraftFuns/` yields `/blog`, and the
- * deployment prefix silently vanishes from every link. Mounting is prefixing.
- * They are different operations and this site needs the second one.
- *
- * The parser is still the right engine, because it owns the parts that are not
- * regular. Making the path relative and the base slash-terminated is precisely
- * the shape under which resolution and mounting coincide, so the spec
- * algorithm is borrowed rather than reimplemented. Both adjustments are
+ * Deliberately not `new URL(path, base)`: RFC 3986 reference resolution lets a
+ * rooted path replace the base's path outright, so `/blog` against
+ * `…/MinecraftFuns/` yields `/blog` and the deployment prefix vanishes from
+ * every link. The parser is still the right engine for the parts that are not
+ * regular, and a relative path against a slash-terminated base is exactly the
+ * shape under which resolution and mounting coincide. Both adjustments are
  * load-bearing: an unterminated base loses its final segment.
  */
 const mount = (base: string, path: string): URL => {
@@ -87,10 +70,7 @@ const mount = (base: string, path: string): URL => {
   return new URL(path.startsWith("/") ? path.slice(1) : path, root);
 };
 
-/**
- * What each kind of target does to a mounted pathname. A total map over the
- * closed sum, and the single point at which routes and assets differ.
- */
+/** The single point at which routes and assets differ. */
 type Target = "route" | "asset";
 
 const TERMINATE: Readonly<Record<Target, (pathname: string) => string>> = {
@@ -99,11 +79,10 @@ const TERMINATE: Readonly<Record<Target, (pathname: string) => string>> = {
 };
 
 /**
- * Total: every (base, path) pair maps to a string, and no input throws.
- *
- * The parser hands back the query and fragment already separated from the
- * path, so the slash lands where it belongs without any splitting of our own:
- * `/about#contact` becomes `/about/#contact` rather than `/about#contact/`.
+ * Total: every (base, path) pair maps to a string and no input throws. The
+ * parser hands back query and fragment already split from the path, so the
+ * slash lands where it belongs: `/about#contact` becomes `/about/#contact`
+ * rather than `/about#contact/`.
  */
 const join = (base: string, path: string, target: Target): string => {
   if (classifyHref(path) !== "site") return path;
@@ -121,13 +100,10 @@ export const joinRoute = (base: string, path: string): string =>
   join(base, path, "route");
 
 /**
- * Astro injects `BASE_URL`; Node running the tests does not. Reading it
- * defensively keeps this module importable in both, and the `/` fallback is
- * the correct base for an un-based build rather than a silent failure.
- *
- * Exported because `lib/deployment.ts` must answer "which deployment is this"
- * from the same value the links are built against. Two independent reads of
- * the environment are two chances to disagree about where the site is mounted.
+ * Astro injects `BASE_URL`; Node running the tests does not, so the read is
+ * defensive and `/` is the correct base for an un-based build. Exported
+ * because `lib/deployment.ts` must answer "which deployment is this" from the
+ * same value the links are built against.
  */
 export const currentBase = (): string => {
   const env = import.meta.env as { readonly BASE_URL?: string } | undefined;
@@ -141,13 +117,11 @@ export const routeUrl = (path: string): string => joinRoute(currentBase(), path)
 export const assetUrl = (path: string): string => joinBase(currentBase(), path);
 
 /**
- * Section containment, used to mark the current nav item.
- *
- * Both sides are slash-terminated first, which makes a plain `startsWith`
- * correct: the separator becomes part of the prefix, so `/blog/` matches
- * `/blog/2026/` but not `/blogroll/`. Left as string comparison deliberately:
- * these are already-resolved pathnames from one origin, so re-parsing them
- * would buy nothing that the mount above has not already established.
+ * Section containment, used to mark the current nav item. Slash-terminating
+ * both sides makes the separator part of the prefix, so `/blog/` matches
+ * `/blog/2026/` but not `/blogroll/`. String comparison is deliberate: these
+ * are resolved pathnames from one origin, and re-parsing them would establish
+ * nothing the mount above has not.
  */
 export const isWithin = (pathname: string, target: string): boolean =>
   slashTerminated(pathname).startsWith(slashTerminated(target));

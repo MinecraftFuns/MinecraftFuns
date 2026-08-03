@@ -2,28 +2,23 @@
 /**
  * Source gate: no `break`, no `continue`.
  *
- * Both are non-local jumps. They make where a loop body ends depend on how
- * deeply it is nested rather than on what it computes, so the exit condition
- * cannot be named, cannot be passed anywhere, and cannot be tested apart from
- * the loop it sits inside. Every loop in this repo is the backend of a fold,
- * a filter, or a partial map, and each of those has a place for the condition
- * that reads better than a jump:
+ * Both are non-local jumps: where a loop body ends comes to depend on how
+ * deeply it nests rather than on what it computes, so the exit condition
+ * cannot be named, passed, or tested apart from the loop around it. Every loop
+ * here is the backend of a fold, a filter, or a partial map, each of which has
+ * somewhere better to put it:
  *
  *   continue on a predicate     a predicate, composed with `allOf`
- *   continue past a bad value   a function returning `undefined`, pushed when present
+ *   continue past a bad value   a function returning `undefined`
  *   break on a hit              `find`, `some`, or `every`
  *   break on a count            `slice` before the work, not a counter during it
- *   break in a `switch`         `return` from the case, which every one here does
+ *   break in a `switch`         `return` from the case
  *
- * The last is why no exemption is carved out for `switch`. A case that breaks
- * is a case that falls through when someone forgets; a case that returns is a
- * case that cannot. Forbidding `break` outright makes the `switch` statements
- * in this repo expressions in all but syntax, which is what they already are.
+ * No exemption for `switch`: a case that breaks falls through when somebody
+ * forgets, and a case that returns cannot.
  *
- * This parses rather than greps. `break` and `continue` are short words that
- * occur in prose, in identifiers, and in string literals, and a regex that
- * tried to exclude those would be a worse parser than the one already
- * installed for typechecking.
+ * This parses rather than greps, because `break` and `continue` are ordinary
+ * words that occur in prose, identifiers, and string literals.
  */
 
 import { readdir, readFile } from "node:fs/promises";

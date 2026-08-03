@@ -1,63 +1,40 @@
 import { deployments } from "../config/deployments.ts";
 import type { DeploymentTargetConfig } from "../config/schema.ts";
-import { assertNever, invalid, ok, type Parsed } from "./adt.ts";
+import { invalid, ok, type Parsed } from "./adt.ts";
 import { currentBase, joinBase, joinRoute, slashTerminated } from "./url.ts";
 
 /**
- * The deployment read model: which copy of the site this build is, and where
- * the authoritative copy lives.
+ * Which copy of the site this build is, and where the authoritative copy lives.
  *
- * The rule this module exists to enforce is that **a page's canonical URL is a
- * property of the site, not of the build that emitted it**. Every build points
- * `rel="canonical"` at the canonical origin, so a crawler that reaches a
- * mirror is told, on that page, exactly which URL to index instead. Previously
- * each build canonicalised to *itself*, which is the one answer guaranteed to
- * be wrong on every target but one, and it meant the mirror advertised itself
- * as authoritative while separately asking not to be indexed: two signals,
- * derived independently, disagreeing.
+ * The rule the module exists for: **a page's canonical URL is a property of
+ * the site, not of the build that emitted it**. Every build points
+ * `rel="canonical"` at the canonical origin, so a crawler reaching a mirror is
+ * told on that page which URL to index instead.
  *
- * Pure and total. Nothing here reads the clock, the network, or the disk; the
- * one environment read is `BASE_URL`, which Astro fixes at build time.
+ * Pure and total; the one environment read is `BASE_URL`, fixed at build time.
  */
 
-/**
- * Which copy this is.
- *
- * A closed sum rather than an `isCanonical` boolean. The boolean reads the
- * same at every call site whichever way it is set, and it was already spelled
- * three different ways (`isPrimary` in two modules and an origin comparison in
- * a third). A tag can be eliminated exhaustively, which is what the `switch`
- * statements downstream rely on.
- */
+/** A tag rather than an `isCanonical` boolean, which reads the same however set. */
 export type DeploymentRole = "canonical" | "mirror";
 
 /**
- * The set of deployment names, derived from the config rather than declared
- * beside it.
- *
- * `"joefang-org" | "github-pages"` today, and it changes when
- * `config/deployments.ts` changes, so a name cannot exist in one place and not
- * the other. Each is also the name of the GitHub environment that deploys it,
- * which is what lets the workflow write `environment: ${{ matrix.id }}`.
+ * The declared deployment names, derived from the config so a name cannot
+ * exist in one place and not the other. Each is also the GitHub environment
+ * that deploys it, which is what lets the workflow write
+ * `environment: ${{ matrix.id }}`.
  */
 export type DeploymentId =
   | (typeof deployments.canonical)["id"]
   | (typeof deployments.mirrors)[number]["id"];
 
-/**
- * A target with its role attached.
- *
- * The role is *derived* from the target's position in the config, never
- * authored, so it cannot disagree with the config. This is the payoff of
- * making `canonical` a field: the tag is a function of the structure.
- */
+/** The role is derived from position in the config, never authored. */
 export type DeploymentTarget = DeploymentTargetConfig & {
   readonly id: DeploymentId;
   readonly role: DeploymentRole;
 };
 
-/* The parameter is narrowed to a *declared* id rather than any string, so this
-   cannot mint a target naming a deployment the config does not contain. */
+/* Narrowed to a declared id, so this cannot mint a target naming a deployment
+   the config does not contain. */
 const withRole = (
   target: DeploymentTargetConfig & { readonly id: DeploymentId },
   role: DeploymentRole,
@@ -75,20 +52,16 @@ export const targets: readonly DeploymentTarget[] = [
 ];
 
 /**
- * What `astro dev` and an unparameterised build assume.
- *
- * A mirror when one exists, because a based deployment is the *harder* URL
- * shape: a link written `href="/blog"` without going through `routeUrl` works
- * at the root and 404s beneath a base path, so defaulting to the root would
- * let that class of bug pass locally and fail only in production. Falling back
- * to the canonical target keeps this total when there are no mirrors.
+ * What `astro dev` and an unparameterised build assume: a mirror when one
+ * exists, because a based deployment is the harder URL shape. A link written
+ * `href="/blog"` without going through `routeUrl` works at the root and 404s
+ * beneath a base path, so defaulting to the root would hide that class of bug
+ * until production.
  */
 export const developmentTarget: DeploymentTarget =
   targets.find((target) => target.role === "mirror") ?? canonicalTarget;
 
-/* Origins are compared through the URL parser rather than as strings, so host
-   case and a default port normalise; bases are compared slash-terminated, so
-   `/MinecraftFuns` and `/MinecraftFuns/` are the one value they denote. */
+/* Through the parser, so host case and a default port normalise. */
 const sameOrigin = (a: string, b: string): boolean => {
   const parsed = URL.parse(a);
   const other = URL.parse(b);
@@ -96,13 +69,10 @@ const sameOrigin = (a: string, b: string): boolean => {
 };
 
 /**
- * Identify the deployment from the parameters a build was given.
- *
- * This is the parse-don't-validate boundary for `SITE_URL`/`SITE_BASE`: two
- * environment strings, which nothing has checked, become a `DeploymentTarget`
- * that downstream code may trust. An unrecognised pair is a build that no
- * declaration describes, so the error names the ones that exist rather than
- * guessing which was meant.
+ * The parse-don't-validate boundary for `SITE_URL`/`SITE_BASE`: two unchecked
+ * environment strings become a target downstream code may trust. An
+ * unrecognised pair names the declarations that exist rather than guessing
+ * which was meant.
  */
 export const findTarget = (origin: string, base: string): Parsed<DeploymentTarget> => {
   const wanted = slashTerminated(base);
@@ -122,14 +92,10 @@ export const findTarget = (origin: string, base: string): Parsed<DeploymentTarge
 };
 
 /**
- * The active deployment, from Astro's own view of the build.
- *
- * `site` is threaded in rather than read here because `Astro.site` is only
- * available inside a component or endpoint; the base comes from `BASE_URL`,
- * which Astro injects everywhere. Returning `Parsed` keeps the absent case a
- * value rather than a thrown surprise; callers at a build boundary eliminate
- * it with `orThrow`, since a build that cannot say where it is deploying to
- * should not produce an artifact.
+ * The active deployment. `site` is threaded in because `Astro.site` is only
+ * available inside a component or endpoint. Callers at a build boundary
+ * eliminate the `Parsed` with `orThrow`: a build that cannot say where it is
+ * deploying to should not produce an artifact.
  */
 export const activeTarget = (site: URL | undefined): Parsed<DeploymentTarget> =>
   site === undefined
@@ -137,13 +103,10 @@ export const activeTarget = (site: URL | undefined): Parsed<DeploymentTarget> =>
     : findTarget(site.origin, currentBase());
 
 /**
- * Strip a deployment's base from a pathname, yielding the site-relative route.
- *
  * The inverse of mounting, and the step the canonical URL cannot be computed
- * without: `/MinecraftFuns/blog/` on the mirror and `/blog/` on the canonical
- * origin are the same page, and only the site-relative form says so. A
- * pathname outside its own base is a contradiction rather than a route, so it
- * is rejected instead of being silently truncated.
+ * without: `/MinecraftFuns/blog/` and `/blog/` are the same page, and only the
+ * site-relative form says so. A pathname outside its own base is a
+ * contradiction rather than a route, so it is rejected, not truncated.
  */
 export const siteRelative = (base: string, pathname: string): Parsed<string> => {
   const mounted = slashTerminated(base);
@@ -155,13 +118,9 @@ export const siteRelative = (base: string, pathname: string): Parsed<string> => 
 };
 
 /**
- * The canonical URL of a page, wherever it was built.
- *
- * Composed rather than concatenated: the pathname is brought back to
- * site-relative form against the *active* base, then mounted on the canonical
- * base and resolved against the canonical origin. String surgery on the two
- * bases would be shorter and would be wrong whenever exactly one of them is
- * the root.
+ * The canonical URL of a page, wherever it was built: unmount from the active
+ * base, mount on the canonical one, resolve. String surgery on the two bases
+ * would be shorter and wrong whenever exactly one of them is the root.
  */
 export const canonicalHref = (
   target: DeploymentTarget,
@@ -184,19 +143,13 @@ export const canonicalSitemapUrl = (): string =>
     .href;
 
 /**
- * Whether this deployment asks to be indexed.
- *
- * Total over the role, so adding a third kind of deployment is a compile error
- * here rather than a mirror that quietly starts competing with the canonical
- * copy in search results.
+ * Whether this deployment asks to be indexed. A third kind of deployment is a
+ * missing key here rather than a mirror that quietly competes with the
+ * canonical copy in search results.
  */
-export const indexable = (role: DeploymentRole): boolean => {
-  switch (role) {
-    case "canonical":
-      return true;
-    case "mirror":
-      return false;
-    default:
-      return assertNever(role);
-  }
+const INDEXABLE: Readonly<Record<DeploymentRole, boolean>> = {
+  canonical: true,
+  mirror: false,
 };
+
+export const indexable = (role: DeploymentRole): boolean => INDEXABLE[role];
