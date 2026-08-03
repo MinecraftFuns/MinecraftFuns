@@ -103,13 +103,23 @@ const addressesOn = (
     .map((user) => addressOn(user, domain))
     .filter((address) => address !== undefined);
 
-  /* The first occurrence of each hash. A `Map` keyed by hash would also
-     deduplicate, but it keeps the last, and "first wins" is the property this
-     needs stated rather than inherited from a collection's overwrite rule. */
-  return published.filter(
-    (address, index) =>
-      published.findIndex((other) => other.hash === address.hash) === index,
-  );
+  /*
+   * The first occurrence of each hash, kept by asking before writing rather
+   * than by overwriting. `Map` insertion order preserves the sequence, and
+   * `has` states "first wins" instead of leaving it to a collection's
+   * overwrite rule, which keeps the last.
+   *
+   * Hashed rather than scanned. The `findIndex` this replaces re-walked the
+   * whole list for every address to ask a question a `Set` answers in one
+   * step: quadratic work to compute a distinctness that is a lookup.
+   */
+  const byHash = new Map<WkdHash, PublishedAddress>();
+
+  for (const address of published) {
+    if (!byHash.has(address.hash)) byHash.set(address.hash, address);
+  }
+
+  return [...byHash.values()];
 };
 
 const load = async (domain: string): Promise<readonly PublishedKey[]> => {

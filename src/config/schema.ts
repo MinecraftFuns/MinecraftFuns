@@ -158,12 +158,27 @@ export type RedirectConfig = {
  * `set` is a record rather than a list of pairs, which makes a repeated header
  * name unrepresentable in the common case: object keys are unique. Names
  * differing only in case remain expressible, so the decoder still checks.
+ *
+ * A rule must do something. Written as two independent optionals, `{ path }`
+ * alone typechecked, naming a path the rule then did nothing to, and only the
+ * decoder said so, at build time. As a union at least one of the two is
+ * required and the empty rule fails to compile. `remove` is non-empty for the
+ * same reason: an empty list removes nothing.
+ *
+ * What a type still cannot say is that a `set` record has any keys, so
+ * `{ path, set: {} }` stays expressible and the decoder keeps its check for
+ * exactly that case.
  */
-export type HeaderConfig = {
-  readonly path: RootedPath;
-  readonly set?: Readonly<Record<string, string>>;
-  readonly remove?: readonly string[];
-};
+export type HeaderConfig = { readonly path: RootedPath } & (
+  | {
+      readonly set: Readonly<Record<string, string>>;
+      readonly remove?: readonly [string, ...string[]];
+    }
+  | {
+      readonly set?: Readonly<Record<string, string>>;
+      readonly remove: readonly [string, ...string[]];
+    }
+);
 
 export type HostConfig = {
   readonly headers: readonly HeaderConfig[];

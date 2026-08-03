@@ -16,7 +16,7 @@ import {
   type HeaderRule,
   type Redirect,
 } from "./hosting.ts";
-import type { RootedPath } from "../config/schema.ts";
+import type { HeaderConfig, RootedPath } from "../config/schema.ts";
 
 const reasons = (problems: readonly { reason: string }[]) =>
   problems.map((problem) => problem.reason);
@@ -206,8 +206,25 @@ describe("decodeHostConfig", () => {
     assert.equal(decoded.tag === "ok" && decoded.value.redirects[0]?.status, 301);
   });
 
+  /*
+   * `HeaderConfig` now requires one of `set`/`remove`, so config cannot reach
+   * this and the cast is what lets the test still describe it. The decoder is
+   * exported, though, and the check stays live for callers whose input was
+   * never typed. The case a type cannot reach is the empty record below.
+   */
   it("rejects a header rule that does nothing", () => {
-    const decoded = decodeHostConfig({ headers: [{ path: "/a" }], redirects: [] }, under);
+    const nothing = { path: "/a" } as unknown as HeaderConfig;
+    assert.equal(
+      decodeHostConfig({ headers: [nothing], redirects: [] }, under).tag,
+      "invalid",
+    );
+  });
+
+  it("rejects a header rule whose only declaration is empty", () => {
+    const decoded = decodeHostConfig(
+      { headers: [{ path: "/a", set: {} }], redirects: [] },
+      under,
+    );
     assert.equal(decoded.tag, "invalid");
   });
 

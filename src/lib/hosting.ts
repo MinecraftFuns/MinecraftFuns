@@ -323,25 +323,26 @@ const headerName = (op: HeaderOp): string => op.name.toLowerCase();
 /**
  * Header rules that quietly lose one of their own declarations.
  *
- * "The ops that repeat an earlier name, each of which is a problem": a filter
- * and a map, so the code says which step is which. It read as one `flatMap`
- * threading a mutable `Set`, where returning the empty array was the filter
- * and returning a singleton was the map. Looking back along the list is the
- * same shape the shadowing check above uses, and both are bounded by a rule's
- * own handful of entries.
+ * One pass per rule, collecting the ops that repeat a name already seen, then
+ * a map turning each into a problem. Looking back along the list re-walked the
+ * rule for every op to answer a membership question, which is what a `Set`
+ * answers in one step.
  */
 export const headerProblems = (
   rules: readonly HeaderRule[],
 ): readonly RuleProblem[] =>
-  rules.flatMap((rule) =>
-    rule.ops
-      .filter((op, index) =>
-        rule.ops
-          .slice(0, index)
-          .some((earlier) => headerName(earlier) === headerName(op)),
-      )
-      .map((op) => ({
-        rule: renderPattern(rule.pattern),
-        reason: `sets ${op.name} more than once; only the last would apply`,
-      })),
-  );
+  rules.flatMap((rule) => {
+    const seen = new Set<string>();
+    const repeats: HeaderOp[] = [];
+
+    for (const op of rule.ops) {
+      const name = headerName(op);
+      if (seen.has(name)) repeats.push(op);
+      else seen.add(name);
+    }
+
+    return repeats.map((op) => ({
+      rule: renderPattern(rule.pattern),
+      reason: `sets ${op.name} more than once; only the last would apply`,
+    }));
+  });
