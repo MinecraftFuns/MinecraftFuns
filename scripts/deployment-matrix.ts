@@ -16,7 +16,11 @@
 
 import { appendFile } from "node:fs/promises";
 
-import { canonicalTarget, targets } from "../src/lib/deployment.ts";
+import {
+  canonicalTarget,
+  targets,
+  type DeploymentTarget,
+} from "../src/lib/deployment.ts";
 
 /**
  * `include` entries for `strategy.matrix`. The projection is explicit so that
@@ -25,11 +29,16 @@ import { canonicalTarget, targets } from "../src/lib/deployment.ts";
  * `id` is the deployment's only name: the GitHub environment, the job, the
  * artifact, and the matrix leg all use it.
  */
-export const matrixInclude = (deployments) =>
+/** Exactly the fields CI consumes, and no more. */
+export type MatrixLeg = Pick<DeploymentTarget, "id" | "origin" | "base" | "role">;
+
+export const matrixInclude = (
+  deployments: readonly DeploymentTarget[],
+): readonly MatrixLeg[] =>
   deployments.map(({ id, origin, base, role }) => ({ id, origin, base, role }));
 
 /** GITHUB_OUTPUT is line-oriented, so every value must be a single line. */
-export const renderOutputs = (outputs) =>
+export const renderOutputs = (outputs: Readonly<Record<string, unknown>>): string =>
   Object.entries(outputs)
     .map(([name, value]) => `${name}=${JSON.stringify(value)}`)
     .join("\n");

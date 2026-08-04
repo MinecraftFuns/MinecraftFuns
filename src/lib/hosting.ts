@@ -1,9 +1,9 @@
 import type {
   HeaderConfig,
   HostConfig,
-  Href,
   RedirectConfig,
   RedirectStatus,
+  RedirectTarget,
   RootedPath,
 } from "../config/schema.ts";
 import {
@@ -13,7 +13,9 @@ import {
   collect,
   invalid,
   mapParsed,
+  nonEmpty,
   ok,
+  type NonEmpty,
   type Parsed,
 } from "./adt.ts";
 
@@ -121,7 +123,7 @@ export type HeaderOp =
  */
 export type HeaderRule = {
   readonly pattern: PathPattern;
-  readonly ops: readonly [HeaderOp, ...HeaderOp[]];
+  readonly ops: NonEmpty<HeaderOp>;
 };
 
 const renderOp = (op: HeaderOp): string => {
@@ -165,11 +167,11 @@ export const renderHeaders = (rules: readonly HeaderRule[]): string =>
 export type Resolve = (path: string) => string;
 
 /**
- * The decision procedure for `Href`. An `HttpsUrl` cannot begin with a slash
- * and a `RootedPath` must, so the leading slash is not a heuristic about the
- * string but the discriminant of the union, and this eliminates it.
+ * The decision procedure for `RedirectTarget`. An `HttpsUrl` cannot begin with
+ * a slash and a `RootedPath` must, so the leading slash is not a heuristic
+ * about the string but the discriminant of the union, and this eliminates it.
  */
-const isRooted = (href: Href): href is RootedPath => href.startsWith("/");
+const isRooted = (href: RedirectTarget): href is RootedPath => href.startsWith("/");
 
 /**
  * Total, and now smaller than it was: the leading slash is `RootedPath`'s to
@@ -219,10 +221,10 @@ const decodeHeaderRule = (config: HeaderConfig, resolve: Resolve): Parsed<Header
       ...(config.remove ?? []).map((name): HeaderOp => ({ kind: "remove", name })),
     ];
 
-    const [first, ...rest] = ops;
-    return first === undefined
+    const declared = nonEmpty(ops);
+    return declared === undefined
       ? invalid(`${config.path} sets and removes nothing`)
-      : ok({ pattern: resolvePattern(pattern, resolve), ops: [first, ...rest] });
+      : ok({ pattern: resolvePattern(pattern, resolve), ops: declared });
   });
 
 /**
@@ -247,12 +249,13 @@ export const decodeHostConfig = (
     /* Dependent, so `andThen`: shadowing and duplication are questions about
        rules that decoded, and there are none to ask of a config that did not. */
     ([headers, redirects]) => {
-      const [first, ...rest] = [
-        ...redirectProblems(redirects),
-        ...headerProblems(headers),
-      ].map(({ rule, reason }) => `${rule}: ${reason}`);
+      const problems = nonEmpty(
+        [...redirectProblems(redirects), ...headerProblems(headers)].map(
+          ({ rule, reason }) => `${rule}: ${reason}`,
+        ),
+      );
 
-      return first === undefined ? ok({ headers, redirects }) : invalid(first, ...rest);
+      return problems === undefined ? ok({ headers, redirects }) : invalid(...problems);
     },
   );
 

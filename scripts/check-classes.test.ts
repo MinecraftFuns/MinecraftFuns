@@ -6,11 +6,13 @@ import {
   classRegions,
   typeRoles,
   typeRolesSet,
-} from "./check-classes.mjs";
+} from "./check-classes.ts";
 
-const astro = (frontmatter, template) => `---\n${frontmatter}\n---\n${template}`;
+const astro = (frontmatter: string, template: string): string =>
+  `---\n${frontmatter}\n---\n${template}`;
 
-const rulesFound = (source) => anonymousValues(source).map((found) => found.rule);
+const rulesFound = (source: string): readonly string[] =>
+  anonymousValues(source).map((found) => found.rule);
 
 describe("classRegions", () => {
   it("returns the whole file when there is no frontmatter", () => {
@@ -115,7 +117,7 @@ describe("typeRolesSet", () => {
       found.map((problem) => problem.text),
       ["text-caption"],
     );
-    assert.equal(found[0].rule, "type-in-page");
+    assert.equal(found[0]?.rule, "type-in-page");
   });
 
   /*
@@ -161,7 +163,8 @@ describe("typeRolesSet", () => {
  * a single class, and the pattern has to stay inside one attribute.
  */
 describe("recipe rules", () => {
-  const rules = (source) => anonymousValues(source).map(({ rule }) => rule);
+  const rules = (source: string): readonly string[] =>
+    anonymousValues(source).map(({ rule }) => rule);
 
   it("catches a hand-rolled accent link", () => {
     const source = astro("", '<a class="text-accent hover:text-accent-hover">x</a>');

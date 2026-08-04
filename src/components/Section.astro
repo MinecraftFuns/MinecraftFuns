@@ -1,5 +1,5 @@
 ---
-import { assertNever } from "../lib/adt.ts";
+import type { Href } from "../lib/url.ts";
 
 /**
  * A titled section with a ruled head.
@@ -15,7 +15,7 @@ import { assertNever } from "../lib/adt.ts";
  * About has neither.
  */
 export type SectionTrailing =
-  | { readonly kind: "link"; readonly href: string; readonly label: string }
+  | { readonly kind: "link"; readonly href: Href; readonly label: string }
   | { readonly kind: "count"; readonly value: number };
 
 type Props = {
@@ -28,13 +28,15 @@ type Props = {
 const { id, title, blurb, trailing } = Astro.props;
 
 /*
- * Astro templates cannot host a `switch`, so exhaustiveness is asserted here
- * instead: a fourth variant fails to typecheck against `assertNever` until the
- * markup below is taught to render it.
+ * Astro templates cannot host a `switch`, so exhaustiveness is stated as a
+ * type; see the longer note in `EntryList.astro`. Asking about the sum itself
+ * rather than about `trailing` also drops the `undefined` case, which was
+ * never part of the question.
  */
-if (trailing !== undefined && trailing.kind !== "link" && trailing.kind !== "count") {
-  assertNever(trailing);
-}
+type Unhandled = Exclude<SectionTrailing["kind"], "link" | "count">;
+
+const _exhaustive: [Unhandled] extends [never] ? true : never = true;
+void _exhaustive;
 ---
 
 {

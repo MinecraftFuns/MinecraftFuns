@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { partitionStaged } from "./format-changed.mjs";
+import { partitionStaged } from "./format-changed.ts";
 
 /*
  * The one rule in this script that can lose work: a file with both staged and

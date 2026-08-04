@@ -1,8 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { compareFindings, dedupeFindings, summarise } from "./checks.mjs";
-import { toJson, toMarkdown } from "./report.mjs";
+import {
+  compareFindings,
+  dedupeFindings,
+  summarise,
+  type MergedFinding,
+} from "./checks.ts";
+import { toJson, toMarkdown, type Meta } from "./report.ts";
 
 /*
  * The browser-driven half of the audit cannot run here, so these cover the
@@ -11,7 +16,9 @@ import { toJson, toMarkdown } from "./report.mjs";
  * it is believed.
  */
 
-const finding = (overrides = {}) => ({
+/* Built as a `MergedFinding` so one fixture serves both halves: `dedupe`
+   accepts it as a `Finding`, and `toMarkdown` needs the contexts. */
+const finding = (overrides: Partial<MergedFinding> = {}): MergedFinding => ({
   category: "accessibility",
   rule: "color-contrast",
   impact: "serious",
@@ -20,10 +27,11 @@ const finding = (overrides = {}) => ({
   colorScheme: "light",
   selector: ".x",
   message: "insufficient contrast",
+  contexts: [],
   ...overrides,
 });
 
-const META = {
+const META: Meta = {
   generatedAt: "2026-08-01T00:00:00.000Z",
   target: "http://localhost:4321/MinecraftFuns/",
   pages: ["/", "/blog/"],
@@ -38,7 +46,7 @@ describe("dedupeFindings", () => {
       finding({ viewport: "narrow", colorScheme: "light" }),
     ]);
     assert.equal(deduped.length, 1);
-    assert.deepEqual(deduped[0].contexts, [
+    assert.deepEqual(deduped[0]?.contexts, [
       "desktop/light",
       "desktop/dark",
       "narrow/light",
@@ -58,14 +66,14 @@ describe("dedupeFindings", () => {
 
   it("does not repeat an identical context", () => {
     const deduped = dedupeFindings([finding(), finding()]);
-    assert.deepEqual(deduped[0].contexts, ["desktop/light"]);
+    assert.deepEqual(deduped[0]?.contexts, ["desktop/light"]);
   });
 
   it("handles findings with no viewport or scheme", () => {
     const deduped = dedupeFindings([
       finding({ viewport: undefined, colorScheme: undefined }),
     ]);
-    assert.deepEqual(deduped[0].contexts, []);
+    assert.deepEqual(deduped[0]?.contexts, []);
   });
 
   it("returns an empty list for no input", () => {

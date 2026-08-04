@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { jumps } from "./check-control-flow.mjs";
+import { jumps, type Jump } from "./check-control-flow.ts";
 
 /*
  * The violating code lives in template literals rather than in this file's
@@ -12,7 +12,8 @@ import { jumps } from "./check-control-flow.mjs";
  * `continue` are ordinary English words and perfectly good identifiers.
  */
 
-const keywords = (found) => found.map(({ keyword }) => keyword);
+const keywords = (found: readonly Jump[]): readonly string[] =>
+  found.map(({ keyword }) => keyword);
 
 describe("jumps", () => {
   it("finds a continue in a loop", () => {

@@ -1,7 +1,7 @@
 import { contact } from "../config/contact.ts";
-import type { HttpsUrl, Link, PlatformName } from "../config/schema.ts";
+import type { HttpsUrl, PlatformName } from "../config/schema.ts";
 import { formatFingerprint, publishedKeys } from "./keys.ts";
-import { routeUrl } from "./url.ts";
+import { routeUrl, type Href } from "./url.ts";
 
 /**
  * Profiles, resolved from handles.
@@ -29,8 +29,11 @@ const PLATFORMS = {
   { readonly label: string; readonly url: (handle: string) => HttpsUrl }
 >;
 
-/** A `Link` that also carries the bare handle, and whether it proves identity. */
-export type Profile = Link & {
+/** A resolved link that also carries the bare handle, and whether it proves
+ *  identity. */
+export type Profile = {
+  readonly label: string;
+  readonly href: Href;
   /** As displayed: the handle itself, not a URL. */
   readonly handle: string;
   /**
@@ -51,7 +54,7 @@ export const profiles: readonly Profile[] = contact.profiles.map(
 );
 
 /** This site's own key route. Not a profile: it is a document, not an account. */
-export const pgpHref = (): string => routeUrl("/pgp");
+export const pgpHref = (): Href => routeUrl("/pgp");
 
 /**
  * Everything the footer lists. Profiles plus the key, which is ours rather than

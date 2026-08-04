@@ -11,13 +11,37 @@
  */
 
 /** One block per problem, blank line between. The usual body. */
-export const each = (render) => (problems) => problems.map(render).join("\n\n");
+export const each =
+  <P>(render: (problem: P) => string) =>
+  (problems: readonly P[]): string =>
+    problems.map(render).join("\n\n");
 
 /**
  * Report and set the exit code. The console and `process.exitCode` are the
  * only effects; the problems are returned so a caller can keep inspecting them.
  */
-export const report = ({ name, problems, passed, failed, body }) => {
+/**
+ * What a gate reports. Generic in the problem, which is the whole point of
+ * `body` being a parameter: a line number, a class name, and a viewport are
+ * different facts, and one flattened record shape would say less about each.
+ */
+export type Report<P> = {
+  readonly name: string;
+  readonly problems: readonly P[];
+  /** Phrase completing "<name>: OK, …". */
+  readonly passed: string;
+  /** Phrase completing "<name>: n problem(s) …". May be empty. */
+  readonly failed: string;
+  readonly body: (problems: readonly P[]) => string;
+};
+
+export const report = <P>({
+  name,
+  problems,
+  passed,
+  failed,
+  body,
+}: Report<P>): readonly P[] => {
   if (problems.length === 0) {
     console.log(`${name}: OK, ${passed}`);
     return problems;
@@ -35,7 +59,7 @@ export const report = ({ name, problems, passed, failed, body }) => {
  * A gate that cannot run at all, which is not the same as one that found
  * nothing. Reported separately so an absent `dist/` never reads as a pass.
  */
-export const cannotRun = (name, reason) => {
+export const cannotRun = (name: string, reason: string): void => {
   console.error(`${name}: ${reason}`);
   process.exitCode = 1;
 };

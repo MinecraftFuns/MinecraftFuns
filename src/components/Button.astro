@@ -1,4 +1,6 @@
 ---
+import type { Href } from "../lib/url.ts";
+
 /**
  * A link styled as a control. The only place a control's look is decided.
  *
@@ -29,7 +31,7 @@ export type ButtonTone = "primary" | "secondary";
 export type ButtonSize = "control" | "compact";
 
 type Props = {
-  readonly href: string;
+  readonly href: Href;
   readonly tone: ButtonTone;
   /** Required rather than defaulted: a control's size is a decision. */
   readonly size: ButtonSize;

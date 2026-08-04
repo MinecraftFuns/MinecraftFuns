@@ -20,17 +20,24 @@
 import { readdir, readFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
 
-import { each, report } from "./lib/gate.mjs";
+import { each, report } from "./lib/gate.ts";
 
 const EM_DASH = String.fromCodePoint(0x2014);
 
 /** Trees this project writes, and the extensions worth reading in each. */
 const ROOTS = ["src", "scripts", ".github/workflows"];
 const EXTENSIONS = [".ts", ".astro", ".mjs", ".js", ".css", ".md", ".yml", ".yaml"];
-const LOOSE = ["astro.config.mjs", "README.md"];
+const LOOSE = ["astro.config.ts", "README.md"];
+
+/** One banned character, where it sits, and the line it sits on. */
+export type EmDash = {
+  readonly path: string;
+  readonly line: number;
+  readonly text: string;
+};
 
 /** Every occurrence in one file, with the line it sits on. Pure and total. */
-export const emDashes = (path, source) =>
+export const emDashes = (path: string, source: string): readonly EmDash[] =>
   source
     .split("\n")
     .map((text, index) => ({ text, line: index + 1 }))
@@ -41,7 +48,7 @@ export const emDashes = (path, source) =>
 // Effect boundary
 // ---------------------------------------------------------------------------
 
-const sourcesUnder = async (dir) => {
+const sourcesUnder = async (dir: string): Promise<readonly string[]> => {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true });
   return entries
     .filter(

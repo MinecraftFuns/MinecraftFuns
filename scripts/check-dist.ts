@@ -15,7 +15,7 @@
  *  - Violations are *accumulated*, not thrown. One run reports every problem,
  *    because fixing them one CI round-trip at a time is how people start
  *    skipping the gate.
- *  - The pure functions below are exported and covered by check-dist.test.mjs,
+ *  - The pure functions below are exported and covered by check-dist.test.ts,
  *    which feeds them known-bad input. A detector nobody tests is a detector
  *    that silently stops detecting.
  *  - HTML is matched with targeted regexes rather than parsed. Adequate for
@@ -26,13 +26,68 @@ import { readFile, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { deployments } from "../src/config/deployments.ts";
-import { filesUnder } from "./lib/files.mjs";
-import { cannotRun, report } from "./lib/gate.mjs";
+import { filesUnder } from "./lib/files.ts";
+import { cannotRun, report } from "./lib/gate.ts";
 
-/** @typedef {{ readonly check: string, readonly detail: string }} Violation */
+/**
+ * The data model the checks are written against. None of it existed before:
+ * as `.js` this pipeline moved untyped records between twenty functions.
+ */
 
-/** @type {(check: string, detail: string) => Violation} */
-const violation = (check, detail) => ({ check, detail });
+/** One thing wrong with the artifact, grouped by `check` when reported. */
+export type Violation = {
+  readonly check: string;
+  readonly detail: string;
+};
+
+const violation = (check: string, detail: string): Violation => ({ check, detail });
+
+/** A file read out of `dist/`, with its path relative to it. */
+export type Document = { readonly path: string; readonly text: string };
+
+/** A redirect line as it shipped, not as it was authored. */
+export type ShippedRedirect = {
+  readonly from: string;
+  readonly to: string;
+  /** Absent where the line omitted it; this parser does not default. */
+  readonly status: string | undefined;
+};
+
+export type WkdEntry = { readonly name: string; readonly bytes: Uint8Array };
+
+export type WebKeyDirectory = {
+  readonly policy: boolean;
+  readonly keys: readonly WkdEntry[];
+};
+
+/** Plain strings: this module shares facts with `src/config`, never derivations. */
+export type Deployment = { readonly origin: string; readonly base: string };
+
+/** Whether a reference is served; `isPrefix` asks the wildcard's question. */
+export type Resolves = (reference: string, isPrefix?: boolean) => boolean;
+
+/** Everything the checks read, gathered once. */
+export type Artifact = {
+  readonly base: string;
+  readonly normalisedBase: string;
+  readonly canonical: Deployment;
+  readonly present: ReadonlySet<string>;
+  readonly relativeFiles: readonly string[];
+  readonly html: readonly Document[];
+  readonly css: readonly Document[];
+  readonly js: readonly string[];
+  readonly redirects: readonly ShippedRedirect[];
+  readonly headerPatterns: readonly string[];
+  readonly wkd: WebKeyDirectory;
+  readonly palette: ReadonlySet<string>;
+};
+
+export type Options = {
+  readonly dist: string;
+  readonly base: string;
+  readonly canonical: Deployment;
+  readonly tokensCss: string;
+};
 
 // ---------------------------------------------------------------------------
 // Pure helpers
@@ -55,20 +110,21 @@ const violation = (check, detail) => ({ check, detail });
  */
 
 /** Local, so the rule above holds: the same one line, not the same module. */
-const slashTerminated = (path) => (path.endsWith("/") ? path : `${path}/`);
+const slashTerminated = (path: string): string =>
+  path.endsWith("/") ? path : `${path}/`;
 
 /** A syntactically valid origin that can never resolve. RFC 2606 reserves it. */
 const PROBE_ORIGIN = "https://probe.invalid";
 
 /** Normalise a base path to exactly one leading and one trailing slash. */
-export const normaliseBase = (base) => {
+export const normaliseBase = (base: string): string => {
   const trimmed = base.replace(/^\/+|\/+$/g, "");
   return trimmed === "" ? "/" : `/${trimmed}/`;
 };
 
 /** Total: a malformed escape yields the raw text rather than throwing, so a
     bad href becomes a reported dead link instead of a crashed gate. */
-const decodedPath = (pathname) => {
+const decodedPath = (pathname: string): string => {
   try {
     return decodeURIComponent(pathname);
   } catch {
@@ -99,11 +155,15 @@ const SCRIPT_ELEMENT = /<script\b/i;
  * Returns raw values; classification is a separate concern so each step stays
  * independently testable.
  */
-export const extractReferences = (html) =>
-  [...html.matchAll(REFERENCE)].map((match) => match[1]);
+export const extractReferences = (html: string): readonly string[] =>
+  /* The group is mandatory in the pattern and optional in the type, as
+     wherever a `RegExp` is read; an absent one names no reference. */
+  [...html.matchAll(REFERENCE)]
+    .map((match) => match[1])
+    .filter((reference) => reference !== undefined);
 
 /** Anything carrying its own authority is out of scope for local resolution. */
-export const isInternal = (reference) =>
+export const isInternal = (reference: string): boolean =>
   reference.startsWith("/") && !reference.startsWith("//");
 
 /**
@@ -113,7 +173,7 @@ export const isInternal = (reference) =>
  * is served as itself. Returning candidates rather than one path keeps the
  * caller's existence test a simple disjunction.
  */
-export const candidatePaths = (reference, base) => {
+export const candidatePaths = (reference: string, base: string): readonly string[] => {
   const normalised = normaliseBase(base);
   if (!isInternal(reference) || !reference.startsWith(normalised)) return [];
 
@@ -140,17 +200,23 @@ export const candidatePaths = (reference, base) => {
  * deliberately dumb: the formats are line-oriented, and the point is to read
  * what actually shipped.
  */
-export const parseRedirects = (text) =>
+export const parseRedirects = (text: string): readonly ShippedRedirect[] =>
   text
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line !== "" && !line.startsWith("#"))
     .map((line) => line.split(/\s+/))
-    .filter((fields) => fields.length >= 2)
-    .map(([from, to, status]) => ({ from, to, status }));
+    /* The `length >= 2` filter this replaces said the same thing where the
+       type could not follow it, leaving every field possibly-missing
+       downstream. Deciding it on the destructured values is what makes a
+       redirect that parses one that has both halves. */
+    .map(([from, to, status]) =>
+      from === undefined || to === undefined ? undefined : { from, to, status },
+    )
+    .filter((redirect) => redirect !== undefined);
 
 /** Pattern lines are unindented; the operations beneath them are not. */
-export const parseHeaderPatterns = (text) =>
+export const parseHeaderPatterns = (text: string): readonly string[] =>
   text
     .split("\n")
     .filter((line) => line.trim() !== "" && !line.startsWith("#") && !/^\s/.test(line))
@@ -164,11 +230,20 @@ export const parseHeaderPatterns = (text) =>
  * for years because nothing ever asked whether the paths were real. A rule is a
  * claim; these are the claims the artifact can settle.
  */
-export const hostDirectiveViolations = ({ redirects, headerPatterns, resolves }) => {
+export const hostDirectiveViolations = ({
+  redirects,
+  headerPatterns,
+  resolves,
+}: {
+  readonly redirects: readonly ShippedRedirect[];
+  readonly headerPatterns: readonly string[];
+  readonly resolves: Resolves;
+}): readonly string[] => {
   // A destination carrying its own authority cannot be checked from here.
-  const internal = ({ to }) => to.startsWith("/") && !to.startsWith("//");
+  const internal = ({ to }: ShippedRedirect): boolean =>
+    to.startsWith("/") && !to.startsWith("//");
 
-  const unmatched = (pattern) => {
+  const unmatched = (pattern: string): boolean => {
     const wildcard = pattern.endsWith("*");
     return !resolves(wildcard ? pattern.slice(0, -1) : pattern, wildcard);
   };
@@ -198,24 +273,28 @@ const ZBASE32_NAME = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{32}$/;
  * old packet format the export uses.
  */
 /** What is wrong with an entry's name, or nothing. */
-const namingProblem = ({ name }) =>
+const namingProblem = ({ name }: WkdEntry): string | undefined =>
   ZBASE32_NAME.test(name) ? undefined : `hu/${name} is not a 32-character Z-Base-32 hash`;
 
 /**
  * What is wrong with an entry's bytes, or nothing. An armored key would start
  * with "-" (0x2d), which is the mistake the specification warns against.
  */
-const contentProblem = ({ name, bytes }) => {
-  if (bytes.length === 0) return `hu/${name} is empty`;
-  if (bytes[0] === 0x98 || bytes[0] === 0x99) return undefined;
-  return `hu/${name} does not begin with an OpenPGP public-key packet (0x${bytes[0].toString(16)}); the key must be binary, not armored`;
+const contentProblem = ({ name, bytes }: WkdEntry): string | undefined => {
+  /* One read rather than a length test and then an index: emptiness and "no
+     first byte" are the same fact, and asking once leaves the byte a definite
+     number in the message below. */
+  const [tag] = bytes;
+  if (tag === undefined) return `hu/${name} is empty`;
+  if (tag === 0x98 || tag === 0x99) return undefined;
+  return `hu/${name} does not begin with an OpenPGP public-key packet (0x${tag.toString(16)}); the key must be binary, not armored`;
 };
 
 /* Each check is a total function to "a problem, or nothing", so the whole
    thing is that list with the nothings removed. Written as pushes into a
    shared array, the checks read as steps in a procedure rather than as the
    independent facts they are. */
-export const wkdViolations = ({ policy, keys }) =>
+export const wkdViolations = ({ policy, keys }: WebKeyDirectory): readonly string[] =>
   [
     policy
       ? undefined
@@ -239,10 +318,14 @@ export const wkdViolations = ({ policy, keys }) =>
  * `/404/`. Resolution goes through the URL parser, which normalises host case
  * and a default port that string comparison gets wrong.
  *
- * @returns {string | undefined} the expected href, or undefined if the
- *   canonical deployment's own configuration is unparseable.
+ * Returns the expected href, or `undefined` where the canonical deployment's
+ * own configuration is unparseable.
  */
-export const expectedCanonical = (path, canonicalOrigin, canonicalBase) => {
+export const expectedCanonical = (
+  path: string,
+  canonicalOrigin: string,
+  canonicalBase: string,
+): string | undefined => {
   const route = path
     .replaceAll("\\", "/")
     .replace(/\.html$/, "")
@@ -284,18 +367,22 @@ const COLOUR_DEFINITION = new RegExp(
   "gi",
 );
 
-export const undefinedCustomProperties = (css) => {
-  const defined = new Set([...css.matchAll(DEFINITION)].map((match) => match[1]));
+export const undefinedCustomProperties = (css: string): readonly string[] => {
+  const named = (matches: readonly RegExpExecArray[]): readonly string[] =>
+    matches.map((match) => match[1]).filter((name) => name !== undefined);
+
+  const defined = new Set(named([...css.matchAll(DEFINITION)]));
   const readBare = new Set(
-    [...css.matchAll(BARE_READ)]
-      .filter((match) => match[2] === ")")
-      .map((match) => match[1]),
+    named([...css.matchAll(BARE_READ)].filter((match) => match[2] === ")")),
   );
   return [...readBare].filter((name) => !defined.has(name)).sort();
 };
 
 /** Hex colours outside the sanctioned palette. */
-export const offPaletteColours = (css, palette) =>
+export const offPaletteColours = (
+  css: string,
+  palette: ReadonlySet<string>,
+): readonly string[] =>
   [...new Set([...css.matchAll(ANY_COLOUR)].map((m) => m[0].toLowerCase()))]
     .filter((colour) => !palette.has(colour))
     .sort();
@@ -308,18 +395,21 @@ export const offPaletteColours = (css, palette) =>
  * rather than baking it into the pattern lets both colour rules share one
  * definition of what a colour literal looks like.
  */
-export const paletteFrom = (tokensCss) =>
+export const paletteFrom = (tokensCss: string): ReadonlySet<string> =>
   new Set(
     [...tokensCss.matchAll(COLOUR_DEFINITION)]
-      .filter(([, name]) => name.startsWith("--color-"))
-      .map(([, , colour]) => colour.toLowerCase()),
+      .map(([, name, colour]) => ({ name, colour }))
+      .filter((found) => found.name?.startsWith("--color-") === true)
+      .map((found) => found.colour)
+      .filter((colour) => colour !== undefined)
+      .map((colour) => colour.toLowerCase()),
   );
 
 // ---------------------------------------------------------------------------
 // Filesystem walk
 // ---------------------------------------------------------------------------
 
-const exists = async (path) => {
+const exists = async (path: string): Promise<boolean> => {
   try {
     await stat(path);
     return true;
@@ -339,7 +429,12 @@ const exists = async (path) => {
  * than against a directory somebody had to build first.
  *
  */
-export const gather = async ({ dist, base, canonical, tokensCss }) => {
+export const gather = async ({
+  dist,
+  base,
+  canonical,
+  tokensCss,
+}: Options): Promise<Artifact> => {
   const relativeFiles = (await filesUnder(dist)).map((path) => relative(dist, path));
 
   /*
@@ -353,10 +448,10 @@ export const gather = async ({ dist, base, canonical, tokensCss }) => {
   /* Three filters rather than one loop dealing three ways. The extensions are
      disjoint, so nothing was gained by visiting each path once except hiding
      what each list is behind a branch. */
-  const withExtension = (extension) =>
+  const withExtension = (extension: string): readonly string[] =>
     relativeFiles.filter((path) => path.endsWith(extension));
 
-  const read = async (paths) =>
+  const read = async (paths: readonly string[]): Promise<readonly Document[]> =>
     Promise.all(
       paths.map(async (path) => ({
         path,
@@ -364,7 +459,7 @@ export const gather = async ({ dist, base, canonical, tokensCss }) => {
       })),
     );
 
-  const directive = async (name) =>
+  const directive = async (name: string): Promise<string> =>
     present.has(name) ? readFile(join(dist, name), "utf8") : "";
 
   const hu = join("\.well-known", "openpgpkey", "hu");
@@ -399,7 +494,7 @@ export const gather = async ({ dist, base, canonical, tokensCss }) => {
  * wildcard directive raises: whether anything at all sits beneath it.
  */
 const resolvesIn =
-  ({ present, relativeFiles, base, normalisedBase }) =>
+  ({ present, relativeFiles, base, normalisedBase }: Artifact): Resolves =>
   (reference, isPrefix = false) => {
     if (!isPrefix) {
       return candidatePaths(reference, base).some((path) => present.has(path));
@@ -414,12 +509,12 @@ const resolvesIn =
  * one check the others depend on: every one of them would report an artifact
  * with no pages as broken in its own way, which is noise rather than news.
  */
-export const noOutput = ({ html }) =>
+export const noOutput = ({ html }: Artifact): readonly Violation[] =>
   html.length === 0
     ? [violation("output", "no HTML emitted; the build produced nothing")]
     : [];
 
-export const missingRequired = ({ present }) =>
+export const missingRequired = ({ present }: Artifact): readonly Violation[] =>
   ["index.html", "favicon.svg"]
     .filter((required) => !present.has(required))
     .map((required) => violation("output", `missing required file: ${required}`));
@@ -429,7 +524,7 @@ export const missingRequired = ({ present }) =>
  * system preference in CSS, so nothing needs scripting. Guarding it means an
  * accidental island or stray script is caught rather than silently shipped.
  */
-export const clientScripts = ({ js, html }) => [
+export const clientScripts = ({ js, html }: Artifact): readonly Violation[] => [
   ...js.map((path) => violation("zero-js", `unexpected client script: ${path}`)),
   ...html
     .filter(({ text }) => SCRIPT_ELEMENT.test(text))
@@ -437,14 +532,14 @@ export const clientScripts = ({ js, html }) => [
 ];
 
 /** A rendered "undefined" is a prop that went missing, visible to a reader. */
-export const templateLeakage = ({ html }) =>
+export const templateLeakage = ({ html }: Artifact): readonly Violation[] =>
   html.flatMap(({ path, text }) =>
     ["undefined", "NaN", "[object Object]"]
       .filter((leak) => text.includes(`>${leak}<`) || text.includes(`"${leak}"`))
       .map((leak) => violation("leakage", `rendered ${leak} in ${path}`)),
   );
 
-export const linkIntegrity = (artifact) => {
+export const linkIntegrity = (artifact: Artifact): readonly Violation[] => {
   const resolves = resolvesIn(artifact);
 
   return artifact.html.flatMap(({ path, text }) =>
@@ -471,7 +566,7 @@ export const linkIntegrity = (artifact) => {
  * built: both artifacts must advertise the same URL for the same page, and a
  * mirror that canonicalises to itself is the defect this catches.
  */
-export const canonicalLinks = ({ html, canonical }) =>
+export const canonicalLinks = ({ html, canonical }: Artifact): readonly Violation[] =>
   html.flatMap(({ path, text }) => {
     const declared = CANONICAL.exec(text);
     const expected = expectedCanonical(path, canonical.origin, canonical.base);
@@ -482,18 +577,18 @@ export const canonicalLinks = ({ html, canonical }) =>
       : [violation("canonical", `${path}: ${declared[1]} should be ${expected}`)];
   });
 
-export const hostDirectives = (artifact) =>
+export const hostDirectives = (artifact: Artifact): readonly Violation[] =>
   hostDirectiveViolations({
     redirects: artifact.redirects,
     headerPatterns: artifact.headerPatterns,
     resolves: resolvesIn(artifact),
   }).map((detail) => violation("host-directives", detail));
 
-export const webKeyDirectory = ({ wkd }) =>
+export const webKeyDirectory = ({ wkd }: Artifact): readonly Violation[] =>
   wkdViolations(wkd).map((detail) => violation("wkd", detail));
 
 /** A typo'd custom property fails no build; it renders the wrong colour. */
-export const stylesheetIntegrity = ({ css, palette }) => [
+export const stylesheetIntegrity = ({ css, palette }: Artifact): readonly Violation[] => [
   ...(palette.size === 0
     ? [violation("palette", "no palette found in the token layer")]
     : []),
@@ -515,7 +610,7 @@ export const stylesheetIntegrity = ({ css, palette }) => [
  * order violations are reported in, and nothing else, because each is a
  * function of the artifact alone and none can see another's findings.
  */
-export const CHECKS = [
+export const CHECKS: readonly ((artifact: Artifact) => readonly Violation[])[] = [
   missingRequired,
   clientScripts,
   templateLeakage,
@@ -526,10 +621,8 @@ export const CHECKS = [
   stylesheetIntegrity,
 ];
 
-/**
- * @returns {Promise<readonly Violation[]>} every violation found, in check order
- */
-export const inspect = async (options) => {
+/** Every violation found, in check order. */
+export const inspect = async (options: Options): Promise<readonly Violation[]> => {
   const artifact = await gather(options);
 
   /* Fail fast where the checks depend on the artifact existing, accumulate
@@ -548,7 +641,7 @@ const main = async () => {
 
   /*
    * Defaults come from the deployments config, not from literals repeated
-   * here. `mirrors[0] ?? canonical` is the same rule `astro.config.mjs`
+   * here. `mirrors[0] ?? canonical` is the same rule `astro.config.ts`
    * applies, and for the same reason: an unparameterised run should reproduce
    * the harder, based URL shape. Derived locally in two lines rather than
    * imported from `src/lib/deployment.ts`, keeping the gate's reasoning its
@@ -573,12 +666,12 @@ const main = async () => {
 
   report({
     name: "check-dist",
-    problems: await inspect({ dist, base, site, canonical, tokensCss }),
+    problems: await inspect({ dist, base, canonical, tokensCss }),
     passed: `${dist} passes all ${CHECKS.length} checks for ${site}${base}`,
     failed: `for ${site}${base}`,
     /* Its own body rather than `each`: forty dead links are one fact about the
        artifact, and grouping them says so where forty lines do not. */
-    body: (violations) =>
+    body: (violations: readonly Violation[]): string =>
       Object.entries(Object.groupBy(violations, (entry) => entry.check))
         .map(
           ([check, entries = []]) =>

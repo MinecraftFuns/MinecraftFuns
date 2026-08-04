@@ -1,5 +1,5 @@
 import { COLLATOR } from "./collate.ts";
-import { orThrow } from "./adt.ts";
+import { orThrow, type NonEmpty } from "./adt.ts";
 import { parseSlug, slugify } from "./slug.ts";
 
 /**
@@ -26,7 +26,7 @@ export type Taxon<Label extends string, Item> = {
    * Non-empty by construction, since labels are read off the items. Saying so
    * in the type removes the empty case from every consumer.
    */
-  readonly items: readonly [Item, ...Item[]];
+  readonly items: NonEmpty<Item>;
 };
 
 /**
@@ -37,7 +37,7 @@ export type Taxon<Label extends string, Item> = {
 const groupByLabel = <Label extends string, Item>(
   items: readonly Item[],
   labelsOf: (item: Item) => readonly Label[],
-): ReadonlyMap<Label, readonly [Item, ...Item[]]> => {
+): ReadonlyMap<Label, NonEmpty<Item>> => {
   const grouped = new Map<Label, [Item, ...Item[]]>();
 
   for (const item of items) {

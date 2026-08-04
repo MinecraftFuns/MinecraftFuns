@@ -7,6 +7,28 @@
  */
 
 /**
+ * A list with at least one element.
+ *
+ * `readonly [T, ...T[]]` is the whole of the definition, but spelled out at
+ * every use it reads as a tuple trick, and each reader has to re-derive what
+ * the head is doing there. The name says the concept once.
+ *
+ * Two things follow from having it. Destructuring gives a head typed `T`
+ * rather than `T | undefined`, so consumers lose the empty case outright; and
+ * `nonEmpty` below becomes the one place the emptiness question is asked, at
+ * the boundary where an ordinary array is admitted.
+ */
+export type NonEmpty<T> = readonly [T, ...T[]];
+
+/**
+ * The sole narrowing from an array. `undefined` for the empty case rather than
+ * a `Parsed`: emptiness has no reason to report, and every caller here already
+ * has a better sentence of its own to supply.
+ */
+export const nonEmpty = <T>(items: readonly T[]): NonEmpty<T> | undefined =>
+  items.length === 0 ? undefined : (items as NonEmpty<T>);
+
+/**
  * The result of turning an untrusted representation into a trusted domain
  * value. A sum, not a nullable: the failure carries its reasons, so a caller
  * can report *why* rather than only *that* parsing failed.
@@ -17,13 +39,14 @@
  */
 export type Parsed<T> =
   | { readonly tag: "ok"; readonly value: T }
-  | { readonly tag: "invalid"; readonly reasons: readonly [string, ...string[]] };
+  | { readonly tag: "invalid"; readonly reasons: NonEmpty<string> };
 
 export const ok = <T>(value: T): Parsed<T> => ({ tag: "ok", value });
 
-export const invalid = <T = never>(
-  ...reasons: readonly [string, ...string[]]
-): Parsed<T> => ({ tag: "invalid", reasons });
+export const invalid = <T = never>(...reasons: NonEmpty<string>): Parsed<T> => ({
+  tag: "invalid",
+  reasons,
+});
 
 /**
  * Totality proof. Reaching this function means a variant was added to a union
@@ -69,8 +92,8 @@ export const collect = <A>(items: readonly Parsed<A>[]): Parsed<readonly A[]> =>
     else reasons.push(...item.reasons);
   }
 
-  const [first, ...rest] = reasons;
-  return first === undefined ? ok(values) : invalid(first, ...rest);
+  const failures = nonEmpty(reasons);
+  return failures === undefined ? ok(values) : invalid(...failures);
 };
 
 /**
@@ -94,11 +117,11 @@ export const both = <A, B>(a: Parsed<A>, b: Parsed<B>): Parsed<readonly [A, B]> 
 export const inContext = <T>(parsed: Parsed<T>, context: string): Parsed<T> => {
   if (parsed.tag === "ok") return parsed;
 
+  /* Head and tail rather than `map`, which would hand back a plain array and
+     lose the very property this type is here to carry. */
+  const label = (reason: string): string => `${context}: ${reason}`;
   const [first, ...rest] = parsed.reasons;
-  return invalid(
-    `${context}: ${first}`,
-    ...rest.map((reason) => `${context}: ${reason}`),
-  );
+  return invalid(label(first), ...rest.map(label));
 };
 
 /** Every reason, one per line. A success has nothing to explain. */

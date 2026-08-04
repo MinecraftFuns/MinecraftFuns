@@ -10,7 +10,7 @@ import { joinRoute, slashTerminated } from "./url.ts";
  * would drop `/blog/2026/08/404-is-a-http-code/` for containing `/404`.
  *
  * The base is a parameter because `BASE_URL` does not exist yet where this is
- * called: `astro.config.mjs` runs before the build it configures.
+ * called: `astro.config.ts` runs before the build it configures.
  */
 export const sitemapFilter = (base: string): ((page: string) => boolean) => {
   const excluded = new Set(sitemapExclude.map((route) => joinRoute(base, route)));

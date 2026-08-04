@@ -12,8 +12,103 @@
 export const INTERACTIVE_SELECTOR =
   'a[href], button, input, select, textarea, [role="button"], [role="link"], [tabindex]:not([tabindex="-1"])';
 
+export type Limits = {
+  readonly findings: number;
+  readonly containers: number;
+  readonly children: number;
+  readonly sampled: number;
+  readonly asymmetric: number;
+};
+
+/** A token scale, mapped to the custom properties it is made of. */
+export type TokenNames = Readonly<Record<string, readonly string[]>>;
+
+export type ProbeOptions = {
+  readonly interactiveSelector: string;
+  readonly tokenNames: TokenNames;
+  readonly includeDesign: boolean;
+  readonly limits: Limits;
+  readonly spacingProperties: readonly string[];
+};
+
+/** The design half of `pageProbe`'s result, named so `design.ts` reads the
+ *  same record this file builds rather than one that happens to match. */
+export type Measurement = {
+  readonly value: number;
+  readonly selector: string;
+  readonly property: string;
+};
+
+export type AlignmentGroup = {
+  readonly container: string;
+  readonly lefts: readonly number[];
+  readonly rights: readonly number[];
+};
+
+export type RhythmGroup = {
+  readonly container: string;
+  readonly signature: string;
+  readonly gaps: readonly number[];
+};
+
+export type FlushPair = {
+  readonly container: string;
+  readonly before: string;
+  readonly after: string;
+};
+
+export type PaddingBox = {
+  readonly selector: string;
+  readonly left: number;
+  readonly right: number;
+};
+
+export type DesignProbe = {
+  readonly tokens: Readonly<Record<string, readonly number[]>>;
+  readonly alignmentGroups: readonly AlignmentGroup[];
+  readonly rhythmGroups: readonly RhythmGroup[];
+  readonly flushPairs: readonly FlushPair[];
+  readonly measurements: Readonly<Record<string, readonly Measurement[]>>;
+  readonly asymmetricPadding: readonly PaddingBox[];
+};
+
+/** The layout half of `pageProbe`'s result. */
+export type LayoutProbe = {
+  readonly documentScrollWidth: number;
+  readonly viewportWidth: number;
+  readonly interactiveCount: number;
+  readonly overflowing: readonly { readonly selector: string; readonly right: number }[];
+  readonly tinyText: readonly {
+    readonly selector: string;
+    readonly fontSize: string;
+    readonly sample: string;
+  }[];
+  readonly clipped: readonly {
+    readonly selector: string;
+    readonly scrollWidth: number;
+    readonly clientWidth: number;
+  }[];
+  readonly smallTargets: readonly {
+    readonly selector: string;
+    readonly width: number;
+    readonly height: number;
+  }[];
+};
+
+/** What `documentProbe` reports: facts that do not vary with viewport. */
+export type DocumentFacts = {
+  readonly title: string;
+  readonly description: string;
+  readonly lang: string;
+  readonly h1Count: number;
+  readonly scriptCount: number;
+  readonly bodyFontFamily: string;
+  readonly backgroundColor: string;
+  readonly internalLinks: readonly string[];
+};
+
 /** Caps keep one pathological page from flooding the report. */
-const LIMITS = { findings: 10, containers: 60, children: 12, sampled: 150, asymmetric: 5 };
+const LIMITS: Limits = { findings: 10, containers: 60, children: 12, sampled: 150, asymmetric: 5 };
 
 /* CSS spelling, because these are read with `getPropertyValue`, which is the
    only accessor that takes a name computed at runtime. Indexing the style
@@ -32,22 +127,40 @@ const SPACING_PROPERTIES = [
  * Measure the page once, returning raw numbers only. Every verdict is reached
  * in Node, where it can be tested without a browser.
  */
-export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limits, spacingProperties }) => {
-  const round = (value) => Math.round(value * 10) / 10;
+export const pageProbe = ({
+  interactiveSelector,
+  tokenNames,
+  includeDesign,
+  limits,
+  spacingProperties,
+}: ProbeOptions): {
+  readonly layout: LayoutProbe;
+  readonly design: DesignProbe | null;
+} => {
+  /** One element worth measuring, with its style and box resolved once. */
+  type Measured = {
+    readonly element: Element;
+    readonly style: CSSStyleDeclaration;
+    readonly box: DOMRect;
+    readonly text: string;
+    readonly interactive: boolean;
+  };
 
-  const describe = (element) => {
+  const round = (value: number): number => Math.round(value * 10) / 10;
+
+  const describe = (element: Element): string => {
     const id = element.id ? `#${element.id}` : "";
     const names = typeof element.className === "string" ? element.className.trim() : "";
     const classes = names === "" ? "" : `.${names.split(/\s+/).slice(0, 2).join(".")}`;
     return `${element.tagName.toLowerCase()}${id}${classes}`;
   };
 
-  const signature = (element) => {
+  const signature = (element: Element): string => {
     const names = typeof element.className === "string" ? element.className.trim() : "";
     return `${element.tagName.toLowerCase()}${names === "" ? "" : `.${names.split(/\s+/)[0]}`}`;
   };
 
-  const ownText = (element) =>
+  const ownText = (element: Element): string =>
     [...element.childNodes]
       .filter((node) => node.nodeType === Node.TEXT_NODE)
       .map((node) => node.textContent ?? "")
@@ -62,8 +175,8 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
    * stage, which is worth removing over every element in the document.
    */
   const allOf =
-    (...predicates) =>
-    (value) => {
+    <T,>(...predicates: readonly ((value: T) => boolean)[]) =>
+    (value: T): boolean => {
       for (const predicate of predicates) {
         if (!predicate(value)) return false;
       }
@@ -78,9 +191,9 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
    * as arithmetic. Carrying the previous element says it once, and says it
    * without an index that only the surrounding `slice` proves is in range.
    */
-  const consecutive = (items) => {
-    const pairs = [];
-    let previous;
+  const consecutive = <T,>(items: readonly T[]): readonly (readonly [T, T])[] => {
+    const pairs: (readonly [T, T])[] = [];
+    let previous: T | undefined;
 
     for (const item of items) {
       if (previous !== undefined) pairs.push([previous, item]);
@@ -90,8 +203,8 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
   };
 
   /** First occurrence wins, so the reported selector is the first offender. */
-  const dedupeBy = (items, keyOf) => {
-    const seen = new Map();
+  const dedupeBy = <T,>(items: readonly T[], keyOf: (item: T) => string): readonly T[] => {
+    const seen = new Map<string, T>();
     items.forEach((item) => {
       const key = keyOf(item);
       if (!seen.has(key)) seen.set(key, item);
@@ -105,7 +218,7 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
    * combinator expresses, so the partiality is in the return type and each
    * early return is the filter it replaces.
    */
-  const measured = (element) => {
+  const measured = (element: Element): Measured | undefined => {
     const style = getComputedStyle(element);
     if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) {
       return undefined;
@@ -127,7 +240,7 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
      element just to encode absence. `querySelectorAll("*")` is the largest
      collection this file touches, which is what makes the traversal worth
      spelling here and nowhere else. */
-  const visible = [];
+  const visible: Measured[] = [];
   for (const element of document.body.querySelectorAll("*")) {
     const entry = measured(element);
     if (entry !== undefined) visible.push(entry);
@@ -194,7 +307,7 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
   );
   const byElement = new Map(laidOut.map((entry) => [entry.element, entry]));
 
-  const childrenOf = (element) =>
+  const childrenOf = (element: Element): readonly Measured[] =>
     [...element.children]
       .map((child) => byElement.get(child))
       .filter((entry) => entry !== undefined)
@@ -254,7 +367,7 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
    * is simply absent, neither of them having declared it. Three conditions
    * keep it quiet, each stated at its own predicate below.
    */
-  const edge = (value) => Number.parseFloat(value) || 0;
+  const edge = (value: string): number => Number.parseFloat(value) || 0;
 
   const flushPairs = containers
     .flatMap(({ element, children }) =>
@@ -287,12 +400,21 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
   // resolve to whatever they are at this viewport.
   const rootStyle = getComputedStyle(document.documentElement);
 
-  const measure = (entries, keyOf) =>
+  const measure = <T extends { readonly value: number }>(
+    entries: readonly T[],
+    keyOf: (entry: T) => string,
+  ): readonly T[] =>
     dedupeBy(
       entries.filter(({ value }) => Number.isFinite(value) && value !== 0),
       keyOf,
     );
-  const byPropertyValue = ({ property, value }) => `${property}:${Math.round(value * 10)}`;
+  const byPropertyValue = ({
+    property,
+    value,
+  }: {
+    readonly property: string;
+    readonly value: number;
+  }): string => `${property}:${Math.round(value * 10)}`;
 
   const design = {
     tokens: Object.fromEntries(
@@ -356,7 +478,10 @@ export const pageProbe = ({ interactiveSelector, tokenNames, includeDesign, limi
 };
 
 /** Arguments for `pageProbe`, assembled here so the driver stays declarative. */
-export const probeOptions = (tokenNames, includeDesign) => ({
+export const probeOptions = (
+  tokenNames: TokenNames,
+  includeDesign: boolean,
+): ProbeOptions => ({
   interactiveSelector: INTERACTIVE_SELECTOR,
   tokenNames,
   includeDesign,
@@ -365,7 +490,7 @@ export const probeOptions = (tokenNames, includeDesign) => ({
 });
 
 /** Facts that do not vary with viewport size. */
-export const documentProbe = () => {
+export const documentProbe = (): DocumentFacts => {
   const anchors = [...document.querySelectorAll("a[href]")].map(
     (anchor) => anchor.getAttribute("href") ?? "",
   );
@@ -402,9 +527,10 @@ export const motionProbe = () => {
  * Tag names whose focus draws no visible ring. Programmatic focus does not
  * always satisfy `:focus-visible`, so this informs rather than accuses.
  */
-export const focusProbe = (selector) => [
+export const focusProbe = (selector: string): readonly string[] => [
   ...new Set(
-    [...document.querySelectorAll(selector)]
+    /* Typed as `HTMLElement`, since `focus` below is not on `Element`. */
+    [...document.querySelectorAll<HTMLElement>(selector)]
       .slice(0, 20)
       .filter((element) => {
         element.focus();

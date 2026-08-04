@@ -1,5 +1,5 @@
 ---
-import { assertNever } from "../lib/adt.ts";
+import type { Href } from "../lib/url.ts";
 
 /**
  * A labelled list: a short label in a fixed left column, its value beside it.
@@ -28,7 +28,7 @@ export type EntryBody =
       readonly title: string;
       readonly notes: readonly string[];
     }
-  | { readonly kind: "link"; readonly href: string; readonly label: string }
+  | { readonly kind: "link"; readonly href: Href; readonly label: string }
   /** A machine-readable string: a fingerprint, an identifier, a hash. */
   | { readonly kind: "mono"; readonly value: string };
 
@@ -42,14 +42,22 @@ type Props = { readonly entries: readonly Entry[] };
 const { entries } = Astro.props;
 
 /*
- * Astro templates cannot host a `switch`, so exhaustiveness is asserted here:
- * a fourth variant fails to typecheck until the markup below is taught it.
+ * Astro templates cannot host a `switch`, so exhaustiveness is stated as a
+ * type: a fourth variant leaves `Unhandled` inhabited and this line stops
+ * typechecking until the markup below is taught to render it.
+ *
+ * The tuple wrappers are load-bearing. A bare conditional over a union
+ * distributes across its members, and `never` is the empty union, so the whole
+ * expression would evaluate to `never` and check nothing at all.
+ *
+ * `assertNever` is the wrong tool here and was doing the wrong work: it is a
+ * runtime eliminator, so proving a static fact with it meant walking every
+ * entry on every render.
  */
-entries.forEach(({ body }) => {
-  if (body.kind !== "lines" && body.kind !== "link" && body.kind !== "mono") {
-    assertNever(body);
-  }
-});
+type Unhandled = Exclude<EntryBody["kind"], "lines" | "link" | "mono">;
+
+const _exhaustive: [Unhandled] extends [never] ? true : never = true;
+void _exhaustive;
 ---
 
 <dl>

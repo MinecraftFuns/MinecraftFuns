@@ -6,7 +6,7 @@ import { readingMinutes } from "./reading.ts";
 import { slugify } from "./slug.ts";
 import { taxonomy, type Taxon } from "./taxonomy.ts";
 import { byRecencyWith, type IsoDate } from "./time.ts";
-import { routeUrl } from "./url.ts";
+import { routeUrl, type Href } from "./url.ts";
 
 /**
  * The blog's read model. Pages consume these types rather than raw collection
@@ -16,9 +16,13 @@ import { routeUrl } from "./url.ts";
 
 /**
  * An entry paired with its archive path, decoded once at the boundary. A
- * `CollectionEntry` carries a raw `id` that nothing has checked; this can only
- * be built by `publishedPosts`, which refuses an entry whose folder
- * contradicts its date.
+ * `CollectionEntry` carries a raw `id` that nothing has checked, and `PostPath`
+ * is branded, so the pair cannot be assembled around a hand-written path.
+ *
+ * What the type does not carry is that the path was *reconciled* against the
+ * entry's date. That is a fact about the pairing rather than about either
+ * half, so it holds by `publishedPosts` being the only producer, not by
+ * construction.
  */
 export type PublishedPost = {
   readonly entry: CollectionEntry<"blog">;
@@ -39,7 +43,7 @@ export type PostTag = string & { readonly [postTagBrand]: true };
 export type PostSummary = {
   readonly title: string;
   readonly description: string;
-  readonly href: string;
+  readonly href: Href;
   readonly date: IsoDate;
   readonly readingMinutes: number;
   readonly tags: readonly PostTag[];
@@ -105,7 +109,7 @@ export const postSummaries = async (
  * and the route `taxonomy` generates are two calls to one function. A tag with
  * no usable segment, or two sharing one, fails the build in `postTags`.
  */
-export const tagHref = (tag: PostTag): string => routeUrl(`/blog/tags/${slugify(tag)}`);
+export const tagHref = (tag: PostTag): Href => routeUrl(`/blog/tags/${slugify(tag)}`);
 
 /** The blog's tags, alphabetically, each with its posts newest first. */
 export const postTags = async (): Promise<readonly Taxon<PostTag, PostSummary>[]> =>

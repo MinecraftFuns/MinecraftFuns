@@ -1,4 +1,4 @@
-import type { HttpsUrl, ProjectKindConfig, ProjectStatusConfig } from "./schema.ts";
+import type { HttpsUrl, ProjectKindConfig } from "./schema.ts";
 
 /**
  * Projects, and the sections they group into.
@@ -30,35 +30,28 @@ export const projectKinds = [
 
 export type ProjectKind = (typeof projectKinds)[number]["kind"];
 
-/**
- * The badge each status shows. `null` means "no badge": a decision, not a
- * value that went missing. Add a status by adding a key.
- */
-export const projectStatuses = {
-  active: null,
-  archived: "Archived",
-} as const satisfies ProjectStatusConfig;
-
-export type ProjectStatus = keyof typeof projectStatuses;
-
 export type Project = {
   readonly title: string;
   readonly description: string;
   /** A project nobody can look at is a claim; every card is a link. */
   readonly href: HttpsUrl;
+  /** The year work started. */
+  readonly since: number;
   /**
-   * A year, or a range. `${number}` admits neither a range written with a
-   * hyphen nor one written with an em dash, so the punctuation this project
-   * uses is the punctuation that typechecks.
+   * The year work stopped, or `null` while it continues.
+   *
+   * One field for two facts that were separately authored and could disagree:
+   * a range ending in the past said the work had stopped while `status:
+   * "active"` said it had not. It also removes the annual edit, since a live
+   * project's span now runs to whatever year it is read in.
    */
-  readonly year: `${number}` | `${number}–${number}`;
+  readonly until: number | null;
   /**
    * One to three, which is what the card lays out. A tuple union says so; the
    * comment that used to say it could be read and ignored.
    */
   readonly tags:
     readonly [string] | readonly [string, string] | readonly [string, string, string];
-  readonly status: ProjectStatus;
   readonly kind: ProjectKind;
   /**
    * Shown on the home page. `true` rather than `boolean`: absence is the
@@ -69,17 +62,20 @@ export type Project = {
 
 /**
  * Order within a section is the order written here; sections come from
- * `projectKinds`. `status` tracks GitHub's archive flag, not dormancy.
+ * `projectKinds`. A non-null `until` is the year the repository was archived.
+ *
+ * `lib/projects.ts` re-exports this list having checked that no project ends
+ * before it starts, which is the one thing about a span a type cannot say.
  */
-export const projects: readonly Project[] = [
+export const authoredProjects: readonly Project[] = [
   {
     title: "Serval",
     description:
       "Stores a templated config once, keyed by content hash, and serves it at the edge with query-parameter substitution. Route ids carry a keyed MAC, so a forged one is rejected before any cache or database lookup.",
     href: "https://github.com/BTreeMap/Serval",
-    year: "2026",
+    since: 2026,
+    until: null,
     tags: ["Rust", "PostgreSQL", "Content-addressed"],
-    status: "active",
     kind: "side-project",
     featured: true,
   },
@@ -88,9 +84,9 @@ export const projects: readonly Project[] = [
     description:
       "An Android reader for .eml files that parses them in a Rust core over UniFFI. Remote images are blocked by default and otherwise fetched through a WARP proxy, so opening a message does not report back to its sender.",
     href: "https://github.com/BTreeMap/Letterbox",
-    year: "2025–2026",
+    since: 2025,
+    until: null,
     tags: ["Kotlin", "Rust", "Android"],
-    status: "active",
     kind: "side-project",
     featured: true,
   },
@@ -99,9 +95,9 @@ export const projects: readonly Project[] = [
     description:
       "A URL shortener split into two servers so the public redirector holds read-only database access. Destinations are versioned in place rather than deleted, and every prior one stays restorable.",
     href: "https://github.com/BTreeMap/Lynx",
-    year: "2025–2026",
+    since: 2025,
+    until: null,
     tags: ["Rust", "OAuth", "Self-hosted"],
-    status: "active",
     kind: "side-project",
   },
   {
@@ -109,9 +105,9 @@ export const projects: readonly Project[] = [
     description:
       "A FastAPI scaffold whose authentication is already right: passkeys by default, device-signed ES256 tokens, and server-side RBAC, so a weekend build never grows a password table.",
     href: "https://github.com/BTreeMap/h4ckath0n",
-    year: "2025–2026",
+    since: 2025,
+    until: null,
     tags: ["Python", "FastAPI", "WebAuthn"],
-    status: "active",
     kind: "side-project",
   },
   {
@@ -119,9 +115,9 @@ export const projects: readonly Project[] = [
     description:
       "Container images for the things I self-host, from remote desktops to Tailscale variants, rebuilt twice a day so a running deployment tracks upstream rather than the day it was first built.",
     href: "https://github.com/BTreeMap/Dockerfiles",
-    year: "2024–2026",
+    since: 2024,
+    until: null,
     tags: ["Docker", "GitHub Actions", "Self-hosted"],
-    status: "active",
     kind: "side-project",
   },
   {
@@ -129,9 +125,9 @@ export const projects: readonly Project[] = [
     description:
       "A library of Markdown procedures for coding agents, kept free of any one project's identity so the same skill works in unrelated repositories. This site consumes it as a submodule.",
     href: "https://github.com/BTreeMap/SKILLs",
-    year: "2026",
+    since: 2026,
+    until: null,
     tags: ["Agents", "Markdown", "Tooling"],
-    status: "active",
     kind: "side-project",
   },
   {
@@ -139,9 +135,9 @@ export const projects: readonly Project[] = [
     description:
       "A CSC207 team project. Aggregates Toronto Police major-crime data and fits a Poisson model per location, so asking whether an address is safe returns a probability over a radius rather than a raw incident count.",
     href: "https://github.com/CSC207-2024/safeTO",
-    year: "2024–2025",
+    since: 2024,
+    until: 2025,
     tags: ["Java", "React", "CSC207"],
-    status: "archived",
     kind: "side-project",
   },
   {
@@ -149,9 +145,9 @@ export const projects: readonly Project[] = [
     description:
       "Delivers adaptive-intervention prompts over WhatsApp for behavioural research: scheduling, receipt and response tracking, and a stateful intake and feedback conversation behind one REST API.",
     href: "https://github.com/BTreeMap/PromptPipe",
-    year: "2025–2026",
+    since: 2025,
+    until: null,
     tags: ["Go", "WhatsApp", "Study infrastructure"],
-    status: "active",
     kind: "research",
     featured: true,
   },
@@ -160,9 +156,9 @@ export const projects: readonly Project[] = [
     description:
       "Carries the CHI 2024 ABScribe interface, in-place variation fields and reusable AI modifiers, into editors never built for it: Gmail, LinkedIn, Reddit.",
     href: "https://github.com/BTreeMap/ABScribeX",
-    year: "2024–2026",
+    since: 2024,
+    until: null,
     tags: ["TypeScript", "Chrome extension", "Human-AI writing"],
-    status: "active",
     kind: "research",
   },
   {
@@ -170,9 +166,9 @@ export const projects: readonly Project[] = [
     description:
       "An Android app that interrupts an impulsive app launch with a prompt, and treats which prompt to show as a selection problem: success rates weighted by a decay term, so one early winner cannot crowd out the rest.",
     href: "https://github.com/Jai0212/Focus-Flow",
-    year: "2024–2025",
+    since: 2024,
+    until: 2025,
     tags: ["Kotlin", "Firebase", "HCI"],
-    status: "archived",
     kind: "research",
   },
 ];

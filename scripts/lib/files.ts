@@ -16,7 +16,7 @@ import { join } from "node:path";
  * and order is whatever the platform returns, so callers that report results
  * sort them.
  */
-export const filesUnder = async (dir) => {
+export const filesUnder = async (dir: string): Promise<readonly string[]> => {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true });
   return entries
     .filter((entry) => entry.isFile())

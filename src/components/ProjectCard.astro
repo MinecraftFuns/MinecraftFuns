@@ -1,14 +1,16 @@
 ---
 import type { Project } from "../config/projects.ts";
-import { badgeFor } from "../lib/projects.ts";
+import { badgeFor, spanOf } from "../lib/projects.ts";
+import { currentYear } from "../lib/time.ts";
 
 type Props = { readonly project: Project };
 
 const { project } = Astro.props;
 
-/* The label lives beside the status it belongs to, in config. `null` means
-   "this state shows no badge", a decision, not a value that went missing. */
-const badge = badgeFor(project.status);
+/* Both derived from the one span. `null` means "this state shows no badge", a
+   decision rather than a value that went missing. */
+const badge = badgeFor(project);
+const span = spanOf(project, currentYear());
 ---
 
 {
@@ -23,7 +25,7 @@ const badge = badgeFor(project.status);
   <div class="flex items-baseline justify-between gap-2xs">
     <h3 class="text-card-title text-ink">{project.title}</h3>
     <span class="meta shrink-0">
-      {project.year}
+      {span}
     </span>
   </div>
 

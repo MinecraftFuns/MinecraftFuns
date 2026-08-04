@@ -15,11 +15,11 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { AxeBuilder } from "@axe-core/playwright";
-import { chromium } from "playwright";
+import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 
-import { filesUnder } from "../lib/files.mjs";
-import { dedupeFindings } from "./checks.mjs";
-import { designFindings, TOKEN_NAMES } from "./design.mjs";
+import { filesUnder } from "../lib/files.ts";
+import { dedupeFindings, type Finding, type Impact, type MergedFinding } from "./checks.ts";
+import { designFindings, TOKEN_NAMES } from "./design.ts";
 import {
   documentProbe,
   focusProbe,
@@ -28,8 +28,10 @@ import {
   overflowProbe,
   pageProbe,
   probeOptions,
-} from "./probe.mjs";
-import { toJson, toMarkdown } from "./report.mjs";
+  type DocumentFacts,
+  type LayoutProbe,
+} from "./probe.ts";
+import { toJson, toMarkdown, type Meta } from "./report.ts";
 
 const PORT = Number(process.env.AUDIT_PORT ?? 4321);
 /** Defaults describe the eventual primary target: joefang.org, served at root. */
@@ -40,36 +42,53 @@ const OUT = resolve(process.env.AUDIT_OUT ?? "audit");
 const ORIGIN = `http://localhost:${PORT}`;
 
 const BASE_PREFIX = BASE.replace(/\/+$/, "");
-const urlFor = (route) => `${ORIGIN}${BASE_PREFIX}${route}`;
-const slug = (route) => route.replace(/^\/|\/$/g, "").replaceAll("/", "_") || "home";
+const urlFor = (route: string): string => `${ORIGIN}${BASE_PREFIX}${route}`;
+const slug = (route: string): string => route.replace(/^\/|\/$/g, "").replaceAll("/", "_") || "home";
 
 /**
  * 320 is the narrowest width WCAG reflow expects to work; 1440 is a common
  * desktop. Axe runs at the extremes only; the middle widths exist to catch
  * layout overflow, which is where they actually differ.
  */
-const VIEWPORTS = [
+type Viewport = {
+  readonly name: string;
+  readonly width: number;
+  readonly height: number;
+  /** Axe runs at the extremes only; the middle widths catch layout overflow. */
+  readonly axe: boolean;
+  readonly capture: boolean;
+};
+
+const VIEWPORTS: readonly Viewport[] = [
   { name: "narrow", width: 320, height: 640, axe: true, capture: false },
   { name: "mobile", width: 390, height: 844, axe: false, capture: true },
   { name: "tablet", width: 768, height: 1024, axe: false, capture: false },
   { name: "desktop", width: 1440, height: 900, axe: true, capture: true },
 ];
 
-const SCHEMES = /** @type {const} */ (["light", "dark"]);
+/* Playwright's own union, so a scheme this list invents fails here rather
+   than at the browser. */
+type Scheme = "light" | "dark";
+
+const SCHEMES: readonly Scheme[] = ["light", "dark"];
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 const LINK_CONCURRENCY = 8;
 const TOUCH_WIDTH = 768;
 
-const findings = [];
-const record = (finding) => findings.push(finding);
-const recordAll = (entries) => entries.forEach(record);
+const findings: Finding[] = [];
+const record = (finding: Finding): number => findings.push(finding);
+const recordAll = (entries: readonly Finding[]): void => entries.forEach(record);
 
 /**
  * Bounded worker pool: `limit` tasks stay in flight and each worker takes the
  * next index as it frees, so elapsed time is the slowest worker rather than
  * the sum of every task.
  */
-const mapConcurrent = async (items, limit, task) => {
+const mapConcurrent = async <T,>(
+  items: readonly T[],
+  limit: number,
+  task: (item: T) => Promise<void>,
+): Promise<void> => {
   const queue = items.entries();
   const worker = async () => {
     for (const [, item] of queue) await task(item);
@@ -84,46 +103,78 @@ const mapConcurrent = async (items, limit, task) => {
 // Adding a check is a row, not another near-identical block.
 // ---------------------------------------------------------------------------
 
-const LAYOUT_RULES = [
+/**
+ * A layout rule names its findings directly rather than a key into the probe.
+ * The message depends on which list it reads, and a key plus a separate
+ * `message` leaves that agreement to the reader; a closure states it.
+ */
+type LayoutRule = {
+  readonly category: string;
+  readonly rule: string;
+  readonly impact: Impact;
+  /** Target size matters where fingers are used, not under a desktop pointer. */
+  readonly touchOnly: boolean;
+  readonly findings: (
+    layout: LayoutProbe,
+  ) => readonly { readonly selector: string; readonly message: string }[];
+};
+
+const LAYOUT_RULES: readonly LayoutRule[] = [
   {
-    key: "overflowing",
     category: "readability",
     rule: "element-overflows-viewport",
     impact: "moderate",
     touchOnly: false,
-    message: (item, layout) =>
-      `extends to ${item.right}px, past the ${layout.viewportWidth}px viewport`,
+    findings: (layout) =>
+      layout.overflowing.map((item) => ({
+        selector: item.selector,
+        message: `extends to ${item.right}px, past the ${layout.viewportWidth}px viewport`,
+      })),
   },
   {
-    key: "tinyText",
     category: "readability",
     rule: "text-below-12px",
     impact: "moderate",
     touchOnly: false,
-    message: (item) => `${item.fontSize} text: "${item.sample}"`,
+    findings: (layout) =>
+      layout.tinyText.map((item) => ({
+        selector: item.selector,
+        message: `${item.fontSize} text: "${item.sample}"`,
+      })),
   },
   {
-    key: "clipped",
     category: "readability",
     rule: "text-clipped",
     impact: "moderate",
     touchOnly: false,
-    message: (item) =>
-      `content is ${item.scrollWidth}px inside a ${item.clientWidth}px box with hidden overflow`,
+    findings: (layout) =>
+      layout.clipped.map((item) => ({
+        selector: item.selector,
+        message: `content is ${item.scrollWidth}px inside a ${item.clientWidth}px box with hidden overflow`,
+      })),
   },
   {
-    // Target size matters where fingers are used, not under a desktop pointer.
-    key: "smallTargets",
     category: "accessibility",
     rule: "target-size-under-24px",
     impact: "moderate",
     touchOnly: true,
-    message: (item) =>
-      `${item.width}x${item.height}px, below the 24x24 minimum (WCAG 2.5.8)`,
+    findings: (layout) =>
+      layout.smallTargets.map((item) => ({
+        selector: item.selector,
+        message: `${item.width}x${item.height}px, below the 24x24 minimum (WCAG 2.5.8)`,
+      })),
   },
 ];
 
-const DOCUMENT_RULES = [
+type DocumentRule = {
+  readonly when: (doc: DocumentFacts) => boolean;
+  readonly category: string;
+  readonly rule: string;
+  readonly impact: Impact;
+  readonly message: (doc: DocumentFacts) => string;
+};
+
+const DOCUMENT_RULES: readonly DocumentRule[] = [
   {
     when: (doc) => doc.scriptCount > 0,
     category: "runtime",
@@ -162,22 +213,6 @@ const DOCUMENT_RULES = [
   },
 ];
 
-const RUNTIME_EVENTS = [
-  {
-    event: "pageerror",
-    rule: "uncaught-exception",
-    impact: "critical",
-    message: (error) => String(error?.message ?? error),
-  },
-  {
-    event: "requestfailed",
-    rule: "request-failed",
-    impact: "serious",
-    message: (request) =>
-      `${request.method()} ${request.url()}: ${request.failure()?.errorText ?? "failed"}`,
-  },
-];
-
 // ---------------------------------------------------------------------------
 // Server and routes
 // ---------------------------------------------------------------------------
@@ -204,7 +239,7 @@ const startPreview = async () => {
 };
 
 /** Routes discovered from the build, so new pages are covered automatically. */
-const discoverRoutes = async (dir) => {
+const discoverRoutes = async (dir: string): Promise<readonly string[]> => {
   return (await filesUnder(dir))
     .filter((path) => path.endsWith("index.html"))
     .map((path) => `/${relative(dir, path).replace(/index\.html$/, "")}`.replace(/\/+/g, "/"))
@@ -215,11 +250,34 @@ const discoverRoutes = async (dir) => {
 // Per-page audit
 // ---------------------------------------------------------------------------
 
-const attachRuntimeListeners = (page, where) => {
-  RUNTIME_EVENTS.forEach(({ event, rule, impact, message }) =>
-    page.on(event, (subject) =>
-      record({ ...where, category: "runtime", rule, impact, message: message(subject) }),
-    ),
+/** Where a finding was seen: the page, and the context it was rendered in. */
+type Where = {
+  readonly page: string;
+  readonly viewport: string;
+  readonly colorScheme: string;
+};
+
+/* Written out rather than tabulated: the two events carry different payloads,
+   so a shared row type would have to widen both to `unknown`. */
+const attachRuntimeListeners = (page: Page, where: Where): void => {
+  page.on("pageerror", (error) =>
+    record({
+      ...where,
+      category: "runtime",
+      rule: "uncaught-exception",
+      impact: "critical",
+      message: error.message,
+    }),
+  );
+
+  page.on("requestfailed", (request) =>
+    record({
+      ...where,
+      category: "runtime",
+      rule: "request-failed",
+      impact: "serious",
+      message: `${request.method()} ${request.url()}: ${request.failure()?.errorText ?? "failed"}`,
+    }),
   );
 
   page.on("console", (message) =>
@@ -247,7 +305,7 @@ const attachRuntimeListeners = (page, where) => {
   );
 };
 
-const auditAxe = async (page, where) => {
+const auditAxe = async (page: Page, where: Where): Promise<void> => {
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   recordAll(
     violations.flatMap((violation) =>
@@ -255,7 +313,7 @@ const auditAxe = async (page, where) => {
         ...where,
         category: "accessibility",
         rule: violation.id,
-        impact: violation.impact ?? "moderate",
+        impact: (violation.impact ?? "moderate") as Impact,
         selector: node.target.join(" "),
         message: violation.help,
         help: violation.helpUrl,
@@ -264,7 +322,11 @@ const auditAxe = async (page, where) => {
   );
 };
 
-const auditDocument = async (page, where, interactiveCount) => {
+const auditDocument = async (
+  page: Page,
+  where: Where,
+  interactiveCount: number,
+): Promise<DocumentFacts> => {
   const doc = await page.evaluate(documentProbe);
 
   recordAll(
@@ -292,7 +354,12 @@ const auditDocument = async (page, where, interactiveCount) => {
   return doc;
 };
 
-const auditPage = async (context, route, viewport, scheme) => {
+const auditPage = async (
+  context: BrowserContext,
+  route: string,
+  viewport: Viewport,
+  scheme: Scheme,
+): Promise<DocumentFacts | null> => {
   const page = await context.newPage();
   const where = { page: route, viewport: viewport.name, colorScheme: scheme };
 
@@ -316,16 +383,17 @@ const auditPage = async (context, route, viewport, scheme) => {
   }
 
   recordAll(
-    LAYOUT_RULES.filter(({ touchOnly }) => !touchOnly || viewport.width <= TOUCH_WIDTH).flatMap(
-      ({ key, category, rule, impact, message }) =>
-        layout[key].map((item) => ({
-          ...where,
-          category,
-          rule,
-          impact,
-          selector: item.selector,
-          message: message(item, layout),
-        })),
+    LAYOUT_RULES.filter(
+      ({ touchOnly }) => !touchOnly || viewport.width <= TOUCH_WIDTH,
+    ).flatMap(({ category, rule, impact, findings }) =>
+      findings(layout).map(({ selector, message }) => ({
+        ...where,
+        category,
+        rule,
+        impact,
+        selector,
+        message,
+      })),
     ),
   );
 
@@ -361,10 +429,18 @@ const auditPage = async (context, route, viewport, scheme) => {
 /* `prepare` defaults to doing nothing rather than being checked at each use:
    an absent hook and a hook that changes nothing are the same run. */
 const overRoutes = async (
-  browser,
-  { contextOptions, prepare = async (_page) => {}, visit },
-  routes,
-) => {
+  browser: Browser,
+  {
+    contextOptions,
+    prepare = async (_page: Page) => {},
+    visit,
+  }: {
+    readonly contextOptions?: Parameters<Browser["newContext"]>[0];
+    readonly prepare?: (page: Page) => Promise<void>;
+    readonly visit: (page: Page, route: string) => Promise<void>;
+  },
+  routes: readonly string[],
+): Promise<void> => {
   const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
   await prepare(page);
@@ -377,7 +453,10 @@ const overRoutes = async (
   await context.close();
 };
 
-const checkSchemesDiffer = (route, byScheme) => {
+const checkSchemesDiffer = (
+  route: string,
+  byScheme: ReadonlyMap<Scheme, DocumentFacts>,
+): void => {
   const light = byScheme.get("light");
   const dark = byScheme.get("dark");
   if (light === undefined || dark === undefined) return;
@@ -393,8 +472,8 @@ const checkSchemesDiffer = (route, byScheme) => {
   }
 };
 
-const checkTitlesUnique = (titles) => {
-  const seen = new Map();
+const checkTitlesUnique = (titles: readonly (readonly [string, string])[]): void => {
+  const seen = new Map<string, string>();
   titles.forEach(([route, title]) => {
     const existing = seen.get(title);
     if (existing === undefined) seen.set(title, route);
@@ -410,7 +489,7 @@ const checkTitlesUnique = (titles) => {
 };
 
 /** Static checks prove links resolve to files; this proves the server serves them. */
-const checkLinks = async (browser, links) => {
+const checkLinks = async (browser: Browser, links: readonly string[]): Promise<void> => {
   if (links.length === 0) return;
 
   const context = await browser.newContext();
@@ -462,16 +541,18 @@ const main = async () => {
        helper rather than asserting one: the map and the loop are built from the
        same list, and a helper that inserts on miss keeps that a fact rather
        than a claim. */
-    const documentsByRoute = new Map(routes.map((route) => [route, new Map()]));
-    const documentsFor = (route) => {
+    const documentsByRoute = new Map<string, Map<Scheme, DocumentFacts>>(
+      routes.map((route) => [route, new Map()]),
+    );
+    const documentsFor = (route: string): Map<Scheme, DocumentFacts> => {
       const found = documentsByRoute.get(route);
       if (found !== undefined) return found;
-      const fresh = new Map();
+      const fresh = new Map<Scheme, DocumentFacts>();
       documentsByRoute.set(route, fresh);
       return fresh;
     };
-    const titles = [];
-    const links = new Set();
+    const titles: [string, string][] = [];
+    const links = new Set<string>();
 
     for (const scheme of SCHEMES) {
       for (const viewport of VIEWPORTS) {
@@ -552,8 +633,11 @@ const main = async () => {
   }
 };
 
-const write = async (collected, routes) => {
-  const meta = {
+const write = async (
+  collected: readonly MergedFinding[],
+  routes: readonly string[],
+): Promise<void> => {
+  const meta: Meta = {
     generatedAt: new Date().toISOString(),
     target: `${SITE}${BASE}`,
     pages: routes,
@@ -585,6 +669,8 @@ try {
         impact: "info",
         page: "-",
         message: `the audit could not complete: ${error instanceof Error ? error.message : String(error)}`,
+        /* No context to merge across: the driver failed once, not per page. */
+        contexts: [],
       },
     ],
     [],

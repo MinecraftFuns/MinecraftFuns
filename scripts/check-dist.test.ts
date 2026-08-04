@@ -27,7 +27,12 @@ import {
   templateLeakage,
   webKeyDirectory,
   undefinedCustomProperties,
-} from "./check-dist.mjs";
+  type Deployment,
+  type Document,
+  type Resolves,
+  type Violation,
+  type WkdEntry,
+} from "./check-dist.ts";
 
 /*
  * These are predominantly *negative* tests. A checker that has quietly stopped
@@ -35,6 +40,19 @@ import {
  * mode for the last gate before production, so each check is fed input it is
  * supposed to reject, and asserted to reject it.
  */
+
+/**
+ * The single element, asserted. `found[0]` read the same and checked less: a
+ * check reporting three problems where one was expected passed just as well.
+ */
+const only = <T>(items: readonly T[]): T => {
+  const [first, ...rest] = items;
+  assert.ok(
+    first !== undefined && rest.length === 0,
+    `expected exactly one, got ${items.length}`,
+  );
+  return first;
+};
 
 const TOKENS = `
   --color-ink-black-950: #0a0f1a;
@@ -48,13 +66,25 @@ const TOKENS = `
  * stopped emitting the key would otherwise look exactly like a clean run.
  * `wkdViolations` is tested directly for the malformed cases.
  */
-const WKD_FIXTURE = {
+const WKD_FIXTURE: Readonly<Record<string, string | Uint8Array>> = {
   ".well-known/openpgpkey/policy": "",
   ".well-known/openpgpkey/hu/s8y7oh5xrdpu9psba3i5ntk64ohouhga": Buffer.from([0x98, 0x01]),
 };
 
+/** What a fixture may override. `site` stands in for both halves of a
+ *  deployment where a case does not care to separate them. */
+type TreeOptions = {
+  readonly base?: string;
+  readonly site?: string;
+  readonly canonical?: Deployment;
+  readonly tokensCss?: string;
+};
+
 /** Build a throwaway dist tree and inspect it. */
-const inspectTree = async (files, options = {}) => {
+const inspectTree = async (
+  files: Readonly<Record<string, string | Uint8Array>>,
+  options: TreeOptions = {},
+) => {
   const dist = await mkdtemp(join(tmpdir(), "check-dist-"));
   for (const [path, contents] of Object.entries({ ...WKD_FIXTURE, ...files })) {
     const full = join(dist, path);
@@ -67,7 +97,6 @@ const inspectTree = async (files, options = {}) => {
   return inspect({
     dist,
     base,
-    site,
     /* Defaults to the build's own parameters, so a fixture that says nothing
        about deployments behaves as it did. The cases that matter pass a
        canonical deployment *different* from the one being built, which is the
@@ -85,12 +114,13 @@ const inspectTree = async (files, options = {}) => {
  * would make every nested page a violation. It previously did exactly that,
  * and the containment check could not tell.
  */
-const page = (body, route = "") =>
+const page = (body: string, route: string = ""): string =>
   `<!doctype html><html><head>
    <link rel="canonical" href="https://example.test/MinecraftFuns/${route}"/>
    </head><body>${body}</body></html>`;
 
-const checksIn = (violations) => new Set(violations.map((v) => v.check));
+const checksIn = (violations: readonly Violation[]): ReadonlySet<string> =>
+  new Set(violations.map((v) => v.check));
 
 describe("normaliseBase", () => {
   it("agrees on every spelling of the same base", () => {
@@ -273,7 +303,7 @@ describe("host directive parsing", () => {
 });
 
 describe("hostDirectiveViolations", () => {
-  const resolves = (reference, isPrefix = false) =>
+  const resolves: Resolves = (reference, isPrefix = false) =>
     isPrefix ? reference === "/real/" : reference === "/real";
 
   it("passes directives whose paths were built", () => {
@@ -294,7 +324,7 @@ describe("hostDirectiveViolations", () => {
       headerPatterns: [],
       resolves,
     });
-    assert.match(found[0], /\/declaration, which no file satisfies/);
+    assert.match(only(found), /\/declaration, which no file satisfies/);
   });
 
   it("catches a header rule matching nothing that was built", () => {
@@ -303,7 +333,7 @@ describe("hostDirectiveViolations", () => {
       headerPatterns: ["/gone/*"],
       resolves,
     });
-    assert.match(found[0], /matches nothing that was built/);
+    assert.match(only(found), /matches nothing that was built/);
   });
 
   it("leaves destinations on other origins alone: it cannot check them", () => {
@@ -323,7 +353,10 @@ describe("hostDirectiveViolations", () => {
 
 describe("wkdViolations", () => {
   const HASH = "s8y7oh5xrdpu9psba3i5ntk64ohouhga";
-  const key = (bytes) => ({ name: HASH, bytes: Uint8Array.from(bytes) });
+  const key = (bytes: readonly number[]): WkdEntry => ({
+    name: HASH,
+    bytes: Uint8Array.from(bytes),
+  });
 
   it("passes a directory holding a binary key and a policy file", () => {
     assert.deepEqual(wkdViolations({ policy: true, keys: [key([0x98, 0x01])] }), []);
@@ -335,23 +368,22 @@ describe("wkdViolations", () => {
 
   it("catches a missing policy file, which the specification requires", () => {
     const found = wkdViolations({ policy: false, keys: [key([0x98])] });
-    assert.equal(found.length, 1);
-    assert.match(found[0], /policy/);
+    assert.match(only(found), /policy/);
   });
 
   it("catches a directory with no keys at all", () => {
-    assert.match(wkdViolations({ policy: true, keys: [] })[0], /no keys/);
+    assert.match(only(wkdViolations({ policy: true, keys: [] })), /no keys/);
   });
 
   it("catches an armored key where the binary one is mandatory", () => {
     // "-----BEGIN" starts with 0x2d. This is the specific mistake the spec
     // warns against, and it would leave clients unable to import the key.
     const found = wkdViolations({ policy: true, keys: [key([0x2d, 0x2d])] });
-    assert.match(found[0], /binary, not armored/);
+    assert.match(only(found), /binary, not armored/);
   });
 
   it("catches an empty key file", () => {
-    assert.match(wkdViolations({ policy: true, keys: [key([])] })[0], /is empty/);
+    assert.match(only(wkdViolations({ policy: true, keys: [key([])] })), /is empty/);
   });
 
   it("catches a filename that is not a Z-Base-32 hash", () => {
@@ -361,7 +393,7 @@ describe("wkdViolations", () => {
       // the encoder had drifted onto RFC 4648's alphabet.
       keys: [{ name: "l0" + "a".repeat(30), bytes: Uint8Array.from([0x98]) }],
     });
-    assert.match(found[0], /Z-Base-32/);
+    assert.match(only(found), /Z-Base-32/);
   });
 });
 
@@ -579,7 +611,7 @@ const artifact = (over = {}) => ({
   ...over,
 });
 
-const doc = (path, text) => ({ path, text });
+const doc = (path: string, text: string): Document => ({ path, text });
 
 describe("checks as data", () => {
   it("names every check exactly once", () => {
@@ -673,14 +705,14 @@ describe("checks as data", () => {
       ],
     });
     assert.match(
-      canonicalLinks(mirrored)[0].detail,
+      only(canonicalLinks(mirrored)).detail,
       /should be https:\/\/canonical.test\/a\//,
     );
   });
 
   it("reports a page with no canonical link at all", () => {
     const found = canonicalLinks(artifact({ html: [doc("a.html", "<html/>")] }));
-    assert.match(found[0].detail, /no canonical link/);
+    assert.match(only(found).detail, /no canonical link/);
   });
 
   it("reports a stylesheet using a property nothing defines", () => {

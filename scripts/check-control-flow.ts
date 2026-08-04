@@ -26,11 +26,11 @@ import { relative, resolve } from "node:path";
 
 import ts from "typescript";
 
-import { moduleBodyOnly } from "./lib/frontmatter.mjs";
-import { each, report } from "./lib/gate.mjs";
+import { moduleBodyOnly } from "./lib/frontmatter.ts";
+import { each, report } from "./lib/gate.ts";
 
 /** Extension to how TypeScript should read the file. */
-const DIALECT = {
+const DIALECT: Readonly<Record<string, ts.ScriptKind>> = {
   ".ts": ts.ScriptKind.TS,
   ".mjs": ts.ScriptKind.JS,
   ".js": ts.ScriptKind.JS,
@@ -39,14 +39,21 @@ const DIALECT = {
   ".astro": ts.ScriptKind.TS,
 };
 
-const extensionOf = (path) => `.${path.split(".").pop()}`;
+const extensionOf = (path: string): string => `.${path.split(".").pop()}`;
 
 /**
  * Every jump in one file. Pure and total: an unparseable file yields
  * whatever TypeScript recovered from it rather than throwing, which is the
  * right failure mode for a gate that must not become the reason a build stops.
  */
-export const jumps = (path, source) => {
+/** A forbidden jump: which file, which line, and which keyword. */
+export type Jump = {
+  readonly path: string;
+  readonly line: number;
+  readonly keyword: Keyword;
+};
+
+export const jumps = (path: string, source: string): readonly Jump[] => {
   const kind = DIALECT[extensionOf(path)];
   if (kind === undefined) return [];
 
@@ -56,8 +63,8 @@ export const jumps = (path, source) => {
       : source;
   const parsed = ts.createSourceFile(path, text, ts.ScriptTarget.ESNext, true, kind);
 
-  const found = [];
-  const visit = (node) => {
+  const found: Jump[] = [];
+  const visit = (node: ts.Node): void => {
     const keyword = ts.isBreakStatement(node)
       ? "break"
       : ts.isContinueStatement(node)
@@ -76,8 +83,11 @@ export const jumps = (path, source) => {
   return found;
 };
 
+/** The two jumps this gate refuses. */
+type Keyword = "break" | "continue";
+
 /** What to reach for instead, keyed by the jump that was written. */
-const REMEDY = {
+const REMEDY: Readonly<Record<Keyword, string>> = {
   continue:
     "lift the condition into a predicate, or return `undefined` from a function the loop pushes when present",
   break: "use `find`, `some`, or `every`; in a `switch`, return from the case",
@@ -90,7 +100,7 @@ const REMEDY = {
 /** Directories to scan, and the extensions worth parsing in each. */
 const ROOTS = ["src", "scripts"];
 
-const sourcesUnder = async (dir) => {
+const sourcesUnder = async (dir: string): Promise<readonly string[]> => {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true });
   return entries
     .filter((entry) => entry.isFile() && extensionOf(entry.name) in DIALECT)
@@ -100,7 +110,7 @@ const sourcesUnder = async (dir) => {
 const main = async () => {
   const files = [
     ...(await Promise.all(ROOTS.map(sourcesUnder))).flat(),
-    resolve("astro.config.mjs"),
+    resolve("astro.config.ts"),
   ];
 
   const found = (

@@ -13,6 +13,9 @@
  * mapping one component over a list should give uniform gaps.
  */
 
+import type { Finding } from "./checks.ts";
+import type { DesignProbe, TokenNames } from "./probe.ts";
+
 /** The 4px base the token scale is built on. */
 export const GRID_BASE = 4;
 
@@ -26,7 +29,7 @@ export const ALIGNMENT_TOLERANCE = 4;
  * Token custom properties by name. Values are read from the live page rather
  * than duplicated here, so fluid scales cannot drift against the stylesheet.
  */
-export const TOKEN_NAMES = {
+export const TOKEN_NAMES: TokenNames = {
   /* The interactive heights live in the spacing namespace because Tailwind's
      `--spacing-*` is its length namespace, and a 40px control height is a
      legitimate generator for rendered geometry to land on. */
@@ -67,15 +70,22 @@ export const TOKEN_NAMES = {
   ],
 };
 
-const near = (a, b, epsilon = EPSILON) => Math.abs(a - b) <= epsilon;
-const round = (value) => Math.round(value * 10) / 10;
+const near = (a: number, b: number, epsilon: number = EPSILON): boolean =>
+  Math.abs(a - b) <= epsilon;
+const round = (value: number): number => Math.round(value * 10) / 10;
 
 /**
  * `token` is a generator; `on-grid` is a multiple of the base that is not a
  * token, so plausible but worth a look; `off-grid` is neither. The linear scan
  * is right for eight entries, and tolerance matching rules out a hashed lookup.
  */
-export const classifyMeasurement = (value, tokens, base = GRID_BASE) => {
+export type Verdict = "token" | "on-grid" | "off-grid";
+
+export const classifyMeasurement = (
+  value: number,
+  tokens: readonly number[],
+  base: number = GRID_BASE,
+): Verdict => {
   if (near(value, 0) || tokens.some((token) => near(token, value))) return "token";
 
   const remainder = Math.abs(value) % base;
@@ -83,7 +93,11 @@ export const classifyMeasurement = (value, tokens, base = GRID_BASE) => {
 };
 
 /** Different enough to see, too close to read as intent. */
-export const isNearMiss = (a, b, tolerance = ALIGNMENT_TOLERANCE) =>
+export const isNearMiss = (
+  a: number,
+  b: number,
+  tolerance: number = ALIGNMENT_TOLERANCE,
+): boolean =>
   Math.abs(a - b) > EPSILON && Math.abs(a - b) <= tolerance;
 
 /**
@@ -91,13 +105,16 @@ export const isNearMiss = (a, b, tolerance = ALIGNMENT_TOLERANCE) =>
  * each pair is considered once and in a canonical order; the quadratic scan is
  * bounded by the probe's twelve-children cap.
  */
-export const nearMissPairs = (values, tolerance = ALIGNMENT_TOLERANCE) => {
+export const nearMissPairs = (
+  values: readonly number[],
+  tolerance: number = ALIGNMENT_TOLERANCE,
+): readonly (readonly [number, number])[] => {
   const sorted = [...new Set(values)].sort((a, b) => a - b);
   return sorted.flatMap((value, index) =>
     sorted
       .slice(index + 1)
       .filter((other) => isNearMiss(value, other, tolerance))
-      .map((other) => [value, other]),
+      .map((other): readonly [number, number] => [value, other]),
   );
 };
 
@@ -106,14 +123,14 @@ export const nearMissPairs = (values, tolerance = ALIGNMENT_TOLERANCE) => {
  * Clustering rather than equality keeps sub-pixel rounding from reading as a
  * rhythm break.
  */
-export const rhythmBreaks = (gaps) => {
+export const rhythmBreaks = (gaps: readonly number[]): readonly number[] => {
   if (gaps.length < 2) return [];
 
   /* Distinct under approximate equality, which `new Set` cannot express: it
      compares exactly, and two gaps a rounding error apart are one rhythm. The
      fold returns a new list rather than pushing into its own accumulator, so
      nothing here is both the input and the output. */
-  const clusters = gaps.reduce(
+  const clusters = gaps.reduce<readonly number[]>(
     (found, gap) =>
       found.some((cluster) => near(cluster, gap, EPSILON * 2)) ? found : [...found, gap],
     [],
@@ -128,13 +145,22 @@ const SCALES = [
   { key: "fontSizes", tokenKey: "text", label: "font size" },
 ];
 
-/* The probe's group key to the edge it names. A record rather than a list of
-   pairs: `Object.entries` yields the pair type a bare array of arrays loses. */
-const EDGES = { lefts: "left", rights: "right" };
+/* The probe's group key to the edge it names. `as const` keeps the keys
+   literal, which `Object.entries` over a record would widen to `string`. */
+const EDGES = [
+  { key: "lefts", edge: "left" },
+  { key: "rights", edge: "right" },
+] as const satisfies readonly {
+  readonly key: "lefts" | "rights";
+  readonly edge: string;
+}[];
 
 /** Raw observations to findings. Pure and total on a partial probe. */
-export const designFindings = (probe, context) => {
-  const at = (extra) => ({
+export const designFindings = (
+  probe: Partial<DesignProbe>,
+  context: { readonly page: string; readonly viewport: string },
+): readonly Finding[] => {
+  const at = (extra: Omit<Finding, "category" | "page" | "viewport">): Finding => ({
     category: "design",
     page: context.page,
     viewport: context.viewport,
@@ -142,8 +168,8 @@ export const designFindings = (probe, context) => {
   });
 
   const alignment = (probe.alignmentGroups ?? []).flatMap((group) =>
-    Object.entries(EDGES).flatMap(([key, edge]) =>
-      nearMissPairs(group[key] ?? []).map(([a, b]) =>
+    EDGES.flatMap(({ key, edge }) =>
+      nearMissPairs(group[key]).map(([a, b]) =>
         at({
           rule: "near-miss-alignment",
           impact: "moderate",

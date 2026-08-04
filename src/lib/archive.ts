@@ -21,10 +21,22 @@ import { monthOf, yearOf, type IsoDate } from "./time.ts";
  * refusing it names the file and fails the build.
  */
 
+declare const postPathBrand: unique symbol;
+
+/**
+ * An archive path whose shape has been checked. Branded, so `routeOf` and
+ * `hrefOf` cannot be handed a record assembled by hand; the sole assertion is
+ * in `parsePostPath` below, which is the only thing that establishes it.
+ *
+ * The brand states shape and deliberately not agreement with the post's date.
+ * That is a property of the *pair* `(id, date)` rather than of this value, so
+ * it is `reconcile`'s to check and no type here can carry it.
+ */
 export type PostPath = {
   readonly year: string;
   readonly month: string;
   readonly slug: string;
+  readonly [postPathBrand]: true;
 };
 
 /**
@@ -51,7 +63,7 @@ export const parsePostPath = (id: string): Parsed<PostPath> => {
     ? invalid(
         `expected YYYY/MM/kebab-case-slug, got ${JSON.stringify(id)}; a post file belongs at src/content/blog/YYYY/MM/slug.md`,
       )
-    : ok({ year, month, slug });
+    : ok({ year, month, slug } as PostPath);
 };
 
 /** The archive folder a post's own date says it belongs in. */

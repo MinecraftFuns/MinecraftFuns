@@ -7,7 +7,7 @@ import {
   motionProbe,
   overflowProbe,
   pageProbe,
-} from "./probe.mjs";
+} from "./probe.ts";
 
 /*
  * `page.evaluate` serialises the function and nothing else: the browser gets
@@ -43,13 +43,15 @@ const MODULE_SCOPE = [
 ];
 
 /** Bare identifier use, ignoring property access such as `Math.round`. */
-const usesBareIdentifier = (source, identifier) =>
+const usesBareIdentifier = (source: string, identifier: string): boolean =>
   new RegExp(String.raw`(?<![.\w$])${identifier}\b`).test(source);
 
-const localNames = (source) => {
+const localNames = (source: string): ReadonlySet<string> => {
   const declared = [
     ...source.matchAll(/(?:const|let|var|function)\s+([A-Za-z_$][\w$]*)/g),
-  ].map((match) => match[1]);
+  ]
+    .map((match) => match[1])
+    .filter((name) => name !== undefined);
   const parameters = (source.slice(0, source.indexOf(")")).match(/[A-Za-z_$][\w$]*/g) ?? []);
   return new Set([...declared, ...parameters]);
 };

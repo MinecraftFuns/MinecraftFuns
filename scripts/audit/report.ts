@@ -6,9 +6,22 @@
  * JSON for parsing. Neither is derived from the other's formatting.
  */
 
-import { IMPACT_ORDER, summarise } from "./checks.mjs";
+import {
+  IMPACT_ORDER,
+  summarise,
+  type Impact,
+  type MergedFinding,
+} from "./checks.ts";
 
-const IMPACT_BADGE = {
+/** What a run was, for the header and for the JSON envelope. */
+export type Meta = {
+  readonly generatedAt: string;
+  readonly target: string;
+  readonly pages: readonly string[];
+  readonly viewports: number;
+};
+
+const IMPACT_BADGE: Readonly<Record<Impact, string>> = {
   critical: "🔴 critical",
   serious: "🟠 serious",
   moderate: "🟡 moderate",
@@ -16,12 +29,12 @@ const IMPACT_BADGE = {
   info: "ℹ️ info",
 };
 
-const escapePipes = (text) => String(text).replaceAll("|", "\\|");
+const escapePipes = (text: string): string => text.replaceAll("|", "\\|");
 
-const truncate = (text, limit) =>
+const truncate = (text: string, limit: number): string =>
   text.length <= limit ? text : `${text.slice(0, limit - 1)}…`;
 
-export const toJson = (findings, meta) =>
+export const toJson = (findings: readonly MergedFinding[], meta: Meta): string =>
   JSON.stringify(
     {
       generatedAt: meta.generatedAt,
@@ -34,9 +47,9 @@ export const toJson = (findings, meta) =>
     2,
   );
 
-export const toMarkdown = (findings, meta) => {
+export const toMarkdown = (findings: readonly MergedFinding[], meta: Meta): string => {
   const summary = summarise(findings);
-  const lines = [];
+  const lines: string[] = [];
 
   lines.push("## Page audit");
   lines.push("");
@@ -88,10 +101,7 @@ export const toMarkdown = (findings, meta) => {
     lines.push("| Impact | Category | Rule | Where | Detail |");
     lines.push("| --- | --- | --- | --- | --- |");
     for (const finding of entries ?? []) {
-      const where =
-        finding.contexts && finding.contexts.length > 0
-          ? finding.contexts.join(", ")
-          : "all";
+      const where = finding.contexts.length > 0 ? finding.contexts.join(", ") : "all";
       const selector = finding.selector
         ? ` \`${escapePipes(truncate(finding.selector, 60))}\``
         : "";

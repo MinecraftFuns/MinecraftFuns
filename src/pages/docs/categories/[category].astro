@@ -1,6 +1,7 @@
 ---
 import DocRow from "../../../components/DocRow.astro";
 import ListPage from "../../../layouts/ListPage.astro";
+import type { NonEmpty } from "../../../lib/adt.ts";
 import { docCategories, type DocCategory, type DocSummary } from "../../../lib/docs.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
@@ -19,7 +20,7 @@ export async function getStaticPaths() {
 type Props = {
   readonly category: DocCategory;
   /* Non-empty by type: a category exists only by being on a doc. */
-  readonly docs: readonly [DocSummary, ...DocSummary[]];
+  readonly docs: NonEmpty<DocSummary>;
 };
 
 const { category, docs } = Astro.props;

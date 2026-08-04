@@ -88,7 +88,7 @@ jobs:
       # paid for the checkout and the install.
       - name: Resolve deployments
         id: deployments
-        run: node scripts/deployment-matrix.mjs
+        run: node scripts/deployment-matrix.ts
 
   # ---------------------------------------------------------------------------
   # Build once per deployment. A base path is baked into every generated link,

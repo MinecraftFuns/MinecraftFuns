@@ -2,6 +2,7 @@
 import BackLink from "../components/BackLink.astro";
 import PageIntro from "../components/PageIntro.astro";
 import BaseLayout from "./BaseLayout.astro";
+import type { Href } from "../lib/url.ts";
 import type { Chrome } from "./chrome.ts";
 
 /**
@@ -34,7 +35,7 @@ type Props = {
   /** Shown in place of the list when nothing rendered. */
   readonly empty: string;
   /** Present on pages that are a slice of a larger index. */
-  readonly back?: { readonly href: string; readonly label: string };
+  readonly back?: { readonly href: Href; readonly label: string };
 };
 
 const { title, description, chrome, eyebrow, heading, lede, label, empty, back } =

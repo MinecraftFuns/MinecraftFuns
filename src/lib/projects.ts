@@ -1,11 +1,10 @@
 import {
+  authoredProjects,
   projectKinds,
-  projects,
-  projectStatuses,
   type Project,
   type ProjectKind,
-  type ProjectStatus,
 } from "../config/projects.ts";
+import { collect, invalid, ok, orThrow, type Parsed } from "./adt.ts";
 
 /**
  * Presentation logic for the project list. The data is config; deciding what to
@@ -13,15 +12,41 @@ import {
  */
 
 /**
- * The badge a status shows, or `null` for none.
- *
- * Total by construction, and now visibly so: `ProjectStatus` is the key type
- * of the very record being indexed, so the lookup cannot miss. The `Map` this
- * replaces returned `string | null | undefined` and coalesced the impossible
- * `undefined` into `null`, which put two absences with different meanings
- * behind one value. Only one of them was ever real.
+ * `until >= since` is an ordering no type can state, so it is the one thing
+ * about a span checked at runtime, once, at the boundary every consumer reads
+ * through.
  */
-export const badgeFor = (status: ProjectStatus): string | null => projectStatuses[status];
+export const wellOrdered = (project: Project): Parsed<Project> =>
+  project.until === null || project.until >= project.since
+    ? ok(project)
+    : invalid(
+        `${project.title}: ends in ${project.until} but starts in ${project.since}`,
+      );
+
+/** The authored list, checked. Read this rather than the config directly. */
+export const projects: readonly Project[] = orThrow(
+  collect(authoredProjects.map(wellOrdered)),
+  "config/projects.ts",
+);
+
+/** Whether work continues. The single fact `until` encodes. */
+export const isActive = (project: Project): boolean => project.until === null;
+
+/**
+ * The badge a project shows, or `null` for none. Derived, because "archived"
+ * and "the span has ended" were two authored claims about one fact.
+ */
+export const badgeFor = (project: Project): string | null =>
+  isActive(project) ? null : "Archived";
+
+/**
+ * The span a card shows. Live work runs to the year it is read in, so the
+ * range advances on its own rather than wanting an edit every January.
+ */
+export const spanOf = (project: Project, thisYear: number): string => {
+  const end = project.until ?? thisYear;
+  return end === project.since ? `${project.since}` : `${project.since}–${end}`;
+};
 
 /** The home page shows a selection, not the list; the flag is where it is chosen. */
 export const featuredProjects = (): readonly Project[] =>

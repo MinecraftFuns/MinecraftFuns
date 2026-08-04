@@ -13,7 +13,15 @@ const FENCE = /^(---\r?\n)([\s\S]*?)(\r?\n---)/;
  * frontmatter. `start` indexes the body's first character; `after` indexes
  * the template's, so the two halves partition the file exactly.
  */
-export const frontmatter = (source) => {
+export type Frontmatter = {
+  readonly body: string;
+  /** Index of the body's first character. */
+  readonly start: number;
+  /** Index of the template's first character. */
+  readonly after: number;
+};
+
+export const frontmatter = (source: string): Frontmatter | undefined => {
   /* Destructured rather than indexed: `RegExp` is typed without reference to
      its pattern, so a group this one guarantees looks optional to a checker.
      Naming the three costs one comparison and leaves `body` a definite string
@@ -30,7 +38,7 @@ export const frontmatter = (source) => {
  * still reports lines that match the file; slicing the body out would put
  * every line number off by the height of the fence.
  */
-export const moduleBodyOnly = (source) => {
+export const moduleBodyOnly = (source: string): string => {
   const parsed = frontmatter(source);
   if (parsed === undefined) return blank(source);
 
@@ -42,4 +50,4 @@ export const moduleBodyOnly = (source) => {
 };
 
 /** Same length, same lines, no content. */
-const blank = (text) => text.replaceAll(/[^\n]/g, " ");
+const blank = (text: string): string => text.replaceAll(/[^\n]/g, " ");

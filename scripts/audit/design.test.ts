@@ -8,7 +8,8 @@ import {
   GRID_BASE,
   isNearMiss,
   rhythmBreaks,
-} from "./design.mjs";
+} from "./design.ts";
+import type { Finding } from "./checks.ts";
 
 /*
  * The probe runs in a browser CI can start but this machine cannot. Splitting
@@ -24,7 +25,8 @@ import {
 const TOKENS = [4, 8, 12, 16, 24, 32, 48, 64];
 
 const context = { page: "/", viewport: "desktop" };
-const rules = (findings) => findings.map((finding) => finding.rule);
+const rules = (findings: readonly Finding[]): readonly string[] =>
+  findings.map((finding) => finding.rule);
 
 describe("classifyMeasurement", () => {
   it("accepts exact tokens", () => {
@@ -137,8 +139,8 @@ describe("designFindings", () => {
     };
     const found = designFindings(probe, context);
     assert.deepEqual(rules(found), ["siblings-flush"]);
-    assert.match(found[0].message, /no space between them/);
-    assert.equal(found[0].selector, "main > section");
+    assert.match(found[0]?.message ?? "", /no space between them/);
+    assert.equal(found[0]?.selector, "main > section");
   });
 
   it("reports nothing when no pair is flush", () => {
@@ -155,7 +157,7 @@ describe("designFindings", () => {
     };
     const found = designFindings(probe, context);
     assert.deepEqual(rules(found), ["near-miss-alignment"]);
-    assert.match(found[0].message, /2px apart/);
+    assert.match(found[0]?.message ?? "", /2px apart/);
   });
 
   it("does not flag a deliberate offset as a near miss", () => {
@@ -179,7 +181,7 @@ describe("designFindings", () => {
     };
     const found = designFindings(probe, context);
     assert.deepEqual(rules(found), ["uneven-rhythm"]);
-    assert.match(found[0].message, /not constant/);
+    assert.match(found[0]?.message ?? "", /not constant/);
   });
 
   it("grades off-grid more seriously than off-token", () => {
@@ -197,8 +199,8 @@ describe("designFindings", () => {
     const found = designFindings(probe, context);
     const offGrid = found.find((f) => f.rule === "off-scale-spacing");
     const offToken = found.find((f) => f.rule === "off-token-spacing");
-    assert.equal(offGrid.impact, "moderate");
-    assert.equal(offToken.impact, "minor");
+    assert.equal(offGrid?.impact, "moderate");
+    assert.equal(offToken?.impact, "minor");
   });
 
   it("checks radii and font sizes against their own scales", () => {
@@ -234,8 +236,8 @@ describe("designFindings", () => {
   it("carries page and viewport onto every finding", () => {
     const probe = { alignmentGroups: [{ container: "div", lefts: [10, 12], rights: [] }] };
     const found = designFindings(probe, { page: "/blog/", viewport: "mobile" });
-    assert.equal(found[0].page, "/blog/");
-    assert.equal(found[0].viewport, "mobile");
-    assert.equal(found[0].category, "design");
+    assert.equal(found[0]?.page, "/blog/");
+    assert.equal(found[0]?.viewport, "mobile");
+    assert.equal(found[0]?.category, "design");
   });
 });

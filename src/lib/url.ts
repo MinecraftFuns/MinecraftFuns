@@ -1,4 +1,4 @@
-import type { RootedPath } from "../config/schema.ts";
+import type { HttpsUrl, RootedPath } from "../config/schema.ts";
 
 /**
  * Base-aware link construction, and the only module that knows the base path.
@@ -13,6 +13,24 @@ import type { RootedPath } from "../config/schema.ts";
  * platform's WHATWG parser. The one surviving regex decides something that
  * genuinely is regular.
  */
+
+declare const resolvedBrand: unique symbol;
+
+/**
+ * A path that has been through this deployment's base. Erased at runtime; its
+ * only power is that `routeUrl` and `assetUrl` are the sole way to obtain one.
+ */
+type ResolvedPath = string & { readonly [resolvedBrand]: true };
+
+/**
+ * What may be put in an `href`: a path mounted on this deployment's base, or a
+ * URL carrying its own authority, which a base could only corrupt.
+ *
+ * Every component's `href` prop takes this, so a literal `href="/blog"`, right
+ * on the custom domain and a 404 on Pages, is now a type error rather than a
+ * convention this module could only document.
+ */
+export type Href = ResolvedPath | HttpsUrl;
 
 /**
  * A syntactically valid origin that can never resolve. Mounting happens
@@ -115,7 +133,8 @@ export const currentBase = (): string => {
  * because a bare `blog` is the mistake this module exists to prevent, and one
  * a template literal type can refuse before the build reaches a browser.
  */
-export const routeUrl = (path: RootedPath): string => joinRoute(currentBase(), path);
+export const routeUrl = (path: RootedPath): Href =>
+  joinRoute(currentBase(), path) as ResolvedPath;
 
 /**
  * Resolve a file against the deployment's base path.
@@ -125,7 +144,8 @@ export const routeUrl = (path: RootedPath): string => joinRoute(currentBase(), p
  * string. Narrowing the parameter would buy a rooted asset link and cost an
  * assertion at that boundary, which is the worse of the two trades.
  */
-export const assetUrl = (path: string): string => joinBase(currentBase(), path);
+export const assetUrl = (path: string): Href =>
+  joinBase(currentBase(), path) as ResolvedPath;
 
 /**
  * Section containment, used to mark the current nav item. Slash-terminating

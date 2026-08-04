@@ -6,4 +6,4 @@
 #
 # Formatting only, never checking: a hook that can reject a commit is a hook
 # people pass `--no-verify` to. The quality gate is `npm run check`.
-exec node scripts/format-changed.mjs --staged
+exec node scripts/format-changed.ts --staged

@@ -18,16 +18,26 @@
 
 import { execFileSync } from "node:child_process";
 
-const git = (...args) => execFileSync("git", args, { encoding: "utf8" });
+const git = (...args: readonly string[]): string =>
+  execFileSync("git", args, { encoding: "utf8" });
 
 /** Non-empty lines, since `git diff` prints nothing rather than an empty list. */
-const lines = (text) => text.split("\n").filter((line) => line !== "");
+const lines = (text: string): readonly string[] =>
+  text.split("\n").filter((line) => line !== "");
 
 /**
  * Split the staged set into what can be formatted and what must not be.
  * Pure: the two inputs are file lists, the output partitions the first.
  */
-export const partitionStaged = (staged, alsoUnstaged) => {
+export type Partition = {
+  readonly format: readonly string[];
+  readonly skip: readonly string[];
+};
+
+export const partitionStaged = (
+  staged: readonly string[],
+  alsoUnstaged: readonly string[],
+): Partition => {
   const held = new Set(alsoUnstaged);
   return {
     format: staged.filter((path) => !held.has(path)),
@@ -39,7 +49,10 @@ export const partitionStaged = (staged, alsoUnstaged) => {
    formatted. Deleted is the one that does not. */
 const FILTER = "--diff-filter=ACMR";
 
-const SCOPES = {
+/** A partition plus whether the formatted files must go back into the index. */
+type Selection = Partition & { readonly restage: boolean };
+
+const SCOPES: Readonly<Record<"tree" | "staged", () => Selection>> = {
   tree: () => ({
     format: [
       ...lines(git("diff", "--name-only", FILTER, "HEAD")),

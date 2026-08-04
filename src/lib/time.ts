@@ -205,10 +205,6 @@ export type WallClock = {
  * The parts are indexed in a single pass. Searching the array once per field
  * would rescan it six times for a list the formatter already returns in one
  * piece, and this runs for every rendered date.
- *
- * The `?? 0` branch is unreachable: `wallClockFormatter` requests all six
- * fields a few lines above, so the invariant is established locally and does
- * not rest on the caller.
  */
 export const wallClockAt = (instant: Date, zone: TimeZone): WallClock => {
   const fields = new Map(
@@ -217,7 +213,17 @@ export const wallClockAt = (instant: Date, zone: TimeZone): WallClock => {
       .map((part) => [part.type, Number(part.value)] as const),
   );
 
-  const field = (type: Intl.DateTimeFormatPartTypes): number => fields.get(type) ?? 0;
+  const field = (type: Intl.DateTimeFormatPartTypes): number => {
+    const value = fields.get(type);
+    /* Unreachable: `wallClockFormatter` requests all six fields a few lines
+       above. It throws rather than defaulting because the only plausible
+       default is zero, and a year of zero is precisely the silently wrong date
+       this module exists to make impossible. */
+    if (value === undefined) {
+      throw new TypeError(`the formatter for ${zone} returned no ${type}`);
+    }
+    return value;
+  };
 
   return {
     year: field("year"),
@@ -265,8 +271,9 @@ export const startOfDayIn = (date: IsoDate, zone: TimeZone = SITE_TIME_ZONE): Da
 // Rendering
 // ---------------------------------------------------------------------------
 
-/* NUL separates the two halves of the key. Neither an IANA zone identifier
-   nor a BCP 47 tag may contain it, so no two distinct pairs can collide. */
+/* A space separates the two halves of the key. Neither an IANA zone
+   identifier nor a BCP 47 tag may contain one, so no two distinct pairs
+   collide. */
 const displayFormatter = memoiseBy(
   (zone: TimeZone, locale: string) => `${zone} ${locale}`,
   (zone: TimeZone, locale: string) =>

@@ -1,6 +1,7 @@
 ---
 import BackLink from "../components/BackLink.astro";
 import BaseLayout from "./BaseLayout.astro";
+import type { Href } from "../lib/url.ts";
 import type { Chrome } from "./chrome.ts";
 
 /**
@@ -20,7 +21,7 @@ type Props = {
   readonly title: string;
   readonly description: string;
   readonly chrome?: Chrome;
-  readonly back: { readonly href: string; readonly label: string };
+  readonly back: { readonly href: Href; readonly label: string };
 };
 
 const { title, description, chrome, back } = Astro.props;

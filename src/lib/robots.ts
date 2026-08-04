@@ -1,3 +1,5 @@
+import type { NonEmpty } from "./adt.ts";
+
 /**
  * The Robots Exclusion Protocol, as data.
  *
@@ -20,7 +22,7 @@ export type Rule =
  * to nobody, so the empty case is not validated at runtime; it cannot be built.
  */
 export type Group = {
-  readonly userAgents: readonly [string, ...string[]];
+  readonly userAgents: NonEmpty<string>;
   readonly rules: readonly Rule[];
 };
 

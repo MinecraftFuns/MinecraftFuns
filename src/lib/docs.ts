@@ -7,7 +7,7 @@ import type { RootedPath } from "../config/schema.ts";
 import { nav } from "../config/site.ts";
 import { parseSlug, slugify } from "./slug.ts";
 import { taxonomy, type Taxon } from "./taxonomy.ts";
-import { routeUrl } from "./url.ts";
+import { routeUrl, type Href } from "./url.ts";
 
 /**
  * The docs read model, the flat counterpart to `lib/posts.ts`. Both
@@ -18,8 +18,10 @@ import { routeUrl } from "./url.ts";
 
 /**
  * An entry paired with its validated slug, as `PublishedPost` is with its
- * path. Only `publishedDocs` can build one, and it refuses an id that is not a
- * flat kebab-case slug.
+ * path. The slug is a plain string rather than a branded one: `hrefOf` here
+ * takes the same segment `slugify` produces for a category, and a brand would
+ * oblige every such call site to handle a failure the taxonomy has already
+ * ruled out. `publishedDocs` refusing a non-flat id is what holds it.
  */
 export type PublishedDoc = {
   readonly entry: CollectionEntry<"docs">;
@@ -39,7 +41,7 @@ export type DocCategory = string & { readonly [docCategoryBrand]: true };
 export type DocSummary = {
   readonly title: string;
   readonly description: string;
-  readonly href: string;
+  readonly href: Href;
   readonly readingMinutes: number;
   readonly category: DocCategory;
 };
@@ -100,7 +102,7 @@ export const docSummaries = async (): Promise<readonly DocSummary[]> =>
   (await publishedDocs()).map(summarise);
 
 /** Where a category leads. One function, as `tagHref` is for a tag. */
-export const categoryHref = (category: DocCategory): string =>
+export const categoryHref = (category: DocCategory): Href =>
   routeUrl(`/docs/categories/${slugify(category)}`);
 
 /**

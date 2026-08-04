@@ -4,6 +4,20 @@
   // nothing, and `exactOptionalPropertyTypes`, which separates "omitted" from
   // "passed as undefined" and so decides what a forwarded prop must declare.
   "extends": "astro/tsconfigs/strictest",
+  "compilerOptions": {
+    // The unit tests are run by `node --test` straight off the source, so the
+    // same stripper constraint applies here as in `tsconfig.scripts.json`.
+    "erasableSyntaxOnly": true
+  },
   "include": [".astro/types.d.ts", "**/*.ts", "**/*.tsx", "**/*.astro"],
-  "exclude": ["dist", "node_modules", ".github/skills", ".claude/skills"]
+  // `scripts` and the Astro config belong to `tsconfig.scripts.json`, which
+  // gives them Node's globals and a different lib set.
+  "exclude": [
+    "dist",
+    "node_modules",
+    "scripts",
+    "astro.config.ts",
+    ".github/skills",
+    ".claude/skills"
+  ]
 }

@@ -1,6 +1,7 @@
 ---
 import PostRow from "../../../components/PostRow.astro";
 import ListPage from "../../../layouts/ListPage.astro";
+import type { NonEmpty } from "../../../lib/adt.ts";
 import { postTags, type PostSummary, type PostTag } from "../../../lib/posts.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
@@ -22,7 +23,7 @@ type Props = {
   readonly tag: PostTag;
   /* Non-empty by type: a tag exists only by being on a post, so the empty
      state `ListPage` can render is unreachable from here. */
-  readonly posts: readonly [PostSummary, ...PostSummary[]];
+  readonly posts: NonEmpty<PostSummary>;
 };
 
 const { tag, posts } = Astro.props;

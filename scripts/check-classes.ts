@@ -34,11 +34,25 @@
 import { readFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
-import { filesUnder } from "./lib/files.mjs";
-import { frontmatter } from "./lib/frontmatter.mjs";
-import { each, report } from "./lib/gate.mjs";
+import { filesUnder } from "./lib/files.ts";
+import { frontmatter } from "./lib/frontmatter.ts";
+import { each, report } from "./lib/gate.ts";
 
-const RULES = [
+/** One thing a class list must not contain, and what to write instead. */
+type Rule = {
+  readonly rule: string;
+  readonly pattern: RegExp;
+  readonly remedy: string;
+};
+
+/** A rule that fired, before the file it fired in is attached. */
+export type Violation = {
+  readonly rule: string;
+  readonly text: string;
+  readonly remedy: string;
+};
+
+const RULES: readonly Rule[] = [
   {
     rule: "arbitrary-value",
     /* A utility name followed by a bracket: `w-[`, `grid-cols-[`, `aria-[`.
@@ -89,18 +103,22 @@ const RULES = [
  * template, and any string literal in the frontmatter; a class list extracted
  * to a `const` is still markup, and is exactly where a literal would hide.
  */
-export const classRegions = (source) => {
+export const classRegions = (source: string): readonly string[] => {
   const parsed = frontmatter(source);
   if (parsed === undefined) return [source];
 
+  /* Exactly one alternative participates in any match, but `RegExp` is typed
+     without reference to its pattern, so both groups read as optional. The
+     empty string is the honest third case: it is a region with nothing in it
+     to match, so an impossible match contributes nothing rather than a hole. */
   const literals = [...parsed.body.matchAll(/"([^"\\\n]*)"|'([^'\\\n]*)'/g)].map(
-    (literal) => literal[1] ?? literal[2],
+    (literal) => literal[1] ?? literal[2] ?? "",
   );
   return [source.slice(parsed.after), ...literals];
 };
 
 /** Every anonymous value in one file's class regions. Pure and total. */
-export const anonymousValues = (source) =>
+export const anonymousValues = (source: string): readonly Violation[] =>
   classRegions(source).flatMap((region) =>
     RULES.flatMap(({ rule, pattern, remedy }) =>
       [...region.matchAll(pattern)].map((found) => ({
@@ -118,9 +136,13 @@ export const anonymousValues = (source) =>
  * and `--text-*: initial` is the namespace reset. Only the first names a
  * utility, so the two double-hyphen forms are dropped.
  */
-export const typeRoles = (css) =>
+export const typeRoles = (css: string): readonly string[] =>
   [...css.matchAll(/^\s*--text-([a-z0-9-]+):/gm)]
     .map((declaration) => declaration[1])
+    /* Same as in `classRegions`: the group is mandatory in the pattern and
+       optional in the type. Dropping the absent case is what makes the two
+       tests below definite strings rather than possibly-missing ones. */
+    .filter((role) => role !== undefined)
     .filter((role) => !role.includes("--") && !role.includes("*"));
 
 /**
@@ -130,7 +152,10 @@ export const typeRoles = (css) =>
  * `text-body-sm`: a word boundary sits between `y` and `-`, so `\b` alone
  * would report every longer role twice.
  */
-export const typeRolesSet = (source, roles) =>
+export const typeRolesSet = (
+  source: string,
+  roles: readonly string[],
+): readonly Violation[] =>
   classRegions(source).flatMap((region) =>
     roles.flatMap((role) =>
       [...region.matchAll(new RegExp(`\\btext-${role}(?![-a-z0-9])`, "g"))].map(

@@ -1,4 +1,6 @@
 ---
+import type { Href } from "../lib/url.ts";
+
 /**
  * The ruled footer that returns a reader to an index.
  *
@@ -15,7 +17,7 @@
  * 73x21px, under the 24px minimum on its short axis.
  */
 type Props = {
-  readonly href: string;
+  readonly href: Href;
   readonly label: string;
 };
 

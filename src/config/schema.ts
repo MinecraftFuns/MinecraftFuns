@@ -1,7 +1,14 @@
+import type { NonEmpty } from "../lib/adt.ts";
+
 /**
  * The shape of this site's configuration. One module, so "what can I
- * configure?" is a file rather than a search, and a leaf, so config data and
- * the code reading it can both depend on it without a cycle.
+ * configure?" is a file rather than a search, and nothing in `config/` depends
+ * on anything but this, so config data and the code reading it can both depend
+ * on it without a cycle.
+ *
+ * The one import is `NonEmpty` from `lib/adt.ts`, which imports nothing at all.
+ * Restating the tuple here to keep the file import-free would be a second
+ * definition of one concept, which is the trade this project does not make.
  *
  * Every config export is written `as const satisfies` one of these: `satisfies`
  * reports a missing or misspelled field, while `as const` keeps the literal
@@ -23,14 +30,12 @@ export type RootedPath = `/${string}`;
 /** An absolute URL. Same technique; `http://` and bare hosts are rejected. */
 export type HttpsUrl = `https://${string}`;
 
-/** Anything that can be linked to, once resolved. */
-export type Href = RootedPath | HttpsUrl;
-
-/** Nav items and profiles are both this, refined. */
-export type Link = {
-  readonly label: string;
-  readonly href: string;
-};
+/**
+ * A redirect destination as written in config: a path on this site, or a URL
+ * leaving it. Distinct from `lib/url.ts`'s `Href`, which is the *resolved*
+ * form; this one is still site-relative and has not met a base path yet.
+ */
+export type RedirectTarget = RootedPath | HttpsUrl;
 
 // ---------------------------------------------------------------------------
 // Deployments
@@ -90,8 +95,15 @@ export type SiteConfig = {
   readonly dateLocale: string;
 };
 
-/** A nav entry is a `Link` whose target is known to be on this site. */
-export type NavItem = Link & { readonly href: RootedPath };
+/**
+ * A nav entry. The target is written site-relative and *unresolved*: the
+ * header mounts it on the deployment's base, which is why this is a
+ * `RootedPath` and not a `lib/url.ts` `Href`.
+ */
+export type NavItem = {
+  readonly label: string;
+  readonly href: RootedPath;
+};
 
 // ---------------------------------------------------------------------------
 // Contact
@@ -136,13 +148,6 @@ export type ProjectKindConfig = {
   readonly blurb: string;
 };
 
-/**
- * Statuses mapped to the badge each shows; `null` is "no badge", a decision
- * rather than a value that went missing. Keyed rather than a list, so the key
- * type is the set of statuses and `badgeFor` is total.
- */
-export type ProjectStatusConfig = Readonly<Record<string, string | null>>;
-
 // ---------------------------------------------------------------------------
 // Hosting
 // ---------------------------------------------------------------------------
@@ -158,7 +163,7 @@ export type RedirectStatus = 200 | 301 | 302 | 303 | 307 | 308;
 /** A redirect as written in config. `status` defaults to a permanent move. */
 export type RedirectConfig = {
   readonly from: RootedPath;
-  readonly to: Href;
+  readonly to: RedirectTarget;
   readonly status?: RedirectStatus;
 };
 
@@ -177,11 +182,11 @@ export type RedirectConfig = {
 export type HeaderConfig = { readonly path: RootedPath } & (
   | {
       readonly set: Readonly<Record<string, string>>;
-      readonly remove?: readonly [string, ...string[]];
+      readonly remove?: NonEmpty<string>;
     }
   | {
       readonly set?: Readonly<Record<string, string>>;
-      readonly remove: readonly [string, ...string[]];
+      readonly remove: NonEmpty<string>;
     }
 );
 

@@ -98,7 +98,7 @@ export const findTarget = (origin: string, base: string): Parsed<DeploymentTarge
  */
 export const activeTarget = (site: URL | undefined): Parsed<DeploymentTarget> =>
   site === undefined
-    ? invalid("Astro.site is unset; astro.config.mjs must assign `site`")
+    ? invalid("Astro.site is unset; astro.config.ts must assign `site`")
     : findTarget(site.origin, currentBase());
 
 /**

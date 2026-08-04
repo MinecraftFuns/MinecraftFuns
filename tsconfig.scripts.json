@@ -1,29 +1,28 @@
 {
   // The build and gate scripts, which `astro check` never sees: it reads the
-  // main tsconfig, and that includes only `.ts`/`.astro`. Some two thousand
-  // lines deciding whether a build ships were the least checked code here.
+  // main tsconfig, and that excludes this tree so the two projects cannot both
+  // claim a file.
   //
-  // `strictest`, which is `strict` plus the checks that matter most to code
-  // shaped like this: `noUncheckedIndexedAccess`, since these scripts walk
-  // arrays and match regexes all day, and `noUnusedLocals`, since a gate that
-  // stopped being called still looks like one.
+  // These were `.mjs` under `checkJs` with `noImplicitAny` off, which was the
+  // honest choice at the time: switching it on reported 202 unannotated
+  // parameters to surface 32 real problems, and the answer would have been 202
+  // JSDoc comments restating what every call site already says.
   //
-  // `noImplicitAny` is off, and that is the point rather than a concession.
-  // Turning it on reports 202 unannotated parameters and 32 real problems; the
-  // 202 would be answered by JSDoc that restates what the call sites already
-  // say, and the noise is what stops anybody reading the 32. Inference alone
-  // catches the mistakes worth catching: a possibly-undefined value used as a
-  // number, an argument that may be undefined, a catch binding treated as an
-  // Error.
+  // Renaming them to `.ts` dissolves that trade rather than settling it.
+  // Inference supplies all 202 for free, `strictest` applies in full, and Node
+  // 24 runs the files directly, so nothing is compiled and no build step
+  // appears between editing a gate and running it.
   "extends": "astro/tsconfigs/strictest",
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
     "noEmit": true,
-    "noImplicitAny": false,
     "module": "esnext",
     "moduleResolution": "bundler",
     "target": "es2023",
+    // These files are *executed* by Node's type stripper, which erases
+    // annotations and refuses anything that would need code generated for it.
+    // `enum`, `namespace`, and parameter properties therefore fail at runtime
+    // rather than at the typecheck. This makes that a checked property.
+    "erasableSyntaxOnly": true,
     // ES2024 for `Object.groupBy`; DOM because the audit probes are functions
     // serialised into a browser page.
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
@@ -31,5 +30,5 @@
     // module graph reaches `import.meta.env` from there.
     "types": ["node", "astro/client"]
   },
-  "include": ["scripts/**/*.mjs", "astro.config.mjs"]
+  "include": ["scripts/**/*.ts", "astro.config.ts"]
 }
