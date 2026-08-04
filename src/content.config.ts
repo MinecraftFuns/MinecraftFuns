@@ -4,8 +4,25 @@ import { defineCollection } from "astro:content";
    and from `astro:schema` are both deprecated for removal in Astro 7. */
 import { z } from "astro/zod";
 
-import { explain } from "./lib/adt.ts";
+import { explain, type Parsed } from "./lib/adt.ts";
+import { parseDocCategory, parsePostTag } from "./lib/labels.ts";
 import { isoDate, parseIsoDate } from "./lib/time.ts";
+
+/**
+ * Refine proves, transform casts. Splitting them is what puts the offending
+ * *file* on the message: Zod attaches it, where a throw from inside a smart
+ * constructor has no idea which file it was reading.
+ */
+const decoded = <T extends string>(parse: (raw: string) => Parsed<T>) =>
+  z
+    .string()
+    .min(1)
+    .superRefine((raw, ctx) => {
+      const parsed = parse(raw);
+      if (parsed.tag === "invalid")
+        ctx.addIssue({ code: "custom", message: explain(parsed) });
+    })
+    .transform((raw) => raw as T);
 
 /**
  * Content collections.
@@ -32,8 +49,12 @@ const blog = defineCollection({
     description: z.string().min(1),
     /** Drafts are written but never built. Default keeps frontmatter terse. */
     draft: z.boolean().default(false),
-    /** The blog's own taxonomy. See `PostTag`; a doc's category is not one. */
-    tags: z.array(z.string()).default([]),
+    /*
+     * The blog's own taxonomy, decoded rather than merely typed. A tag becomes
+     * a `PostTag`, which is `Sluggable`, so `taxonomy` needs no per-label check
+     * and the failure names the post rather than the collection.
+     */
+    tags: z.array(decoded(parsePostTag)).default([]),
     /*
      * Refine proves validity, transform performs the cast. Splitting them means
      * the failure is reported by Zod with the offending file attached, rather
@@ -91,7 +112,9 @@ const docs = defineCollection({
     title: z.string().min(1),
     description: z.string().min(1),
     draft: z.boolean().default(false),
-    category: z.string().min(1),
+    /* One category, decoded to `DocCategory`: nominally distinct from a post
+       tag even where the two spell the same word. */
+    category: decoded(parseDocCategory),
   }),
 });
 

@@ -60,6 +60,60 @@ describe("covers", () => {
     assert.equal(covers(exactPath("/pgp"), prefixPath("/pgp")), false);
     assert.equal(covers(exactPath("/pg"), exactPath("/pgp")), false);
   });
+
+  /*
+   * The law relating the two functions, and the reason `covers` may declare a
+   * rule dead:
+   *
+   *   covers(outer, inner)  =>  forall p. matches(inner, p) => matches(outer, p)
+   *
+   * Soundness is the direction that matters. A false positive fails the build
+   * over a rule that is genuinely reachable; a false negative only leaves dead
+   * config in place. The pattern language is finite over a small alphabet, so
+   * this is checked by enumeration rather than by sampling: 196 pairs against
+   * 7 paths is exhaustive, deterministic, and instant.
+   */
+  const PATHS = ["", "/", "/a", "/a/", "/ab", "/a/b", "/b"] as const;
+  const PATTERNS = PATHS.flatMap((path) => [exactPath(path), prefixPath(path)]);
+
+  it("never covers a pattern that matches a path the coverer does not", () => {
+    PATTERNS.forEach((outer) =>
+      PATTERNS.filter((inner) => covers(outer, inner)).forEach((inner) =>
+        PATHS.filter((path) => patternMatches(inner, path)).forEach((path) =>
+          assert.ok(
+            patternMatches(outer, path),
+            `${renderPattern(outer)} covers ${renderPattern(inner)}, which matches ${JSON.stringify(path)}`,
+          ),
+        ),
+      ),
+    );
+  });
+
+  /* Guards against the quantified test above passing by saying nothing: an
+     empty inner filter satisfies it vacuously. */
+  it("does cover something, and does refuse something", () => {
+    assert.ok(PATTERNS.some((inner) => covers(prefixPath("/a"), inner)));
+    assert.ok(PATTERNS.some((inner) => !covers(exactPath("/a"), inner)));
+  });
+
+  /* Shadow detection scans every earlier rule, so it rests on both of these
+     without either being written down anywhere. */
+  it("is reflexive", () => {
+    PATTERNS.forEach((pattern) => assert.ok(covers(pattern, pattern)));
+  });
+
+  it("is transitive", () => {
+    PATTERNS.forEach((a) =>
+      PATTERNS.filter((b) => covers(a, b)).forEach((b) =>
+        PATTERNS.filter((c) => covers(b, c)).forEach((c) =>
+          assert.ok(
+            covers(a, c),
+            `${renderPattern(a)} covers ${renderPattern(b)} covers ${renderPattern(c)}`,
+          ),
+        ),
+      ),
+    );
+  });
 });
 
 describe("renderRedirects", () => {

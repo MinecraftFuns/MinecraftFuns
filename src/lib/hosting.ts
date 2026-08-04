@@ -277,10 +277,12 @@ export const redirectProblems = (
   redirects: readonly Redirect[],
 ): readonly RuleProblem[] =>
   redirects.flatMap((redirect, index) => {
-    // First match wins, so anything an earlier rule already covers is dead.
-    const shadow = redirects
-      .slice(0, index)
-      .find((earlier) => covers(earlier.from, redirect.from));
+    /* First match wins, so anything an earlier rule already covers is dead.
+       Bounded by the index rather than sliced to it: the slice allocated a
+       fresh array per rule to answer a question `find` can answer in place. */
+    const shadow = redirects.find(
+      (earlier, before) => before < index && covers(earlier.from, redirect.from),
+    );
 
     /* Three independent facts about one rule, each a reason or nothing. */
     return [

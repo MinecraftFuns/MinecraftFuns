@@ -2,7 +2,9 @@ import { basename } from "node:path/posix";
 
 import * as openpgp from "openpgp";
 
+import { invalid, nonEmpty, ok, orThrow, type Parsed } from "./adt.ts";
 import { byCodepoint } from "./collate.ts";
+import { memoiseBy } from "./memo.ts";
 import { isOnDomain, parseMailAddress, wkdHash, type WkdHash } from "./wkd.ts";
 
 /**
@@ -34,17 +36,6 @@ export type PublishedKey = {
   readonly binary: Uint8Array;
   readonly addresses: readonly PublishedAddress[];
 };
-
-/*
- * Vite resolves this at build time, so the key files need no runtime path and
- * the dev server reloads on edit. `eager` because there is no laziness to gain:
- * every key is needed to enumerate the routes.
- */
-const SOURCES = import.meta.glob("../keys/*.asc", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-}) as Readonly<Record<string, string>>;
 
 /* The POSIX variant specifically: these are `import.meta.glob` keys, which are
    URL-shaped and separated by `/` whatever the host platform is. */
@@ -93,10 +84,56 @@ const addressesOn = (key: openpgp.Key, domain: string): readonly PublishedAddres
   return [...byHash.values()];
 };
 
+/**
+ * Addresses claimed by more than one key.
+ *
+ * The address-to-key mapping has to be a function: two keys claiming one
+ * directory entry would put two files at one URL, resolved arbitrarily and
+ * never noticed by a client. Carrying the owner already seen keeps the
+ * counterpart in hand, so a message cannot print "undefined".
+ *
+ * Every clash, not the first: three are three facts about `src/keys`, and
+ * reporting them one build at a time turns one mistake into three builds.
+ */
+export const ownershipProblems = (keys: readonly PublishedKey[]): readonly string[] => {
+  const owners = new Map<WkdHash, string>();
+
+  return keys.flatMap((key) =>
+    key.addresses.flatMap(({ address, hash }) => {
+      const first = owners.get(hash);
+      owners.set(hash, first ?? key.name);
+
+      return first === undefined || first === key.name
+        ? []
+        : [`${address} is claimed by both ${first}.asc and ${key.name}.asc`];
+    }),
+  );
+};
+
+const checked = (keys: readonly PublishedKey[]): Parsed<readonly PublishedKey[]> => {
+  const problems = nonEmpty(ownershipProblems(keys));
+  return problems === undefined ? ok(keys) : invalid(...problems);
+};
+
 const load = async (domain: string): Promise<readonly PublishedKey[]> => {
+  /*
+   * Vite resolves this at build time, so the key files need no runtime path
+   * and the dev server reloads on edit. `eager` because there is no laziness
+   * to gain: every key is needed to enumerate the routes.
+   *
+   * Inside the function rather than at module scope so that plain Node can
+   * import this file. `import.meta.glob` is a build-time transform and throws
+   * anywhere else, which is why nothing here was testable before.
+   */
+  const sources = import.meta.glob("../keys/*.asc", {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  }) as Readonly<Record<string, string>>;
+
   /* Code points, not collation: these are file stems, and their order must
      not depend on the build machine's locale. */
-  const entries = Object.entries(SOURCES).toSorted(([a], [b]) => byCodepoint(a, b));
+  const entries = Object.entries(sources).toSorted(([a], [b]) => byCodepoint(a, b));
 
   const keys = await Promise.all(
     entries.map(async ([path, armored]) => {
@@ -111,27 +148,7 @@ const load = async (domain: string): Promise<readonly PublishedKey[]> => {
     }),
   );
 
-  /* The address-to-key mapping has to be a function: two keys claiming one
-     address would mean two files at one URL, resolved arbitrarily and never
-     noticed by a client. One pass carrying the owner already seen keeps the
-     counterpart in hand, so the message cannot print "undefined". */
-  const claims = keys.flatMap((key) =>
-    key.addresses.map(({ address, hash }) => ({ address, hash, owner: key.name })),
-  );
-
-  const owners = new Map<string, string>();
-
-  for (const { address, hash, owner } of claims) {
-    const first = owners.get(hash);
-    if (first !== undefined && first !== owner) {
-      throw new TypeError(
-        `${address} is claimed by both ${first}.asc and ${owner}.asc; one address, one key`,
-      );
-    }
-    owners.set(hash, owner);
-  }
-
-  return keys;
+  return orThrow(checked(keys), "src/keys holds one key per address");
 };
 
 /*
@@ -139,16 +156,7 @@ const load = async (domain: string): Promise<readonly PublishedKey[]> => {
  * getStaticPaths need the same answer, and OpenPGP parsing is the expensive
  * part of either.
  */
-const cache = new Map<string, Promise<readonly PublishedKey[]>>();
-
-export const publishedKeys = (domain: string): Promise<readonly PublishedKey[]> => {
-  const cached = cache.get(domain);
-  if (cached !== undefined) return cached;
-
-  const pending = load(domain);
-  cache.set(domain, pending);
-  return pending;
-};
+export const publishedKeys = memoiseBy((domain: string) => domain, load);
 
 /**
  * A fingerprint as people transcribe it: upper case, in groups of four.

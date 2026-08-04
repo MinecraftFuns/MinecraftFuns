@@ -1,5 +1,6 @@
 import { site } from "../config/site.ts";
 import { invalid, ok, orThrow, type Parsed } from "./adt.ts";
+import { memoiseBy } from "./memo.ts";
 
 /**
  * Time: zones, calendar dates, and clock reads.
@@ -150,31 +151,8 @@ export const byRecency = <T extends { readonly date: IsoDate }>(
 // Zone resolution
 // ---------------------------------------------------------------------------
 
-/**
- * Keyed memoisation.
- *
- * Constructing an `Intl` formatter is the expensive half; formatting is cheap.
- * Both formatters below wanted the same cache-or-build dance, differing only in
- * arity, so it is written once here. `T extends object` is what makes the
- * `undefined` test a sound miss check rather than a guess about the value.
- */
-const memoiseBy = <A extends readonly unknown[], T extends object>(
-  keyOf: (...args: A) => string,
-  build: (...args: A) => T,
-): ((...args: A) => T) => {
-  const cache = new Map<string, T>();
-
-  return (...args: A): T => {
-    const key = keyOf(...args);
-    const cached = cache.get(key);
-    if (cached !== undefined) return cached;
-
-    const built = build(...args);
-    cache.set(key, built);
-    return built;
-  };
-};
-
+/* Constructing an `Intl` formatter is the expensive half; formatting is
+   cheap, so both formatters below are built once per key. */
 const wallClockFormatter = memoiseBy(
   (zone: TimeZone) => zone,
   (zone: TimeZone) =>

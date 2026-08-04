@@ -4,6 +4,12 @@ import { collect, inContext, mapParsed, orThrow } from "./adt.ts";
 import { hrefOf, reconcile, type PostPath } from "./archive.ts";
 import { readingMinutes } from "./reading.ts";
 import { slugify } from "./slug.ts";
+import type { PostTag } from "./labels.ts";
+
+/* Re-exported: a tag is part of the blog's vocabulary, and no consumer
+   should need to know which leaf module the brand is declared in. */
+export type { PostTag } from "./labels.ts";
+import { once, memoiseBy } from "./memo.ts";
 import { taxonomy, type Taxon } from "./taxonomy.ts";
 import { byRecencyWith, type IsoDate } from "./time.ts";
 import { routeUrl, type Href } from "./url.ts";
@@ -29,17 +35,6 @@ export type PublishedPost = {
   readonly path: PostPath;
 };
 
-declare const postTagBrand: unique symbol;
-
-/**
- * A label in the blog's taxonomy, branded so it cannot be confused with
- * `DocCategory`. Both are plain strings at runtime and may spell the same word,
- * but "networking" as a post tag and as a doc category are claims about
- * different collections, and a function pooling them is a bug the type system
- * can refuse rather than a convention somebody must remember.
- */
-export type PostTag = string & { readonly [postTagBrand]: true };
-
 export type PostSummary = {
   readonly title: string;
   readonly description: string;
@@ -49,17 +44,28 @@ export type PostSummary = {
   readonly tags: readonly PostTag[];
 };
 
-export const summarise = ({ entry, path }: PublishedPost): PostSummary => ({
-  title: entry.data.title,
-  description: entry.data.description,
-  href: routeUrl(hrefOf(path)),
-  date: entry.data.date,
-  readingMinutes: readingMinutes(entry.body ?? ""),
-  /* Branded per element rather than by casting the array: `string[]` and
-     `PostTag[]` do not overlap, and forcing it through `unknown` would assert
-     what the element-wise narrowing actually proves. */
-  tags: entry.data.tags.map((tag) => tag as PostTag),
-});
+/*
+ * Keyed by entry id, because a summary is a function of the post and the build
+ * reads the same posts from several pages: the index, the tag pages, and each
+ * article. `readingMinutes` scans the whole body, so an archive of P posts read
+ * from K pages was O(P x K) full-body scans and is now O(P).
+ *
+ * Memoising here rather than over the whole list keeps the home page paying for
+ * the three posts it shows rather than for every post ever written.
+ */
+export const summarise = memoiseBy(
+  ({ entry }: PublishedPost) => entry.id,
+  ({ entry, path }: PublishedPost): PostSummary => ({
+    title: entry.data.title,
+    description: entry.data.description,
+    href: routeUrl(hrefOf(path)),
+    date: entry.data.date,
+    readingMinutes: readingMinutes(entry.body ?? ""),
+    /* Already `PostTag[]`: the collection schema decodes each tag through
+       `parsePostTag`, so nothing is asserted here. */
+    tags: entry.data.tags,
+  }),
+);
 
 /**
  * Published posts, newest first. Two policies live here rather than in each
@@ -68,7 +74,7 @@ export const summarise = ({ entry, path }: PublishedPost): PostSummary => ({
  * a misfiled post should fail the build once rather than render a plausible
  * wrong URL everywhere it is listed.
  */
-export const publishedPosts = async (): Promise<readonly PublishedPost[]> => {
+export const publishedPosts = once(async (): Promise<readonly PublishedPost[]> => {
   const entries = await getCollection("blog", ({ data }) => !data.draft);
 
   /* `collect`, not `orThrow` per entry: three misfiled posts are three facts
@@ -88,7 +94,7 @@ export const publishedPosts = async (): Promise<readonly PublishedPost[]> => {
     orThrow(posts, "src/content/blog"),
     (post) => post.entry.data.date,
   );
-};
+});
 
 /**
  * Published posts as summaries, newest first. Truncation happens before
@@ -113,4 +119,7 @@ export const tagHref = (tag: PostTag): Href => routeUrl(`/blog/tags/${slugify(ta
 
 /** The blog's tags, alphabetically, each with its posts newest first. */
 export const postTags = async (): Promise<readonly Taxon<PostTag, PostSummary>[]> =>
-  taxonomy(await postSummaries(), (post) => post.tags, "blog tags");
+  orThrow(
+    taxonomy(await postSummaries(), (post) => post.tags),
+    "blog tags",
+  );

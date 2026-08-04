@@ -1,6 +1,7 @@
+import { invalid, nonEmpty, ok, type NonEmpty, type Parsed } from "./adt.ts";
 import { COLLATOR } from "./collate.ts";
-import { orThrow, type NonEmpty } from "./adt.ts";
-import { parseSlug, slugify } from "./slug.ts";
+import type { Sluggable } from "./labels.ts";
+import { slugify } from "./slug.ts";
 
 /**
  * Labels, the pages they lead to, and what is filed under each.
@@ -11,12 +12,15 @@ import { parseSlug, slugify } from "./slug.ts";
  * since nothing here can inspect a label.
  *
  * What is shared is the part that is easy to get wrong: deriving a URL segment
- * from a label, refusing a label with no usable segment, and refusing two
- * labels that land on the same one. Rendering stays separate, which is where
- * the two genuinely differ.
+ * from a label, and refusing two labels that land on the same one. Rendering
+ * stays separate, which is where the two genuinely differ.
  *
- * Pure and total apart from those two failures, which throw: an ambiguous URL
- * is a defect in authored content, and this project fails those builds.
+ * That a *single* label has a usable segment is `Sluggable`'s to prove, so it
+ * is checked once when frontmatter is decoded and not again here. What remains
+ * is the property no per-label check can see: two labels colliding is a fact
+ * about the collection.
+ *
+ * Pure and total.
  */
 export type Taxon<Label extends string, Item> = {
   readonly label: Label;
@@ -52,43 +56,44 @@ const groupByLabel = <Label extends string, Item>(
 };
 
 /**
+ * Two labels on one segment would put two pages at one URL. Carrying the first
+ * label seen keeps the counterpart in hand, so a message cannot print
+ * "undefined", and the lookup keeps the check linear rather than quadratic.
+ *
+ * Every collision, not the first: they are independent mistakes in content.
+ */
+const collisions = <Label extends string, Item>(
+  taxa: readonly Taxon<Label, Item>[],
+): readonly string[] => {
+  const seen = new Map<string, Label>();
+
+  return taxa.flatMap((taxon) => {
+    const first = seen.get(taxon.slug);
+    seen.set(taxon.slug, first ?? taxon.label);
+
+    return first === undefined
+      ? []
+      : [
+          `${JSON.stringify(first)} and ${JSON.stringify(taxon.label)} both become "${taxon.slug}"; one label, one URL`,
+        ];
+  });
+};
+
+/**
  * The taxonomy of a collection, ordered by label. Items keep the order they
  * arrived in, so each page inherits the order its own collection established;
  * only the taxa are sorted here.
- *
- * `context` names the caller in any failure, since the mistake is in content
- * and the message has to say which file to go and fix.
  */
-export const taxonomy = <Label extends string, Item>(
+export const taxonomy = <Label extends Sluggable, Item>(
   items: readonly Item[],
   labelsOf: (item: Item) => readonly Label[],
-  context: string,
-): readonly Taxon<Label, Item>[] => {
+): Parsed<readonly Taxon<Label, Item>[]> => {
+  /* `slugify` rather than a parse: `Sluggable` is the proof that it returns a
+     usable segment, established where the frontmatter was decoded. */
   const taxa = [...groupByLabel(items, labelsOf)]
-    .map(([label, group]) => ({
-      label,
-      slug: orThrow(
-        parseSlug(slugify(label)),
-        `${context}: ${JSON.stringify(label)} has no usable URL segment`,
-      ),
-      items: group,
-    }))
+    .map(([label, group]) => ({ label, slug: slugify(label), items: group }))
     .toSorted((a, b) => COLLATOR.compare(a.label, b.label));
 
-  /* Two labels on one segment would put two pages at one URL. Carrying the
-     first label seen keeps the counterpart in hand, so the message cannot
-     print "undefined" and the check stays linear. */
-  const seen = new Map<string, Label>();
-
-  for (const taxon of taxa) {
-    const first = seen.get(taxon.slug);
-    if (first !== undefined) {
-      throw new TypeError(
-        `${context}: ${JSON.stringify(first)} and ${JSON.stringify(taxon.label)} both become "${taxon.slug}"; one label, one URL`,
-      );
-    }
-    seen.set(taxon.slug, taxon.label);
-  }
-
-  return taxa;
+  const problems = nonEmpty(collisions(taxa));
+  return problems === undefined ? ok(taxa) : invalid(...problems);
 };

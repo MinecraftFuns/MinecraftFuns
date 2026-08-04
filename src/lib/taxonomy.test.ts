@@ -1,21 +1,37 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { explain } from "./adt.ts";
+import type { Sluggable } from "./labels.ts";
 import { taxonomy } from "./taxonomy.ts";
 
-type Item = { readonly name: string; readonly labels: readonly string[] };
+type Item = { readonly name: string; readonly labels: readonly Sluggable[] };
 
-const item = (name: string, ...labels: string[]): Item => ({ name, labels });
+/* Labels reach `taxonomy` already decoded, so the fixture asserts what the
+   collection schema establishes. The check itself lives in labels.test.ts. */
+const label = (raw: string): Sluggable => raw as Sluggable;
+
+const item = (name: string, ...labels: string[]): Item => ({
+  name,
+  labels: labels.map(label),
+});
+
 const labelsOf = (found: Item) => found.labels;
+const build = (items: readonly Item[]) => taxonomy(items, labelsOf);
 
-const build = (items: readonly Item[]) => taxonomy(items, labelsOf, "test labels");
+/** The taxa of a collection expected to hold no collisions. */
+const taxaOf = (items: readonly Item[]) => {
+  const result = build(items);
+  assert.equal(result.tag, "ok", explain(result));
+  return result.tag === "ok" ? result.value : [];
+};
 
 describe("taxonomy", () => {
   it("groups items under each of their labels", () => {
-    const taxa = build([item("a", "Networking", "Mail"), item("b", "Mail")]);
-
     assert.deepEqual(
-      taxa.map(({ label, slug, items }) => [label, slug, items.map((i) => i.name)]),
+      taxaOf([item("a", "Networking", "Mail"), item("b", "Mail")]).map(
+        ({ label: found, slug, items }) => [found, slug, items.map((i) => i.name)],
+      ),
       [
         ["Mail", "mail", ["a", "b"]],
         ["Networking", "networking", ["a"]],
@@ -24,9 +40,8 @@ describe("taxonomy", () => {
   });
 
   it("orders taxa by label, not by first appearance", () => {
-    const taxa = build([item("a", "Zone transfers"), item("b", "Ansible")]);
     assert.deepEqual(
-      taxa.map(({ label }) => label),
+      taxaOf([item("a", "Zone transfers"), item("b", "Ansible")]).map((t) => t.label),
       ["Ansible", "Zone transfers"],
     );
   });
@@ -34,58 +49,62 @@ describe("taxonomy", () => {
   /* Items keep the order they arrived in, so each collection's own ordering
      (recency for posts, title for docs) survives into its taxon pages. */
   it("preserves the incoming order of items within a taxon", () => {
-    const taxa = build([item("first", "x"), item("second", "x"), item("third", "x")]);
     assert.deepEqual(
-      taxa.map((taxon) => taxon.items.map((i) => i.name)),
+      taxaOf([item("first", "x"), item("second", "x"), item("third", "x")]).map((t) =>
+        t.items.map((i) => i.name),
+      ),
       [["first", "second", "third"]],
     );
   });
 
   it("is total on an empty collection", () => {
-    assert.deepEqual(build([]), []);
+    assert.deepEqual(taxaOf([]), []);
   });
 
   /*
-   * The reason this module owns slug derivation rather than each caller.
-   * `slugify` is many-to-one, so two labels can land on one segment, and two
-   * pages at one URL is not a state a build should resolve arbitrarily.
+   * The one failure this module still owns. Whether a single label has a
+   * usable segment is settled when frontmatter is decoded; whether two of them
+   * collide is a property of the collection, which no per-label check sees.
    */
-  it("fails the build when two different labels collapse to one slug", () => {
-    assert.throws(
-      () => build([item("a", "Mail Routing"), item("b", "mail  routing")]),
-      /both become "mail-routing"/,
-    );
+  it("refuses two different labels that collapse to one slug", () => {
+    const result = build([item("a", "Mail Routing"), item("b", "mail  routing")]);
+    assert.equal(result.tag, "invalid");
+    assert.match(explain(result), /both become "mail-routing"/);
   });
 
   it("names both offenders and the segment they collide on", () => {
-    assert.throws(
-      () => build([item("a", "A-B"), item("b", "a b")]),
-      (error: Error) => {
-        assert.match(error.message, /test labels/);
-        assert.match(error.message, /"A-B"/);
-        assert.match(error.message, /"a b"/);
-        return true;
-      },
-    );
+    const result = build([item("a", "A-B"), item("b", "a b")]);
+    assert.match(explain(result), /"A-B"/);
+    assert.match(explain(result), /"a b"/);
+  });
+
+  /* Accumulating, like every other check here: two collisions are two facts
+     about the collection, not two builds. */
+  it("reports every collision rather than the first", () => {
+    const result = build([
+      item("a", "Mail Routing"),
+      item("b", "mail  routing"),
+      item("c", "Zone Transfers"),
+      item("d", "zone  transfers"),
+    ]);
+
+    assert.equal(result.tag, "invalid");
+    assert.equal(result.tag === "invalid" ? result.reasons.length : 0, 2);
   });
 
   /* Same spelling is the same label, not a collision: it groups. */
   it("does not mistake one label used twice for a collision", () => {
-    const taxa = build([item("a", "Mail"), item("b", "Mail")]);
     assert.deepEqual(
-      taxa.map((taxon) => taxon.items.length),
+      taxaOf([item("a", "Mail"), item("b", "Mail")]).map((t) => t.items.length),
       [2],
     );
-  });
-
-  it("fails the build when a label has no usable URL segment", () => {
-    assert.throws(() => build([item("a", "!!!")]), /no usable URL segment/);
   });
 
   /* A label exists only by being on an item, so a taxon is never empty. The
      type says so; this checks the construction agrees. */
   it("never produces an empty taxon", () => {
-    const taxa = build([item("a", "x"), item("b", "y", "x")]);
-    taxa.forEach(({ items }) => assert.ok(items.length > 0));
+    taxaOf([item("a", "x"), item("b", "y", "x")]).forEach(({ items }) =>
+      assert.ok(items.length > 0),
+    );
   });
 });
