@@ -44,7 +44,7 @@ const selected = featuredProjects();
   <Section
     id="work-heading"
     title="Selected projects"
-    trailing={{ kind: "link", href: routeUrl("/projects"), label: "All projects" }}
+    trailing={{ tag: "link", href: routeUrl("/projects"), label: "All projects" }}
   >
     <ul class="grid grid-cols-cards gap-md" role="list">
       {
@@ -60,7 +60,7 @@ const selected = featuredProjects();
   <Section
     id="writing-heading"
     title="Recent posts"
-    trailing={{ kind: "link", href: routeUrl("/blog"), label: "All posts" }}
+    trailing={{ tag: "link", href: routeUrl("/blog"), label: "All posts" }}
   >
     <div class="*:last:border-b-0">
       {recentPosts.map((post) => <PostRow post={post} />)}

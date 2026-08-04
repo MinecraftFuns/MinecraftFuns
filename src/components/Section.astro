@@ -15,8 +15,8 @@ import type { Href } from "../lib/url.ts";
  * About has neither.
  */
 export type SectionTrailing =
-  | { readonly kind: "link"; readonly href: Href; readonly label: string }
-  | { readonly kind: "count"; readonly value: number };
+  | { readonly tag: "link"; readonly href: Href; readonly label: string }
+  | { readonly tag: "count"; readonly value: number };
 
 type Props = {
   readonly id: string;
@@ -33,7 +33,7 @@ const { id, title, blurb, trailing } = Astro.props;
  * rather than about `trailing` also drops the `undefined` case, which was
  * never part of the question.
  */
-type Unhandled = Exclude<SectionTrailing["kind"], "link" | "count">;
+type Unhandled = Exclude<SectionTrailing["tag"], "link" | "count">;
 
 const _exhaustive: [Unhandled] extends [never] ? true : never = true;
 void _exhaustive;
@@ -56,13 +56,13 @@ void _exhaustive;
     </div>
 
     {
-      trailing?.kind === "link" && (
+      trailing?.tag === "link" && (
         <a class="link text-body-sm shrink-0 whitespace-nowrap" href={trailing.href}>
           {trailing.label}
         </a>
       )
     }
-    {trailing?.kind === "count" && <span class="meta shrink-0">{trailing.value}</span>}
+    {trailing?.tag === "count" && <span class="meta shrink-0">{trailing.value}</span>}
   </div>
 
   <slot />

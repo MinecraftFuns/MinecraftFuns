@@ -24,13 +24,13 @@ import type { Href } from "../lib/url.ts";
  */
 export type EntryBody =
   | {
-      readonly kind: "lines";
+      readonly tag: "lines";
       readonly title: string;
       readonly notes: readonly string[];
     }
-  | { readonly kind: "link"; readonly href: Href; readonly label: string }
+  | { readonly tag: "link"; readonly href: Href; readonly label: string }
   /** A machine-readable string: a fingerprint, an identifier, a hash. */
-  | { readonly kind: "mono"; readonly value: string };
+  | { readonly tag: "mono"; readonly value: string };
 
 export type Entry = {
   readonly label: string;
@@ -54,7 +54,7 @@ const { entries } = Astro.props;
  * runtime eliminator, so proving a static fact with it meant walking every
  * entry on every render.
  */
-type Unhandled = Exclude<EntryBody["kind"], "lines" | "link" | "mono">;
+type Unhandled = Exclude<EntryBody["tag"], "lines" | "link" | "mono">;
 
 const _exhaustive: [Unhandled] extends [never] ? true : never = true;
 void _exhaustive;
@@ -66,7 +66,7 @@ void _exhaustive;
       <div class="border-hairline grid gap-md border-b py-sm last:border-b-0 sm:grid-cols-entry sm:items-baseline">
         <dt class="meta">{label}</dt>
         <dd>
-          {body.kind === "lines" && (
+          {body.tag === "lines" && (
             <>
               <p class="text-ink text-control">{body.title}</p>
               {body.notes.map((note) => (
@@ -74,12 +74,12 @@ void _exhaustive;
               ))}
             </>
           )}
-          {body.kind === "link" && (
+          {body.tag === "link" && (
             <a class="link text-control" href={body.href}>
               {body.label}
             </a>
           )}
-          {body.kind === "mono" && (
+          {body.tag === "mono" && (
             <span class="text-ink-muted font-mono text-body wrap-anywhere">
               {body.value}
             </span>

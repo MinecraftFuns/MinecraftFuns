@@ -311,11 +311,11 @@ describe("renderHeaders", () => {
     const rules: readonly HeaderRule[] = [
       {
         pattern: exactPath("/pgp"),
-        ops: [{ kind: "set", name: "content-type", value: "application/pgp-keys" }],
+        ops: [{ tag: "set", name: "content-type", value: "application/pgp-keys" }],
       },
       {
         pattern: prefixPath("/x/"),
-        ops: [{ kind: "remove", name: "link" }],
+        ops: [{ tag: "remove", name: "link" }],
       },
     ];
 
@@ -330,7 +330,7 @@ describe("renderHeaders", () => {
   /* `!` is an operator the format spells by prefixing a name, not part of one. */
   it("renders removal with the bang the format defines", () => {
     const text = renderHeaders([
-      { pattern: exactPath("/a"), ops: [{ kind: "remove", name: "link" }] },
+      { pattern: exactPath("/a"), ops: [{ tag: "remove", name: "link" }] },
     ]);
     assert.match(text, /^ {2}! link$/m);
   });
@@ -343,8 +343,8 @@ describe("headerProblems", () => {
         {
           pattern: exactPath("/a"),
           ops: [
-            { kind: "set", name: "content-type", value: "text/plain" },
-            { kind: "set", name: "x-robots-tag", value: "noindex" },
+            { tag: "set", name: "content-type", value: "text/plain" },
+            { tag: "set", name: "x-robots-tag", value: "noindex" },
           ],
         },
       ]),
@@ -357,8 +357,8 @@ describe("headerProblems", () => {
       {
         pattern: exactPath("/a"),
         ops: [
-          { kind: "set", name: "content-type", value: "text/plain" },
-          { kind: "set", name: "Content-Type", value: "application/json" },
+          { tag: "set", name: "content-type", value: "text/plain" },
+          { tag: "set", name: "Content-Type", value: "application/json" },
         ],
       },
     ]);

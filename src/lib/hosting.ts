@@ -47,21 +47,21 @@ export type { HeaderConfig, HostConfig, RedirectConfig, RedirectStatus };
  * change to this sum rather than to every place a pattern is written.
  */
 export type PathPattern =
-  | { readonly kind: "exact"; readonly path: string }
-  | { readonly kind: "prefix"; readonly path: string };
+  | { readonly tag: "exact"; readonly path: string }
+  | { readonly tag: "prefix"; readonly path: string };
 
-export const exactPath = (path: string): PathPattern => ({ kind: "exact", path });
+export const exactPath = (path: string): PathPattern => ({ tag: "exact", path });
 
 /** Matches `path` and anything beneath it. Rendered with a trailing splat. */
-export const prefixPath = (path: string): PathPattern => ({ kind: "prefix", path });
+export const prefixPath = (path: string): PathPattern => ({ tag: "prefix", path });
 
-const SPLAT: Readonly<Record<PathPattern["kind"], string>> = {
+const SPLAT: Readonly<Record<PathPattern["tag"], string>> = {
   exact: "",
   prefix: "*",
 };
 
 export const renderPattern = (pattern: PathPattern): string =>
-  `${pattern.path}${SPLAT[pattern.kind]}`;
+  `${pattern.path}${SPLAT[pattern.tag]}`;
 
 /**
  * Whether a concrete path is matched. Because the wildcard is a variant rather
@@ -69,7 +69,7 @@ export const renderPattern = (pattern: PathPattern): string =>
  * regular expression, and so nothing to escape.
  */
 export const patternMatches = (pattern: PathPattern, path: string): boolean => {
-  switch (pattern.kind) {
+  switch (pattern.tag) {
     case "exact":
       return path === pattern.path;
     case "prefix":
@@ -81,9 +81,9 @@ export const patternMatches = (pattern: PathPattern, path: string): boolean => {
 
 /** Whether every path `inner` matches is also matched by `outer`. */
 export const covers = (outer: PathPattern, inner: PathPattern): boolean =>
-  outer.kind === "prefix"
+  outer.tag === "prefix"
     ? inner.path.startsWith(outer.path)
-    : inner.kind === "exact" && inner.path === outer.path;
+    : inner.tag === "exact" && inner.path === outer.path;
 
 // ---------------------------------------------------------------------------
 // Redirects
@@ -116,8 +116,8 @@ export const renderRedirects = (redirects: readonly Redirect[]): string =>
  * value of a field whose type says "header name".
  */
 export type HeaderOp =
-  | { readonly kind: "set"; readonly name: string; readonly value: string }
-  | { readonly kind: "remove"; readonly name: string };
+  | { readonly tag: "set"; readonly name: string; readonly value: string }
+  | { readonly tag: "remove"; readonly name: string };
 
 /**
  * The non-empty list is the type saying what a runtime check otherwise would:
@@ -129,7 +129,7 @@ export type HeaderRule = {
 };
 
 const renderOp = (op: HeaderOp): string => {
-  switch (op.kind) {
+  switch (op.tag) {
     case "set":
       return `  ${op.name}: ${op.value}`;
     case "remove":
@@ -198,7 +198,7 @@ export const parsePathPattern = (raw: RootedPath): Parsed<PathPattern> => {
 
 /* Only the literal half is resolved; the wildcard never reaches the URL parser. */
 const resolvePattern = (pattern: PathPattern, resolve: Resolve): PathPattern =>
-  pattern.kind === "exact"
+  pattern.tag === "exact"
     ? exactPath(resolve(pattern.path))
     : prefixPath(resolve(pattern.path));
 
@@ -216,11 +216,11 @@ const decodeHeaderRule = (config: HeaderConfig, resolve: Resolve): Parsed<Header
   andThen(parsePathPattern(config.path), (pattern) => {
     const ops: HeaderOp[] = [
       ...Object.entries(config.set ?? {}).map(([name, value]): HeaderOp => ({
-        kind: "set",
+        tag: "set",
         name,
         value,
       })),
-      ...(config.remove ?? []).map((name): HeaderOp => ({ kind: "remove", name })),
+      ...(config.remove ?? []).map((name): HeaderOp => ({ tag: "remove", name })),
     ];
 
     const declared = nonEmpty(ops);

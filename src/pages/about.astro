@@ -29,7 +29,7 @@ const fingerprint = await siteFingerprint();
 const educationEntries: readonly Entry[] = education.map((entry) => ({
   label: entry.period,
   body: {
-    kind: "lines",
+    tag: "lines",
     title: entry.institution,
     /* `detail` is optional, so an absent one contributes no line at all
        rather than an empty paragraph holding space. */
@@ -38,10 +38,10 @@ const educationEntries: readonly Entry[] = education.map((entry) => ({
 }));
 
 const contactEntries: readonly Entry[] = [
-  { label: "PGP", body: { kind: "mono", value: fingerprint } },
+  { label: "PGP", body: { tag: "mono", value: fingerprint } },
   ...profiles.map((item): Entry => ({
     label: item.label,
-    body: { kind: "link", href: item.href, label: item.handle },
+    body: { tag: "link", href: item.href, label: item.handle },
   })),
 ];
 ---
@@ -92,7 +92,7 @@ const contactEntries: readonly Entry[] = [
           {
             label: "2026",
             body: {
-              kind: "lines",
+              tag: "lines",
               title: "Role, Organisation",
               notes: ["One line on what you did."],
             },

@@ -25,7 +25,7 @@ const sections = projectSections();
         id={`${section.kind}-heading`}
         title={section.heading}
         blurb={section.blurb}
-        trailing={{ kind: "count", value: section.items.length }}
+        trailing={{ tag: "count", value: section.items.length }}
       >
         <ul class="grid grid-cols-cards gap-md" role="list">
           {section.items.map((project) => (

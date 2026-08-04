@@ -12,8 +12,8 @@ describe("renderRobots", () => {
         {
           userAgents: ["GoogleBot", "BingBot"],
           rules: [
-            { kind: "disallow", path: "/private/" },
-            { kind: "allow", path: "/private/public/" },
+            { tag: "disallow", path: "/private/" },
+            { tag: "allow", path: "/private/public/" },
           ],
         },
       ],
@@ -35,8 +35,8 @@ describe("renderRobots", () => {
   it("separates groups with a blank line", () => {
     const text = renderRobots({
       groups: [
-        { userAgents: ["a"], rules: [{ kind: "allow", path: "/" }] },
-        { userAgents: ["b"], rules: [{ kind: "disallow", path: "/" }] },
+        { userAgents: ["a"], rules: [{ tag: "allow", path: "/" }] },
+        { userAgents: ["b"], rules: [{ tag: "disallow", path: "/" }] },
       ],
       sitemaps: [],
     });

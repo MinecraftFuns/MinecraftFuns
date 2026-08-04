@@ -36,6 +36,21 @@ keyed by a union is a `Readonly<Record<Union, T>>`, so a new variant is a
 missing key rather than a lost case. Markup that cannot host a `switch` states
 exhaustiveness as a type instead; see `EntryList.astro`.
 
+## Naming a sum
+
+The discriminant is called `tag`. A _kind_ classifies types in the sense of
+`*` and `* -> *`; a _tag_ discriminates values of a sum, and that is what this
+field does. `kind` survives in two places that are not discriminants:
+`ProjectKind` is a domain field naming a section, and `PageIntro`'s `kind` prop
+selects a variant that carries no payload, where `tag` would read as an HTML
+tag.
+
+Variants that carry nothing need no wrapper at all. `Chrome`, `HrefKind`,
+`DeploymentRole` and `Impact` are bare unions of string literals, which is what
+an `enum` would be minus the runtime object and the numeric unsoundness; they
+are eliminated by `Readonly<Record<Union, T>>`. A field appears only when the
+variants differ in what they carry.
+
 ## The modules
 
 | Module        | What it gives you                                                  |

@@ -14,8 +14,8 @@ import type { NonEmpty } from "../prelude/adt.ts";
 
 /** A sum, not `{ allow: boolean }`, which reads the same however it is set. */
 export type Rule =
-  | { readonly kind: "allow"; readonly path: string }
-  | { readonly kind: "disallow"; readonly path: string };
+  | { readonly tag: "allow"; readonly path: string }
+  | { readonly tag: "disallow"; readonly path: string };
 
 /**
  * A non-empty list in the type system. A group with no user-agent line applies
@@ -33,12 +33,12 @@ export type Robots = {
 };
 
 /** Total by construction: a new kind of rule is a missing key, not a lost case. */
-const FIELD: Readonly<Record<Rule["kind"], string>> = {
+const FIELD: Readonly<Record<Rule["tag"], string>> = {
   allow: "Allow",
   disallow: "Disallow",
 };
 
-const renderRule = (rule: Rule): string => `${FIELD[rule.kind]}: ${rule.path}`;
+const renderRule = (rule: Rule): string => `${FIELD[rule.tag]}: ${rule.path}`;
 
 const renderGroup = (group: Group): readonly string[] => [
   ...group.userAgents.map((agent) => `User-agent: ${agent}`),
@@ -63,13 +63,13 @@ export const renderRobots = (robots: Robots): string => {
 /** Everything is crawlable. `Allow: /`, since a bare `Disallow:` means this
  *  but does not say it. */
 export const allowAll = (sitemaps: readonly string[]): Robots => ({
-  groups: [{ userAgents: ["*"], rules: [{ kind: "allow", path: "/" }] }],
+  groups: [{ userAgents: ["*"], rules: [{ tag: "allow", path: "/" }] }],
   sitemaps,
 });
 
 /** Nothing is crawlable, and no sitemap: offering a map of pages a crawler was
  *  just told not to fetch is a contradiction. */
 export const disallowAll = (): Robots => ({
-  groups: [{ userAgents: ["*"], rules: [{ kind: "disallow", path: "/" }] }],
+  groups: [{ userAgents: ["*"], rules: [{ tag: "disallow", path: "/" }] }],
   sitemaps: [],
 });
