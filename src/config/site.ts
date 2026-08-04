@@ -1,4 +1,4 @@
-import type { NavItem, RootedPath, SiteConfig } from "./schema.ts";
+import type { NavItem, RootedPath, SiteConfig } from "../schema.ts";
 
 /**
  * Site identity.

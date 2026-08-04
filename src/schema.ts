@@ -1,14 +1,12 @@
-import type { NonEmpty } from "../prelude/adt.ts";
+import type { NonEmpty } from "./prelude/adt.ts";
 
 /**
- * The shape of this site's configuration. One module, so "what can I
- * configure?" is a file rather than a search, and nothing in `config/` depends
- * on anything but this, so config data and the code reading it can both depend
- * on it without a cycle.
+ * What may be written in `src/config`, and nothing else.
  *
- * The one import is `NonEmpty` from `prelude/adt.ts`, which imports nothing at all.
- * Restating the tuple here to keep the file import-free would be a second
- * definition of one concept, which is the trade this project does not make.
+ * Outside that directory on purpose. `config/` is the surface somebody edits,
+ * so it holds values and no declarations; this file is the contract those
+ * values are checked against, which is read when you want to know what is
+ * allowed rather than what is set.
  *
  * Every config export is written `as const satisfies` one of these: `satisfies`
  * reports a missing or misspelled field, while `as const` keeps the literal
@@ -146,6 +144,39 @@ export type ProjectKindConfig = {
   readonly kind: string;
   readonly heading: string;
   readonly blurb: string;
+};
+
+/**
+ * A project, generic in the kind so that the shape can live here while the set
+ * of kinds stays derived from the data. Naming the union here instead would be
+ * a second place to add a section, which is the drift `projectKinds` exists to
+ * prevent; instantiating it beside the data costs one line.
+ */
+export type ProjectConfig<Kind extends string> = {
+  readonly title: string;
+  readonly description: string;
+  /** A project nobody can look at is a claim; every card is a link. */
+  readonly href: HttpsUrl;
+  /** The year work started. */
+  readonly since: number;
+  /**
+   * The year work stopped, or `null` while it continues.
+   *
+   * One field for two facts that were separately authored and could disagree:
+   * a range ending in the past said the work had stopped while a status field
+   * said it had not. It also removes the annual edit, since a live project's
+   * span runs to whatever year it is read in.
+   */
+  readonly until: number | null;
+  /** Non-empty, because an empty list renders an empty element. No ceiling:
+   *  the card wraps, so a fourth tag is an editorial call, not a defect. */
+  readonly tags: NonEmpty<string>;
+  readonly kind: Kind;
+  /**
+   * Shown on the home page. `true` rather than `boolean`: absence is the
+   * negative, so there is no `featured: false` to read as a considered decision.
+   */
+  readonly featured?: true;
 };
 
 // ---------------------------------------------------------------------------

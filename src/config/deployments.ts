@@ -1,4 +1,4 @@
-import type { DeploymentsConfig } from "./schema.ts";
+import type { DeploymentsConfig } from "../schema.ts";
 
 /**
  * Where this site is published, and which copy search engines should index.

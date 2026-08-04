@@ -1,4 +1,4 @@
-import type { HttpsUrl, RootedPath } from "../config/schema.ts";
+import type { HttpsUrl, RootedPath } from "../schema.ts";
 
 /**
  * Base-aware link construction, and the only module that knows the base path.

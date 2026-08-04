@@ -1,6 +1,6 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
-import type { RootedPath } from "../config/schema.ts";
+import type { RootedPath } from "../schema.ts";
 import { nav } from "../config/site.ts";
 import { collect, inContext, mapParsed, orThrow } from "../prelude/adt.ts";
 import { memoiseBy, once } from "../prelude/memo.ts";

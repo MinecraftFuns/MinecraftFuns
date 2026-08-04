@@ -1,5 +1,5 @@
 import { deployments } from "../config/deployments.ts";
-import type { DeploymentTargetConfig } from "../config/schema.ts";
+import type { DeploymentTargetConfig } from "../schema.ts";
 import { andThen, invalid, ok, type Parsed } from "../prelude/adt.ts";
 import { currentBase, joinBase, joinRoute, slashTerminated } from "./url.ts";
 

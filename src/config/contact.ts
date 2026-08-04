@@ -1,4 +1,4 @@
-import type { ContactConfig } from "./schema.ts";
+import type { ContactConfig } from "../schema.ts";
 
 /**
  * How to reach me, and where I am.

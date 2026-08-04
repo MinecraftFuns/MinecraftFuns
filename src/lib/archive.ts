@@ -1,4 +1,4 @@
-import type { RootedPath } from "../config/schema.ts";
+import type { RootedPath } from "../schema.ts";
 import { andThen, invalid, ok, type Parsed } from "../prelude/adt.ts";
 import { SLUG_SOURCE } from "./slug.ts";
 import { monthOf, yearOf, type IsoDate } from "./time.ts";

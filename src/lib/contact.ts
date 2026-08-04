@@ -1,5 +1,5 @@
 import { contact } from "../config/contact.ts";
-import type { HttpsUrl, PlatformName } from "../config/schema.ts";
+import type { HttpsUrl, PlatformName } from "../schema.ts";
 import { formatFingerprint, publishedKeys } from "./keys.ts";
 import { routeUrl, type Href } from "./url.ts";
 

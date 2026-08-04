@@ -1,4 +1,4 @@
-import type { HttpsUrl, ProjectKindConfig } from "./schema.ts";
+import type { ProjectConfig, ProjectKindConfig } from "../schema.ts";
 
 /**
  * Projects, and the sections they group into.
@@ -30,35 +30,9 @@ export const projectKinds = [
 
 export type ProjectKind = (typeof projectKinds)[number]["kind"];
 
-export type Project = {
-  readonly title: string;
-  readonly description: string;
-  /** A project nobody can look at is a claim; every card is a link. */
-  readonly href: HttpsUrl;
-  /** The year work started. */
-  readonly since: number;
-  /**
-   * The year work stopped, or `null` while it continues.
-   *
-   * One field for two facts that were separately authored and could disagree:
-   * a range ending in the past said the work had stopped while `status:
-   * "active"` said it had not. It also removes the annual edit, since a live
-   * project's span now runs to whatever year it is read in.
-   */
-  readonly until: number | null;
-  /**
-   * One to three, which is what the card lays out. A tuple union says so; the
-   * comment that used to say it could be read and ignored.
-   */
-  readonly tags:
-    readonly [string] | readonly [string, string] | readonly [string, string, string];
-  readonly kind: ProjectKind;
-  /**
-   * Shown on the home page. `true` rather than `boolean`: absence is the
-   * negative, so there is no `featured: false` to read as a considered decision.
-   */
-  readonly featured?: true;
-};
+/* The shape is in `schema.ts`; only the set of kinds is derived from the data
+   above, and that derivation is what keeps this file to one place per fact. */
+export type Project = ProjectConfig<ProjectKind>;
 
 /**
  * Order within a section is the order written here; sections come from

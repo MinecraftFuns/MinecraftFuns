@@ -7,6 +7,21 @@ import nothing, and any project could take them unchanged.
 Everything else lives in `src/lib/`, which is this site's domain: posts, docs,
 deployments, keys, host directives.
 
+## Where things live
+
+| Directory                           | Holds                                              | Depends on       |
+| ----------------------------------- | -------------------------------------------------- | ---------------- |
+| `prelude/`                          | the vocabulary; nothing here knows the site exists | nothing          |
+| `schema.ts`                         | what may be written in `config/`                   | `prelude/`       |
+| `config/`                           | values you edit, and no declarations               | `schema.ts`      |
+| `lib/`                              | this site's domain: posts, docs, keys, deployments | all of the above |
+| `components/`, `layouts/`, `pages/` | rendering                                          | `lib/`           |
+
+`config/projects.ts` is the one file holding a declaration, and it holds two:
+`ProjectKind` is derived from the data beside it, and `Project` instantiates
+the shape from `schema.ts` at that kind. Neither can move upstream of the data
+they are derived from.
+
 ## The dialect, in five rules
 
 **Parse, do not validate.** An untrusted value becomes a domain value at one

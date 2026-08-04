@@ -5,7 +5,7 @@ import type {
   RedirectStatus,
   RedirectTarget,
   RootedPath,
-} from "../config/schema.ts";
+} from "../schema.ts";
 import {
   andThen,
   assertNever,

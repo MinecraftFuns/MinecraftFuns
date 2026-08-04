@@ -1,4 +1,4 @@
-import type { HostConfig } from "./schema.ts";
+import type { HostConfig } from "../schema.ts";
 
 /**
  * Directives for the host serving this build.

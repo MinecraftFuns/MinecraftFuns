@@ -1,4 +1,4 @@
-import type { EducationEntry } from "./schema.ts";
+import type { EducationEntry } from "../schema.ts";
 
 /**
  * Facts for the About page.
