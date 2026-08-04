@@ -1,4 +1,4 @@
-import { invalid, ok, type Parsed } from "./adt.ts";
+import { invalid, ok, type Parsed } from "../prelude/adt.ts";
 import { parseSlug, slugify } from "./slug.ts";
 
 /**

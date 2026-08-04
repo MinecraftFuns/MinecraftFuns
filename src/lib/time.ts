@@ -1,6 +1,6 @@
 import { site } from "../config/site.ts";
-import { invalid, ok, orThrow, type Parsed } from "./adt.ts";
-import { memoiseBy } from "./memo.ts";
+import { invalid, ok, orThrow, type Parsed } from "../prelude/adt.ts";
+import { memoiseBy } from "../prelude/memo.ts";
 
 /**
  * Time: zones, calendar dates, and clock reads.

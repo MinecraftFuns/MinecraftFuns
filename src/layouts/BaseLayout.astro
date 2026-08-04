@@ -6,7 +6,7 @@ import "../styles/global.css";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import { site } from "../config/site.ts";
-import { orThrow } from "../lib/adt.ts";
+import { orThrow } from "../prelude/adt.ts";
 import { activeTarget, canonicalHref, indexable } from "../lib/deployment.ts";
 import { assetUrl } from "../lib/url.ts";
 import type { Chrome } from "./chrome.ts";

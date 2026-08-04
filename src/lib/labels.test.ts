@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { explain } from "./adt.ts";
+import { explain } from "../prelude/adt.ts";
 import { parseDocCategory, parsePostTag } from "./labels.ts";
 
 /*

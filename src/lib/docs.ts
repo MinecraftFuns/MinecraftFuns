@@ -1,18 +1,18 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
-import { collect, inContext, mapParsed, orThrow } from "./adt.ts";
-import { compareDocs, type DocOrder } from "./doc-order.ts";
-import { readingMinutes } from "./reading.ts";
 import type { RootedPath } from "../config/schema.ts";
 import { nav } from "../config/site.ts";
+import { collect, inContext, mapParsed, orThrow } from "../prelude/adt.ts";
+import { memoiseBy, once } from "../prelude/memo.ts";
+import { compareDocs, type DocOrder } from "./doc-order.ts";
 import type { DocCategory } from "./labels.ts";
-
-/* Re-exported, as `PostTag` is from `lib/posts.ts`. */
-export type { DocCategory } from "./labels.ts";
-import { memoiseBy, once } from "./memo.ts";
+import { readingMinutes } from "./reading.ts";
 import { parseSlug, slugify } from "./slug.ts";
 import { taxonomy, type Taxon } from "./taxonomy.ts";
 import { routeUrl, type Href } from "./url.ts";
+
+/* Re-exported, as `PostTag` is from `lib/posts.ts`. */
+export type { DocCategory } from "./labels.ts";
 
 /**
  * The docs read model, the flat counterpart to `lib/posts.ts`. Both

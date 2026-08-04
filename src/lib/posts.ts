@@ -1,18 +1,18 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
-import { collect, inContext, mapParsed, orThrow } from "./adt.ts";
+import { collect, inContext, mapParsed, orThrow } from "../prelude/adt.ts";
+import { memoiseBy, once } from "../prelude/memo.ts";
 import { hrefOf, reconcile, type PostPath } from "./archive.ts";
+import type { PostTag } from "./labels.ts";
 import { readingMinutes } from "./reading.ts";
 import { slugify } from "./slug.ts";
-import type { PostTag } from "./labels.ts";
-
-/* Re-exported: a tag is part of the blog's vocabulary, and no consumer
-   should need to know which leaf module the brand is declared in. */
-export type { PostTag } from "./labels.ts";
-import { once, memoiseBy } from "./memo.ts";
 import { taxonomy, type Taxon } from "./taxonomy.ts";
 import { byRecencyWith, type IsoDate } from "./time.ts";
 import { routeUrl, type Href } from "./url.ts";
+
+/* Re-exported: a tag is part of the blog's vocabulary, and no consumer should
+   need to know which leaf module the brand is declared in. */
+export type { PostTag } from "./labels.ts";
 
 /**
  * The blog's read model. Pages consume these types rather than raw collection

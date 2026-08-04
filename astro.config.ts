@@ -3,7 +3,7 @@ import { defineConfig } from "astro/config";
 
 import sitemap from "@astrojs/sitemap";
 
-import { explain } from "./src/lib/adt.ts";
+import { explain } from "./src/prelude/adt.ts";
 import { developmentTarget, findTarget } from "./src/lib/deployment.ts";
 import { sitemapFilter } from "./src/lib/sitemap.ts";
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { explain } from "./adt.ts";
+import { explain } from "../prelude/adt.ts";
 import type { Sluggable } from "./labels.ts";
 import { taxonomy } from "./taxonomy.ts";
 

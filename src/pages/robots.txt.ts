@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-import { orThrow } from "../lib/adt.ts";
+import { orThrow } from "../prelude/adt.ts";
 import { activeTarget, canonicalSitemapUrl, indexable } from "../lib/deployment.ts";
 import { allowAll, disallowAll, renderRobots } from "../lib/robots.ts";
 

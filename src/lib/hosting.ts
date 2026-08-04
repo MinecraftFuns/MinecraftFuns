@@ -15,9 +15,11 @@ import {
   mapParsed,
   nonEmpty,
   ok,
+  okUnless,
   type NonEmpty,
   type Parsed,
-} from "./adt.ts";
+} from "../prelude/adt.ts";
+import { clashesBy } from "../prelude/distinct.ts";
 
 export type { HeaderConfig, HostConfig, RedirectConfig, RedirectStatus };
 
@@ -249,13 +251,11 @@ export const decodeHostConfig = (
     /* Dependent, so `andThen`: shadowing and duplication are questions about
        rules that decoded, and there are none to ask of a config that did not. */
     ([headers, redirects]) => {
-      const problems = nonEmpty(
-        [...redirectProblems(redirects), ...headerProblems(headers)].map(
-          ({ rule, reason }) => `${rule}: ${reason}`,
-        ),
+      const problems = [...redirectProblems(redirects), ...headerProblems(headers)].map(
+        ({ rule, reason }) => `${rule}: ${reason}`,
       );
 
-      return problems === undefined ? ok({ headers, redirects }) : invalid(...problems);
+      return okUnless(problems, { headers, redirects });
     },
   );
 
@@ -308,18 +308,9 @@ const headerName = (op: HeaderOp): string => op.name.toLowerCase();
 
 /** Header rules that quietly lose one of their own declarations. */
 export const headerProblems = (rules: readonly HeaderRule[]): readonly RuleProblem[] =>
-  rules.flatMap((rule) => {
-    const seen = new Set<string>();
-    const repeats: HeaderOp[] = [];
-
-    for (const op of rule.ops) {
-      const name = headerName(op);
-      if (seen.has(name)) repeats.push(op);
-      else seen.add(name);
-    }
-
-    return repeats.map((op) => ({
+  rules.flatMap((rule) =>
+    clashesBy(rule.ops, headerName).map(([, later]) => ({
       rule: renderPattern(rule.pattern),
-      reason: `sets ${op.name} more than once; only the last would apply`,
-    }));
-  });
+      reason: `sets ${later.name} more than once; only the last would apply`,
+    })),
+  );

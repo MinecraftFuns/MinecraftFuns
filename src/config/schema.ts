@@ -1,4 +1,4 @@
-import type { NonEmpty } from "../lib/adt.ts";
+import type { NonEmpty } from "../prelude/adt.ts";
 
 /**
  * The shape of this site's configuration. One module, so "what can I
@@ -6,7 +6,7 @@ import type { NonEmpty } from "../lib/adt.ts";
  * on anything but this, so config data and the code reading it can both depend
  * on it without a cycle.
  *
- * The one import is `NonEmpty` from `lib/adt.ts`, which imports nothing at all.
+ * The one import is `NonEmpty` from `prelude/adt.ts`, which imports nothing at all.
  * Restating the tuple here to keep the file import-free would be a second
  * definition of one concept, which is the trade this project does not make.
  *

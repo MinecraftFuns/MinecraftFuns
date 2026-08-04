@@ -4,7 +4,7 @@ import {
   type Project,
   type ProjectKind,
 } from "../config/projects.ts";
-import { collect, invalid, ok, orThrow, type Parsed } from "./adt.ts";
+import { collect, invalid, ok, orThrow, type Parsed } from "../prelude/adt.ts";
 
 /**
  * Presentation logic for the project list. The data is config; deciding what to

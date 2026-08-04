@@ -34,6 +34,7 @@
 import { readFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
+import { captures } from "./lib/captures.ts";
 import { filesUnder } from "./lib/files.ts";
 import { frontmatter } from "./lib/frontmatter.ts";
 import { each, report } from "./lib/gate.ts";
@@ -137,13 +138,9 @@ export const anonymousValues = (source: string): readonly Violation[] =>
  * utility, so the two double-hyphen forms are dropped.
  */
 export const typeRoles = (css: string): readonly string[] =>
-  [...css.matchAll(/^\s*--text-([a-z0-9-]+):/gm)]
-    .map((declaration) => declaration[1])
-    /* Same as in `classRegions`: the group is mandatory in the pattern and
-       optional in the type. Dropping the absent case is what makes the two
-       tests below definite strings rather than possibly-missing ones. */
-    .filter((role) => role !== undefined)
-    .filter((role) => !role.includes("--") && !role.includes("*"));
+  captures(css.matchAll(/^\s*--text-([a-z0-9-]+):/gm)).filter(
+    (role) => !role.includes("--") && !role.includes("*"),
+  );
 
 /**
  * Type roles set in one file. Pure and total.

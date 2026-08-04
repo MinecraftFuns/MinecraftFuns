@@ -1,4 +1,5 @@
-import { invalid, nonEmpty, ok, type NonEmpty, type Parsed } from "./adt.ts";
+import { okUnless, type NonEmpty, type Parsed } from "../prelude/adt.ts";
+import { clashesBy } from "../prelude/distinct.ts";
 import { COLLATOR } from "./collate.ts";
 import type { Sluggable } from "./labels.ts";
 import { slugify } from "./slug.ts";
@@ -55,29 +56,14 @@ const groupByLabel = <Label extends string, Item>(
   return grouped;
 };
 
-/**
- * Two labels on one segment would put two pages at one URL. Carrying the first
- * label seen keeps the counterpart in hand, so a message cannot print
- * "undefined", and the lookup keeps the check linear rather than quadratic.
- *
- * Every collision, not the first: they are independent mistakes in content.
- */
+/** Two labels on one segment would put two pages at one URL. */
 const collisions = <Label extends string, Item>(
   taxa: readonly Taxon<Label, Item>[],
-): readonly string[] => {
-  const seen = new Map<string, Label>();
-
-  return taxa.flatMap((taxon) => {
-    const first = seen.get(taxon.slug);
-    seen.set(taxon.slug, first ?? taxon.label);
-
-    return first === undefined
-      ? []
-      : [
-          `${JSON.stringify(first)} and ${JSON.stringify(taxon.label)} both become "${taxon.slug}"; one label, one URL`,
-        ];
-  });
-};
+): readonly string[] =>
+  clashesBy(taxa, (taxon) => taxon.slug).map(
+    ([first, later]) =>
+      `${JSON.stringify(first.label)} and ${JSON.stringify(later.label)} both become "${later.slug}"; one label, one URL`,
+  );
 
 /**
  * The taxonomy of a collection, ordered by label. Items keep the order they
@@ -94,6 +80,5 @@ export const taxonomy = <Label extends Sluggable, Item>(
     .map(([label, group]) => ({ label, slug: slugify(label), items: group }))
     .toSorted((a, b) => COLLATOR.compare(a.label, b.label));
 
-  const problems = nonEmpty(collisions(taxa));
-  return problems === undefined ? ok(taxa) : invalid(...problems);
+  return okUnless(collisions(taxa), taxa);
 };

@@ -1,4 +1,4 @@
-import type { NonEmpty } from "./adt.ts";
+import type { NonEmpty } from "../prelude/adt.ts";
 
 /**
  * The Robots Exclusion Protocol, as data.

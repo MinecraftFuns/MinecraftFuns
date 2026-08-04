@@ -73,6 +73,18 @@ export const andThen = <A, B>(
 ): Parsed<B> => (parsed.tag === "ok" ? f(parsed.value) : parsed);
 
 /**
+ * `ok`, unless there were reasons not to be.
+ *
+ * The shape every accumulating check in this project ends in: a list of
+ * problems, empty meaning success. Written out at four sites before this, each
+ * repeating the same `undefined` dance around `nonEmpty`.
+ */
+export const okUnless = <T>(reasons: readonly string[], value: T): Parsed<T> => {
+  const failures = nonEmpty(reasons);
+  return failures === undefined ? ok(value) : invalid(...failures);
+};
+
+/**
  * Applicative traverse: every element parsed, every failure kept.
  *
  * Emphatically not `andThen` in a loop, and it cannot be built from one.
@@ -92,8 +104,7 @@ export const collect = <A>(items: readonly Parsed<A>[]): Parsed<readonly A[]> =>
     else reasons.push(...item.reasons);
   }
 
-  const failures = nonEmpty(reasons);
-  return failures === undefined ? ok(values) : invalid(...failures);
+  return okUnless(reasons, values);
 };
 
 /**

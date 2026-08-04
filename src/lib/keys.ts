@@ -2,9 +2,10 @@ import { basename } from "node:path/posix";
 
 import * as openpgp from "openpgp";
 
-import { invalid, nonEmpty, ok, orThrow, type Parsed } from "./adt.ts";
+import { okUnless, orThrow } from "../prelude/adt.ts";
+import { clashesBy, distinctBy } from "../prelude/distinct.ts";
+import { memoiseBy } from "../prelude/memo.ts";
 import { byCodepoint } from "./collate.ts";
-import { memoiseBy } from "./memo.ts";
 import { isOnDomain, parseMailAddress, wkdHash, type WkdHash } from "./wkd.ts";
 
 /**
@@ -72,16 +73,9 @@ const addressesOn = (key: openpgp.Key, domain: string): readonly PublishedAddres
     .map((user) => addressOn(user, domain))
     .filter((address) => address !== undefined);
 
-  /* First occurrence wins, stated by asking before writing rather than left to
-     a collection's overwrite rule, which keeps the last. `Map` preserves
-     insertion order, and distinctness is a lookup rather than a scan. */
-  const byHash = new Map<WkdHash, PublishedAddress>();
-
-  for (const address of published) {
-    if (!byHash.has(address.hash)) byHash.set(address.hash, address);
-  }
-
-  return [...byHash.values()];
+  /* First occurrence wins, which is `distinctBy`'s contract; a collection's
+     own overwrite rule would keep the last. */
+  return distinctBy(published, (address) => address.hash);
 };
 
 /**
@@ -96,23 +90,23 @@ const addressesOn = (key: openpgp.Key, domain: string): readonly PublishedAddres
  * reporting them one build at a time turns one mistake into three builds.
  */
 export const ownershipProblems = (keys: readonly PublishedKey[]): readonly string[] => {
-  const owners = new Map<WkdHash, string>();
-
-  return keys.flatMap((key) =>
-    key.addresses.flatMap(({ address, hash }) => {
-      const first = owners.get(hash);
-      owners.set(hash, first ?? key.name);
-
-      return first === undefined || first === key.name
-        ? []
-        : [`${address} is claimed by both ${first}.asc and ${key.name}.asc`];
-    }),
+  /* Flattened first, so a clash is between two *claims* and each names the key
+     it came from. */
+  const claims = keys.flatMap((key) =>
+    key.addresses.map(({ address, hash }) => ({ address, hash, owner: key.name })),
   );
-};
 
-const checked = (keys: readonly PublishedKey[]): Parsed<readonly PublishedKey[]> => {
-  const problems = nonEmpty(ownershipProblems(keys));
-  return problems === undefined ? ok(keys) : invalid(...problems);
+  return (
+    clashesBy(claims, (claim) => claim.hash)
+      /* One key naming an address twice is one directory entry, not a conflict:
+         this key really does carry two User IDs for `me@joefang.org`. Only a
+         second *owner* means two files at one URL. */
+      .filter(([first, later]) => first.owner !== later.owner)
+      .map(
+        ([first, later]) =>
+          `${later.address} is claimed by both ${first.owner}.asc and ${later.owner}.asc`,
+      )
+  );
 };
 
 const load = async (domain: string): Promise<readonly PublishedKey[]> => {
@@ -148,7 +142,10 @@ const load = async (domain: string): Promise<readonly PublishedKey[]> => {
     }),
   );
 
-  return orThrow(checked(keys), "src/keys holds one key per address");
+  return orThrow(
+    okUnless(ownershipProblems(keys), keys),
+    "src/keys holds one key per address",
+  );
 };
 
 /*

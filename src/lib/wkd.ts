@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { invalid, ok, type Parsed } from "./adt.ts";
+import { invalid, ok, type Parsed } from "../prelude/adt.ts";
 
 /**
  * Web Key Directory address hashing.

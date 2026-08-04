@@ -1,4 +1,4 @@
-import { COLLATOR } from "./collate.ts";
+import { byCodepoint, COLLATOR } from "./collate.ts";
 
 /** Everything the order depends on, and nothing else. */
 export type DocOrder = {
@@ -11,8 +11,14 @@ export type DocOrder = {
  * the loader walked the directory in. Sorting is stable, so title alone would
  * leave two docs sharing one in whatever order the filesystem gave them; slugs
  * are file names, so they break every tie.
+ *
+ * The two comparisons are deliberately different. A title is text a reader
+ * sees, so it collates; a slug is a file stem, and `collate.ts` reserves
+ * `byCodepoint` for exactly that. The tiebreak only has to be a deterministic
+ * total order, which is what code points are and what an ICU call is an
+ * expensive way to be.
  */
 export const compareDocs = (a: DocOrder, b: DocOrder): number => {
   const byTitle = COLLATOR.compare(a.title, b.title);
-  return byTitle !== 0 ? byTitle : COLLATOR.compare(a.slug, b.slug);
+  return byTitle !== 0 ? byTitle : byCodepoint(a.slug, b.slug);
 };

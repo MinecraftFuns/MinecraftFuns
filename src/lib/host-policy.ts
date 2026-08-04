@@ -1,5 +1,5 @@
 import { hosting } from "../config/hosting.ts";
-import { orThrow } from "./adt.ts";
+import { orThrow } from "../prelude/adt.ts";
 import { decodeHostConfig, type HeaderRule, type Redirect } from "./hosting.ts";
 import { assetUrl } from "./url.ts";
 

@@ -17,6 +17,8 @@ import { join, relative, resolve } from "node:path";
 import { AxeBuilder } from "@axe-core/playwright";
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 
+import { clashesBy } from "../../src/prelude/distinct.ts";
+import { mapConcurrent } from "../lib/concurrent.ts";
 import { filesUnder } from "../lib/files.ts";
 import { dedupeFindings, type Finding, type Impact, type MergedFinding } from "./checks.ts";
 import { designFindings, TOKEN_NAMES } from "./design.ts";
@@ -78,23 +80,6 @@ const TOUCH_WIDTH = 768;
 const findings: Finding[] = [];
 const record = (finding: Finding): number => findings.push(finding);
 const recordAll = (entries: readonly Finding[]): void => entries.forEach(record);
-
-/**
- * Bounded worker pool: `limit` tasks stay in flight and each worker takes the
- * next index as it frees, so elapsed time is the slowest worker rather than
- * the sum of every task.
- */
-const mapConcurrent = async <T,>(
-  items: readonly T[],
-  limit: number,
-  task: (item: T) => Promise<void>,
-): Promise<void> => {
-  const queue = items.entries();
-  const worker = async () => {
-    for (const [, item] of queue) await task(item);
-  };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-};
 
 // ---------------------------------------------------------------------------
 // Rule tables
@@ -473,19 +458,15 @@ const checkSchemesDiffer = (
 };
 
 const checkTitlesUnique = (titles: readonly (readonly [string, string])[]): void => {
-  const seen = new Map<string, string>();
-  titles.forEach(([route, title]) => {
-    const existing = seen.get(title);
-    if (existing === undefined) seen.set(title, route);
-    else
-      record({
-        category: "meta",
-        rule: "duplicate-title",
-        impact: "minor",
-        page: route,
-        message: `shares its title with ${existing}: "${title}"`,
-      });
-  });
+  clashesBy(titles, ([, title]) => title).forEach(([[first], [route, title]]) =>
+    record({
+      category: "meta",
+      rule: "duplicate-title",
+      impact: "minor",
+      page: route,
+      message: `shares its title with ${first}: "${title}"`,
+    }),
+  );
 };
 
 /** Static checks prove links resolve to files; this proves the server serves them. */

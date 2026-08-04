@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { deployments } from "../config/deployments.ts";
-import { explain } from "./adt.ts";
+import { explain } from "../prelude/adt.ts";
 import {
   activeTarget,
   canonicalHref,

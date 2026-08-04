@@ -26,6 +26,8 @@ import { readFile, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { deployments } from "../src/config/deployments.ts";
+import { captures } from "./lib/captures.ts";
+import { mapConcurrent } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
 import { cannotRun, report } from "./lib/gate.ts";
 
@@ -113,6 +115,9 @@ export type Options = {
 const slashTerminated = (path: string): string =>
   path.endsWith("/") ? path : `${path}/`;
 
+/** Open file handles, which a directory listing otherwise bounds. */
+const READ_CONCURRENCY = 16;
+
 /** A syntactically valid origin that can never resolve. RFC 2606 reserves it. */
 const PROBE_ORIGIN = "https://probe.invalid";
 
@@ -156,11 +161,7 @@ const SCRIPT_ELEMENT = /<script\b/i;
  * independently testable.
  */
 export const extractReferences = (html: string): readonly string[] =>
-  /* The group is mandatory in the pattern and optional in the type, as
-     wherever a `RegExp` is read; an absent one names no reference. */
-  [...html.matchAll(REFERENCE)]
-    .map((match) => match[1])
-    .filter((reference) => reference !== undefined);
+  captures(html.matchAll(REFERENCE));
 
 /** Anything carrying its own authority is out of scope for local resolution. */
 export const isInternal = (reference: string): boolean =>
@@ -368,12 +369,9 @@ const COLOUR_DEFINITION = new RegExp(
 );
 
 export const undefinedCustomProperties = (css: string): readonly string[] => {
-  const named = (matches: readonly RegExpExecArray[]): readonly string[] =>
-    matches.map((match) => match[1]).filter((name) => name !== undefined);
-
-  const defined = new Set(named([...css.matchAll(DEFINITION)]));
+  const defined = new Set(captures(css.matchAll(DEFINITION)));
   const readBare = new Set(
-    named([...css.matchAll(BARE_READ)].filter((match) => match[2] === ")")),
+    captures([...css.matchAll(BARE_READ)].filter((match) => match[2] === ")")),
   );
   return [...readBare].filter((name) => !defined.has(name)).sort();
 };
@@ -451,13 +449,13 @@ export const gather = async ({
   const withExtension = (extension: string): readonly string[] =>
     relativeFiles.filter((path) => path.endsWith(extension));
 
-  const read = async (paths: readonly string[]): Promise<readonly Document[]> =>
-    Promise.all(
-      paths.map(async (path) => ({
-        path,
-        text: await readFile(join(dist, path), "utf8"),
-      })),
-    );
+  /* Bounded: an artifact has as many files as the site has pages, and
+     `Promise.all` over the listing would open every one of them at once. */
+  const read = (paths: readonly string[]): Promise<readonly Document[]> =>
+    mapConcurrent(paths, READ_CONCURRENCY, async (path) => ({
+      path,
+      text: await readFile(join(dist, path), "utf8"),
+    }));
 
   const directive = async (name: string): Promise<string> =>
     present.has(name) ? readFile(join(dist, name), "utf8") : "";
@@ -478,12 +476,10 @@ export const gather = async ({
     headerPatterns: parseHeaderPatterns(await directive("_headers")),
     wkd: {
       policy: present.has(join("\.well-known", "openpgpkey", "policy")),
-      keys: await Promise.all(
-        huFiles.map(async (path) => ({
-          name: path.slice(hu.length + 1),
-          bytes: await readFile(join(dist, path)),
-        })),
-      ),
+      keys: await mapConcurrent(huFiles, READ_CONCURRENCY, async (path) => ({
+        name: path.slice(hu.length + 1),
+        bytes: await readFile(join(dist, path)),
+      })),
     },
     palette: paletteFrom(tokensCss),
   };

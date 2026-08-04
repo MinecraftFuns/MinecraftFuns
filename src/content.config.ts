@@ -4,7 +4,7 @@ import { defineCollection } from "astro:content";
    and from `astro:schema` are both deprecated for removal in Astro 7. */
 import { z } from "astro/zod";
 
-import { explain, type Parsed } from "./lib/adt.ts";
+import { explain, type Parsed } from "./prelude/adt.ts";
 import { parseDocCategory, parsePostTag } from "./lib/labels.ts";
 import { isoDate, parseIsoDate } from "./lib/time.ts";
 
