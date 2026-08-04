@@ -45,7 +45,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Serval",
     description:
-      "Stores a templated config once, keyed by content hash, and serves it at the edge with query-parameter substitution. Route ids carry a keyed MAC, so a forged one is rejected before any cache or database lookup.",
+      "Configuration and scripts served from a URL that never moves, filled in per caller and versioned so any revision is restorable. A Gist serves stale content after an edit; here a write evicts the cache, and a route id nobody minted never reaches the database.",
     href: "https://github.com/BTreeMap/Serval",
     since: 2026,
     until: null,
@@ -56,7 +56,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Letterbox",
     description:
-      "An Android reader for .eml files that parses them in a Rust core over UniFFI. Remote images are blocked by default and otherwise fetched through a WARP proxy, so opening a message does not report back to its sender.",
+      "Opening an email should not tell the sender you opened it. Remote images are blocked by default, and the ones you allow go through a WARP tunnel the app builds itself in Rust, rather than a proxy that would do the logging instead.",
     href: "https://github.com/BTreeMap/Letterbox",
     since: 2025,
     until: null,
@@ -67,7 +67,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Lynx",
     description:
-      "A URL shortener split into two servers so the public redirector holds read-only database access. Destinations are versioned in place rather than deleted, and every prior one stays restorable.",
+      "Short links that outlive what they point at: destinations are edited in place, and every earlier one stays restorable. Deletion is refused by a database trigger rather than by code that has to remember.",
     href: "https://github.com/BTreeMap/Lynx",
     since: 2025,
     until: null,
@@ -77,7 +77,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "h4ckath0n",
     description:
-      "A FastAPI scaffold whose authentication is already right: passkeys by default, device-signed ES256 tokens, and server-side RBAC, so a weekend build never grows a password table.",
+      "A weekend team spends its first hours on login and ships a password table nobody would defend on Monday. This starts past both: passkeys by default, and roles the server decides rather than the token.",
     href: "https://github.com/BTreeMap/h4ckath0n",
     since: 2025,
     until: null,
@@ -87,7 +87,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Dockerfiles",
     description:
-      "Container images for the things I self-host, from remote desktops to Tailscale variants, rebuilt twice a day so a running deployment tracks upstream rather than the day it was first built.",
+      "Self-hosted software rots quietly: the container running today is whatever its dependencies were the day it was built. These rebuild twice daily on a pipeline where workers steal from their peers once they run dry, so nothing waits behind the slowest shard.",
     href: "https://github.com/BTreeMap/Dockerfiles",
     since: 2024,
     until: null,
@@ -97,7 +97,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "SKILLs",
     description:
-      "A library of Markdown procedures for coding agents, kept free of any one project's identity so the same skill works in unrelated repositories. This site consumes it as a submodule.",
+      "An agent is only as consistent as the procedure it is handed, and one pasted into a single repository does not travel. These are Markdown that names no project, written once and read everywhere, this site included.",
     href: "https://github.com/BTreeMap/SKILLs",
     since: 2026,
     until: null,
@@ -107,7 +107,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "safeTO",
     description:
-      "A CSC207 team project. Aggregates Toronto Police major-crime data and fits a Poisson model per location, so asking whether an address is safe returns a probability over a radius rather than a raw incident count.",
+      "People ask whether an address is safe before signing a lease, and an incident count answers badly: it punishes density and says nothing about what comes next. A Poisson fit over Toronto Police data answers with a probability instead.",
     href: "https://github.com/CSC207-2024/safeTO",
     since: 2024,
     until: 2025,
@@ -117,7 +117,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "PromptPipe",
     description:
-      "Delivers adaptive-intervention prompts over WhatsApp for behavioural research: scheduling, receipt and response tracking, and a stateful intake and feedback conversation behind one REST API.",
+      "Behavioural studies fail on delivery more often than on design: missed prompts, silent dropout, answers that never arrive. PromptPipe reaches participants on WhatsApp, where they already are, and counts what was delivered apart from what was answered.",
     href: "https://github.com/BTreeMap/PromptPipe",
     since: 2025,
     until: null,
@@ -128,7 +128,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "ABScribeX",
     description:
-      "Carries the CHI 2024 ABScribe interface, in-place variation fields and reusable AI modifiers, into editors never built for it: Gmail, LinkedIn, Reddit.",
+      "An interaction shown to work in a study's own editor has not been shown to work anywhere. This carries the CHI 2024 ABScribe interface into Gmail, LinkedIn, and Reddit, which strip any markup they did not author, so a variant's identity rides inside the text as zero-width characters.",
     href: "https://github.com/BTreeMap/ABScribeX",
     since: 2024,
     until: null,
@@ -138,11 +138,31 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Focus Flow",
     description:
-      "An Android app that interrupts an impulsive app launch with a prompt, and treats which prompt to show as a selection problem: success rates weighted by a decay term, so one early winner cannot crowd out the rest.",
+      "Every nudge stops working once you have seen it enough times, which is why most screen-time apps fade in a week. Focus Flow keeps choosing: prompts are weighted by measured success under a cooldown, so an early winner cannot crowd out the untried.",
     href: "https://github.com/Jai0212/Focus-Flow",
     since: 2024,
     until: 2025,
     tags: ["Kotlin", "Firebase", "HCI"],
     kind: "research",
+  },
+  {
+    title: "ebpf-docs",
+    description:
+      "Reference examples get copied verbatim, and a reversed bit shift compiles, runs, and prints plausible numbers. The kernel puts tgid in the high 32 bits and pid in the low ones; the documented example had them the other way round, as did the uid/gid page beside it.",
+    href: "https://github.com/isovalent/ebpf-docs/commit/7546bcb3f713f3b091869178942a7c51395b8760",
+    since: 2025,
+    until: 2025,
+    tags: ["eBPF", "Linux", "Documentation"],
+    kind: "open-source",
+  },
+  {
+    title: "Tailscale",
+    description:
+      "An address meant never to leave the device was leaving it: Android probes its resolver on port 853, netstack answered only on 53, and the rest fell through to the exit node's default route. The client logged it out, the exit node logged it refused; fixed upstream eight days later.",
+    href: "https://github.com/tailscale/tailscale/issues/19421",
+    since: 2026,
+    until: 2026,
+    tags: ["Networking", "DNS", "Bug report"],
+    kind: "open-source",
   },
 ];
