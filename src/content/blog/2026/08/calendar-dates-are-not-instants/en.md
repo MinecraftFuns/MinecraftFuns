@@ -1,50 +1,54 @@
 ---
 title: A calendar date is not an instant
-description: How a one-line date format shipped the wrong day, and why the fix was a type rather than a patch.
+description: A one-line date format on this site shipped the wrong day, and the fix turned out to be a type rather than a patch.
 date: "2026-08-01"
 tags: ["TypeScript", "Time"]
 ---
 
-This site rendered `Jul 13, 2026` for a post dated the fourteenth. The
-`datetime` attribute beside it said `2026-07-14`. Both came from the same
-field.
+This site rendered `Jul 13, 2026` for a post I had dated the fourteenth. The
+`datetime` attribute sitting right next to it said `2026-07-14`. Both were
+reading the same field, which is the sort of thing that makes you go and check
+the field before you start suspecting the code.
 
-The offending line was ordinary enough to read past:
+The line responsible is ordinary enough to read straight past:
 
 ```ts
 new Date(post.date).toLocaleDateString("en-CA", { /* ... */ });
 ```
 
-## Two types wearing one costume
+## Two types spelled the same way
 
 `"2026-07-14"` names a box on a wall calendar. It has no hour, and it does not
-identify a moment: "the fourteenth" begins at different instants in Auckland
-and in Toronto.
+pick out a moment: the fourteenth begins at different instants in Auckland and
+in Toronto.
 
-`new Date("2026-07-14")` does not preserve that. The ECMAScript spec parses a
-date-only ISO string as **UTC midnight**, producing a specific point on the
-timeline. `toLocaleDateString` then projects that point back onto a calendar,
-and with no `timeZone` option, it uses the host's. Toronto sits five hours
-behind UTC in winter, so midnight UTC is still 7pm on the thirteenth.
+`new Date("2026-07-14")` throws that distinction away. The ECMAScript spec
+parses a date-only ISO string as **UTC midnight**, which is a specific point on
+the timeline. `toLocaleDateString` then puts that point back onto a calendar,
+and with no `timeZone` option it uses whichever calendar the host happens to be
+on. Toronto runs four hours behind UTC in July, so UTC midnight is still eight
+in the evening on the thirteenth.
 
-The value made a round trip through a type that could not hold it, and came
-back a day short.
+The date went out through a type with no room for it, and came back a day
+short.
 
-## Why it survived CI
+## Why CI never caught it
 
-The build was green. Types checked, tests passed, and the site deployed. The
-bug reproduced only where the clock disagreed with UTC, which meant it
-appeared on my laptop and vanished in CI, the failure mode most likely to be
-dismissed as a fluke.
+The build was green. Types checked, tests passed, the site deployed. The bug
+only appeared where the clock disagreed with UTC, which meant my laptop and not
+CI, and that is close to the worst possible split: the natural response to a
+failure that will not reproduce on the build server is to assume you imagined
+it.
 
-Nothing in the pipeline had an opinion about the *output*. That gap was worth
-more attention than the date bug itself.
+Nothing in the pipeline had an opinion about the *output* at all. That bothered
+me more than the wrong day did.
 
-## The fix is a type
+## Fixing the symptom, or fixing the type
 
-Adding `timeZone` to the formatter would have corrected the symptom. Instead
-the calendar date became its own type, with the only route in going through a
-parser:
+Passing `timeZone` to the formatter prints the right day. It also fixes exactly
+one call site, and nothing stops the next one from making the same mistake.
+
+So the calendar date got a type of its own, with the parser as the only way in:
 
 ```ts
 declare const isoDateBrand: unique symbol;
@@ -53,18 +57,24 @@ export type IsoDate = string & { readonly [isoDateBrand]: true };
 export const parseIsoDate = (raw: string): Parsed<IsoDate> => { /* ... */ };
 ```
 
-The brand is erased at runtime: an `IsoDate` is a plain string. Its entire
-value is that you cannot obtain one without going through the parser, so any
-value of that type has already been checked. Shape alone is not enough:
-`2026-02-31` matches `YYYY-MM-DD` and names no day, which a round trip through
-`Date.UTC` catches, since the constructor quietly overflows it into March.
+The brand is erased at runtime, so an `IsoDate` is still a plain string. The
+entire point is that you cannot obtain one without going through the parser,
+which means anything holding that type has already been checked.
 
-Conversions to an instant are now explicit and always take a zone, defaulting
-to the project's own rather than the host's. The build produces identical
-output in Toronto, Auckland, and CI.
+Checking the shape alone would not be enough. `2026-02-31` matches
+`YYYY-MM-DD` perfectly well and is not a day. A round trip through `Date.UTC`
+catches it, because the constructor quietly rolls it over into March instead of
+complaining.
 
-## The general shape
+Converting to an actual instant is now something you have to ask for, and it
+takes a zone every time, defaulting to the project's own rather than the
+machine's. The build produces identical output in Toronto, in Auckland, and in
+CI.
 
-Whenever a value converts through another type to be displayed, the conversion
-takes a parameter. Supply it, or the environment will, and the environment
-does not know what you meant.
+## What I took from it
+
+When a value passes through a second type on its way to being displayed, that
+conversion takes a parameter whether or not you supply one. Leave it out and
+`toLocaleDateString` picks a time zone for you. So does `toString`, and every
+other locale-aware formatter in the standard library, and none of them know
+what you meant.

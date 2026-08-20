@@ -5,39 +5,43 @@ date: "2025-04-28"
 tags: ["Tailscale", "Networking", "Security"]
 ---
 
-When I started using [Tailscale](https://tailscale.com/), it was great to link
-all my machines (laptops, servers, Raspberry Pis, containers, and exit nodes)
-into one private network. As the number of devices grew, I needed a simple way
-to keep things secure and easy to manage. That is why I turned to Tailscale's
-[Access Control Lists](https://tailscale.com/kb/1018/acls) (ACLs) and
+[Tailscale](https://tailscale.com/) is very good at the thing it advertises.
+Every machine I own (laptops, servers, Raspberry Pis, containers, exit nodes)
+turns up on one flat private network and can reach every other one. That is the
+whole appeal, and it is also the problem: past a handful of devices, "anything
+can reach anything" stopped being a convenience and became a thing I could no
+longer hold in my head.
+
+So I sat down and wrote a policy file, using Tailscale's [Access Control
+Lists](https://tailscale.com/kb/1018/acls) (ACLs) and
 [tags](https://tailscale.com/kb/1068/tags).
 
-## Why I use ACLs and tags
+## Why ACLs and tags
 
-By default, Tailscale lets any node talk to any other node. That works for a
-few devices, but when I added services and shared with others, I wanted:
+Tailscale is allow-all by default. That is the right default for two laptops
+and the wrong one the moment you are running services on the network or sharing
+a node with somebody else. What I wanted instead:
 
-- **Deny by default.** Only allow the connections I really need, which
-  significantly reduces security risks from unauthorized access or
-  misconfigured services.
-- **Easy-to-read policies.** JSON format is simple to understand and allows
-  easy version control through Git, enabling clear audit trails and rollback
-  capability if changes go wrong.
-- **Device IDs.** Treating servers and services similarly to users means access
-  is controlled granularly, improving security by avoiding overly permissive
-  defaults.
+- **Deny by default.** If I did not write a rule for it, it does not connect.
+- **A policy I can read.** It is one file, it lives in Git, and a bad change is
+  one `git revert` away.
+- **Roles instead of machines.** A container that gets rebuilt every week
+  should not need a new rule each time. It needs to be a `container`.
 
-Tags let me label devices (`server`, `container`, `exit-node`, `rdp-client`,
-and so on) so each machine has a clear role. Then ACLs use those tags to allow
-only the right traffic. This makes it easy to understand exactly what each
-device is allowed to do, simplifying troubleshooting and improving security
-auditing.
+Tags handle that last part. Each device is labeled by what it is (`server`,
+`container`, `exit-node`, `rdp-client`) and the rules talk about labels rather
+than machines. The useful side effect is that reading the policy tells you what
+a device may do without knowing anything about the device.
+
+One thing worth knowing before you start: once a device is tagged, it belongs
+to the tag rather than to your user account, and its key stops expiring. That
+is usually what you want for a server and rarely what you want for your laptop.
 
 ## ACL file structure
 
 My [policy file](https://gist.github.com/MinecraftFuns/c01d9abb6a4dc621e0c6e3ef3371dbca)
-lives in a private Git repository. At the top, I set up my admin group, tag
-owners, and host names:
+lives in a private Git repository. The top of it declares my admin group, who
+owns which tags, and a few static hostnames:
 
 ```json
 {
@@ -72,35 +76,26 @@ owners, and host names:
 
 ## How I tag my devices
 
-1. **Core servers**
-   - Tag: `tag:server`
-   - These machines host critical infrastructure like databases or APIs.
-     Clearly tagging them helps me quickly verify and protect critical
-     endpoints.
+1. **Core servers** (`tag:server`) are the machines I would notice going down:
+   databases, APIs, the boxes other things point at.
 
-2. **Containers and labs**
-   - Tags: `tag:container`, `tag:arklab`
-   - Containers frequently change, so tagging helps rapidly apply appropriate
-     ACLs without reconfiguring permissions each time a container restarts or
-     scales.
+2. **Containers and labs** (`tag:container`, `tag:arklab`) come and go. A
+   rebuilt container joins with the tag already applied, so it arrives with the
+   right permissions instead of getting them afterwards.
 
-3. **Remote desktop**
-   - Tags: `tag:rdp-client`, `tag:rdp-server`
-   - Tagging both clients and servers ensures only my authorized Windows
-     machines can initiate RDP connections, reducing the attack surface for
-     potential intruders.
+3. **Remote desktop** (`tag:rdp-client`, `tag:rdp-server`) is tagged at both
+   ends, which turns RDP into a rule between two roles rather than a port left
+   open on a machine.
 
-4. **Exit nodes and DNS**
-   - Tags: `tag:exit-node`, `tag:dns-server`, `tag:dns-client`,
-     `tag:doh-client`, `tag:dot-client`
-   - Tagging exit nodes separately allows tight control over internet traffic
-     flow. Using tags for DNS-related roles further secures my DNS setup,
-     clearly defining which devices handle DNS queries and ensuring encrypted
-     protocols (DoH, DoT) are correctly routed.
+4. **Exit nodes and DNS** (`tag:exit-node`, `tag:dns-server`,
+   `tag:dns-client`, `tag:doh-client`, `tag:dot-client`) get a tag per
+   protocol. "May talk to my resolver" and "may talk to my resolver over DoT"
+   are different permissions, and I would rather see the difference written
+   down than infer it from a port number.
 
-When I add a new device, I tag it immediately, either via the admin console or
-an auth key that tags devices automatically. This reduces the risk of
-misconfiguration and ensures consistent security policies.
+New devices get tagged as they join, with a pre-tagged auth key where possible,
+so there is never a window in which something is sitting on the network as an
+untagged personal machine.
 
 ## My ACL rules
 
@@ -153,26 +148,25 @@ Here is the core of my
 ]
 ```
 
-- **Admins and servers** can do everything, which is great for management and
-  backups.
-- **RDP clients** only reach RDP servers on port 3389, with no extra access.
-- **Specific host** (`arklab.perch-map.ts.net`) has a special RDP rule for my
-  Windows laptop.
-- **Exit node users** can route internet traffic via exit nodes.
-- **DNS over 53** clients only talk to my DNS servers over port 53 (still
-  encrypted, since Tailscale encrypts all the traffic end-to-end).
-- **Encrypted DNS** clients only talk to my DNS servers over encrypted ports
-  designated by each protocol.
+- **Admins** reach everything. This is a one-person tailnet, so `group:root` is
+  me.
+- **RDP clients** reach RDP servers on 3389 and nothing else.
+- **One host rule** names `arklab.perch-map.ts.net` directly rather than a tag,
+  for my Windows laptop.
+- **Exit node users** reach `autogroup:internet` through an exit node.
+- **DNS clients** reach the resolver on 53. Plaintext DNS, but only in the
+  sense that the payload is not itself encrypted: Tailscale is carrying it
+  inside WireGuard either way.
+- **DoH and DoT clients** reach the resolver on the ports their own protocol
+  uses.
 
-Each rule clearly defines allowed interactions. By explicitly stating ports and
-allowed sources, I can quickly identify unnecessary permissions or diagnose
-connectivity issues. This granular control minimizes potential vulnerabilities
-due to overly permissive access.
+If the trailing commas above look like a mistake, they are not. Tailscale's
+policy file is HuJSON, so comments and trailing commas are both legal, whatever
+your editor's JSON linter thinks about it.
 
-## Securing SSH with Tailscale SSH
+## SSH without keys
 
-I use Tailscale SSH instead of manually managing SSH keys. Here is my SSH
-setup:
+Tailscale SSH means I am not maintaining `authorized_keys` by hand anywhere:
 
 ```json
 "ssh": [
@@ -208,11 +202,18 @@ setup:
 ]
 ```
 
-Now running `ssh ubuntu@arklab-wsl.perch-map.ts.net` just works: Tailscale
-checks the policy, lets me in, and there is no need for manually configuring a
-list of `authorized_keys` anymore, as the burden of authentication and
-authorization falls to Tailscale.
+The part worth pointing out is `check`. It does not simply allow the
+connection; it makes me re-authenticate in a browser first, and `checkPeriod`
+sets how long that lasts. Root on anything, and any access at all to my own
+devices, goes through a three-day check. Ordinary non-root logins on tagged
+servers are a plain `accept`, because I do those constantly and a prompt every
+time would only teach me to click through it.
 
-Using tags and ACLs has made my tailnet safe and easy to manage. Give it a try;
-you will save time and avoid surprises when you add new devices or share access
-with others.
+So `ssh ubuntu@arklab-wsl.perch-map.ts.net` now just works, with no key
+material on the client at all. Authentication and authorization both moved into
+the policy file, which is where every other decision about this network already
+lived.
+
+The tradeoff is that the file is now the thing I have to keep honest. Every
+stale rule in it is a permission I am still handing out for something I may not
+still run.

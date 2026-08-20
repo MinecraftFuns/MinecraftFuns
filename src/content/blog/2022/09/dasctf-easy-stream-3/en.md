@@ -1,6 +1,6 @@
 ---
-title: "Solving the Easy Stream 3 Problem in the DASCTF Cybersecurity Competition"
-description: "A writeup solving the Easy Stream 3 crypto challenge from the DASCTF competition, an LFSR-based stream cipher recovered by reconstructing its internal state and brute-forcing its mask."
+title: "DASCTF easystream3: recovering an LFSR from four known characters"
+description: "A writeup for the easystream3 crypto challenge: the keystream hands you the register's state for free, and the mask is small enough to brute force."
 date: "2022-09-30"
 tags: ["CTF", "Security"]
 ---
@@ -10,13 +10,21 @@ tags: ["CTF", "Security"]
 > `tag`: stream cipher  
 > `flag`: `DASCTF{88ac22ea2ce99c7a325fe6ce2ddd3718}`  
 
-As a freshman in university with limited knowledge of cybersecurity, I was introduced to Capture the Flag (CTF) competitions for the first time. Although CTF and Olympiad in Informatics (OI) share some criteria, such as a high demand for coding ability and the need for bravery when things go wrong, I found that CTF problems require more flexible thinking patterns.
+This was my first CTF. I am a first-year undergraduate and I knew close to
+nothing about security going in, so I expected to be lost. Competitive
+programming turns out to prepare you for more of it than I thought: both reward
+writing code quickly, and both reward keeping your nerve when the thing in front
+of you does not make sense yet. The difference is that an OI problem tells you
+what it wants, and a CTF problem makes you work that out first.
 
 ![hero.webp](https://ragnarok.joefang.org/static/xeenv11353go28aobqp0sp539k0r24l6m.webp)
 
-The source code for the problem is available on [GitHub Gist](https://gist.github.com/MinecraftFuns/d6873a1b8aa67d83df02408afb58e2a4), and I recommend you look at it before continuing to read.
+The source is on [GitHub Gist](https://gist.github.com/MinecraftFuns/d6873a1b8aa67d83df02408afb58e2a4),
+and it is worth reading before the rest of this.
 
-The problem suggests we analyze the methods defined in `class lfsr()`.
+## What the register actually does
+
+The problem points you at `class lfsr()`.
 
 ```py
 class lfsr():
@@ -44,10 +52,33 @@ class lfsr():
         return output
 ```
 
-First, we can notice that in the function `def next()`, the generated 1-bit `output` is appended to the `state` variable, whose highest bit is discarded. The computation of the `output` variable is in equivalence to the C++ expression `std::popcount(state & mask) & 1`, indicating that the `output` depends on the number of $1\operatorname{s}$ in the binary representation of `state & mask`. If we do `def next()` 32 times, the initial state will be entirely replaced by the newly generated bits. Therefore, we can recover the `state` variable with the knowledge of the first four letters (`DASC`).
+Two things fall out of `next()`.
 
-Now we need to uncover the value of the `mask` variable. [My solution](https://gist.github.com/MinecraftFuns/44173a642b4886c86a2f4198f02c20a2), which enumerates all possible values of a 32-bit unsigned integer and checks them against the next 3 bytes (`TF{`) and the last 1 byte (`}`), is relatively straightforward and brute-force.
+The first is how the output bit is computed. `i` is `state & mask`, and the loop
+XORs all of its bits together, so `output` is the parity of `state & mask`. In
+C++ it would be `std::popcount(state & mask) & 1`.
 
-In conclusion, the Easy Stream 3 problem is entry-level and requires little brainstorming. I would tag it with `implementation` if it were a Codeforces problem.
+The second is where that bit goes. `state` is shifted left by one, the top bit
+falls off the end under `length_mask`, and `output` is XORed into the bottom.
+The output bit is not merely derived from the state; it becomes part of it.
 
-> The article is also available in [Chinese](https://bafkreiccxkgfot73sjtq6rx6ruvuks3dt4tf63nh6ksdtxupegsedh6bce.ipfs.inbrowser.link/?filename=Crypto.pdf).
+That second point is the whole challenge. The register is 32 bits wide, so after
+32 calls to `next()` the original seed is gone and the state *is* the last 32
+output bits. Those bits are not secret: they follow immediately from the four
+characters the flag has to begin with, `DASC`. The state costs nothing to
+recover.
+
+## Brute-forcing the mask
+
+That leaves `mask`, and there is nothing clever in
+[my solution](https://gist.github.com/MinecraftFuns/44173a642b4886c86a2f4198f02c20a2).
+It walks all $2^{32}$ values of a 32-bit unsigned integer and keeps whichever
+ones reproduce the next three known bytes, `TF{`, and the closing `}`. Crude,
+but a 32-bit space is small enough that crude is the correct answer.
+
+## Verdict
+
+easystream3 is entry level and needs very little insight. If it were a
+Codeforces problem I would tag it `implementation`.
+
+> This article is also available in [Chinese](https://bafkreiccxkgfot73sjtq6rx6ruvuks3dt4tf63nh6ksdtxupegsedh6bce.ipfs.inbrowser.link/?filename=Crypto.pdf).
