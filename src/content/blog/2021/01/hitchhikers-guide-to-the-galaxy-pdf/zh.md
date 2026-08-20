@@ -26,7 +26,7 @@ tags: ["Reading", "Sharing"]
 
 感谢原帖作者 [@songkey](https://www.douban.com/people/sokey/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210115133034/https://www.douban.com/people/sokey/)。
 
-原帖中 OneDrive 的链接挂了，只能从百度云下载。~~出于对百度云的厌恶~~ 我把两个文件传到 IPFS 上了。你可以通过**任意** IPFS Gateway 访问，如 [ipfs.io](https://ipfs.io/)、[cloudflare-ipfs.com](https://cloudflare-ipfs.com/) 和 [dweb.link](https://dweb.link/)。
+原帖中 OneDrive 的链接挂了，只能从百度云下载。~~出于对百度云的厌恶~~ 我把两个文件传到 IPFS 上了。你可以通过**任意** IPFS Gateway 访问，如 [ipfs.io](https://ipfs.io/)、[dweb.link](https://dweb.link/) 和 [inbrowser.link](https://inbrowser.link/)。
 
 ![0.webp](https://bafkreic76j23m57comk7mdtekff55dpxvifwivfo3qq6yedcvpcbxfxczu.ipfs.dweb.link)
 

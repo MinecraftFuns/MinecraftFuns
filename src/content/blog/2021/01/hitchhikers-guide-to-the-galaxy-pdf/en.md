@@ -27,7 +27,7 @@ I found a good PDF edition on Douban, so I am sharing it here.
 
 Thanks to the original poster [@songkey](https://www.douban.com/people/sokey/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210115133034/https://www.douban.com/people/sokey/).
 
-The OneDrive link in the original post is dead, so the files could only be downloaded from Baidu Netdisk. ~~Out of my distaste for Baidu Netdisk~~ I uploaded both files to IPFS instead. You can access them through **any** IPFS gateway, such as [ipfs.io](https://ipfs.io/), [cloudflare-ipfs.com](https://cloudflare-ipfs.com/), and [dweb.link](https://dweb.link/).
+The OneDrive link in the original post is dead, so the files could only be downloaded from Baidu Netdisk. ~~Out of my distaste for Baidu Netdisk~~ I uploaded both files to IPFS instead. You can access them through **any** IPFS gateway, such as [ipfs.io](https://ipfs.io/), [dweb.link](https://dweb.link/), and [inbrowser.link](https://inbrowser.link/).
 
 ![0.webp](https://bafkreic76j23m57comk7mdtekff55dpxvifwivfo3qq6yedcvpcbxfxczu.ipfs.dweb.link)
 
