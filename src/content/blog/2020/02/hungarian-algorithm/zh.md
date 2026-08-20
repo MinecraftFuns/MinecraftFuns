@@ -25,7 +25,7 @@ tags: ["Algorithms", "Graph Theory"]
 ### 判定
 
 * 是否可以将图中的顶点分成两个满足条件的集合。
-* 可以使用 DFS 或者 BFS 来遍历这张图。如果发现了奇环，那么就不是二分图，否则是。
+* 可以使用DFS或者BFS来遍历这张图。如果发现了奇环，那么就不是二分图，否则是。
 
 ## 模板
 
@@ -56,7 +56,7 @@ G.clear();
 memset(from, -1, sizeof(from));
 ```
 
-### DFS 函数
+### DFS函数
 
 ```cpp
 bool dfs(int u)

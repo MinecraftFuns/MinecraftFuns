@@ -49,7 +49,7 @@ wget -mkEpnp https://example.com/something.html
 
 ## 你知道吗
 
-`wget` 在 Windows 下有一个单文件版本，非常适合放在 U 盘上随身携带，这里也一并放出来：[wget.exe](https://bafybmidj6zl4ellqyzhso63o3jvlfasjtzqnqij323ulvdwolf62z5kq2a.ipfs.inbrowser.link/?filename=wget.exe)。
+`wget` 在Windows下有一个单文件版本，非常适合放在U盘上随身携带，这里也一并放出来：[wget.exe](https://bafybmidj6zl4ellqyzhso63o3jvlfasjtzqnqij323ulvdwolf62z5kq2a.ipfs.inbrowser.link/?filename=wget.exe)。
 
 ## 另请参阅
 

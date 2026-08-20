@@ -22,21 +22,21 @@ tags: ["Tools"]
 > 自我介绍：  
 > 免费无广告的 `IDM` / `Torrent` 合成体
 
-还是比较符合实际的。除了免费无广告以外，`Torrent` 的下载速度很优秀。内置的 tracker 能覆盖到常用的种子。粗略测试了一下，热门种子去掉 tracker 后用 `Xdown` 下载，几乎都可以成功（19 / 20）。总体成功率大约 50%（和所在的网络环境有关）。
+还是比较符合实际的。除了免费无广告以外，`Torrent` 的下载速度很优秀。内置的tracker能覆盖到常用的种子。粗略测试了一下，热门种子去掉tracker后用 `Xdown` 下载，几乎都可以成功（19 / 20）。总体成功率大约50%（和所在的网络环境有关）。
 
-而 `uGet` 下 `Torrent` 的时候，不知道是我配置的问题还是软件的问题，速度不理想（uGet 的 `Torrent` 是调用 aria2 来下载的，和 `Motrix` 一样）。
+而 `uGet` 下 `Torrent` 的时候，不知道是我配置的问题还是软件的问题，速度不理想（uGet的 `Torrent` 是调用aria2来下载的，和 `Motrix` 一样）。
 
-http 的下载，感觉还是 [uGet](https://ugetdm.com/) 更香。主要是 `Xdown` 界面确实比较简陋。（当然 [![memset0's avatar](https://bafkreifoiocil7nu3vxuyszpjcj3orv64z7mrkaq3ypo5arltx3w2tqyqq.ipfs.dweb.link)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) 大佬推荐的 `Motrix` 坠吼看了。）
+http的下载，感觉还是 [uGet](https://ugetdm.com/) 更香。主要是 `Xdown` 界面确实比较简陋。（当然 [![memset0's avatar](https://bafkreifoiocil7nu3vxuyszpjcj3orv64z7mrkaq3ypo5arltx3w2tqyqq.ipfs.dweb.link)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) 大佬推荐的 `Motrix` 坠吼看了。）
 
-小文件一般直接 Chrome 下载，大文件需要多线程下载的话，Xdown 和 `IDM` 速度上没什么区别。`IDM` 确实是老牌下载神器了，但是 `Xdown` 也不差。考虑到 `IDM` 是付费软件，我选 `Xdown` 。
+小文件一般直接Chrome下载，大文件需要多线程下载的话，Xdown和 `IDM` 速度上没什么区别。`IDM` 确实是老牌下载神器了，但是 `Xdown` 也不差。考虑到 `IDM` 是付费软件，我选 `Xdown` 。
 
 关于 `Xdown` 的浏览器插件，可以参考[官方文档](https://xdown.org/extensions/)。
 
-在[Chrome 应用商店](https://chrome.google.com/webstore/detail/xdown/eapmjcdkdlenhkbanlgacimfibbbiinc)安装。配置还是很直白的，这里搬运了一段测试方法。
+在[Chrome应用商店](https://chrome.google.com/webstore/detail/xdown/eapmjcdkdlenhkbanlgacimfibbbiinc)安装。配置还是很直白的，这里搬运了一段测试方法。
 
-> `Xdown` 打开 `设置 > 插件 ID` 里面写入当前插件的 ID ，需要打开开发模式才可以看到  
+> `Xdown` 打开 `设置 > 插件 ID` 里面写入当前插件的ID ，需要打开开发模式才可以看到  
 > 例如：`eapmjcdkdlenhkbanlgacimfibbbiinc`  
-> 看到 `Xdown` 的 id 后，保存并前往 [https://xdown.org/test.html](https://xdown.org/test.html)  
+> 看到 `Xdown` 的id后，保存并前往 [https://xdown.org/test.html](https://xdown.org/test.html)  
 > 点击其中一个链接。如果弹出新建任务对话框，说明插件安装成功；如果失败，请仔细对照上面的说明。  
 > 下面两个地址是演示安装视频，不懂的可以观看视频解答疑惑。
 > [https://dl.xdown.org/mp4/xdown-extensions.mp4](https://dl.xdown.org/mp4/xdown-extensions.mp4)  

@@ -37,6 +37,6 @@ tags: ["Competitive Programming", "Editorial", "Number Theory"]
 
 个人意见是不使用 `#define` 定义常量，而是使用 `const` 或 `constexpr`。另外，代码中最好不要出现一些莫名其妙的数字，而是使用有意义的常量名来指代。
 
-`#define int long long` 是极其糟糕的做法。出于运行效率的考虑，应该仔细思考变量的值域，使用恰当的类型（当然打 Codeforces 是另一回事，因为在 rush 代码的时候顾不上那么多细节）。
+`#define int long long` 是极其糟糕的做法。出于运行效率的考虑，应该仔细思考变量的值域，使用恰当的类型（当然打Codeforces是另一回事，因为在rush代码的时候顾不上那么多细节）。
 
 ![hero.webp](https://ragnarok.joefang.org/static/xqifcrgr6lll6138ms4ckjvqrrorkfrc9.webp)

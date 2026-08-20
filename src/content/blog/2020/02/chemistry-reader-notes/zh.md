@@ -41,9 +41,9 @@ A.
 
 ## 【置顶】可供下载的资料
 
-> 提示：一个文件一般提供 PDF 和原始文件两个版本，其中 PDF 版本方便在线预览，原始文件方便编辑  
+> 提示：一个文件一般提供PDF和原始文件两个版本，其中PDF版本方便在线预览，原始文件方便编辑  
 > 有时候会提供第三个文件，即经过转换的原始文件  
-> 如果没有提供 PDF 预览，可以前往 `https://view.officeapps.live.com/op/view.aspx?src=文件地址` 预览（注意该服务仅支持 Office 文档），也可以在该页面将 Office 文档转换成 PDF  
+> 如果没有提供PDF预览，可以前往 `https://view.officeapps.live.com/op/view.aspx?src=文件地址` 预览（注意该服务仅支持Office文档），也可以在该页面将Office文档转换成PDF  
 
 * 高中化学方程式大全(完整版) [PDF](https://bafkreify3vz47n6taxdvrth3uekwpgr2n7zi3htxony7yeshx3xpqcucsq.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/MWgQzpso.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/jh7FwIGk.docx)
 * 高中化学知识框架 [PDF](https://bafybeieojg5t3yfxqgesmbnij72da4vij2h7gkyk3ypvgq2kll627erytu.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/WFnCGrZe.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/3d5QEzMi.docx) *该文档中大量内容以图片的形式展现，可能不适合编辑*
@@ -58,7 +58,7 @@ A.
 
 ### [碳族元素](https://zh.wikipedia.org/wiki/%E7%A2%B3%E6%97%8F%E5%85%83%E7%B4%A0)
 
-* 元素周期表的**第 IV 主族**
+* 元素周期表的**第IV主族**
 * 碳，硅，锗，锡，铅
 * 中间位置，容易生成共价化合物
 * 原子最外层电子排布式 ![ns2np2](https://bafkreibxslcygphcolepukdvbbleabr2pz4xmbjzhttwwvcx5p6y3ky2de.ipfs.dweb.link)
@@ -69,7 +69,7 @@ A.
 
 1. 碳族元素的**熔点**和**沸点**随着**原子量增加**而**降低**。碳在3825 °C时升华。
 2. 碳族元素的密度及原子半径随着原子量增加而增加。
-3. **碳**的晶体结构是**六方晶系**，在**高温和高压**下形成**金刚石**。硅和锗的晶体结构亦为钻石结构。锡在低温下（13.2 °C 以下）是钻石结构，室温下则是四方晶系。铅的晶体结构是立方晶系。
+3. **碳**的晶体结构是**六方晶系**，在**高温和高压**下形成**金刚石**。硅和锗的晶体结构亦为钻石结构。锡在低温下（13.2 °C以下）是钻石结构，室温下则是四方晶系。铅的晶体结构是立方晶系。
 
 ### 硅，硅的化合物
 
@@ -99,7 +99,7 @@ A.
 
 ![电离常数](https://bafkreiftp4keb7qzhax5rbv5z4fsi3xup3w2fa5uxt63k5c7ujhkjawqzm.ipfs.dweb.link)
 
-* 多元弱酸各步电离的电离常数 K1, K2, K3 一般差距几个数量级，故酸性主要由第一步电离决定
+* 多元弱酸各步电离的电离常数K1, K2, K3一般差距几个数量级，故酸性主要由第一步电离决定
 
 ### `pH` 的定义
 

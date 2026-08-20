@@ -100,7 +100,7 @@ $$\sum_{i=1}^{n-k}10^{i-1}\times (\sum_{j=1}^{n-i}a_j\times \binom{n-1-i}{k-1}+a
 
 现在对于每个连通块 $DFS$ 一遍。对每条非树边 $(a,b)$ 都暴力标记被它覆盖的树边。如果发现之前这个树边被非树边 $(c,d)$ 标记过，那么可以直接通过 $(a,b)$ 和 $(c,d)$ 获取答案。
 
-![屏幕截图 2020-11-11 171828.jpg](https://bafkreidjtfxygh5ygpbd4nm6earhqaysd4m3dozo3sc6rebimd42jd44tu.ipfs.dweb.link)
+![屏幕截图2020-11-11 171828.jpg](https://bafkreidjtfxygh5ygpbd4nm6earhqaysd4m3dozo3sc6rebimd42jd44tu.ipfs.dweb.link)
 
 我们钦定 $dep_b\gt dep_a$，$dep_d\gt dep_c$，且 $d$ 为 $b$ 的祖先。设 $e=\operatorname{LCA}(a,c)$，则三条路径分别为 $d\rightarrow e$，$d\rightarrow b\rightarrow a\rightarrow e$，$d\rightarrow c\rightarrow e$。找路径的实现上暴力跳 $fa$ 即可。
 

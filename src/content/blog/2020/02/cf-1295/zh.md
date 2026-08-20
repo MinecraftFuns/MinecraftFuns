@@ -11,14 +11,14 @@ tags: ["Codeforces", "Editorial"]
 ![hero.webp](https://ragnarok.joefang.org/static/x21jvkmpvu9pdp6h8i4faalh86ai10503.webp)
 
 > [比赛链接](https://codeforces.com/contest/1295)  
-> 比赛的时候只做出来 A, B, C, D，然后 B 还 FST 了，~~菜死了~~  
-> 赛后参考 [Tutorial](https://codeforces.com/blog/entry/73467)，把~~不会做~~没时间做的 E, F 补起来了  
+> 比赛的时候只做出来A, B, C, D，然后B还FST了，~~菜死了~~  
+> 赛后参考 [Tutorial](https://codeforces.com/blog/entry/73467)，把~~不会做~~没时间做的E, F补起来了  
 
-官方的 Tutorial 真是个好东西，~~以下纯属翻译~~其实自己也写了一部分
+官方的Tutorial真是个好东西，~~以下纯属翻译~~其实自己也写了一部分
 
 ## A
 
-没什么好说的，如果偶数就全输出 1，如果奇数就最高位输出 7，其它输出 1
+没什么好说的，如果偶数就全输出1，如果奇数就最高位输出7，其它输出1
 
 代码：
 
@@ -271,7 +271,7 @@ int main()
 由辗转相除法的正确性，即求 `φ(m')`  
 
 但是~~队友~~我比较菜，在比赛时没有注意到一些性质，于是大力容斥了  
-~~导致没时间去水 E 题~~
+~~导致没时间去水E题~~
 
 代码：
 
@@ -579,7 +579,7 @@ int main()
 
 ## 公共头
 
-> （这几天对公共头进行了小调整，以下是新的公共头，配合老代码使用可能出现小概率 CE 等情况，概不负责）
+> （这几天对公共头进行了小调整，以下是新的公共头，配合老代码使用可能出现小概率CE等情况，概不负责）
 
 ```cpp
 #pragma GCC optimize(2)

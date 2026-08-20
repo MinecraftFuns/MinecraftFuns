@@ -5,7 +5,7 @@ date: "2020-12-25"
 tags: ["Python", "Windows"]
 ---
 
-> 检查正在运行的 Python 解释器是否 **正在使用（占用）** 要更新的文件
+> 检查正在运行的Python解释器是否 **正在使用（占用）** 要更新的文件
 
 ![0.webp](https://bafkreicnacyi2kzjv5jzyj2islipt2l7hzedp5hnluhx7mvyarlhx62ks4.ipfs.dweb.link)
 
@@ -18,6 +18,6 @@ Consider using the `--user` option or check the permissions.
 
 直接根据提示，在命令后加上 `--user` 固然可行，但并没有解决根本问题。
 
-Google 了一下，发现可能和文件权限有关，`以管理员身份运行`命令行后仍然报错。
+Google了一下，发现可能和文件权限有关，`以管理员身份运行`命令行后仍然报错。
 
-突然发现有几个正在运行的 Python 脚本，终止脚本后 [cffi](https://pypi.org/project/cffi/) 可以正常安装。于是水篇文章，记录一下。
+突然发现有几个正在运行的Python脚本，终止脚本后 [cffi](https://pypi.org/project/cffi/) 可以正常安装。于是水篇文章，记录一下。

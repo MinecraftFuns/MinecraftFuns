@@ -17,25 +17,25 @@ std::mt19937 mtr(std::random_device{}());
 
 ### `std::random_device` 可能根本不是随机的
 
-旧版 MinGW 中的 GCC 将其实现为确定性的，参见 [`std::random_device` not working properly](https://sourceforge.net/p/mingw-w64/bugs/338/) :backup[https://archive.is/hIH5m]，这一问题已在 `MinGW GCC 9.2` 中修复。
+旧版MinGW中的GCC将其实现为确定性的，参见 [`std::random_device` not working properly](https://sourceforge.net/p/mingw-w64/bugs/338/) :backup[https://archive.is/hIH5m]，这一问题已在 `MinGW GCC 9.2` 中修复。
 
 ### `std::random_device` 的值域不够大
 
-`std::random_device` 的值域同 `unsigned int`，在我的环境中为 $[0,2^{32}-1]$，提供了 32 位的随机性。
+`std::random_device` 的值域同 `unsigned int`，在我的环境中为 $[0,2^{32}-1]$，提供了32位的随机性。
 
 然而，$2^{32}$ 并不是一个很大的数字。我们进行了一组[测试](https://gist.github.com/MinecraftFuns/9d05c1503dbf745d83d71995998f494e) :backup[https://archive.is/C05S1]，在 $1.75$ 秒内遍历了 $10^6$ 个数据，因此预计可以在 $2.09$ 小时内遍历完 $2^{32}$ 种情况。
 
-众所周知，只要知道种子，就可以预测整个随机序列。因此，对于需要高安全性的用例来说，32 位的种子远远不够。
+众所周知，只要知道种子，就可以预测整个随机序列。因此，对于需要高安全性的用例来说，32位的种子远远不够。
 
 > 需要高安全性的用例应当使用[密码学安全伪随机数生成器](https://zh.wikipedia.org/wiki/%E5%AF%86%E7%A0%81%E5%AD%A6%E5%AE%89%E5%85%A8%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E5%99%A8) :backup[https://archive.is/26P3p]。
 
 ### `std::seed_seq` 的实现不靠谱
 
-上面的代码中，我们只给 `std::mt19937` 提供了一个 32 位整数，但是 Mersenne Twister 的状态包含 624 个 32 位整数（参见[维基百科](https://zh.wikipedia.org/wiki/%E6%A2%85%E6%A3%AE%E6%97%8B%E8%BD%AC%E7%AE%97%E6%B3%95) :backup[https://archive.is/4EvcF]），因此标准库会使用 `std::seed_seq` 来扩充状态。
+上面的代码中，我们只给 `std::mt19937` 提供了一个32位整数，但是Mersenne Twister的状态包含624个32位整数（参见[维基百科](https://zh.wikipedia.org/wiki/%E6%A2%85%E6%A3%AE%E6%97%8B%E8%BD%AC%E7%AE%97%E6%B3%95) :backup[https://archive.is/4EvcF]），因此标准库会使用 `std::seed_seq` 来扩充状态。
 
 然而 `std::seed_seq` 的实现有问题。
 
-在使用 32 位整数进行播种时，包括 $7$ 和 $13$ 在内的大约 $\frac{2^{32}}e$ 个数永远不可能作为 `std::mt19937` 生成的第一个数。如果你运行如下代码，函数 `send_detailed_tracking_info_secretly` 永远不会被调用。
+在使用32位整数进行播种时，包括 $7$ 和 $13$ 在内的大约 $\frac{2^{32}}e$ 个数永远不可能作为 `std::mt19937` 生成的第一个数。如果你运行如下代码，函数 `send_detailed_tracking_info_secretly` 永远不会被调用。
 
 ```cpp
 std::mt19937 mtr(std::random_device{}());
@@ -47,7 +47,7 @@ if (mtr() == 7) /* lucky seven! you get to send in a report */
 
 ## 修复
 
-可以参考 Stack Overflow 上的[这个回答](https://stackoverflow.com/a/45069347) :backup[https://archive.is/XBQy9#45069347] 进行简单修复：
+可以参考Stack Overflow上的[这个回答](https://stackoverflow.com/a/45069347) :backup[https://archive.is/XBQy9#45069347] 进行简单修复：
 
 ```cpp
 using Generator = std::mt19937;
@@ -89,11 +89,11 @@ Generator mtr = ([]() -> Generator {
 
 ### 关于熵的来源
 
-在 Linux 上可以通过读取 `/dev/urandom` 获得良好的随机性，在 Windows 上则可以使用 [`BCryptGenRandom`](https://docs.microsoft.com/en-us/windows/win32/api/bcrypt/nf-bcrypt-bcryptgenrandom) :backup[https://archive.is/4GYJA]。
+在Linux上可以通过读取 `/dev/urandom` 获得良好的随机性，在Windows上则可以使用 [`BCryptGenRandom`](https://docs.microsoft.com/en-us/windows/win32/api/bcrypt/nf-bcrypt-bcryptgenrandom) :backup[https://archive.is/4GYJA]。
 
 ### 关于熵的大小
 
-为了初始化 `std::seed_seq`，我从 `/dev/urandom` 中读取了 2496B 的数据。
+为了初始化 `std::seed_seq`，我从 `/dev/urandom` 中读取了2496B的数据。
 
 ## 增强
 

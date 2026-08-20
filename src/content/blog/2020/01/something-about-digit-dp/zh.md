@@ -5,16 +5,16 @@ date: "2020-01-31"
 tags: ["Competitive Programming", "Dynamic Programming"]
 ---
 
-> 数位 DP 用于解决如下格式的问题：  
+> 数位DP用于解决如下格式的问题：  
 > *给定一个闭区间 $[L,R]$，让你求这个区间中满足 **某种条件** 的数的总数。*
 >
-> 数位 DP 是一个很朴素的想法，其实就是枚举每一位的情况，再加了一个公共部分的缓存。  
+> 数位DP是一个很朴素的想法，其实就是枚举每一位的情况，再加了一个公共部分的缓存。  
 > 对于**多组测试数据**的题目，两组测试数据之间**不用清缓存**（因为缓存针对的是普遍情况，而边界情况是暴力统计不缓存的，所以缓存可以共用）。
 >
-> 个人感觉，在数位 DP 的实现上 `记忆化 DFS` 比 `DP` 要好写一点。  
-> 数位 DP 的一个特点是 `dfs(x, y, z)` 在 `(x, y, z)` 这个三元组确定的情况下是可以确定的，所以可以缓存下来。但是在边界情况时缓存不具有普遍性，于是暴力统计。
+> 个人感觉，在数位DP的实现上 `记忆化 DFS` 比 `DP` 要好写一点。  
+> 数位DP的一个特点是 `dfs(x, y, z)` 在 `(x, y, z)` 这个三元组确定的情况下是可以确定的，所以可以缓存下来。但是在边界情况时缓存不具有普遍性，于是暴力统计。
 >
-> 数位 DP 干了一件这样的事情：暴力统计的枚举方式是 $\operatorname{for} i \in [l,r]$，没有公共部分，但是数位 DP 的统计方式是每一位确定过去，这使得它有一个优势，就是出现了大量的重复，可以进行优化。  
+> 数位DP干了一件这样的事情：暴力统计的枚举方式是 $\operatorname{for} i \in [l,r]$，没有公共部分，但是数位DP的统计方式是每一位确定过去，这使得它有一个优势，就是出现了大量的重复，可以进行优化。  
 
 ## 【LightOJ 1140】How Many Zeroes?
 
@@ -26,7 +26,7 @@ tags: ["Competitive Programming", "Dynamic Programming"]
 
 > [代码](https://gist.github.com/MinecraftFuns/1b9c14c48f3b97ef0569118ab4d5b8f0) :backup[https://archive.is/Q1cKT]
 
-## 【HDU 2089】不要 62
+## 【HDU 2089】不要62
 
 [题面](http://acm.hdu.edu.cn/showproblem.php?pid=2089) :backup[https://archive.is/3qZ07]
 
@@ -88,6 +88,6 @@ tags: ["Competitive Programming", "Dynamic Programming"]
 
 如果需要编译运行，可以前往 [Gist](https://gist.github.com/MinecraftFuns/9eb0c738620c9b0b805dddb5b3f2a03c) :backup[https://archive.is/yGvqo] 复制公共头
 
-如果编译器不支持 C++11，请将 `constexpr` 改为 `const`
+如果编译器不支持C++11，请将 `constexpr` 改为 `const`
 
 ![hero.webp](https://ragnarok.joefang.org/static/x7edpe48fsn0iu41d8hi0qbjn89r78bmf.webp)

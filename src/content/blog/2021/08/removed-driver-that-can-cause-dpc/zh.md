@@ -5,13 +5,13 @@ date: "2021-08-25"
 tags: ["Windows", "Life"]
 ---
 
-作为一名 Dell 用户，之前经常在任务管理器中注意到一个叫 `SmartByte Telemetry` 的进程。`SmartByte` 的作用是*平衡不同软件的网络带宽占用，防止在线播放内容时卡顿*，然而网络上大量的文章反应 `SmartByte` 不仅没有起到应有的作用，甚至降低了网速。
+作为一名Dell用户，之前经常在任务管理器中注意到一个叫 `SmartByte Telemetry` 的进程。`SmartByte` 的作用是*平衡不同软件的网络带宽占用，防止在线播放内容时卡顿*，然而网络上大量的文章反应 `SmartByte` 不仅没有起到应有的作用，甚至降低了网速。
 
 但是从我自身的使用经验来看，似乎 `SmartByte` 也没有影响到我的网络体验，放着就放着呗，万一什么时候派上用场了呢？
 
-直到最近，连续几天，打开 Chrome 地址栏，输入若干字符后直接蓝屏，报错 `DPC_WATCHDOG_VIOLATION`，感觉不太对劲。一开始以为是 Chrome 的问题，但是今天在 Chrome 未运行的情况下依然发生了蓝屏。
+直到最近，连续几天，打开Chrome地址栏，输入若干字符后直接蓝屏，报错 `DPC_WATCHDOG_VIOLATION`，感觉不太对劲。一开始以为是Chrome的问题，但是今天在Chrome未运行的情况下依然发生了蓝屏。
 
-这个问题已经严重干扰到我的体验了，所以开始折腾。网上的调试方法似乎都要分析 dump 出来的文件，很麻烦。直接打开 `Dell` 自带的 `SupportAssist`，查看`历史记录`，可以看到关于蓝屏错误的一些信息。
+这个问题已经严重干扰到我的体验了，所以开始折腾。网上的调试方法似乎都要分析dump出来的文件，很麻烦。直接打开 `Dell` 自带的 `SupportAssist`，查看`历史记录`，可以看到关于蓝屏错误的一些信息。
 
 ![1](https://ragnarok.joefang.org/static/x92d1tqs1ho57c5lu2ps6151eh0gms66a.webp)
 

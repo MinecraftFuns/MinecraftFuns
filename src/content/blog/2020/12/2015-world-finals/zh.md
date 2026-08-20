@@ -101,7 +101,7 @@ tags: ["ICPC", "Editorial"]
 
 这题只要爆搜 + 剪枝就行。
 
-首先预处理从每个位置往`上 / 下 / 左 / 右`跳一格会到哪里，然后大力 BFS。剪枝时可以设 $vis_{x,y}$ 表示经过位置 $(x,y)$ 时最多能匹配到文本串上的哪个位置，转移时如果发现匹配到的位置没有增加，就不用转移（正确性显然）。
+首先预处理从每个位置往`上 / 下 / 左 / 右`跳一格会到哪里，然后大力BFS。剪枝时可以设 $vis_{x,y}$ 表示经过位置 $(x,y)$ 时最多能匹配到文本串上的哪个位置，转移时如果发现匹配到的位置没有增加，就不用转移（正确性显然）。
 
 [代码](https://gist.github.com/MinecraftFuns/dd7ad9f8ed6a1d37eb44061a46d570d7)
 
@@ -155,7 +155,7 @@ tags: ["ICPC", "Editorial"]
 
 > 题解
 
-![屏幕截图 2020-11-19 151553.jpg](https://bafkreibxizaji54setl57rbbextfjappxg5kzu3xesoil4jl66vnlumedm.ipfs.dweb.link)
+![屏幕截图2020-11-19 151553.jpg](https://bafkreibxizaji54setl57rbbextfjappxg5kzu3xesoil4jl66vnlumedm.ipfs.dweb.link)
 
 平行四边形的面积等于外面矩形的面积减去四个小三角形的面积。
 

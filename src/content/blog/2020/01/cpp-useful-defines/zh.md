@@ -18,8 +18,8 @@ tags: ["C++", "Performance"]
 
 ## `__cplusplus`: C++ 的版本号
 
-> 原理: __cplusplus 定义了版本号，可以进行大小比较，如 `#if __cplusplus > 201403L`  
-> 用法: 搭配 `#if`，可以避免部分 ~~辣鸡~~ OJ ~~如 POJ~~ C++ 版本过低导致的 `CE`，以及 C++ 17 弃用 `register` 关键字导致的 `WARNING`  
+> 原理: __cplusplus定义了版本号，可以进行大小比较，如 `#if __cplusplus > 201403L`  
+> 用法: 搭配 `#if`，可以避免部分 ~~辣鸡~~ OJ ~~如POJ~~ C++ 版本过低导致的 `CE`，以及C++ 17弃用 `register` 关键字导致的 `WARNING`  
 
 * 避免版本过高爆 `WARNING`
 

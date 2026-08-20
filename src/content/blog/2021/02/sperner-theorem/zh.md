@@ -77,4 +77,4 @@ $$\sum_{i=1}^k \frac 1 {\binom n{|A_i|}} \le 1$$
 
 ## 参考
 
-[Sperner 定理及其证明 | www.cnblogs.com](https://www.cnblogs.com/suncongbo/p/10321099.html) :backup[https://archive.is/YiT9t]
+[Sperner定理及其证明 | www.cnblogs.com](https://www.cnblogs.com/suncongbo/p/10321099.html) :backup[https://archive.is/YiT9t]
