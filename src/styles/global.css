@@ -387,6 +387,44 @@
   body {
     text-rendering: optimizeLegibility;
     font-synthesis-weight: none;
+
+    /*
+     * Inter-script spacing, done by the engine rather than by the author.
+     *
+     * Chinese prose that quotes an English term wants a hairline gap around
+     * it, and for twenty years the only way to get one was to type a space.
+     * That is a word space, roughly 0.25em; the typographically correct gap
+     * is 0.125ic, about half as wide. `text-autospace` lets the engine insert
+     * the right one at the right boundaries and leave the source text alone.
+     *
+     * `normal` is the property's initial value, so this declaration looks
+     * redundant, and in Blink and Gecko it is. It is here for WebKit, which
+     * shipped the property in Safari 18.4 with an initial value of
+     * `no-autospace` to preserve how the pre-existing web renders. Declaring
+     * the spec's value explicitly is the only thing that makes the three
+     * engines agree.
+     *
+     * Two things follow that the declaration does not say on its own. The
+     * engine inserts nothing where a space character already sits, so this is
+     * safe over unmigrated prose: those boundaries keep their wide gap rather
+     * than gaining a second one. And engines without the property show no gap
+     * at all once the manual spaces are gone, which is the cost the archive
+     * migration pays and the reason it is a separate, deliberate step.
+     */
+    text-autospace: normal;
+  }
+
+  /*
+   * Code is quoted, not typeset. A gap the engine invents between a CJK
+   * comment and the identifier beside it is indistinguishable from a space
+   * that is really in the file, and a reader copying the line out has no way
+   * to tell which they saw. Verbatim wins over pretty here.
+   */
+  code,
+  kbd,
+  samp,
+  pre {
+    text-autospace: no-autospace;
   }
 
   h1,

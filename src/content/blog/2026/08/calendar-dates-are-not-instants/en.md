@@ -18,9 +18,8 @@ new Date(post.date).toLocaleDateString("en-CA", { /* ... */ });
 
 ## Two types spelled the same way
 
-`"2026-07-14"` names a box on a wall calendar. It has no hour, and it does not
-pick out a moment: the fourteenth begins at different instants in Auckland and
-in Toronto.
+`"2026-07-14"` names a box on a wall calendar, not a moment: the fourteenth
+begins at different instants in Auckland and in Toronto.
 
 `new Date("2026-07-14")` throws that distinction away. The ECMAScript spec
 parses a date-only ISO string as **UTC midnight**, which is a specific point on
@@ -29,16 +28,12 @@ and with no `timeZone` option it uses whichever calendar the host happens to be
 on. Toronto runs four hours behind UTC in July, so UTC midnight is still eight
 in the evening on the thirteenth.
 
-The date went out through a type with no room for it, and came back a day
-short.
-
 ## Why CI never caught it
 
 The build was green. Types checked, tests passed, the site deployed. The bug
 only appeared where the clock disagreed with UTC, which meant my laptop and not
-CI, and that is close to the worst possible split: the natural response to a
-failure that will not reproduce on the build server is to assume you imagined
-it.
+CI, and the natural response to a failure that will not reproduce on the build
+server is to assume you imagined it.
 
 Nothing in the pipeline had an opinion about the *output* at all. That bothered
 me more than the wrong day did.
@@ -58,8 +53,7 @@ export const parseIsoDate = (raw: string): Parsed<IsoDate> => { /* ... */ };
 ```
 
 The brand is erased at runtime, so an `IsoDate` is still a plain string. The
-entire point is that you cannot obtain one without going through the parser,
-which means anything holding that type has already been checked.
+entire point is that you cannot obtain one without going through the parser.
 
 Checking the shape alone would not be enough. `2026-02-31` matches
 `YYYY-MM-DD` perfectly well and is not a day. A round trip through `Date.UTC`
@@ -75,6 +69,5 @@ CI.
 
 When a value passes through a second type on its way to being displayed, that
 conversion takes a parameter whether or not you supply one. Leave it out and
-`toLocaleDateString` picks a time zone for you. So does `toString`, and every
-other locale-aware formatter in the standard library, and none of them know
-what you meant.
+`toLocaleDateString` picks the host's zone, as do `toString` and every
+`getDate`-style accessor on `Date`.

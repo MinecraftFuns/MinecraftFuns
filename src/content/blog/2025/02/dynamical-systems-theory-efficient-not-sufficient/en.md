@@ -6,8 +6,8 @@ tags: ["Essays", "Cognitive Science", "Philosophy of Mind"]
 ---
 
 > Written by hand in a COG250Y1 (Introduction to Cognitive Science) term test on
-> February 3, 2025. Edited here for grammar and clarity; the argument is as it
-> was written, sources and all, which is to say none.
+> February 3, 2025. Edited here for grammar and clarity; the argument is
+> unchanged.
 
 **Thesis:** while Dynamical Systems Theory provides an efficient way to achieve
 intelligent behavior, it is not powerful enough to explain human-level

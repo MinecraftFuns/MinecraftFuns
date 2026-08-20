@@ -12,7 +12,7 @@ whole appeal, and it is also the problem: past a handful of devices, "anything
 can reach anything" stopped being a convenience and became a thing I could no
 longer hold in my head.
 
-So I sat down and wrote a policy file, using Tailscale's [Access Control
+So I wrote a policy file, using Tailscale's [Access Control
 Lists](https://tailscale.com/kb/1018/acls) (ACLs) and
 [tags](https://tailscale.com/kb/1068/tags).
 
@@ -29,9 +29,8 @@ a node with somebody else. What I wanted instead:
   should not need a new rule each time. It needs to be a `container`.
 
 Tags handle that last part. Each device is labeled by what it is (`server`,
-`container`, `exit-node`, `rdp-client`) and the rules talk about labels rather
-than machines. The useful side effect is that reading the policy tells you what
-a device may do without knowing anything about the device.
+`container`, `exit-node`, `rdp-client`) and the rules talk about labels, so the
+policy tells you what a device may do without your knowing which device it is.
 
 One thing worth knowing before you start: once a device is tagged, it belongs
 to the tag rather than to your user account, and its key stops expiring. That
@@ -173,8 +172,7 @@ untagged personal machine.
 ```
 
 - **Admins** reach everything. This is a one-person tailnet and `group:root` is
-  me, so the deny-by-default property is really a promise made to the *tagged*
-  devices, not to the operator. More on that at the end.
+  me, so deny-by-default is a promise made to the tagged devices, not to me.
 - **RDP clients** reach RDP servers on 3389 and nothing else.
 - **One host rule** names `arklab.perch-map.ts.net` directly rather than a tag,
   for my Windows laptop.
@@ -193,7 +191,7 @@ editor's JSON linter thinks about it.
 
 ## Android debugging, split across three tags
 
-This is the rule pair I like most, and it took the longest to arrive at.
+This is the rule pair I like most.
 
 ```json
 {
@@ -263,11 +261,9 @@ The second grant is the one worth stealing if you run headless machines.
 `canEdit` scopes it: SSH, advertised subnets, exit node status. Enabling an
 exit node on a Raspberry Pi behind a television is otherwise an errand.
 
-`tag:funnel-server` deserves its own mention because it is the only attribute
-in the file that points *outward*. [Funnel](https://tailscale.com/kb/1223/funnel)
-exposes a node to the public internet, which is the exact opposite of what
-everything else here is for, so it is gated behind a tag that precisely one
-machine holds.
+`tag:funnel-server` is the only attribute in the file that points *outward*.
+[Funnel](https://tailscale.com/kb/1223/funnel) exposes a node to the public
+internet, so it is gated behind a tag that precisely one machine holds.
 
 ## SSH without keys
 
