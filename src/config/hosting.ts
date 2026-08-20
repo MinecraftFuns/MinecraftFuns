@@ -20,13 +20,31 @@ export const hosting = {
        *
        * `x-declaration` names the signed statement of ownership. The absolute
        * canonical origin is deliberate even on the mirror, since the claim is
-       * about joefang.org specifically. It is the one origin written literally
-       * here, and being a claim is what keeps it from rotting.
+       * about joefang.org specifically, and being a claim is what keeps it
+       * from rotting.
+       *
+       * `link` carries the resource hints, as one header holding a
+       * comma-separated list: the decoder refuses a rule that sets the same
+       * header twice, because only the last would survive.
+       *
+       * The preconnect is to the origin serving the archive's images. A hint
+       * in the document `<head>` cannot arrive before the document does;
+       * this one is read while the HTML is still in flight, so the handshake
+       * overlaps the download rather than following it. The origin is
+       * written literally because this file is a leaf that imports nothing,
+       * and it is the only place in the source that names it: the image URLs
+       * themselves live in the Markdown, which is where a specific file is
+       * named.
+       *
+       * One origin, and no more: the images not yet mirrored are addressed
+       * through a subdomain gateway, `<cid>.ipfs.dweb.link`, which is a
+       * separate origin per image. Preconnecting those would open a
+       * connection per image to save nothing.
        */
       path: "/*",
       set: {
         "x-declaration": "<https://joefang.org/docs/declaration/>",
-        link: '</favicon.svg>; rel="prefetch"; as="image"',
+        link: '</favicon.svg>; rel="prefetch"; as="image", <https://ragnarok.joefang.org>; rel="preconnect"',
       },
     },
     {
