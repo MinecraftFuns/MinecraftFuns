@@ -188,9 +188,8 @@ untagged personal machine.
 Nextcloud and Seafile get one rule each in the same shape, though theirs are
 `tag:*-server:*`: scoped by role, not by port.
 
-If the trailing commas above look like a mistake, they are not. Tailscale's
-policy file is HuJSON, so comments and trailing commas are both legal, whatever
-your editor's JSON linter thinks about it.
+The trailing commas are legal: the policy file is HuJSON, whatever your
+editor's JSON linter thinks about it.
 
 ## Android debugging, split across three tags
 
@@ -210,33 +209,23 @@ This is the rule pair I like most, and it took the longest to arrive at.
 },
 ```
 
-`adb` is already a three-part system and most people never notice, because all
-three parts normally live on one machine: the client you type commands into,
-the server that multiplexes them, and the daemon on the phone. Splitting them
-across a network makes the structure visible, and the tags fall out of it
-directly.
+`adb` is three parts that normally share a machine: client, server, and the
+daemon on the phone. Across a network they want three tags.
 
-An `adb-client` reaches an `adb-server` on 5037, which is the only port an adb
-client ever needs, and the client can be anywhere. The `adb-server` reaches the
-`adb-daemon` phones on two ranges: 5500 to 5600 covers classic `adb tcpip`
-sessions, and 30000 to 50000 covers Android 11's wireless debugging, which
-picks a fresh high port every time it starts and does not ask your opinion
-about which one.
+Clients reach the server on 5037 and need nothing else. The server reaches the
+phones on two ranges: 5500 to 5600 for classic `adb tcpip`, and 30000 to 50000
+for Android 11 wireless debugging, which picks a fresh high port on every start
+and does not ask your opinion about which one.
 
-What makes it worth the setup is that a phone becomes debuggable from any
-machine on the tailnet without being reachable *from* any of them: the phones
-accept connections only from the one node holding `tag:adb-server`, and every
-laptop just points `ADB_SERVER_SOCKET` at it.
+The payoff is that a phone is debuggable from any machine on the tailnet while
+being reachable from none of them. The phones accept only the node holding
+`tag:adb-server`; every laptop points `ADB_SERVER_SOCKET` at it.
 
 ## Taildrive keeps permission in two places
 
 [Taildrive](https://tailscale.com/kb/1369/taildrive) shares directories between
-nodes, and it is the clearest example on this tailnet of Tailscale's newer
-permission model. Being allowed to use a feature and being allowed to do
-something specific with it are two different statements, in two different
-blocks.
-
-`nodeAttrs` turns the capability on for a node at all:
+nodes, and it splits permission across two blocks. `nodeAttrs` turns the
+capability on for a node:
 
 ```json
 "nodeAttrs": [
@@ -269,12 +258,10 @@ blocks.
 ]
 ```
 
-The second grant is the one I would recommend to anyone running headless
-machines. `tailscale.com/cap/webui` lets me open a node's own web interface and
-change its Tailscale settings remotely, and `canEdit` says exactly which
-settings: SSH, advertised subnets, exit node status. Enabling an exit node on a
-Raspberry Pi that lives behind a television is otherwise a genuinely annoying
-errand.
+The second grant is the one worth stealing if you run headless machines.
+`tailscale.com/cap/webui` opens a node's own web interface remotely, and
+`canEdit` scopes it: SSH, advertised subnets, exit node status. Enabling an
+exit node on a Raspberry Pi behind a television is otherwise an errand.
 
 `tag:funnel-server` deserves its own mention because it is the only attribute
 in the file that points *outward*. [Funnel](https://tailscale.com/kb/1223/funnel)
