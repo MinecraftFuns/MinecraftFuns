@@ -13,10 +13,12 @@ tags: ["Essays", "Cognitive Science", "Philosophy of Mind"]
 intelligent behavior, it is not powerful enough to explain human-level
 intelligence.
 
-Dynamical Systems Theory (DST), as exemplified by the Watt governor, provides an
-intriguing way to explain cognition: one that is energy-efficient, simple in its
-constructs, and highly complex in its behavior compared to the simplicity of its
-internal structure. Set against the GOFAI model of cognition, which relies
+Dynamical Systems Theory (DST), as exemplified by
+[the Watt governor](https://doi.org/10.2307/2941061), provides an intriguing way
+to explain cognition: one that is energy-efficient, simple in its constructs,
+and highly complex in its behavior compared to the simplicity of its internal
+structure. Set against the
+[GOFAI model of cognition](https://doi.org/10.1145/360018.360022), which relies
 heavily on internal representation of knowledge, DST achieves an impressive
 range of capabilities with near-to-zero internal representation, and so offers a
 route to intelligence that is cheap in storage and cheap in computation alike.
@@ -47,12 +49,13 @@ animal." This simple argument exemplifies the use of logic in language. To
 understand it correctly, one must understand the internal logic relating the
 three components, which relies on concepts like "human", "animal", and
 "Socrates", and on logical operators like "every" and "is". Given its lack of
-internal representation, it is impossible for DST to process abstract concepts
-and logic, since these necessitate a memory that can be operated on while an
-arbitrarily given logical expression is being processed. Yet logic evidently
-exists in language, and humans use it effectively in our expressions. DST's lack
-of logic processing therefore challenges its candidacy as a plausible
-explanation of human-level intelligence.
+internal representation, it is impossible for DST to process
+[abstract concepts and logic](https://doi.org/10.1016/0010-0277(88)90031-5),
+since these necessitate a memory that can be operated on while an arbitrarily
+given logical expression is being processed. Yet logic evidently exists in
+language, and humans use it effectively in our expressions. DST's lack of logic
+processing therefore challenges its candidacy as a plausible explanation of
+human-level intelligence.
 
 ## Thinking about the future
 
@@ -69,13 +72,16 @@ makes it incapable of "thinking about the future".
 While DST holds a significant advantage over earlier computational models
 through its low reliance on representation, its energy efficiency, and its
 speed, it lacks the components necessary for human-level information processing.
-It can still be useful, though, as part of a subsumption architecture for human
+It can still be useful, though, as part of a
+[subsumption architecture](https://doi.org/10.1109/JRA.1986.1087032) for human
 cognition. It cannot account for the higher-order cognitive functions of the
-mind, but it can offer a plausible account of the motion systems, given that we
-do not "compute" our walking steps or our balance. Those lower-level functions
-are integral to the whole functionality of cognition, as evidenced by the
-extended mind theory, and DST can work with the existing neural network approach
-to help us better understand cognition.
+mind, but it can offer a plausible account of the motion systems, given that
+[we do not "compute" our walking steps or our balance](https://doi.org/10.1016/0004-3702(91)90053-M).
+Those lower-level functions are integral to the whole functionality of
+cognition, as evidenced by the
+[extended mind theory](https://doi.org/10.1093/analys/58.1.7), and DST can work
+with the existing neural network approach to help us better understand
+cognition.
 
 ## Conclusion
 
