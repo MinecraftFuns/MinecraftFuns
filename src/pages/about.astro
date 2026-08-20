@@ -2,8 +2,16 @@
 import EntryList, { type Entry } from "../components/EntryList.astro";
 import PageIntro from "../components/PageIntro.astro";
 import Section from "../components/Section.astro";
-import { education } from "../config/about.ts";
+import { site } from "../config/site.ts";
+import { standing } from "../config/about.ts";
 import { pgpHref, profiles, siteFingerprint } from "../lib/contact.ts";
+import {
+  aboutDescription,
+  credentialClause,
+  educationEntries as education,
+  minorClause,
+  standingPhrase,
+} from "../lib/identity.ts";
 import { routeUrl } from "../lib/url.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
@@ -46,17 +54,19 @@ const contactEntries: readonly Entry[] = [
 ];
 ---
 
-<BaseLayout
-  title="About"
-  description="Joe Fang. Computer Science and Cognitive Science at the University of Toronto."
->
-  <PageIntro kind="page" eyebrow="About" title="Joe Fang">
+<BaseLayout title="About" description={aboutDescription}>
+  <PageIntro kind="page" eyebrow="About" title={site.name}>
     <div class="prose">
+      {
+        /* The standing facts are interpolated, not written: this sentence is
+          one of the three surfaces that once disagreed on the year. */
+      }
       <p>
-        I am a fourth-year undergraduate at the University of Toronto, taking a double
-        major in Computer Science and Cognitive Science alongside a minor in Statistics.
-        The combination is deliberate: I am interested in how systems represent and
-        process information, whether the system happens to be a compiler or a mind.
+        I am a {standingPhrase} undergraduate at the {standing.institution}, taking a {
+          credentialClause
+        }{minorClause !== undefined && <> alongside a {minorClause}</>}. The combination
+        is deliberate: I am interested in how systems represent and process information,
+        whether the system happens to be a compiler or a mind.
       </p>
       <p>
         This site holds my <a href={routeUrl("/projects")}>projects</a> and a <a

@@ -15,6 +15,12 @@
  *
  * Vendored skill definitions are excluded, being instructions this project
  * follows rather than prose it authors.
+ *
+ * Chinese renditions (`zh.md` in the blog archive) are excluded too, for the
+ * opposite of an exemption: the ban exists because the dash dodges a
+ * punctuation decision English prose should make, and in Chinese the doubled
+ * form of the very character, the 破折号, *is* the decided punctuation. The
+ * gate polices this project's English; it has no opinion to offer on Chinese.
  */
 
 import { readdir, readFile } from "node:fs/promises";
@@ -48,6 +54,9 @@ export const emDashes = (path: string, source: string): readonly EmDash[] =>
 // Effect boundary
 // ---------------------------------------------------------------------------
 
+/** A blog rendition written in Chinese; see the header for why it is exempt. */
+const CHINESE_RENDITION = /[\\/]zh\.md$/;
+
 const sourcesUnder = async (dir: string): Promise<readonly string[]> => {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true });
   return entries
@@ -55,7 +64,8 @@ const sourcesUnder = async (dir: string): Promise<readonly string[]> => {
       (entry) =>
         entry.isFile() && EXTENSIONS.some((extension) => entry.name.endsWith(extension)),
     )
-    .map((entry) => resolve(entry.parentPath, entry.name));
+    .map((entry) => resolve(entry.parentPath, entry.name))
+    .filter((path) => !CHINESE_RENDITION.test(path));
 };
 
 const main = async () => {

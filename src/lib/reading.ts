@@ -11,6 +11,25 @@
 const WORDS_PER_MINUTE = 200;
 
 /**
+ * Characters per minute for Han text, which has no word boundaries to count:
+ * a Chinese paragraph is one unbroken run, so a word count rates a
+ * three-thousand-character post at a minute. Characters are the unit that
+ * reading-speed studies measure Chinese in; 300 a minute sits at the careful
+ * end of their range, matching the 200 above for technical prose.
+ */
+const HAN_PER_MINUTE = 300;
+
+const HAN = /\p{Script=Han}/gu;
+
+/**
+ * A run of non-whitespace containing at least one letter or digit. Bare
+ * punctuation is excluded deliberately: with Han characters lifted out, a
+ * Chinese sentence leaves its 。and ，behind, and counting those as words
+ * would let punctuation density masquerade as prose.
+ */
+const WORD = /\S*[\p{L}\p{N}]\S*/gu;
+
+/**
  * Total: every string maps to a positive integer.
  *
  * Markdown syntax is stripped before counting so that fences, link targets,
@@ -34,11 +53,13 @@ export const readingMinutes = (markdown: string): number => {
     .replace(/^\s{0,3}(?:#{1,6}|>|[-*+]|\d+\.)\s+/gm, " ") // markers
     .replace(/[*_~]/g, " ");
 
-  /* Count the runs of non-whitespace directly. Splitting on whitespace and
-     then discarding the empties filters away an artefact of the split rather
-     than anything about the prose. */
-  const words = prose.match(/\S+/g)?.length ?? 0;
+  /* Two counts on two clocks: Han characters at theirs, and what remains at
+     the word rate. Lifting the Han text out first keeps a run like "用TypeScript写"
+     from being one "word": its Latin core is counted as a word and its three
+     Han characters as characters. */
+  const han = prose.match(HAN)?.length ?? 0;
+  const words = prose.replace(HAN, " ").match(WORD)?.length ?? 0;
 
   // Never zero: "0 min" reads as broken rather than as short.
-  return Math.max(1, Math.round(words / WORDS_PER_MINUTE));
+  return Math.max(1, Math.round(words / WORDS_PER_MINUTE + han / HAN_PER_MINUTE));
 };

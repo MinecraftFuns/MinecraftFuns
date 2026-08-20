@@ -6,6 +6,7 @@ import { z } from "astro/zod";
 
 import { explain, type Parsed } from "./prelude/adt.ts";
 import { parseDocCategory, parsePostTag } from "./lib/labels.ts";
+import { TRANSLATORS } from "./lib/lang.ts";
 import { isoDate, parseIsoDate } from "./lib/time.ts";
 
 /**
@@ -36,11 +37,17 @@ const decoded = <T extends string>(parse: (raw: string) => Parsed<T>) =>
  * downstream receives a value already known to name a real calendar day in the
  * project's zone. Nothing past this point re-checks it.
  *
- * Posts are filed at `YYYY/MM/slug.md`, which restates the first two
- * components of that date. The schema cannot see the file path, so the two are
- * reconciled a step later in `lib/archive.ts`; see the note there on why the
- * glob stays permissive and rejects loudly instead of matching narrowly and
- * dropping a misfiled post in silence.
+ * An article is the folder `YYYY/MM/slug`, holding one file per language
+ * rendition: `en.md`, `zh.md`. The folder restates the first two components
+ * of the date, and the filename states the language; the schema cannot see
+ * the file path, so both are reconciled a step later, in `lib/archive.ts`
+ * and `lib/article.ts`. See the note there on why the glob stays permissive
+ * and rejects loudly instead of matching narrowly and dropping a misfiled
+ * post in silence.
+ *
+ * `title` and `description` are per-rendition, being written *in* the
+ * language. `date` and `tags` are article-level facts each rendition
+ * restates; `lib/article.ts` fails the build when two renditions disagree.
  */
 const blog = defineCollection({
   loader: glob({ base: "./src/content/blog", pattern: "**/*.md" }),
@@ -49,6 +56,14 @@ const blog = defineCollection({
     description: z.string().min(1),
     /** Drafts are written but never built. Default keeps frontmatter terse. */
     draft: z.boolean().default(false),
+    /*
+     * Present on a rendition that is a translation, naming who produced it;
+     * absent on an original. Absence-as-original keeps every existing file
+     * valid and gives `translation: false` no spelling. What no per-file
+     * check can see, an article whose every rendition claims to be a
+     * translation, is `lib/article.ts`'s to refuse.
+     */
+    translation: z.enum(TRANSLATORS).optional(),
     /*
      * The blog's own taxonomy, decoded rather than merely typed. A tag becomes
      * a `PostTag`, which is `Sluggable`, so `taxonomy` needs no per-label check

@@ -5,6 +5,7 @@ import PageIntro from "../components/PageIntro.astro";
 import PostRow from "../components/PostRow.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import Section from "../components/Section.astro";
+import { standing } from "../config/about.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { postSummaries } from "../lib/posts.ts";
 import { featuredProjects } from "../lib/projects.ts";
@@ -21,7 +22,7 @@ const selected = featuredProjects();
     kind="hero"
     eyebrow="Toronto"
     title="A compiler and a mind are both machines for turning symbols into meaning."
-    lede="I study both at the University of Toronto, and I write here about where the analogy leaks: types, time zones, private networks, and the small bugs that turn out to have been category errors all along."
+    lede={`I study both at the ${standing.institution}, and I write here about where the analogy leaks: types, time zones, private networks, and the small bugs that turn out to have been category errors all along.`}
   >
     <div class="flex flex-wrap gap-xs">
       <Button href={routeUrl("/blog")} tone="primary" size="control">Read the blog</Button

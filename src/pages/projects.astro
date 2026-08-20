@@ -2,6 +2,7 @@
 import PageIntro from "../components/PageIntro.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import Section from "../components/Section.astro";
+import { site } from "../config/site.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { projectSections } from "../lib/projects.ts";
 
@@ -10,7 +11,7 @@ const sections = projectSections();
 
 <BaseLayout
   title="Projects"
-  description="Side projects, research artifacts, and open-source contributions by Joe Fang."
+  description={`Side projects, research artifacts, and open-source contributions by ${site.name}.`}
 >
   <PageIntro
     kind="page"

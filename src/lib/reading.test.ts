@@ -47,4 +47,32 @@ describe("readingMinutes", () => {
       assert.doesNotThrow(() => readingMinutes(markdown));
     }
   });
+
+  it("counts Han text by character, not by whitespace run", () => {
+    // A Chinese paragraph has no spaces: as "words" this is one, and an
+    // essay of it would read as a one-minute post.
+    const han = (count: number) => "字".repeat(count);
+    assert.equal(readingMinutes(han(300)), 1);
+    assert.equal(readingMinutes(han(900)), 3);
+  });
+
+  it("reads mixed prose on both clocks at once", () => {
+    // 100 English words and 150 Han characters: half a minute each.
+    assert.equal(readingMinutes(`${words(100)} ${"字".repeat(150)}`), 1);
+    assert.equal(readingMinutes(`${words(300)} ${"字".repeat(450)}`), 3);
+  });
+
+  it("does not let Chinese punctuation masquerade as words", () => {
+    // With the Han characters lifted out, the 。remain; were each counted as
+    // a word, 300 of them would add a minute and a half.
+    assert.equal(readingMinutes("字。".repeat(300)), 1);
+  });
+
+  it("splits a run that mixes scripts between the two clocks", () => {
+    // "用TypeScript写" is one whitespace run: one word plus two Han
+    // characters. Read as words alone, 300 runs would be a 2-minute post;
+    // the 600 Han characters make it four.
+    const mixed = Array.from({ length: 300 }, () => "用TypeScript写").join(" ");
+    assert.equal(readingMinutes(mixed), 4);
+  });
 });

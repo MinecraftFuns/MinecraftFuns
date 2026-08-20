@@ -1,6 +1,7 @@
 import { site } from "../config/site.ts";
 import { invalid, ok, orThrow, type Parsed } from "../prelude/adt.ts";
 import { memoiseBy } from "../prelude/memo.ts";
+import { dateLocaleOf, SITE_LANG } from "./lang.ts";
 
 /**
  * Time: zones, calendar dates, and clock reads.
@@ -56,8 +57,14 @@ export const timeZone = (raw: string): TimeZone =>
  */
 export const SITE_TIME_ZONE: TimeZone = timeZone(site.timeZone);
 
-/** Formatting locale. Separate from the zone: they vary independently. */
-const SITE_LOCALE: string = site.dateLocale;
+/**
+ * Formatting locale of the site's own language: what chrome-context dates,
+ * index rows and the footer, are rendered under. Separate from the zone,
+ * which they vary independently of, and read from `config/languages.ts`
+ * rather than declared again here. A page in another language passes that
+ * language's locale to `formatDateIn` explicitly.
+ */
+const SITE_LOCALE: string = dateLocaleOf(SITE_LANG);
 
 // ---------------------------------------------------------------------------
 // Calendar dates

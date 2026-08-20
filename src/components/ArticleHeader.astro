@@ -1,6 +1,8 @@
 ---
+import { dateLocaleOf, type Lang } from "../lib/lang.ts";
 import type { PostTag } from "../lib/posts.ts";
-import { formatIsoDate, type IsoDate } from "../lib/time.ts";
+import { formatDateIn, SITE_TIME_ZONE, type IsoDate } from "../lib/time.ts";
+import type { Href } from "../lib/url.ts";
 import { INTRO } from "./intro.ts";
 import PostTags from "./PostTags.astro";
 
@@ -25,20 +27,71 @@ type Props = {
   readonly title: string;
   readonly description: string;
   readonly date: IsoDate;
+  /**
+   * The language the body below this header is written in. The date is
+   * formatted under this language's locale, so a Chinese article dates
+   * itself 2020年1月25日: the meta line sits inside the article, not the
+   * chrome. The zone stays the site's; the day named must not shift with
+   * the reader's language.
+   */
+  readonly lang: Lang;
   readonly readingMinutes: number;
   readonly tags: readonly PostTag[];
+  /**
+   * The same article in its other languages, preference-ordered, empty when
+   * it has none. Each is rendered in the meta line in the *target*
+   * language's own name: a reader of Chinese scans for 中文, not for
+   * "Chinese". `hrefLang` says where the link leads and `lang`-tags the
+   * label itself, so screen readers switch voices for the words that need
+   * it. `undefined` admitted explicitly: the page forwards its own optional
+   * under `exactOptionalPropertyTypes`.
+   */
+  readonly alternates?:
+    | readonly {
+        readonly href: Href;
+        readonly hrefLang: string;
+        readonly label: string;
+      }[]
+    | undefined;
 };
 
-const { title, description, date, readingMinutes, tags } = Astro.props;
+const {
+  title,
+  description,
+  date,
+  lang,
+  readingMinutes,
+  tags,
+  alternates = [],
+} = Astro.props;
 
 const { spacing, title: titleClass } = INTRO.page;
+
+/* One validated value, two renderings: `datetime` carries the machine form
+   and the text the reader's, in the article's own language. */
+const displayDate = formatDateIn(date, SITE_TIME_ZONE, dateLocaleOf(lang));
 ---
 
 <header class:list={["border-hairline border-b", spacing]}>
   <p class="meta flex items-center gap-2xs">
-    <time datetime={date}>{formatIsoDate(date)}</time>
+    <time datetime={date}>{displayDate}</time>
     <span aria-hidden="true">·</span>
     <span>{readingMinutes} min read</span>
+    {
+      alternates.map((alternate) => (
+        <>
+          <span aria-hidden="true">·</span>
+          <a
+            class="link-muted"
+            href={alternate.href}
+            hreflang={alternate.hrefLang}
+            lang={alternate.hrefLang}
+          >
+            {alternate.label}
+          </a>
+        </>
+      ))
+    }
   </p>
   <h1 class:list={["text-ink mt-xs", titleClass]}>{title}</h1>
   <p class="text-ink-muted mt-sm max-w-measure text-body-lg">{description}</p>

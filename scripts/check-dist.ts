@@ -26,6 +26,7 @@ import { readFile, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { deployments } from "../src/config/deployments.ts";
+import { languages } from "../src/config/languages.ts";
 import { captures } from "./lib/captures.ts";
 import { mapConcurrent } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
@@ -558,19 +559,52 @@ export const linkIntegrity = (artifact: Artifact): readonly Violation[] => {
 };
 
 /**
- * Exact equality, against the *canonical* deployment rather than the one being
+ * A route whose final segment is a declared language code is a
+ * language-addressed serving of its parent route: `/blog/x/zh/` holds the
+ * Chinese rendition of `/blog/x/`. Its canonical may legitimately be itself
+ * (a sibling rendition owns the bare URL) or the parent (it is the article's
+ * only rendition, served at both addresses); which of the two depends on the
+ * article's other files, which an artifact check cannot see. Both name this
+ * page's own content on the canonical origin, and the defect this check
+ * exists for, a mirror canonicalising to its own origin, is caught either
+ * way. The codes are facts and come from config; the reasoning is
+ * deliberately re-derived here, per the note at the top of this module.
+ */
+const LANG_SUFFIX = new RegExp(`/(?:${languages.map(({ code }) => code).join("|")})/$`);
+
+/** The canonical URLs a built page may advertise, most specific first. */
+export const acceptableCanonicals = (
+  path: string,
+  canonicalOrigin: string,
+  canonicalBase: string,
+): readonly string[] => {
+  const expected = expectedCanonical(path, canonicalOrigin, canonicalBase);
+  if (expected === undefined) return [];
+
+  const parent = expected.replace(LANG_SUFFIX, "/");
+  return parent === expected ? [expected] : [expected, parent];
+};
+
+/**
+ * Exact equality against the *canonical* deployment rather than the one being
  * built: both artifacts must advertise the same URL for the same page, and a
- * mirror that canonicalises to itself is the defect this catches.
+ * mirror that canonicalises to itself is the defect this catches. A
+ * language-suffixed page has two acceptable answers; see `LANG_SUFFIX`.
  */
 export const canonicalLinks = ({ html, canonical }: Artifact): readonly Violation[] =>
   html.flatMap(({ path, text }) => {
     const declared = CANONICAL.exec(text);
-    const expected = expectedCanonical(path, canonical.origin, canonical.base);
+    const accepted = acceptableCanonicals(path, canonical.origin, canonical.base);
 
     if (declared === null) return [violation("canonical", `${path}: no canonical link`)];
-    return declared[1] === expected
+    return declared[1] !== undefined && accepted.includes(declared[1])
       ? []
-      : [violation("canonical", `${path}: ${declared[1]} should be ${expected}`)];
+      : [
+          violation(
+            "canonical",
+            `${path}: ${declared[1]} should be ${accepted.join(" or ")}`,
+          ),
+        ];
   });
 
 export const hostDirectives = (artifact: Artifact): readonly Violation[] =>

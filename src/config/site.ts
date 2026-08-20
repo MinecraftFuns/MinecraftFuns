@@ -9,16 +9,15 @@ import type { NavItem, RootedPath, SiteConfig } from "../schema.ts";
  */
 export const site = {
   name: "Joe Fang",
-  handle: "MinecraftFuns",
-  /* Origins are not here. Where the site is published, and which copy is
-     authoritative, is `config/deployments.ts`: one declaration, so a mirror
-     cannot be added without the canonical link, the indexing policy, and the
-     build matrix all following from it. */
-  description:
-    "Computer Science and Cognitive Science at the University of Toronto. Projects, writing, and CV.",
-  locale: "en",
+  /* Most of the identity is elsewhere, each fact once: what is studied and
+     where is `config/about.ts`; the GitHub account is a profile in
+     `config/contact.ts`; the site's languages are `config/languages.ts`;
+     origins are `config/deployments.ts`, so a mirror cannot be added without
+     the canonical link, the indexing policy, and the build matrix all
+     following from it. The full site description is assembled from these in
+     `lib/identity.ts`. */
+  tagline: "Projects, writing, and CV.",
   timeZone: "America/Toronto",
-  dateLocale: "en-CA",
 } as const satisfies SiteConfig;
 
 export const nav = [

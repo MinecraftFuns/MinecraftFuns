@@ -76,21 +76,67 @@ export type DeploymentsConfig = {
 };
 
 // ---------------------------------------------------------------------------
+// Languages
+// ---------------------------------------------------------------------------
+
+/**
+ * One language the blog publishes in.
+ *
+ * `code` is the language's whole identity inside the site: the rendition
+ * filename (`zh.md`), the URL segment (`/blog/YYYY/MM/slug/zh/`), and the
+ * key everything else is looked up by. `Lowercase` because the code is a
+ * path on a case-sensitive host and a filename on whatever the author runs:
+ * one canonical casing, checked at compile time.
+ *
+ * `bcp47` is what the platform is told: `<html lang>` and `hreflang`. It
+ * varies independently of the code, which is how the content can be
+ * announced as "zh-Hans" while living at `/zh/`.
+ */
+export type LanguageConfig = {
+  readonly code: Lowercase<string>;
+  readonly bcp47: string;
+  /** How the language names itself: the label a reader scans for. */
+  readonly nativeName: string;
+  /**
+   * BCP 47 tag dates are formatted under on pages *in this language*: a
+   * Chinese article renders 2020年1月25日 where an English one renders
+   * "Jan 25, 2020". Varies independently of `bcp47`: "en" content can
+   * follow "en-CA" date conventions.
+   */
+  readonly dateLocale: string;
+};
+
+/**
+ * The order *is* the configuration: earlier is more preferred, and an
+ * article's bare URL serves its best-preferred rendition. The head is the
+ * site's own language, the one the chrome is written in. `NonEmpty`, so "a
+ * site with no language" is unrepresentable rather than a runtime surprise;
+ * there is deliberately no separate "default language" field to disagree
+ * with the order.
+ */
+export type LanguagesConfig = NonEmpty<LanguageConfig>;
+
+// ---------------------------------------------------------------------------
 // Site
 // ---------------------------------------------------------------------------
 
 export type SiteConfig = {
   /** Shown as the brand, and used as the document title. */
   readonly name: string;
-  /** GitHub account. Profile URLs are built from it; never repeat it. */
-  readonly handle: string;
-  readonly description: string;
-  /** Document language, for `<html lang>`. */
-  readonly locale: string;
+  /**
+   * The editorial tail of the site description. The description's first
+   * half, what is studied and where, is derived from `StandingConfig` in
+   * `lib/identity.ts`, so this holds only the words no other config states.
+   *
+   * There is deliberately no `handle` and no `dateLocale` here: the GitHub
+   * account lives once, in `ContactConfig.profiles`, and date locales are
+   * per-language in `LanguageConfig`. Each was a second declaration of a
+   * fact declared elsewhere; the first had already fallen out of use while
+   * still inviting an edit.
+   */
+  readonly tagline: string;
   /** IANA zone. Every date the site renders is read in it. */
   readonly timeZone: string;
-  /** BCP 47 tag used to format dates. Varies independently of the zone. */
-  readonly dateLocale: string;
 };
 
 /**
@@ -125,6 +171,26 @@ export type ContactConfig = {
 // ---------------------------------------------------------------------------
 // About
 // ---------------------------------------------------------------------------
+
+/**
+ * Academic standing, as atoms rather than sentences.
+ *
+ * These facts render in at least three surfaces with three phrasings: the
+ * About page prose, the education table, and the GitHub profile README. The
+ * sentences had already drifted once, "second-year" against "third-year"
+ * against the truth; the fix is that no sentence is authored twice. The
+ * Astro-rendered surfaces derive their copy from this record in
+ * `lib/identity.ts`, and the README, which GitHub renders from the repo
+ * without a build step, is reconciled against it by `scripts/check-readme.ts`.
+ */
+export type StandingConfig = {
+  /** "fourth", as in "fourth-year". The value that actually drifts. */
+  readonly ordinal: string;
+  readonly institution: string;
+  readonly majors: NonEmpty<string>;
+  /** Absent when there is none; never an empty string. */
+  readonly minor?: string;
+};
 
 export type EducationEntry = {
   readonly institution: string;

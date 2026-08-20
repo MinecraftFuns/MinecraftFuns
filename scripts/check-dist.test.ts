@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 
 import {
+  acceptableCanonicals,
   canonicalLinks,
   candidatePaths,
   CHECKS,
@@ -250,6 +251,35 @@ describe("expectedCanonical", () => {
     assert.equal(
       expectedCanonical("blog/index.html", CANONICAL, "/site/"),
       `${CANONICAL}/site/blog/`,
+    );
+  });
+
+  it("gives a language-suffixed route two acceptable canonicals", () => {
+    /* A rendition served at /zh/ may canonicalise to itself (a sibling owns
+       the bare URL) or to its parent (it is the sole rendition, served
+       twice); which one is right depends on files this check cannot see. */
+    assert.deepEqual(
+      acceptableCanonicals("blog/2020/09/game-theory/zh/index.html", CANONICAL, "/"),
+      [
+        `${CANONICAL}/blog/2020/09/game-theory/zh/`,
+        `${CANONICAL}/blog/2020/09/game-theory/`,
+      ],
+    );
+  });
+
+  it("gives an unsuffixed route exactly one acceptable canonical", () => {
+    assert.deepEqual(
+      acceptableCanonicals("blog/2020/09/game-theory/index.html", CANONICAL, "/"),
+      [`${CANONICAL}/blog/2020/09/game-theory/`],
+    );
+  });
+
+  it("does not mistake a slug for a language code", () => {
+    // Only the declared codes count; a slug that merely ends the path is not
+    // a language segment.
+    assert.deepEqual(
+      acceptableCanonicals("blog/2020/03/xdown/index.html", CANONICAL, "/"),
+      [`${CANONICAL}/blog/2020/03/xdown/`],
     );
   });
 

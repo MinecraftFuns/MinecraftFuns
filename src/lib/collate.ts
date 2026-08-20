@@ -1,4 +1,4 @@
-import { site } from "../config/site.ts";
+import { bcp47Of, SITE_LANG } from "./lang.ts";
 
 /**
  * The two orderings this project has, both named so neither can be reached for
@@ -9,7 +9,7 @@ import { site } from "../config/site.ts";
  * call while a comparator runs O(n log n) times, and two collators would be
  * two answers to where "Île" sorts.
  */
-export const COLLATOR = new Intl.Collator(site.locale);
+export const COLLATOR = new Intl.Collator(bcp47Of(SITE_LANG));
 
 /**
  * `byCodepoint` is for identifiers: file stems, route paths, rule names. These

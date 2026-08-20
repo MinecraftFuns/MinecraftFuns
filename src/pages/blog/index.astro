@@ -2,6 +2,7 @@
 import PostRow from "../../components/PostRow.astro";
 import PostTags from "../../components/PostTags.astro";
 import ListPage from "../../layouts/ListPage.astro";
+import { site } from "../../config/site.ts";
 import { postSummaries, postTags } from "../../lib/posts.ts";
 
 const posts = await postSummaries();
@@ -15,7 +16,7 @@ const tags = (await postTags()).map((taxon) => taxon.label);
 
 <ListPage
   title="Blog"
-  description="Technical notes on software, systems, and cognitive science by Joe Fang."
+  description={`Technical notes on software, systems, and cognitive science by ${site.name}.`}
   eyebrow="Blog"
   heading="Technical notes, written down so I stop re-deriving them."
   lede="Mostly software and systems, occasionally cognitive science. Written for the version of me who hits the same problem in a year."

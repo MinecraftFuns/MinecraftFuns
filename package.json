@@ -25,12 +25,13 @@
     "rules:classes": "node scripts/check-classes.ts",
     "rules:control-flow": "node scripts/check-control-flow.ts",
     "rules:typography": "node scripts/check-typography.ts",
+    "rules:readme": "node scripts/check-readme.ts",
     "test": "node --test \"src/**/*.test.ts\" \"scripts/**/*.test.ts\"",
     "build": "astro build",
     "dist:check": "node scripts/check-dist.ts",
     "audit": "node scripts/audit/run.ts",
     "types": "npm run types:src && npm run types:scripts",
-    "rules": "npm run rules:classes && npm run rules:control-flow && npm run rules:typography",
+    "rules": "npm run rules:classes && npm run rules:control-flow && npm run rules:typography && npm run rules:readme",
     "check": "npm run format:check && npm run types && npm run rules && npm test",
     "verify": "npm run check && npm run build && npm run dist:check",
     "dev": "astro dev",
@@ -57,6 +58,7 @@
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.1.6",
+    "katex": "^0.18.4",
     "tailwindcss": "^4.3.3"
   }
 }

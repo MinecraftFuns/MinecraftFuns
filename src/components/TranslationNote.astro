@@ -1,0 +1,68 @@
+---
+import { bcp47Of, type Lang, type Translator } from "../lib/lang.ts";
+import type { Href } from "../lib/url.ts";
+
+/**
+ * The disclosure a translated rendition owes its reader: that it is a
+ * translation, who produced it, and where the original lives.
+ *
+ * Honesty is the point, and it cuts both ways. A machine translation
+ * presented as authored prose borrows a voice it does not have; named as
+ * what it is, with the original a click away, it is a service. So the note
+ * always renders for a translation, and the wording distinguishes machine
+ * from human rather than hiding the former behind the latter.
+ *
+ * Written in the language of the page it sits on: a note in English atop a
+ * Chinese page addresses the one reader who does not need it. The language
+ * *names* come from `Intl.DisplayNames`, the platform's own vocabulary,
+ * rather than a third hand-kept table beside `NATIVE_NAME` and `BCP47`.
+ */
+type Props = {
+  /** The language of the rendition this note sits on. */
+  readonly lang: Lang;
+  readonly by: Translator;
+  readonly original: { readonly lang: Lang; readonly href: Href };
+};
+
+const { lang, by, original } = Astro.props;
+
+/* "Chinese" on an English page, 中文 on a Chinese one. `of` is typed as
+   returning undefined for unstructured input; a `Lang` is a valid tag by
+   construction, so the fallback names the code itself and cannot be reached
+   for a member of the union. */
+const originalName =
+  new Intl.DisplayNames([lang], { type: "language" }).of(original.lang) ?? original.lang;
+
+/**
+ * The sentence around the link, split where the link sits. A record over
+ * both closed unions, so a new language or translator kind is a missing
+ * field here rather than a note that silently renders half a sentence.
+ */
+const WORDING: Readonly<
+  Record<Lang, Record<Translator, { readonly before: string; readonly after: string }>>
+> = {
+  en: {
+    machine: { before: "Machine-translated from the ", after: "." },
+    human: { before: "Translated from the ", after: "." },
+  },
+  zh: {
+    machine: { before: "本文由机器翻译自", after: "。" },
+    human: { before: "本文译自", after: "。" },
+  },
+};
+
+const LINK_LABEL: Readonly<Record<Lang, string>> = {
+  en: `${originalName} original`,
+  zh: `${originalName}原文`,
+};
+
+const wording = WORDING[lang][by];
+---
+
+<p class="note border-hairline-strong mt-md border-l pl-md">
+  {wording.before}<a
+    class="link-in-text"
+    href={original.href}
+    hreflang={bcp47Of(original.lang)}>{LINK_LABEL[lang]}</a
+  >{wording.after}
+</p>

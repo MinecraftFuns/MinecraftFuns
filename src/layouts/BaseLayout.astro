@@ -8,8 +8,21 @@ import SiteHeader from "../components/SiteHeader.astro";
 import { site } from "../config/site.ts";
 import { orThrow } from "../prelude/adt.ts";
 import { activeTarget, canonicalHref, indexable } from "../lib/deployment.ts";
-import { assetUrl } from "../lib/url.ts";
+import { siteDescription } from "../lib/identity.ts";
+import { bcp47Of, SITE_LANG } from "../lib/lang.ts";
+import { assetUrl, joinRoute } from "../lib/url.ts";
+import type { RootedPath } from "../schema.ts";
 import type { Chrome } from "./chrome.ts";
+
+/**
+ * A language alternate to declare in the head. Structural on purpose: the
+ * producing domain (`lib/article.ts`) has its own name for this shape, and
+ * the chrome depending on a blog module would invert the layering.
+ */
+type Alternate = {
+  readonly hrefLang: string;
+  readonly route: RootedPath;
+};
 
 /*
  * Every prop here has a default below, which is why each admits `undefined`
@@ -23,13 +36,26 @@ type Props = {
   /** Set on article pages so the OG type is accurate. */
   readonly type?: "website" | "article" | undefined;
   readonly chrome?: Chrome | undefined;
+  /** BCP 47 tag of the page's *content*, where it is not the site's own. */
+  readonly lang?: string | undefined;
+  /**
+   * Site-relative route of the page this one is a copy of, where that is not
+   * the page's own address: a non-default language rendition is served at two
+   * routes, and only one of them is the URL to index.
+   */
+  readonly canonicalRoute?: RootedPath | undefined;
+  /** Language alternates of this page, empty where it has none. */
+  readonly alternates?: readonly Alternate[] | undefined;
 };
 
 const {
   title,
-  description = site.description,
+  description = siteDescription,
   type = "website",
   chrome = "site",
+  lang = bcp47Of(SITE_LANG),
+  canonicalRoute,
+  alternates = [],
 } = Astro.props;
 
 const pageTitle = title ? `${title} | ${site.name}` : site.name;
@@ -51,8 +77,28 @@ const target = orThrow(activeTarget(Astro.site), "deployment");
  * authoritative and then separately asked not to be indexed: two derivations
  * of one decision, disagreeing. Now a crawler landing on any copy is pointed
  * at the same URL.
+ *
+ * `canonicalRoute` overrides the page's own address for the one case where
+ * they differ: a page that is a second serving of another. It arrives
+ * site-relative and is mounted on the active base first, so it enters
+ * `canonicalHref` in the same coordinate system `Astro.url.pathname` would.
  */
-const canonical = orThrow(canonicalHref(target, Astro.url.pathname), "canonical URL");
+const deployed = (route: RootedPath): string => joinRoute(target.base, route);
+
+const canonical = orThrow(
+  canonicalHref(
+    target,
+    canonicalRoute === undefined ? Astro.url.pathname : deployed(canonicalRoute),
+  ),
+  "canonical URL",
+);
+
+/* Alternates resolve the same way: every href in the cluster points at the
+   canonical deployment, whichever copy of the site emitted it. */
+const alternateLinks = alternates.map(({ hrefLang, route }) => ({
+  hrefLang,
+  href: orThrow(canonicalHref(target, deployed(route)), `alternate ${hrefLang}`),
+}));
 
 /*
  * Only the canonical copy asks to be indexed; two indexed copies of one site
@@ -64,13 +110,25 @@ const isIndexable = indexable(target.role);
 ---
 
 <!doctype html>
-<html lang={site.locale}>
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {
+      /*
+      Emitted on every page of a bilingual article, bare and suffixed alike:
+      hreflang annotations must be reciprocal to be honoured, so each page of
+      the cluster declares the whole cluster.
+    */
+    }
+    {
+      alternateLinks.map(({ hrefLang, href }) => (
+        <link rel="alternate" hreflang={hrefLang} href={href} />
+      ))
+    }
     {
       /*
       The second half of sitemap discovery. robots.txt names the sitemap for

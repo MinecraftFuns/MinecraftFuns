@@ -1,7 +1,10 @@
 ---
+import "katex/dist/katex.min.css";
+
 import BackLink from "../components/BackLink.astro";
 import BaseLayout from "./BaseLayout.astro";
 import type { Href } from "../lib/url.ts";
+import type { RootedPath } from "../schema.ts";
 import type { Chrome } from "./chrome.ts";
 
 /**
@@ -22,12 +25,28 @@ type Props = {
   readonly description: string;
   readonly chrome?: Chrome;
   readonly back: { readonly href: Href; readonly label: string };
+  /* Multilingual head state, forwarded untouched: this layout arranges the
+     page and takes no view on what language it is in. Each admits
+     `undefined` explicitly for the reason BaseLayout's own props do. */
+  readonly lang?: string | undefined;
+  readonly canonicalRoute?: RootedPath | undefined;
+  readonly alternates?:
+    readonly { readonly hrefLang: string; readonly route: RootedPath }[] | undefined;
 };
 
-const { title, description, chrome, back } = Astro.props;
+const { title, description, chrome, back, lang, canonicalRoute, alternates } =
+  Astro.props;
 ---
 
-<BaseLayout title={title} description={description} type="article" chrome={chrome}>
+<BaseLayout
+  title={title}
+  description={description}
+  type="article"
+  chrome={chrome}
+  lang={lang}
+  canonicalRoute={canonicalRoute}
+  alternates={alternates}
+>
   <article class="pb-lg">
     <slot name="header" />
 
