@@ -1,0 +1,102 @@
+name: Audit site
+
+# Browser audit. Reports, never blocks.
+#
+# A separate workflow rather than a job in deploy.yml, and the separation is
+# load-bearing: deploy.yml serializes whole runs through its `pages`
+# concurrency group (deliberately, so an older build can never overwrite a
+# newer deployment), which means every job it contains extends the lock every
+# subsequent push must wait on. The audit consumes nothing from that pipeline;
+# it checks out and builds for itself. As a job there, its twenty minutes of
+# browser time held the deployment queue; here it holds nothing.
+#
+# It shares the deploy triggers, so every deployed commit is audited, but no
+# deployment ever waits for an audit. Findings land in the job summary and in
+# a downloadable artifact; the point is to learn about problems, not to hold
+# the site hostage to a slow browser.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+# Only the newest tip is worth auditing, and nothing downstream consumes the
+# result, so a superseded audit is cancelled rather than finished. The
+# opposite choice from deploy.yml, for the opposite reason: a half-finished
+# deployment is a hazard, a half-finished report about a stale commit is
+# merely spent runner-minutes.
+concurrency:
+  group: audit
+  cancel-in-progress: true
+
+env:
+  # The build major. Deliberately not read from `engines.node`, which states a
+  # *minimum* (">=24"); resolving that range would silently move CI onto a new
+  # major the day one ships. deploy.yml states the same major; keep them in
+  # step when bumping.
+  NODE_VERSION: "24"
+
+jobs:
+  audit:
+    name: Audit standalone build (non-blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # A crashed audit is a finding about the audit, not about the site; keep
+    # it from reddening the commit so a red mark still means "deploy broken".
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          submodules: false
+          show-progress: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Latest stable Chrome rather than the Chromium the pinned Playwright
+      # ships: the driver stays reproducible through the lockfile while the
+      # rendering engine tracks what readers actually run. One engine only;
+      # three would triple the runtime for findings that are, at this level,
+      # almost entirely engine-independent.
+      - name: Install the latest stable Chrome
+        run: npx playwright install --with-deps chrome
+
+      # Audit the standalone build: joefang.org at the root is the eventual
+      # primary target, so that is the configuration worth holding to standard.
+      - name: Build
+        env:
+          SITE_URL: https://joefang.org
+          SITE_BASE: /
+        run: npm run build
+
+      - name: Audit
+        env:
+          SITE_URL: https://joefang.org
+          SITE_BASE: /
+        run: npm run audit
+
+      - name: Publish report to the job summary
+        if: always()
+        run: cat audit/report.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Upload findings and screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: page-audit
+          path: audit/
+          retention-days: 14
+          if-no-files-found: warn
+          overwrite: true

@@ -13,9 +13,18 @@ on:
 # compromised dependency in the build cannot publish anything.
 permissions: {}
 
-# One deployment at a time. In-progress runs are allowed to finish rather than
-# being cancelled, because a half-applied production deploy is worse than a
-# slightly stale one; queued runs beyond the newest are dropped.
+# One deployment at a time, in push order. In-progress runs are allowed to
+# finish rather than being cancelled, because a half-applied production deploy
+# is worse than a slightly stale one; queued runs beyond the newest are
+# dropped. Runs in this group execute strictly serially, which is what makes
+# out-of-order publishes impossible: a slow older run can never overwrite a
+# newer one, because the newer one does not start until it has finished.
+#
+# That guarantee prices every job in this file: the group is held until the
+# *whole run* completes, so each job here delays every subsequent push. This
+# is why the browser audit lives in audit.yml rather than as a job below: it
+# consumes nothing from this pipeline and reports rather than gates, yet as a
+# job here its twenty minutes would extend the lock on every deployment.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -23,7 +32,8 @@ concurrency:
 env:
   # The build major. Deliberately not read from `engines.node`, which states a
   # *minimum* (">=24"); resolving that range would silently move CI onto a new
-  # major the day one ships.
+  # major the day one ships. audit.yml states the same major; keep them in
+  # step when bumping.
   NODE_VERSION: "24"
 
 jobs:
@@ -201,77 +211,6 @@ jobs:
           overwrite: true
 
   # ---------------------------------------------------------------------------
-  # Browser audit. Reports, never blocks.
-  #
-  # Deliberately not in `deploy`'s `needs`, so it cannot gate a release even if
-  # it fails outright, and `continue-on-error` keeps a crash from reddening the
-  # run. Findings land in the job summary and in a downloadable artifact. This
-  # runs in parallel with the deployment rather than after it; the point is to
-  # learn about problems, not to hold the site hostage to a slow browser.
-  # ---------------------------------------------------------------------------
-  audit:
-    name: Audit standalone build (non-blocking)
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    continue-on-error: true
-    permissions:
-      contents: read
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-          submodules: false
-          show-progress: false
-
-      - name: Set up Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      # Latest stable Chrome rather than the Chromium the pinned Playwright
-      # ships: the driver stays reproducible through the lockfile while the
-      # rendering engine tracks what readers actually run. One engine only;
-      # three would triple the runtime for findings that are, at this level,
-      # almost entirely engine-independent.
-      - name: Install the latest stable Chrome
-        run: npx playwright install --with-deps chrome
-
-      # Audit the standalone build: joefang.org at the root is the eventual
-      # primary target, so that is the configuration worth holding to standard.
-      - name: Build
-        env:
-          SITE_URL: https://joefang.org
-          SITE_BASE: /
-        run: npm run build
-
-      - name: Audit
-        env:
-          SITE_URL: https://joefang.org
-          SITE_BASE: /
-        run: npm run audit
-
-      - name: Publish report to the job summary
-        if: always()
-        run: cat audit/report.md >> "$GITHUB_STEP_SUMMARY" || true
-
-      - name: Upload findings and screenshots
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: page-audit
-          path: audit/
-          retention-days: 14
-          if-no-files-found: warn
-          overwrite: true
-
-  # ---------------------------------------------------------------------------
   # joefang.org, the primary domain.
   #
   # Cloudflare Pages serves it, and Cloudflare builds from a git remote rather
@@ -299,9 +238,10 @@ jobs:
   #
   #   1. `joefang-org` is named by this job and by no other. An environment
   #      secret is readable only from a job that declares that environment, so
-  #      the deploy key is unreachable from `verify`, `build`, and `audit`,
-  #      which are precisely the jobs that execute repository code, test code,
-  #      and a browser. Adding `environment:` to any of them would break this.
+  #      the deploy key is unreachable from `verify` and `build`, which are
+  #      precisely the jobs that execute repository code and test code (and
+  #      from all of audit.yml, a separate workflow). Adding `environment:`
+  #      to either of them would break this.
   #   2. The environment is restricted to `main`. The `if` below states the
   #      same rule a second time, in the file, so a `workflow_dispatch` from a
   #      branch skips cleanly instead of failing at the gate, and so a reader
