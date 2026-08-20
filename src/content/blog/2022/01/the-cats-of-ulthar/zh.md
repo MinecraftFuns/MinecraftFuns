@@ -5,7 +5,7 @@ date: "2022-01-20"
 tags: ["Reading"]
 ---
 
-> [乌撒之猫 | 克苏鲁神话](https://bafkreicbvka53rxe3a7bjkkplqlizh2nnhishhwowowcp2mkku7se2keqm.ipfs.inbrowser.link/) [$^{dweb.link}$](https://bafkreicbvka53rxe3a7bjkkplqlizh2nnhishhwowowcp2mkku7se2keqm.ipfs.dweb.link/)
+> [乌撒之猫 | 克苏鲁神话](https://bafkreicbvka53rxe3a7bjkkplqlizh2nnhishhwowowcp2mkku7se2keqm.ipfs.inbrowser.link/)
 
 据说在斯凯河之外的乌撒，谁也不能杀猫。此刻望着它趴在火堆前咕噜咕噜叫唤，我对此更是深信不疑。因为猫是神秘的生灵，能够接近人类看不见的怪异事物。猫是远古埃古普托斯的灵魂，承载着被遗忘城市梅罗和俄斐的传说。猫是丛林之主的亲属，继承了邪灵出没的古老非洲的秘密。斯芬克斯是猫的表亲，猫会说斯芬克斯的语言。但猫的历史比斯芬克斯还要悠久，记得斯芬克斯已经遗忘的往事。
 

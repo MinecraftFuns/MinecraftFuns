@@ -6,7 +6,7 @@ tags: ["Essays"]
 translation: machine
 ---
 
-> [Reflections on Looking at a Mirror | Lu Xun's Collected Works · Essays · The Grave](https://bafkreice33ndk2llowzlmo6s3xtiovzytt3f4aatr5toynm5uvr5lbiq7y.ipfs.inbrowser.link/) [$^{dweb.link}$](https://bafkreice33ndk2llowzlmo6s3xtiovzytt3f4aatr5toynm5uvr5lbiq7y.ipfs.dweb.link/)
+> [Reflections on Looking at a Mirror | Lu Xun's Collected Works · Essays · The Grave](https://bafkreice33ndk2llowzlmo6s3xtiovzytt3f4aatr5toynm5uvr5lbiq7y.ipfs.inbrowser.link/)
 
 This essay is a sharp satire of xenophobes, and its argument still holds up today.
 
