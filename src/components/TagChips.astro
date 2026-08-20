@@ -1,0 +1,35 @@
+---
+import Button from "./Button.astro";
+import type { Taxon } from "../lib/taxonomy.ts";
+import { tagHref, type PostSummary, type PostTag } from "../lib/posts.ts";
+
+/**
+ * Tags as controls, each carrying how much is behind it.
+ *
+ * The count is what makes a directory of thirty-eight chips readable rather
+ * than a wall: it says which are worth opening. `PostTags` renders the same
+ * chips without counts where the strip is a shortcut rather than an index.
+ */
+type Props = {
+  readonly tags: readonly Taxon<PostTag, PostSummary>[];
+};
+
+const { tags } = Astro.props;
+---
+
+{
+  tags.length > 0 && (
+    <ul class="flex flex-wrap gap-2xs" role="list">
+      {tags.map((taxon) => (
+        <li>
+          <Button href={tagHref(taxon.label)} tone="secondary" size="compact">
+            {taxon.label}
+            <span class="text-ink-tertiary ms-2xs tabular-nums">
+              {taxon.items.length}
+            </span>
+          </Button>
+        </li>
+      ))}
+    </ul>
+  )
+}
