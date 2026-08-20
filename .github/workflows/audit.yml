@@ -21,14 +21,9 @@ on:
 
 permissions: {}
 
-# Only the newest tip is worth auditing, and nothing downstream consumes the
-# result, so a superseded audit is cancelled rather than finished. The
-# opposite choice from deploy.yml, for the opposite reason: a half-finished
-# deployment is a hazard, a half-finished report about a stale commit is
-# merely spent runner-minutes.
-concurrency:
-  group: audit
-  cancel-in-progress: true
+# No concurrency group, unlike deploy.yml: audits of different commits share
+# nothing and gate nothing, so they are free to run side by side. Each run
+# keeps its own summary and artifact; there is no "latest" to protect.
 
 env:
   # The build major. Deliberately not read from `engines.node`, which states a
