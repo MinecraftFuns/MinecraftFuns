@@ -55,14 +55,14 @@ const contactEntries: readonly Entry[] = [
       <p>
         I am a {standingPhrase} undergraduate at the {standing.institution}, taking a {
           credentialClause
-        }{minorClause !== undefined && <> alongside a {minorClause}</>}. The combination
-        is deliberate: I am interested in how systems represent and process information,
-        whether the system happens to be a compiler or a mind.
+        }{minorClause !== undefined && <> alongside a {minorClause}</>}. The second major
+        is there because both fields keep circling the same question: what a system has to
+        represent before it can do anything with what it is given.
       </p>
       <p>
         This site holds my <a href={routeUrl("/projects")}>projects</a> and a <a
           href={routeUrl("/blog")}>blog</a
-        > of technical notes.
+        > of mostly technical notes.
       </p>
     </div>
   </PageIntro>
@@ -75,8 +75,8 @@ const contactEntries: readonly Entry[] = [
     <div class="prose mb-md">
       <p>
         For anything substantive, import my <a href={pgpHref()}>PGP key</a> and write to the
-        address in its <strong>Primary User ID</strong>. There is deliberately no
-        plaintext address on this page.
+        address in its <strong>Primary User ID</strong>. The address is not written out
+        here in plain text, which keeps it out of scrapers.
       </p>
     </div>
     <EntryList entries={contactEntries} />

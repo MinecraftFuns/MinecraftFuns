@@ -52,8 +52,8 @@ export const educationEntries: readonly EducationEntry[] = [
   },
 ];
 
-/** Compose derived study facts with the authored site tagline. */
-export const siteDescription: string = `${majorsPhrase} at the ${standing.institution}. ${site.tagline}`;
+/** What the site is, for the home page. Who I am belongs on the About page. */
+export const siteDescription: string = `${site.name}. ${site.tagline}`;
 
 /** The About page's own meta description. */
 export const aboutDescription: string = `${site.name}. ${majorsPhrase} at the ${standing.institution}.`;

@@ -57,8 +57,8 @@ describe("identity", () => {
   });
 
   it("assembles the descriptions from facts plus the authored tail", () => {
-    assert.ok(siteDescription.includes(standing.institution));
     assert.ok(siteDescription.endsWith(site.tagline));
     assert.ok(aboutDescription.startsWith(`${site.name}. `));
+    assert.ok(aboutDescription.includes(standing.institution));
   });
 });
