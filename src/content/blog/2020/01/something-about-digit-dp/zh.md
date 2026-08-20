@@ -18,39 +18,39 @@ tags: ["Competitive Programming", "Dynamic Programming"]
 
 ## 【LightOJ 1140】How Many Zeroes?
 
-[题面](https://lightoj.com/problem/how-many-zeroes) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/XMt5F)
+[题面](https://lightoj.com/problem/how-many-zeroes) :backup[https://archive.is/XMt5F]
 
 > 题意
 
 求区间 $[m,n]$ 中的数字的十进制表示中总共有多少个 $0$
 
-> [代码](https://gist.github.com/MinecraftFuns/1b9c14c48f3b97ef0569118ab4d5b8f0) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/Q1cKT)
+> [代码](https://gist.github.com/MinecraftFuns/1b9c14c48f3b97ef0569118ab4d5b8f0) :backup[https://archive.is/Q1cKT]
 
 ## 【HDU 2089】不要 62
 
-[题面](http://acm.hdu.edu.cn/showproblem.php?pid=2089) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/3qZ07)
+[题面](http://acm.hdu.edu.cn/showproblem.php?pid=2089) :backup[https://archive.is/3qZ07]
 
 > 题意
 
 求区间 $[m,n]$ 中，十进制表示中既不包含**连续**的 $62$，也不包含 $4$ 的数的个数。
 
-> [代码](https://gist.github.com/MinecraftFuns/7cb99fc1f7a3d49d276150e631e1cae6) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/GhRzB)
+> [代码](https://gist.github.com/MinecraftFuns/7cb99fc1f7a3d49d276150e631e1cae6) :backup[https://archive.is/GhRzB]
 
 ## 【HDU 3555】Bomb
 
-[题面](http://acm.hdu.edu.cn/showproblem.php?pid=3555) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/s4kqt)
+[题面](http://acm.hdu.edu.cn/showproblem.php?pid=3555) :backup[https://archive.is/s4kqt]
 
 > 题意
 
 求区间 $[1,N]$ 中数字的十进制表示包含连续 $49$ 的数字个数
 
-> [代码](https://gist.github.com/MinecraftFuns/7b44a11ad2577f184308d6922679e2a1) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/HkwAi)
+> [代码](https://gist.github.com/MinecraftFuns/7b44a11ad2577f184308d6922679e2a1) :backup[https://archive.is/HkwAi]
 
 可以参考注释理解
 
 ## 【SPOJ BALNUM】Balanced Numbers
 
-[题面](https://www.spoj.com/problems/BALNUM/) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/mcUdB)
+[题面](https://www.spoj.com/problems/BALNUM/) :backup[https://archive.is/mcUdB]
 
 > 题意
 
@@ -65,13 +65,13 @@ tags: ["Competitive Programming", "Dynamic Programming"]
 
 给定区间 $[A,B]$，求其中平衡数的个数。
 
-> [代码](https://gist.github.com/MinecraftFuns/8858579de244917dc00ac2945562d9fa) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/VbQNF)
+> [代码](https://gist.github.com/MinecraftFuns/8858579de244917dc00ac2945562d9fa) :backup[https://archive.is/VbQNF]
 
 可以参考注释理解
 
 ## 【SPOJ MYQ10】Mirror Number
 
-[题面](https://www.spoj.com/problems/MYQ10/) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/iMb7a)
+[题面](https://www.spoj.com/problems/MYQ10/) :backup[https://archive.is/iMb7a]
 
 > 题意
 
@@ -79,14 +79,14 @@ tags: ["Competitive Programming", "Dynamic Programming"]
 
 求 $[a,b]$ 中有几个镜面对称数
 
-> [代码](https://gist.github.com/MinecraftFuns/8ecae1ca0531d6c867636f2cc603b547) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/kPbc1)
+> [代码](https://gist.github.com/MinecraftFuns/8ecae1ca0531d6c867636f2cc603b547) :backup[https://archive.is/kPbc1]
 
 数据范围是 $10^{44}$，所以要开一个字符数组来存输入  
 并且特判一下 $a$ 本身是不是回文数  
 
 ---
 
-如果需要编译运行，可以前往 [Gist](https://gist.github.com/MinecraftFuns/9eb0c738620c9b0b805dddb5b3f2a03c) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/yGvqo) 复制公共头
+如果需要编译运行，可以前往 [Gist](https://gist.github.com/MinecraftFuns/9eb0c738620c9b0b805dddb5b3f2a03c) :backup[https://archive.is/yGvqo] 复制公共头
 
 如果编译器不支持 C++11，请将 `constexpr` 改为 `const`
 

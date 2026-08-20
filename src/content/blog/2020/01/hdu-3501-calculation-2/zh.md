@@ -5,7 +5,7 @@ date: "2020-01-25"
 tags: ["Competitive Programming", "Editorial", "Number Theory"]
 ---
 
-> [题面](http://acm.hdu.edu.cn/showproblem.php?pid=3501) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/d0rtx)
+> [题面](http://acm.hdu.edu.cn/showproblem.php?pid=3501) :backup[https://archive.is/d0rtx]
 
 ## 题意
 
@@ -17,7 +17,7 @@ tags: ["Competitive Programming", "Editorial", "Number Theory"]
 
 结论：小于 $n$ 且与 $n$ 互质的数的和等于 $\frac{n\times\varphi(n)} 2$
 
-> [代码](https://gist.github.com/MinecraftFuns/53a5c887560d3c4fcf47ade3e1ab15a0) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/cfBZB)
+> [代码](https://gist.github.com/MinecraftFuns/53a5c887560d3c4fcf47ade3e1ab15a0) :backup[https://archive.is/cfBZB]
 
 ### 证明
 

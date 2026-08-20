@@ -6,7 +6,7 @@ tags: ["Competitive Programming", "Editorial", "Number Theory"]
 translation: machine
 ---
 
-> [Problem statement](http://acm.hdu.edu.cn/showproblem.php?pid=3501) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/d0rtx)
+> [Problem statement](http://acm.hdu.edu.cn/showproblem.php?pid=3501) :backup[https://archive.is/d0rtx]
 
 ## Problem
 
@@ -18,7 +18,7 @@ A basic Euler's totient function problem.
 
 Conclusion: the sum of numbers less than $n$ and coprime to $n$ equals $\frac{n\times\varphi(n)} 2$.
 
-> [Code](https://gist.github.com/MinecraftFuns/53a5c887560d3c4fcf47ade3e1ab15a0) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/cfBZB)
+> [Code](https://gist.github.com/MinecraftFuns/53a5c887560d3c4fcf47ade3e1ab15a0) :backup[https://archive.is/cfBZB]
 
 ### Proof
 

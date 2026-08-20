@@ -8,8 +8,8 @@ translation: machine
 
 ![0.webp](https://bafkreibm7oavrgochpe2oirhekzp2jzrc2ap3oskekebliikbjsbbw5wx4.ipfs.dweb.link)
 
-[Handout](https://bafybeihf5gby4uo5e7jtwzoiquw7reoiwzkni4ffdu5ulmogwajros6pxa.ipfs.inbrowser.link/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210112085802/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/fc/2f/e5/cf/fc2fe5cf8b983d201bef031f5ada8e0b133917e7692f54c414466968a48ccb69.pdf)  
-[Supplementary handout](https://bafybeibym4f3j6bq64cwuh5iwgwq7g7zj7xbxyvntqaub66cbh53lymz34.ipfs.inbrowser.link/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210112085836/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/cf/4e/02/04/cf4e02048c40c5baa904b97db61c870ea60a9416568f69a838601f61cd06adf2.pdf)  
+[Handout](https://bafybeihf5gby4uo5e7jtwzoiquw7reoiwzkni4ffdu5ulmogwajros6pxa.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210112085802/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/fc/2f/e5/cf/fc2fe5cf8b983d201bef031f5ada8e0b133917e7692f54c414466968a48ccb69.pdf]  
+[Supplementary handout](https://bafybeibym4f3j6bq64cwuh5iwgwq7g7zj7xbxyvntqaub66cbh53lymz34.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210112085836/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/cf/4e/02/04/cf4e02048c40c5baa904b97db61c870ea60a9416568f69a838601f61cd06adf2.pdf]  
 
 ## Reading the Prompt and Establishing the Thesis, `the Soul of the Essay`
 

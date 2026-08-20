@@ -8,7 +8,7 @@ tags: ["Repost"]
 ## 没有熬不过的黑夜，没有等不来的黎明
 
 > 作者 | 程益中  
-> 链接 | [https://telegra.ph/the-gloomiest-night-will-wear-on-to-a-morning-11-20](https://telegra.ph/the-gloomiest-night-will-wear-on-to-a-morning-11-20) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20211120131755/https://telegra.ph/the-gloomiest-night-will-wear-on-to-a-morning-11-20)  
+> 链接 | [https://telegra.ph/the-gloomiest-night-will-wear-on-to-a-morning-11-20](https://telegra.ph/the-gloomiest-night-will-wear-on-to-a-morning-11-20) :backup[https://web.archive.org/web/20211120131755/https://telegra.ph/the-gloomiest-night-will-wear-on-to-a-morning-11-20]  
 
 各位同仁，战友们：
 
@@ -51,7 +51,7 @@ tags: ["Repost"]
 ## 中国梦，宪政梦
 
 > 作者 |《南方周末》编辑部  
-> 链接 | [https://telegra.ph/chinese-dream-the-dream-of-constitution-11-20](https://telegra.ph/chinese-dream-the-dream-of-constitution-11-20) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20211120125711/https://telegra.ph/chinese-dream-the-dream-of-constitution-11-20)  
+> 链接 | [https://telegra.ph/chinese-dream-the-dream-of-constitution-11-20](https://telegra.ph/chinese-dream-the-dream-of-constitution-11-20) :backup[https://web.archive.org/web/20211120125711/https://telegra.ph/chinese-dream-the-dream-of-constitution-11-20]  
 
 天地之间，时间绽放。
 
@@ -141,4 +141,4 @@ tags: ["Repost"]
 
 ![沉思者](https://bafkreihdep6gootkrg5bf46y7mzqwjfquj67b6nbd6i5zccymxv2x7htgy.ipfs.dweb.link)
 
-[沉思者 | 维基百科](https://zh.wikipedia.org/wiki/%E6%B2%89%E6%80%9D%E8%80%85) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210812075718/https://zh.wikipedia.org/wiki/%E6%B2%89%E6%80%9D%E8%80%85)
+[沉思者 | 维基百科](https://zh.wikipedia.org/wiki/%E6%B2%89%E6%80%9D%E8%80%85) :backup[https://web.archive.org/web/20210812075718/https://zh.wikipedia.org/wiki/%E6%B2%89%E6%80%9D%E8%80%85]

@@ -6,8 +6,8 @@ tags: ["Codeforces", "Editorial"]
 translation: machine
 ---
 
-* [Link](https://codeforces.com/contest/1295) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/QE7IG)
-* [Reference code](https://example.com/#%E6%AD%A4%E4%BB%A3%E7%A0%81%E5%B7%B2%E9%81%97%E5%A4%B1%EF%BC%8C%E8%BF%99%E7%A7%8D%E9%9A%BE%E5%BA%A6%E7%9A%84%E9%A2%98%E5%B0%B1%E4%B8%8D%E7%94%A8%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81%E4%BA%86%E5%90%A7) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/s0vXt)
+* [Link](https://codeforces.com/contest/1295) :backup[https://archive.is/QE7IG]
+* [Reference code](https://example.com/#%E6%AD%A4%E4%BB%A3%E7%A0%81%E5%B7%B2%E9%81%97%E5%A4%B1%EF%BC%8C%E8%BF%99%E7%A7%8D%E9%9A%BE%E5%BA%A6%E7%9A%84%E9%A2%98%E5%B0%B1%E4%B8%8D%E7%94%A8%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81%E4%BA%86%E5%90%A7) :backup[https://archive.is/s0vXt]
 
 ![hero.webp](https://ragnarok.joefang.org/static/x21jvkmpvu9pdp6h8i4faalh86ai10503.webp)
 

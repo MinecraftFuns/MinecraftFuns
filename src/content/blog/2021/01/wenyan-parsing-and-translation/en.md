@@ -8,7 +8,7 @@ translation: machine
 
 ![0.webp](https://bafkreibsfre3mx5yqlvi22pedd3hyvekst5c46acacf3ya2cnklqtb7ska.ipfs.dweb.link)
 
-[Handout](https://bafybeihzvxy2ubawacmv2n5neyiedszpiaikcp2yeptofxtxbwgv7nxx6i.ipfs.inbrowser.link/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210112032514/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.2/1e/03/ec/53/1e03ec53e22200739b974da8be8d44012a5ef1a9ef36a82f7d85f17ef5564884.pdf)
+[Handout](https://bafybeihzvxy2ubawacmv2n5neyiedszpiaikcp2yeptofxtxbwgv7nxx6i.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210112032514/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.2/1e/03/ec/53/1e03ec53e22200739b974da8be8d44012a5ef1a9ef36a82f7d85f17ef5564884.pdf]
 
 ## Sentence Punctuation
 

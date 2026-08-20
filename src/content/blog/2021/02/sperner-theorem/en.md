@@ -74,8 +74,8 @@ Since $\binom n{|A_i|}\le \binom n{\lfloor\frac n 2\rfloor}$, we have $\frac 1{\
 
 ![girl](https://bafkreifsxipccvifscj2hlt2iyc7j2fnklu3jcon66fatllp432xoq2mdu.ipfs.dweb.link)
 
-[Image source](https://twitter.com/i/status/1356483004672053248) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/ghpIM)
+[Image source](https://twitter.com/i/status/1356483004672053248) :backup[https://archive.is/ghpIM]
 
 ## References
 
-[Sperner's theorem and its proof | www.cnblogs.com](https://www.cnblogs.com/suncongbo/p/10321099.html) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/YiT9t)
+[Sperner's theorem and its proof | www.cnblogs.com](https://www.cnblogs.com/suncongbo/p/10321099.html) :backup[https://archive.is/YiT9t]

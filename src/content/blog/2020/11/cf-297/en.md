@@ -6,8 +6,8 @@ tags: ["Codeforces", "Editorial"]
 translation: machine
 ---
 
-* [Link](https://codeforces.com/contest/297) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/rE0U8)
-* [Reference code](https://gist.github.com/MinecraftFuns/9c16b6a800123e37711594ee341bf834) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/SoEeF)
+* [Link](https://codeforces.com/contest/297) :backup[https://archive.is/rE0U8]
+* [Reference code](https://gist.github.com/MinecraftFuns/9c16b6a800123e37711594ee341bf834) :backup[https://archive.is/SoEeF]
 
 ## Problems I didn't solve on my own
 

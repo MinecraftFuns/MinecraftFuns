@@ -6,8 +6,8 @@ tags: ["Codeforces", "Editorial"]
 translation: machine
 ---
 
-* [Link](https://codeforces.com/contest/986) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/Stt8O)
-* [Reference code](https://gist.github.com/MinecraftFuns/e6138d1ec8a09d6b53fb9c59b0b03442) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/dmAM4)
+* [Link](https://codeforces.com/contest/986) :backup[https://archive.is/Stt8O]
+* [Reference code](https://gist.github.com/MinecraftFuns/e6138d1ec8a09d6b53fb9c59b0b03442) :backup[https://archive.is/dmAM4]
 
 ![0.webp](https://bafkreifvf3uxaci63lkzmroltvt5bihtprj7h6wlcz2wfq2hxbubl6uvba.ipfs.dweb.link)
 

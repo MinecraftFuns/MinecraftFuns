@@ -54,6 +54,6 @@ where `np` is short for `--no-parent`.
 
 ## See also
 
-* [Make Offline Mirror of a Site using `wget`](https://www.guyrutenberg.com/2014/05/02/make-offline-mirror-of-a-site-using-wget/) [ᴮᵃᶜᵏᵘᵖ](https://arweave.net/XBKigRYDTxEJkelD3LlekBlX4w1dngY6UKWoRXUKb_w)
-* [NTFS - Wikipedia](https://zh.wikipedia.org/wiki/NTFS) [ᴮᵃᶜᵏᵘᵖ](https://arweave.net/bAjaNG3xyUrE11HXzrdduGzcLM1sYhV75dqHjg7mURs)
-* [wget.exe for Windows](https://bafybmidj6zl4ellqyzhso63o3jvlfasjtzqnqij323ulvdwolf62z5kq2a.ipfs.inbrowser.link/?filename=wget.exe) [ᴮᵃᶜᵏᵘᵖ](https://arweave.net/BrFz4svx6e9sw8n2NNZGSWJ_ftrEPcKxJPXglH2eaaE)
+* [Make Offline Mirror of a Site using `wget`](https://www.guyrutenberg.com/2014/05/02/make-offline-mirror-of-a-site-using-wget/) :backup[https://arweave.net/XBKigRYDTxEJkelD3LlekBlX4w1dngY6UKWoRXUKb_w]
+* [NTFS - Wikipedia](https://zh.wikipedia.org/wiki/NTFS) :backup[https://arweave.net/bAjaNG3xyUrE11HXzrdduGzcLM1sYhV75dqHjg7mURs]
+* [wget.exe for Windows](https://bafybmidj6zl4ellqyzhso63o3jvlfasjtzqnqij323ulvdwolf62z5kq2a.ipfs.inbrowser.link/?filename=wget.exe) :backup[https://arweave.net/BrFz4svx6e9sw8n2NNZGSWJ_ftrEPcKxJPXglH2eaaE]

@@ -22,10 +22,10 @@ translation: machine
 
 I found a good PDF edition on Douban, so I am sharing it here.
 
-> [The Hitchhiker's Guide to the Galaxy PDF edition (Chinese / English)](https://www.douban.com/group/topic/12952159/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210115133434/https://www.douban.com/group/topic/12952159/)  
-> [[PDF] The Hitchhiker's Guide to the Galaxy](https://site.douban.com/129508/widget/notes/5244088/note/177279247/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210115132859/https://site.douban.com/129508/widget/notes/5244088/note/177279247/)  
+> [The Hitchhiker's Guide to the Galaxy PDF edition (Chinese / English)](https://www.douban.com/group/topic/12952159/) :backup[https://web.archive.org/web/20210115133434/https://www.douban.com/group/topic/12952159/]  
+> [[PDF] The Hitchhiker's Guide to the Galaxy](https://site.douban.com/129508/widget/notes/5244088/note/177279247/) :backup[https://web.archive.org/web/20210115132859/https://site.douban.com/129508/widget/notes/5244088/note/177279247/]  
 
-Thanks to the original poster [@songkey](https://www.douban.com/people/sokey/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210115133034/https://www.douban.com/people/sokey/).
+Thanks to the original poster [@songkey](https://www.douban.com/people/sokey/) :backup[https://web.archive.org/web/20210115133034/https://www.douban.com/people/sokey/].
 
 The OneDrive link in the original post is dead, so the files could only be downloaded from Baidu Netdisk. ~~Out of my distaste for Baidu Netdisk~~ I uploaded both files to IPFS instead. You can access them through **any** IPFS gateway, such as [ipfs.io](https://ipfs.io/), [dweb.link](https://dweb.link/), and [inbrowser.link](https://inbrowser.link/).
 

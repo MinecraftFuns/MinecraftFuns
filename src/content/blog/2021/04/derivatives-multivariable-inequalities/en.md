@@ -43,7 +43,7 @@ $\therefore g(x)\gt\lim_{x\to 0}g(x)$
 
 $$\lim_{x\to 0}g(x)=\lim_{x\to 0}\frac{e^x-x-1}{x^2}$$
 
-By [L'Hopital's rule](https://zh.wikipedia.org/wiki/%E6%B4%9B%E5%BF%85%E8%BE%BE%E6%B3%95%E5%88%99) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/Oy8QT)  
+By [L'Hopital's rule](https://zh.wikipedia.org/wiki/%E6%B4%9B%E5%BF%85%E8%BE%BE%E6%B3%95%E5%88%99) :backup[https://archive.is/Oy8QT]  
 
 $$=\lim_{x\to 0}\frac{e^x-1}{2x}$$
 

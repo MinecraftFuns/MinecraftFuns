@@ -5,7 +5,7 @@ date: "2020-01-25"
 tags: ["Competitive Programming", "Editorial", "Number Theory"]
 ---
 
-> [题面](https://lightoj.com/problem/lcm-from-1-to-n) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/DSCtc)
+> [题面](https://lightoj.com/problem/lcm-from-1-to-n) :backup[https://archive.is/DSCtc]
 
 ## 题意
 
@@ -24,6 +24,6 @@ tags: ["Competitive Programming", "Editorial", "Number Theory"]
 
 由于这题的时限是 $4$ 秒，有了递推式就可以 $O(n)$ 过一亿了。
 
-> [代码](https://gist.github.com/MinecraftFuns/ad6289e286a4bddd396a3e58ad3f2e0e) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/PlTAP)
+> [代码](https://gist.github.com/MinecraftFuns/ad6289e286a4bddd396a3e58ad3f2e0e) :backup[https://archive.is/PlTAP]
 
 ![hero.webp](https://ragnarok.joefang.org/static/xd16scumvtp5qkpclvg9adlj2bhnviu8d.webp)

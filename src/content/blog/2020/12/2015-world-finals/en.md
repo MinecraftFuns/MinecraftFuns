@@ -176,7 +176,7 @@ Given a simple graph $G$ containing at least one cycle, find all integers $k$ su
 
 > Solution
 
-A structural result. Ignore the bridges in the graph (these clearly cannot affect the answer); for each remaining edge $i$, compute the number of new bridges $w_i$ created by removing $i$. The answer is the $\gcd$ of all $w_i+1$. See this [proof](https://petrichora.github.io/static/8371608fcdb0258cfbaf329445f395b7446766b798583b5ed0b4dfac9bad5ed1.html) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20201120083829/https://petrichora.github.io/static/8371608fcdb0258cfbaf329445f395b7446766b798583b5ed0b4dfac9bad5ed1.html).
+A structural result. Ignore the bridges in the graph (these clearly cannot affect the answer); for each remaining edge $i$, compute the number of new bridges $w_i$ created by removing $i$. The answer is the $\gcd$ of all $w_i+1$. See this [proof](https://petrichora.github.io/static/8371608fcdb0258cfbaf329445f395b7446766b798583b5ed0b4dfac9bad5ed1.html) :backup[https://web.archive.org/web/20201120083829/https://petrichora.github.io/static/8371608fcdb0258cfbaf329445f395b7446766b798583b5ed0b4dfac9bad5ed1.html].
 
 [Code](https://gist.github.com/MinecraftFuns/1d8b590394f67fef9f7389c514cf345f)
 

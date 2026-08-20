@@ -5,8 +5,8 @@ date: "2020-12-25"
 tags: ["Codeforces", "Editorial"]
 ---
 
-* [链接](https://codeforces.com/contest/930) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/3cPj6)
-* [参考代码](https://gist.github.com/MinecraftFuns/706d87a84abcdb36534820a7a8709609) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/YCQPJ)
+* [链接](https://codeforces.com/contest/930) :backup[https://archive.is/3cPj6]
+* [参考代码](https://gist.github.com/MinecraftFuns/706d87a84abcdb36534820a7a8709609) :backup[https://archive.is/YCQPJ]
 
 ![hero.webp](https://bafkreibbhurwk7asmxigw7d4teva7d7suus74x2cxeo2gq7lcl2encx2pi.ipfs.dweb.link/)
 

@@ -73,8 +73,8 @@ $$\sum_{i=1}^k \frac 1 {\binom n{|A_i|}} \le 1$$
 
 ![girl](https://bafkreifsxipccvifscj2hlt2iyc7j2fnklu3jcon66fatllp432xoq2mdu.ipfs.dweb.link)
 
-[图片来源](https://twitter.com/i/status/1356483004672053248) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/ghpIM)
+[图片来源](https://twitter.com/i/status/1356483004672053248) :backup[https://archive.is/ghpIM]
 
 ## 参考
 
-[Sperner 定理及其证明 | www.cnblogs.com](https://www.cnblogs.com/suncongbo/p/10321099.html) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/YiT9t)
+[Sperner 定理及其证明 | www.cnblogs.com](https://www.cnblogs.com/suncongbo/p/10321099.html) :backup[https://archive.is/YiT9t]

@@ -7,7 +7,7 @@ tags: ["Repost"]
 
 ## 许志永：我们无法逃避——关于南方都市报事件的说明
 
-> 链接：[https://telegra.ph/xu-zhi-yong-we-cant-escape-a-statement-on-the-southern-metropolis-daily-incident-11-27](https://telegra.ph/xu-zhi-yong-we-cant-escape-a-statement-on-the-southern-metropolis-daily-incident-11-27) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20211127024524/https://telegra.ph/xu-zhi-yong-we-cant-escape-a-statement-on-the-southern-metropolis-daily-incident-11-27)
+> 链接：[https://telegra.ph/xu-zhi-yong-we-cant-escape-a-statement-on-the-southern-metropolis-daily-incident-11-27](https://telegra.ph/xu-zhi-yong-we-cant-escape-a-statement-on-the-southern-metropolis-daily-incident-11-27) :backup[https://web.archive.org/web/20211127024524/https://telegra.ph/xu-zhi-yong-we-cant-escape-a-statement-on-the-southern-metropolis-daily-incident-11-27]
 
 2004 年 3 月 19 日，喻华峰被判处 12 年徒刑，4 月 1 日，程益中被正式逮捕。这两位为国家创造了巨额物质财富和精神财富的优秀报人，因为三年前的一次奖金分配要被处以重刑，而背后的原因——那些法律之外的传言几乎人尽皆知。埋葬了收容遣送制度走在时代前沿批判旧体制的勇士们，旧体制反过来要埋葬他们。这是一个颇具象征意义的时代悲剧。
 
@@ -32,7 +32,7 @@ tags: ["Repost"]
 
 ## 程益中：一个报人的反思
 
-> 链接：[https://telegra.ph/cheng-yi-zhong-reflections-of-a-journalist-11-27](https://telegra.ph/cheng-yi-zhong-reflections-of-a-journalist-11-27) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20211127023306/https://telegra.ph/cheng-yi-zhong-reflections-of-a-journalist-11-27)
+> 链接：[https://telegra.ph/cheng-yi-zhong-reflections-of-a-journalist-11-27](https://telegra.ph/cheng-yi-zhong-reflections-of-a-journalist-11-27) :backup[https://web.archive.org/web/20211127023306/https://telegra.ph/cheng-yi-zhong-reflections-of-a-journalist-11-27]
 
 程益中，现代传播集团副总裁、《东方企业家》杂志及《汽车生活》杂志执行出版人。曾任中国证券市场研究设计中心媒体事业管理部副总经理、财讯传媒集团副总裁、*Sports Illustrated* 体育画报中文版执行出版人、*Time Out* 中国版执行出版人。中国当代著名报人、媒体资源整合和管理专家，中国目前最有影响力和最成功的两张日报——《南方都市报》和《新京报》创办人之一、前总编辑。联合国教科文组织 2005 年度世界新闻自由奖获得者。  
 

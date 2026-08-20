@@ -6,9 +6,9 @@ tags: ["WSL", "Cryptography"]
 translation: machine
 ---
 
-Conclusion: [`BCryptGenRandom`](https://docs.microsoft.com/en-us/windows/win32/api/bcrypt/nf-bcrypt-bcryptgenrandom) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/4GYJA)
+Conclusion: [`BCryptGenRandom`](https://docs.microsoft.com/en-us/windows/win32/api/bcrypt/nf-bcrypt-bcryptgenrandom) :backup[https://archive.is/4GYJA]
 
-This has already been discussed on GitHub: [Does WSL provide decent entropy?](https://github.com/microsoft/WSL/issues/1789) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/1shmY).
+This has already been discussed on GitHub: [Does WSL provide decent entropy?](https://github.com/microsoft/WSL/issues/1789) :backup[https://archive.is/1shmY].
 
 WSL developer `@benhillis` gave this [reply](https://github.com/microsoft/WSL/issues/1789#issuecomment-287873135):
 

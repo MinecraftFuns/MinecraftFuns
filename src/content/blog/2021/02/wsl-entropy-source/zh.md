@@ -5,9 +5,9 @@ date: "2021-02-10"
 tags: ["WSL", "Cryptography"]
 ---
 
-结论：[`BCryptGenRandom`](https://docs.microsoft.com/en-us/windows/win32/api/bcrypt/nf-bcrypt-bcryptgenrandom) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/4GYJA)
+结论：[`BCryptGenRandom`](https://docs.microsoft.com/en-us/windows/win32/api/bcrypt/nf-bcrypt-bcryptgenrandom) :backup[https://archive.is/4GYJA]
 
-GitHub 上已经讨论过这个问题：[Does WSL provide decent entropy?](https://github.com/microsoft/WSL/issues/1789) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/1shmY)。
+GitHub 上已经讨论过这个问题：[Does WSL provide decent entropy?](https://github.com/microsoft/WSL/issues/1789) :backup[https://archive.is/1shmY]。
 
 其中 WSL 开发人员 `@benhillis` 给出[回复](https://github.com/microsoft/WSL/issues/1789#issuecomment-287873135)：
 

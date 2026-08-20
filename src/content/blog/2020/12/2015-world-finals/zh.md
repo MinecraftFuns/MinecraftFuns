@@ -175,7 +175,7 @@ $$(a+d)\cdot(b+c)-a\cdot b-c\cdot d=a\cdot c+b\cdot d$$
 
 > 题解
 
-结论题。忽略图中的桥边（这些边显然不会对答案造成影响），对于每条剩下的边 $i$，计算去掉 $i$ 后新产生的桥边的数量 $w_i$，答案为所有 $w_i+1$ 的 $\gcd$。可以参考[证明](https://petrichora.github.io/static/8371608fcdb0258cfbaf329445f395b7446766b798583b5ed0b4dfac9bad5ed1.html) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20201120083829/https://petrichora.github.io/static/8371608fcdb0258cfbaf329445f395b7446766b798583b5ed0b4dfac9bad5ed1.html)。
+结论题。忽略图中的桥边（这些边显然不会对答案造成影响），对于每条剩下的边 $i$，计算去掉 $i$ 后新产生的桥边的数量 $w_i$，答案为所有 $w_i+1$ 的 $\gcd$。可以参考[证明](https://petrichora.github.io/static/8371608fcdb0258cfbaf329445f395b7446766b798583b5ed0b4dfac9bad5ed1.html) :backup[https://web.archive.org/web/20201120083829/https://petrichora.github.io/static/8371608fcdb0258cfbaf329445f395b7446766b798583b5ed0b4dfac9bad5ed1.html]。
 
 [代码](https://gist.github.com/MinecraftFuns/1d8b590394f67fef9f7389c514cf345f)
 

@@ -5,8 +5,8 @@ date: "2020-11-15"
 tags: ["Codeforces", "Editorial"]
 ---
 
-* [链接](https://codeforces.com/contest/297) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/rE0U8)
-* [参考代码](https://gist.github.com/MinecraftFuns/9c16b6a800123e37711594ee341bf834) [ᴮᵃᶜᵏᵘᵖ](https://archive.is/SoEeF)
+* [链接](https://codeforces.com/contest/297) :backup[https://archive.is/rE0U8]
+* [参考代码](https://gist.github.com/MinecraftFuns/9c16b6a800123e37711594ee341bf834) :backup[https://archive.is/SoEeF]
 
 ## 未独立完成的题目
 

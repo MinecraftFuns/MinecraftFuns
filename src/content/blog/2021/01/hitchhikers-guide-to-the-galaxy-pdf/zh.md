@@ -21,10 +21,10 @@ tags: ["Reading", "Sharing"]
 
 从豆瓣上找到一个不错的 PDF 版本，分享一下。
 
-> [银河系漫游指南 PDF 版（中 / 英）](https://www.douban.com/group/topic/12952159/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210115133434/https://www.douban.com/group/topic/12952159/)  
-> [【PDF】《银河系漫游指南》](https://site.douban.com/129508/widget/notes/5244088/note/177279247/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210115132859/https://site.douban.com/129508/widget/notes/5244088/note/177279247/)  
+> [银河系漫游指南 PDF 版（中 / 英）](https://www.douban.com/group/topic/12952159/) :backup[https://web.archive.org/web/20210115133434/https://www.douban.com/group/topic/12952159/]  
+> [【PDF】《银河系漫游指南》](https://site.douban.com/129508/widget/notes/5244088/note/177279247/) :backup[https://web.archive.org/web/20210115132859/https://site.douban.com/129508/widget/notes/5244088/note/177279247/]  
 
-感谢原帖作者 [@songkey](https://www.douban.com/people/sokey/) [ᴮᵃᶜᵏᵘᵖ](https://web.archive.org/web/20210115133034/https://www.douban.com/people/sokey/)。
+感谢原帖作者 [@songkey](https://www.douban.com/people/sokey/) :backup[https://web.archive.org/web/20210115133034/https://www.douban.com/people/sokey/]。
 
 原帖中 OneDrive 的链接挂了，只能从百度云下载。~~出于对百度云的厌恶~~ 我把两个文件传到 IPFS 上了。你可以通过**任意** IPFS Gateway 访问，如 [ipfs.io](https://ipfs.io/)、[dweb.link](https://dweb.link/) 和 [inbrowser.link](https://inbrowser.link/)。
 
