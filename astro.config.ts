@@ -6,6 +6,8 @@ import { satteri } from "@astrojs/markdown-satteri";
 
 import { explain } from "./src/prelude/adt.ts";
 import { developmentTarget, findTarget } from "./src/lib/deployment.ts";
+import { siteMarkup } from "./src/lib/directives.ts";
+import { assertMarkupClean } from "./src/lib/markup.ts";
 import { katexRendering } from "./src/lib/math.ts";
 import { sitemapFilter } from "./src/lib/sitemap.ts";
 
@@ -93,6 +95,19 @@ export default defineConfig({
       },
     },
     /*
+     * The one place a rejected Markdown directive can fail the build.
+     *
+     * `lib/markup.ts` cannot fail it from where the error is found: Astro
+     * swallows exceptions raised by a Markdown plugin and ignores Sätteri's
+     * diagnostics, so a mistyped tag would otherwise be dropped from the page
+     * and the build would report success. The plugin records instead, and
+     * this hook raises what it recorded, at a boundary Astro does propagate.
+     */
+    {
+      name: "markup-directives",
+      hooks: { "astro:build:done": () => assertMarkupClean() },
+    },
+    /*
      * The sitemap. `sitemap-index.xml` plus `sitemap-0.xml` is what this
      * integration emits and what its own discovery guidance points at, so the
      * location is the documented one rather than a guess. Discovery is covered
@@ -111,8 +126,18 @@ export default defineConfig({
      * time: the competitive programming archive is written in it. Sätteri
      * only marks the spans; `lib/math.ts` compiles them with KaTeX, whose
      * stylesheet `ArticlePage` imports.
+     *
+     * `directive` adds the `:name[…]` grammar the site's own tags are written
+     * in. It is not safe on its own: an unhandled directive is *dropped*, and
+     * the parser reads `10:30` as one, so `lib/markup.ts` is what makes the
+     * feature survive contact with prose. Enabling one without the other
+     * silently edits paragraphs.
      */
-    processor: satteri({ features: { math: true }, hastPlugins: [katexRendering] }),
+    processor: satteri({
+      features: { math: true, directive: true },
+      mdastPlugins: [siteMarkup],
+      hastPlugins: [katexRendering],
+    }),
     shikiConfig: {
       // Shiki themes are keyed to their own palettes; these two are the
       // closest neutral fits for the eggshell/navy system. Revisit if code

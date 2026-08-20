@@ -527,6 +527,24 @@
   }
 
   /*
+   * The floating marker on an archived copy of the link before it, written
+   * `:backup[url]` in Markdown. Appearance and hover belong to `.link-muted`,
+   * which this composes with; the only thing here is the raising.
+   *
+   * `line-height: 0` keeps a raised marker from growing the line box, which
+   * is what otherwise makes superscripts push their paragraph's lines apart.
+   * Sizes are em-relative because the marker rides whatever text it follows.
+   */
+  .backup {
+    font-family: var(--font-mono);
+    font-size: 0.7em;
+    vertical-align: super;
+    line-height: 0;
+    margin-left: 0.15em;
+    white-space: nowrap;
+  }
+
+  /*
    * The two supporting roles, each of which was a type class and a colour
    * class written side by side in every component that needed it.
    *
