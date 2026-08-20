@@ -18,18 +18,18 @@ const selected = featuredProjects();
 ---
 
 <BaseLayout>
-  {/* Opens on a habit, not a résumé; the credential is one click away. */}
+  {/* Opens on the work, not a résumé; the credential is one click away. */}
   <PageIntro
     kind="hero"
     eyebrow="Toronto"
-    title="I keep my own copy of things."
-    lede={`Most of what is on this site began as a problem I had: a bookmark that had gone 404, a private network I could not reason about, an email that told the sender I had opened it. I study ${majorsPhrase} at the ${standing.institution}, and write the fixes down here.`}
+    title="I build infrastructure, and take apart what does not behave as advertised."
+    lede={`${majorsPhrase} at the ${standing.institution}. Most of what I build is infrastructure I wanted for myself: private networks, self-hosted services, and software that does not report what I do with it to anybody else. Most of what I write down is a bug whose cause turned out to sit a layer below the symptom.`}
   >
     <div class="flex flex-wrap gap-xs">
       <Button href={routeUrl("/blog")} tone="primary" size="control">Read the blog</Button
       >
       <Button href={routeUrl("/about")} tone="secondary" size="control"
-        >Get in touch</Button
+        >How to reach me</Button
       >
     </div>
   </PageIntro>
