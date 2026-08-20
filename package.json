@@ -26,6 +26,7 @@
     "rules:control-flow": "node scripts/check-control-flow.ts",
     "rules:typography": "node scripts/check-typography.ts",
     "rules:readme": "node scripts/check-readme.ts",
+    "rules:autospace": "node scripts/check-autospace.ts",
     "test": "node --test \"src/**/*.test.ts\" \"scripts/**/*.test.ts\"",
     "build": "astro build",
     "dist:check": "node scripts/check-dist.ts",
