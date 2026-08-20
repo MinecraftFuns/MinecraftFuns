@@ -14,8 +14,7 @@ import type { StandingConfig } from "../schema.ts";
  * template for the day there is something true to add.
  */
 export const standing = {
-  /* The year counter: the one value here that goes stale on a schedule.
-     Bump it once, in this line, each September. */
+  /* Scheduled fact: update once each September. */
   ordinal: "fourth",
   institution: "University of Toronto",
   majors: ["Computer Science", "Cognitive Science"],

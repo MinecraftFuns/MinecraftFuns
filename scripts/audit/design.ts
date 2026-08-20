@@ -1,17 +1,4 @@
-/**
- * Design conformance, judged from raw measurements taken by `pageProbe`.
- *
- * A design system is a finitely generated algebra: the spacing, type, and
- * radius scales are its generators, and rendered geometry should be closed
- * under them. A 13px gap in a system offering 12 and 16 is a type error CSS
- * has no type system to catch.
- *
- * Alignment is judged as a *near* miss rather than a miss. The design intends
- * a binary (edges line up, or one is deliberately offset), but rendering
- * admits a continuum, and a 2px delta lands between the two: neither equal nor
- * meaningfully different. Rhythm is the matching homogeneity law, since
- * mapping one component over a list should give uniform gaps.
- */
+/** Check measured geometry against spacing, type, radius, alignment, and rhythm rules. */
 
 import type { Finding } from "./checks.ts";
 import type { DesignProbe, TokenNames } from "./probe.ts";
@@ -30,9 +17,7 @@ export const ALIGNMENT_TOLERANCE = 4;
  * than duplicated here, so fluid scales cannot drift against the stylesheet.
  */
 export const TOKEN_NAMES: TokenNames = {
-  /* The interactive heights live in the spacing namespace because Tailwind's
-     `--spacing-*` is its length namespace, and a 40px control height is a
-     legitimate generator for rendered geometry to land on. */
+  /* Interactive heights belong to Tailwind's length namespace. */
   spacing: [
     "--spacing-3xs",
     "--spacing-2xs",
@@ -74,11 +59,7 @@ const near = (a: number, b: number, epsilon: number = EPSILON): boolean =>
   Math.abs(a - b) <= epsilon;
 const round = (value: number): number => Math.round(value * 10) / 10;
 
-/**
- * `token` is a generator; `on-grid` is a multiple of the base that is not a
- * token, so plausible but worth a look; `off-grid` is neither. The linear scan
- * is right for eight entries, and tolerance matching rules out a hashed lookup.
- */
+/** Token, on-grid non-token, or off-grid measurement verdict. */
 export type Verdict = "token" | "on-grid" | "off-grid";
 
 export const classifyMeasurement = (
@@ -100,11 +81,7 @@ export const isNearMiss = (
 ): boolean =>
   Math.abs(a - b) > EPSILON && Math.abs(a - b) <= tolerance;
 
-/**
- * Near-miss pairs among edge positions. Sorting and deduplicating first means
- * each pair is considered once and in a canonical order; the quadratic scan is
- * bounded by the probe's twelve-children cap.
- */
+/** Find canonical near-miss edge pairs after sorting and deduplication. */
 export const nearMissPairs = (
   values: readonly number[],
   tolerance: number = ALIGNMENT_TOLERANCE,
@@ -126,10 +103,7 @@ export const nearMissPairs = (
 export const rhythmBreaks = (gaps: readonly number[]): readonly number[] => {
   if (gaps.length < 2) return [];
 
-  /* Distinct under approximate equality, which `new Set` cannot express: it
-     compares exactly, and two gaps a rounding error apart are one rhythm. The
-     fold returns a new list rather than pushing into its own accumulator, so
-     nothing here is both the input and the output. */
+  /* Cluster approximately equal gaps; exact `Set` equality is too strict. */
   const clusters = gaps.reduce<readonly number[]>(
     (found, gap) =>
       found.some((cluster) => near(cluster, gap, EPSILON * 2)) ? found : [...found, gap],
@@ -145,8 +119,7 @@ const SCALES = [
   { key: "fontSizes", tokenKey: "text", label: "font size" },
 ];
 
-/* The probe's group key to the edge it names. `as const` keeps the keys
-   literal, which `Object.entries` over a record would widen to `string`. */
+/* Map probe group keys to measured edges; preserve literal keys with `as const`. */
 const EDGES = [
   { key: "lefts", edge: "left" },
   { key: "rights", edge: "right" },
@@ -214,12 +187,7 @@ export const designFindings = (
       });
   });
 
-  /*
-   * A gap that nobody declared. Every other rule here checks that a value is
-   * on the scale; this one checks that a value exists at all, which is the
-   * failure mode when two components each assume the other owns the space
-   * between them.
-   */
+  /* Detect missing spacing when neither sibling owns the gap. */
   const flush = (probe.flushPairs ?? []).map((pair) =>
     at({
       rule: "siblings-flush",

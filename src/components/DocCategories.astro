@@ -2,19 +2,7 @@
 import { categoryHref, type DocCategory } from "../lib/docs.ts";
 import Button from "./Button.astro";
 
-/**
- * The categories a reader can browse by, on the docs index.
- *
- * The docs' own component, not `PostTags` with a different label type: typing
- * this to `DocCategory` is what stops a post's tags being rendered here. What
- * it does not have of its own is a *look*. Both lists are controls, both go
- * through `Button`, and neither describes a border again.
- *
- * The mono treatment this used to carry is gone with the rest. A category
- * still reads as mono inside a doc's header, where it sits in a line of
- * metadata; here it is something to press, and a control on this site looks
- * like a control.
- */
+/** Docs-only category controls; shared `Button` centralizes their styling. */
 type Props = { readonly categories: readonly DocCategory[] };
 
 const { categories } = Astro.props;

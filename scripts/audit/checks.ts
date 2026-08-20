@@ -1,11 +1,6 @@
 import { byCodepoint } from "../../src/lib/collate.ts";
 
-/**
- * Finding bookkeeping: ordering, deduplication, and counting. Pure and total.
- *
- * `Finding` is the record the whole audit pipeline passes around, and until
- * these files became TypeScript its shape was written down nowhere.
- */
+/** Pure finding bookkeeping: ordering, deduplication, and counting. */
 
 /** Severity, as axe reports it and as the design probes borrow it. */
 export type Impact = "critical" | "serious" | "moderate" | "minor" | "info";
@@ -42,14 +37,9 @@ export const IMPACT_ORDER: readonly Impact[] = [
   "info",
 ];
 
-/**
- * Rank lookup built once. A comparator runs O(n log n) times, so scanning the
- * array inside it would multiply the sort by the number of severity levels.
- */
+/** Rank lookup built once for repeated comparator calls. */
 const IMPACT_RANK = new Map(IMPACT_ORDER.map((impact, index) => [impact, index]));
-/* Past the last known severity, so an impact this table has never heard of
-   sorts below every one it has. Read out of the map instead, the rank was
-   `number | undefined` and the comparator subtracted it regardless. */
+/* Unknown impacts sort after known severities. */
 const DEFAULT_RANK = IMPACT_ORDER.length;
 
 const rankOf = (impact: Impact | undefined): number =>
@@ -60,10 +50,7 @@ export const compareFindings = (a: Finding, b: Finding): number => {
   const byImpact = rankOf(a.impact) - rankOf(b.impact);
   if (byImpact !== 0) return byImpact;
 
-  // Fields compared directly: concatenating keys would allocate a string per
-  // comparison, and the sort makes many. By code point, since a page path and
-  // a rule name are identifiers, and a report must not sort differently on a
-  // different machine.
+  // Compare identifiers directly in machine-stable code-point order.
   const byPage = byCodepoint(a.page, b.page);
   return byPage !== 0 ? byPage : byCodepoint(a.rule, b.rule);
 };
@@ -74,11 +61,7 @@ const contextOf = ({ viewport, colorScheme }: Finding): string =>
 const identityOf = ({ category, rule, page, selector }: Finding): string =>
   `${category}|${rule}|${page}|${selector ?? ""}`;
 
-/**
- * Collapse findings repeated across viewports and schemes into one entry
- * carrying every context it appeared in. The same contrast failure at four
- * combinations is one problem to fix, not four.
- */
+/** Merge repeated findings while retaining every viewport/scheme context. */
 export const dedupeFindings = (findings: readonly Finding[]): readonly MergedFinding[] => {
   const merged = new Map<string, { finding: Finding; contexts: Set<string> }>();
 

@@ -1,27 +1,7 @@
 ---
 import type { Href } from "../lib/url.ts";
 
-/**
- * A labelled list: a short label in a fixed left column, its value beside it.
- *
- * Education and Contact were already sharing the grid, through two `const`
- * strings in the page. What they were not sharing was the value column, which
- * was a slot every call site filled with type of its own choosing. Three of
- * them chose differently: an education entry set `text-control`, the
- * fingerprint `text-body-sm`, and a profile link nothing at all, so a single
- * list rendered alternating rows at 14px and 16px.
- *
- * The body is therefore a closed sum rather than a slot. Each shape a value can
- * take is given its look once, here; a fourth shape is a variant added to this
- * type, not a class written into a page. That is the difference between a
- * convention and a guarantee.
- *
- * Rows align on the first baseline, not the top. A label is 12px and a value is
- * 16px, so top alignment sits the label a different distance above its value on
- * every row that carries a different value; baselines are what a reader
- * actually reads as "the same line". The columns collapse below `sm`, where the
- * fixed label column would crowd the text.
- */
+/** Label/value list; closed body union centralizes each value shape's rendering. */
 export type EntryBody =
   | {
       readonly tag: "lines";
@@ -41,19 +21,7 @@ type Props = { readonly entries: readonly Entry[] };
 
 const { entries } = Astro.props;
 
-/*
- * Astro templates cannot host a `switch`, so exhaustiveness is stated as a
- * type: a fourth variant leaves `Unhandled` inhabited and this line stops
- * typechecking until the markup below is taught to render it.
- *
- * The tuple wrappers are load-bearing. A bare conditional over a union
- * distributes across its members, and `never` is the empty union, so the whole
- * expression would evaluate to `never` and check nothing at all.
- *
- * `assertNever` is the wrong tool here and was doing the wrong work: it is a
- * runtime eliminator, so proving a static fact with it meant walking every
- * entry on every render.
- */
+/* Tuple conditional enforces exhaustive rendering without a runtime walk. */
 type Unhandled = Exclude<EntryBody["tag"], "lines" | "link" | "mono">;
 
 const _exhaustive: [Unhandled] extends [never] ? true : never = true;

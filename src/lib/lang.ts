@@ -71,11 +71,7 @@ export const parseLang = (raw: string): Parsed<Lang> => {
     : ok(found);
 };
 
-/*
- * Lookups, indexed once at module load: O(1) per read against a `find` per
- * read, which over four languages is about taste, but these run for every
- * rendered row and link.
- */
+/* Index lookups once at module load for O(1) access. */
 const indexed = <T>(field: (language: (typeof languages)[number]) => T) =>
   new Map<Lang, T>(languages.map((language) => [language.code, field(language)]));
 

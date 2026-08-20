@@ -7,27 +7,13 @@ import type { Href } from "../lib/url.ts";
 import type { RootedPath } from "../schema.ts";
 import type { Chrome } from "./chrome.ts";
 
-/**
- * A page that is a header, a body of prose, and a way back.
- *
- * Both long-form pages were this shape written twice. The header slot is what
- * keeps the post and the doc distinct: they pass different components, because
- * a doc is not a post missing a date, and this layout never looks inside.
- *
- * That split is deliberate and it has a cost, which is that `ArticleHeader`
- * and `DocHeader` still spell out the same meta line and the same lede. The
- * trade is that the two headers can diverge on purpose while the page around
- * them cannot diverge by accident, and the page around them is the part that
- * had already drifted.
- */
+/** Shared long-form shell; header slot keeps post and doc metadata distinct. */
 type Props = {
   readonly title: string;
   readonly description: string;
   readonly chrome?: Chrome;
   readonly back: { readonly href: Href; readonly label: string };
-  /* Multilingual head state, forwarded untouched: this layout arranges the
-     page and takes no view on what language it is in. Each admits
-     `undefined` explicitly for the reason BaseLayout's own props do. */
+  /* Forward head metadata untouched; this layout does not interpret language. */
   readonly lang?: string | undefined;
   readonly canonicalRoute?: RootedPath | undefined;
   readonly alternates?:
@@ -51,9 +37,9 @@ const { title, description, chrome, back, lang, canonicalRoute, alternates } =
     <slot name="header" />
 
     {
-      /* Both gaps declared here: the header and the back link are siblings
-        this layout arranges, and neither can own the space between itself and
-        something it does not know about. */
+      /*
+       * Layout owns the gap between sibling header and back link.
+       */
     }
     <div class="prose mt-lg mb-xl">
       <slot />

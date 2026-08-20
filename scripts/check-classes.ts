@@ -1,34 +1,8 @@
 #!/usr/bin/env node
 /**
- * Source gate: no anonymous values in markup, and no type set in a page.
- *
- * The theme deletes Tailwind's default namespaces, so `p-4` and `text-red-500`
- * genuinely do not exist. One hole remains: bracket syntax compiles whatever
- * you put in it, so `w-[437px]` would reopen the whole space the theme just
- * closed. This closes it.
- *
- * The three forms and what each should have been:
- *
- *   text-[13px]            an entry in `@theme`
- *   [overflow-wrap:anywhere]   a real utility, or a rule in the components layer
- *   [&>:last-child]:...    a `@custom-variant` with a name
- *
- * A value worth using twice is worth naming once, and a value used once is
- * usually a mistake nobody will catch by reading. This is a source check
- * rather than an artifact check because by the time it reaches CSS the
- * literal has been compiled away into something that looks deliberate.
- *
- * The second rule is about layering. Naming every size in `@theme` stops a
- * value being anonymous but not a *decision* being made twice: the About page
- * built two lists of the same shape and set the value column's role separately
- * on each row, so one list rendered at 14px and 16px alternately. Nothing
- * above catches that, because every class involved was a legitimate named
- * role. What catches it is refusing to let a page set type at all. Pages
- * compose components; components decide what things look like, once, where a
- * second opinion has nowhere to live.
- *
- * The roles are read out of the theme rather than listed here, so the rule
- * cannot fall behind the type scale it polices.
+ * Source gate for anonymous Tailwind values and page-level type styling.
+ * Bracket syntax bypasses the closed theme; pages must compose styled
+ * components rather than re-decide type roles.
  */
 
 import { readFile } from "node:fs/promises";
@@ -56,16 +30,13 @@ export type Violation = {
 const RULES: readonly Rule[] = [
   {
     rule: "arbitrary-value",
-    /* A utility name followed by a bracket: `w-[`, `grid-cols-[`, `aria-[`.
-       The hyphen is what separates this from array indexing. */
+    /* Utility bracket syntax, not TypeScript indexing. */
     pattern: /\b[a-z][a-z0-9]*(?:-[a-z0-9]+)*-\[[^\]]*\]/g,
     remedy: "name the value in @theme and use the generated utility",
   },
   {
     rule: "arbitrary-property",
-    /* Requires a class boundary before the bracket and no space after the
-       colon, which is what distinguishes it from a TypeScript index
-       signature such as `{ [key: string]: T }`. */
+    /* Class boundary and no post-colon space avoid index-signature matches. */
     pattern: /(?<=["'\s])\[[a-z-]+:[^\s\]]*\]/g,
     remedy: "use a utility, or add a rule to the components layer",
   },
@@ -75,17 +46,13 @@ const RULES: readonly Rule[] = [
     remedy: "declare a @custom-variant so the state has a name",
   },
   {
-    /* The tell of a hand-rolled accent link. Five components had spelled the
-       recipe out, three of them differently. */
+    /* Detect hand-rolled accent-link styling. */
     rule: "inline-link-style",
     pattern: /hover:text-accent-hover/g,
     remedy: "use .link, or .link-in-text for a link inside a sentence",
   },
   {
-    /* Mono and the quietest ink in one class list is the metadata role, which
-       seven components had each decided for themselves. `[^"]*` confines the
-       match to a single attribute, so two unrelated elements cannot combine
-       into a false positive. */
+    /* Detect inline metadata styling within one attribute. */
     rule: "inline-meta-style",
     pattern:
       /"[^"]*\btext-ink-tertiary\b[^"]*\bfont-mono\b[^"]*"|"[^"]*\bfont-mono\b[^"]*\btext-ink-tertiary\b[^"]*"/g,
@@ -108,10 +75,7 @@ export const classRegions = (source: string): readonly string[] => {
   const parsed = frontmatter(source);
   if (parsed === undefined) return [source];
 
-  /* Exactly one alternative participates in any match, but `RegExp` is typed
-     without reference to its pattern, so both groups read as optional. The
-     empty string is the honest third case: it is a region with nothing in it
-     to match, so an impossible match contributes nothing rather than a hole. */
+  /* Keep only matched string-literal regions; unmatched alternatives become empty. */
   const literals = [...parsed.body.matchAll(/"([^"\\\n]*)"|'([^'\\\n]*)'/g)].map(
     (literal) => literal[1] ?? literal[2] ?? "",
   );
@@ -130,25 +94,13 @@ export const anonymousValues = (source: string): readonly Violation[] =>
     ),
   );
 
-/**
- * The type-scale role names, read from the theme.
- *
- * `--text-body: …` declares a role; `--text-body--line-height: …` tunes one,
- * and `--text-*: initial` is the namespace reset. Only the first names a
- * utility, so the two double-hyphen forms are dropped.
- */
+/** Read utility role names from theme declarations, excluding modifiers/resets. */
 export const typeRoles = (css: string): readonly string[] =>
   captures(css.matchAll(/^\s*--text-([a-z0-9-]+):/gm)).filter(
     (role) => !role.includes("--") && !role.includes("*"),
   );
 
-/**
- * Type roles set in one file. Pure and total.
- *
- * The lookahead is what keeps `text-body` from also matching inside
- * `text-body-sm`: a word boundary sits between `y` and `-`, so `\b` alone
- * would report every longer role twice.
- */
+/** Find type roles used in one file without matching longer role names. */
 export const typeRolesSet = (
   source: string,
   roles: readonly string[],
@@ -172,8 +124,7 @@ export const typeRolesSet = (
 const main = async () => {
   const root = resolve(process.env.SRC_DIR ?? "src");
 
-  /* Component `.ts` is scanned for the same reason frontmatter literals are:
-     a class list moved to a `const` is still markup. */
+  /* Component `.ts` can still carry markup class lists. */
   const files = (await filesUnder(root)).filter(
     (path) =>
       path.endsWith(".astro") ||

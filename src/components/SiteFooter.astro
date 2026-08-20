@@ -10,13 +10,13 @@ import { currentYear } from "../lib/time.ts";
  */
 const year = currentYear();
 
-/* Derived from the key, not restated beside it. */
 const fingerprint = await siteFingerprint();
 ---
 
 {
-  /* The role is set on the element, so the whole footer inherits it and the
-    children that differ say so rather than restating the default. */
+  /*
+   * Role set on footer; children override where needed.
+   */
 }
 <footer class="note border-hairline border-t py-xl">
   <div class="mx-auto grid w-full max-w-frame grid-cols-footer gap-lg px-md md:px-lg">

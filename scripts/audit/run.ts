@@ -1,14 +1,4 @@
-/**
- * Browser audit driver: the only effectful module here.
- *
- * Non-blocking by construction: it always exits 0 and the workflow does not
- * gate deployment on it, because an audit that can fail a deploy is one that
- * gets disabled the first time it is inconvenient.
- *
- * Contexts are created per (viewport, scheme) and reused across routes: a
- * context is a fresh browser profile while a page is cheap, so ordering the
- * loop contexts-outermost costs eight profiles rather than one per page visit.
- */
+/** Effectful browser audit driver; findings never gate deployment. */
 
 import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -36,7 +26,7 @@ import {
 import { toJson, toMarkdown, type Meta } from "./report.ts";
 
 const PORT = Number(process.env.AUDIT_PORT ?? 4321);
-/** Defaults describe the eventual primary target: joefang.org, served at root. */
+/** Defaults target the primary root deployment. */
 const BASE = process.env.SITE_BASE ?? "/";
 const SITE = process.env.SITE_URL ?? "https://joefang.org";
 const DIST = resolve(process.env.DIST_DIR ?? "dist");
@@ -47,16 +37,12 @@ const BASE_PREFIX = BASE.replace(/\/+$/, "");
 const urlFor = (route: string): string => `${ORIGIN}${BASE_PREFIX}${route}`;
 const slug = (route: string): string => route.replace(/^\/|\/$/g, "").replaceAll("/", "_") || "home";
 
-/**
- * 320 is the narrowest width WCAG reflow expects to work; 1440 is a common
- * desktop. Axe runs at the extremes only; the middle widths exist to catch
- * layout overflow, which is where they actually differ.
- */
+/** 320px is WCAG's reflow minimum; 1440px represents desktop. */
 type Viewport = {
   readonly name: string;
   readonly width: number;
   readonly height: number;
-  /** Axe runs at the extremes only; the middle widths catch layout overflow. */
+  /** Axe runs at extremes; middle widths catch layout overflow. */
   readonly axe: boolean;
   readonly capture: boolean;
 };
@@ -68,8 +54,7 @@ const VIEWPORTS: readonly Viewport[] = [
   { name: "desktop", width: 1440, height: 900, axe: true, capture: true },
 ];
 
-/* Playwright's own union, so a scheme this list invents fails here rather
-   than at the browser. */
+/* Closed scheme union catches unsupported values before the browser. */
 type Scheme = "light" | "dark";
 
 const SCHEMES: readonly Scheme[] = ["light", "dark"];
@@ -88,16 +73,12 @@ const recordAll = (entries: readonly Finding[]): void => entries.forEach(record)
 // Adding a check is a row, not another near-identical block.
 // ---------------------------------------------------------------------------
 
-/**
- * A layout rule names its findings directly rather than a key into the probe.
- * The message depends on which list it reads, and a key plus a separate
- * `message` leaves that agreement to the reader; a closure states it.
- */
+/** Layout rule couples the source probe list to its finding message. */
 type LayoutRule = {
   readonly category: string;
   readonly rule: string;
   readonly impact: Impact;
-  /** Target size matters where fingers are used, not under a desktop pointer. */
+  /** Apply target-size rule only for touch layouts. */
   readonly touchOnly: boolean;
   readonly findings: (
     layout: LayoutProbe,

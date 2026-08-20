@@ -30,8 +30,7 @@ export const projectKinds = [
 
 export type ProjectKind = (typeof projectKinds)[number]["kind"];
 
-/* The shape is in `schema.ts`; only the set of kinds is derived from the data
-   above, and that derivation is what keeps this file to one place per fact. */
+/* Schema owns shape; kinds derive from the data above. */
 export type Project = ProjectConfig<ProjectKind>;
 
 /**

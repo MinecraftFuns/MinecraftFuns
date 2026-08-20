@@ -5,12 +5,7 @@ import type { NonEmpty } from "../../../prelude/adt.ts";
 import { postTags, type PostSummary, type PostTag } from "../../../lib/posts.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
-/*
- * One page per tag, built from the same taxonomy the tag links are derived
- * from, so a link can only point at a page that exists. `taxonomy` rejects a
- * tag with no usable URL segment, and two tags that would share one, before
- * any of this runs.
- */
+/* Taxonomy-derived pages; validation rejects empty or colliding slugs first. */
 export async function getStaticPaths() {
   const tags = await postTags();
   return tags.map((taxon) => ({
@@ -21,8 +16,7 @@ export async function getStaticPaths() {
 
 type Props = {
   readonly tag: PostTag;
-  /* Non-empty by type: a tag exists only by being on a post, so the empty
-     state `ListPage` can render is unreachable from here. */
+  /* NonEmpty because every tag belongs to a post. */
   readonly posts: NonEmpty<PostSummary>;
 };
 

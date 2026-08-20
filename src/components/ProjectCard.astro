@@ -7,16 +7,15 @@ type Props = { readonly project: Project };
 
 const { project } = Astro.props;
 
-/* Both derived from the one span. `null` means "this state shows no badge", a
-   decision rather than a value that went missing. */
+/* Badge and span derive from one project state; null means no badge. */
 const badge = badgeFor(project);
 const span = spanOf(project, currentYear());
 ---
 
 {
-  /* Always an anchor: `href` is required, so the card has one shape and the
-     hover treatment needs no condition to guard it. Elevation is a surface
-     step plus a stronger hairline; this theme has no shadow utilities. */
+  /*
+   * Required `href` gives every card one hoverable shape.
+   */
 }
 <a
   class="border-hairline bg-surface-1 hover:border-hairline-strong hover:bg-surface-2 flex h-full flex-col gap-xs rounded-lg border p-md no-underline transition-colors"

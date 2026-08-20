@@ -21,23 +21,7 @@ import {
 } from "../../lib/posts.ts";
 import { routeUrl } from "../../lib/url.ts";
 
-/*
- * Routes are generated only from published renditions, so a draft has no URL
- * at all rather than an unlisted one that anybody could guess.
- *
- * Every article is served at its bare route, which renders the primary
- * rendition: the article's best language by the preference order in
- * `config/languages.ts`. Every rendition in any *other* language is
- * additionally served at its language-suffixed route, primary or not, so
- * `/blog/YYYY/MM/slug/zh/` holds from the day a Chinese rendition exists and
- * a better-preferred translation arriving later changes what the bare URL
- * renders, never where the Chinese lives. `canonicalPathOf` says which of a
- * rendition's addresses is the one to index.
- *
- * The parameters come from the reconciled path rather than the raw entry id,
- * so the route a page is built at and the href every index links to are two
- * uses of one value instead of two constructions that could differ.
- */
+/* Published renditions only create routes: bare serves primary, others keep suffixed addresses. */
 export async function getStaticPaths() {
   const articles = await publishedArticles();
 
@@ -67,8 +51,7 @@ const { article, rendition } = Astro.props;
 const { entry } = rendition;
 const { Content } = await render(entry);
 
-/* Through `minutesOf` so the article header and the index row cannot report
-   different reading times for the same body. */
+/* Shared summarization keeps article and index metadata consistent. */
 const minutes = minutesOf(entry);
 
 const crossLink = (target: PublishedRendition) => ({
@@ -77,14 +60,10 @@ const crossLink = (target: PublishedRendition) => ({
   label: nativeNameOf(target.lang),
 });
 
-/* Every other rendition, preference-ordered: the reader's ways across. */
+/* Preference-ordered links to other renditions. */
 const alternates = othersOf(article, rendition.lang).map(crossLink);
 
-/*
- * The rendition the translations were made from. Guaranteed to exist by
- * `assemble` (an article of translations with no original fails the build),
- * so the guard below is for the checker, which cannot see that far.
- */
+/* `assemble` guarantees an original; guard satisfies static analysis. */
 const original = originalOf(article);
 ---
 

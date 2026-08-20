@@ -5,10 +5,7 @@ import type { NonEmpty } from "../../../prelude/adt.ts";
 import { docCategories, type DocCategory, type DocSummary } from "../../../lib/docs.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
-/*
- * One page per category, built from the same taxonomy the category links are
- * derived from, so a link can only point at a page that exists.
- */
+/* Taxonomy-derived page; every category link points to an existing page. */
 export async function getStaticPaths() {
   const categories = await docCategories();
   return categories.map((taxon) => ({
@@ -19,7 +16,7 @@ export async function getStaticPaths() {
 
 type Props = {
   readonly category: DocCategory;
-  /* Non-empty by type: a category exists only by being on a doc. */
+  /* NonEmpty because every category belongs to a doc. */
   readonly docs: NonEmpty<DocSummary>;
 };
 

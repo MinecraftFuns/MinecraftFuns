@@ -1,15 +1,7 @@
 ---
 import type { DocSummary } from "../lib/docs.ts";
 
-/**
- * One row of the docs index.
- *
- * `PostRow` with the date column removed rather than a different design: the
- * two lists are siblings and share every type role, so a reader moving between
- * them sees one rhythm. What it does not share is the three-column grid, since
- * a fixed date column reserving space for a date that never comes is a gap
- * with a reason nobody can see.
- */
+/** Docs index row; shares the post rhythm without its date column. */
 type Props = { readonly doc: DocSummary };
 
 const { doc } = Astro.props;

@@ -1,21 +1,7 @@
 ---
 import type { Href } from "../lib/url.ts";
 
-/**
- * The ruled footer that returns a reader to an index.
- *
- * Four pages spelled this out: the same two class strings, the same arrow, and
- * four chances to change one of them. The rule above it belongs to the pattern
- * rather than to the page, so it lives here too.
- *
- * The arrow is decorative and hidden from assistive technology, which reads
- * the label alone. Spelled into the text, it was announced as "left arrow"
- * before every destination.
- *
- * `min-h-target` because this is a standalone control rather than a link in a
- * sentence, so WCAG 2.5.8 applies to it. The audit measured the old one at
- * 73x21px, under the 24px minimum on its short axis.
- */
+/** Shared index backlink; decorative arrow hidden from assistive technology. */
 type Props = {
   readonly href: Href;
   readonly label: string;

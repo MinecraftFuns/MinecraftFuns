@@ -2,24 +2,9 @@ import { contact } from "../config/contact.ts";
 import type { HttpsUrl, PlatformName } from "../schema.ts";
 import { formatFingerprint, publishedKeys } from "./keys.ts";
 import { routeUrl, type Href } from "./url.ts";
+/** Resolve configured handles with platform-owned labels and URL shapes. */
 
-/**
- * Profiles, resolved from handles.
- *
- * The split is deliberate: a *handle* is a fact about me and lives in config; a
- * platform's display name and URL shape are facts about the platform and live
- * here. Storing the full URL in config would write each handle twice, once
- * bare and once inside a link, which is exactly the pair that drifts when an
- * account is renamed.
- */
-
-/**
- * `satisfies` is the whole agreement between this table and `PlatformName`: a
- * missing platform and a platform the union never named are both errors here,
- * and the annotation types each `url` so its template literal is checked to be
- * an absolute URL rather than merely a string. This replaced a dummy binding
- * that asserted the same coverage in runtime code nobody could run.
- */
+/** `satisfies` enforces platform coverage and absolute URL return types. */
 const PLATFORMS = {
   github: { label: "GitHub", url: (handle: string) => `https://github.com/${handle}` },
   matrix: { label: "Matrix", url: (handle: string) => `https://matrix.to/#/${handle}` },
@@ -29,18 +14,13 @@ const PLATFORMS = {
   { readonly label: string; readonly url: (handle: string) => HttpsUrl }
 >;
 
-/** A resolved link that also carries the bare handle, and whether it proves
- *  identity. */
+/** Resolved profile link plus display handle and identity status. */
 export type Profile = {
   readonly label: string;
   readonly href: Href;
   /** As displayed: the handle itself, not a URL. */
   readonly handle: string;
-  /**
-   * `rel="me"` asserts "this profile is the same person as this site", which is
-   * what Mastodon-style verification consumes. True of an account; false of a
-   * document such as a key.
-   */
+  /** Whether `rel="me"` can assert site/profile identity. */
   readonly isIdentity: boolean;
 };
 
@@ -53,32 +33,20 @@ export const profiles: readonly Profile[] = contact.profiles.map(
   }),
 );
 
-/** This site's own key route. Not a profile: it is a document, not an account. */
+/** This site's key document, not a profile account. */
 export const pgpHref = (): Href => routeUrl("/pgp");
 
-/**
- * Everything the footer lists. Profiles plus the key, which is ours rather than
- * somebody else's and so carries no `rel="me"`.
- */
+/** Footer links: profiles plus the site's non-profile key document. */
 export const elsewhere = (): readonly Profile[] => [
   ...profiles,
   { label: "PGP", handle: "PGP", href: pgpHref(), isIdentity: false },
 ];
 
-/**
- * This site's key fingerprint, formatted for reading.
- *
- * Derived here so the footer and the About page cannot print different ones;
- * they each did their own `publishedKeys` call and formatting, which is two
- * copies of one derivation and exactly what the fingerprint config field was
- * before it.
- */
+/** Shared derived fingerprint for footer and About page. */
 export const siteFingerprint = async (): Promise<string> => {
   const [key] = await publishedKeys(contact.mailDomain);
 
-  /* No key is a defect, not an empty string. Correspondence here goes through
-     the Primary User ID, so a build with nothing to print would ship a page
-     offering a way to reach me and no way to reach me. */
+  /* Missing key is a build defect, not an empty display value. */
   if (key === undefined) {
     throw new TypeError(`src/keys: no key published for ${contact.mailDomain}`);
   }

@@ -14,22 +14,13 @@ import { assetUrl, joinRoute } from "../lib/url.ts";
 import type { RootedPath } from "../schema.ts";
 import type { Chrome } from "./chrome.ts";
 
-/**
- * A language alternate to declare in the head. Structural on purpose: the
- * producing domain (`lib/article.ts`) has its own name for this shape, and
- * the chrome depending on a blog module would invert the layering.
- */
+/** Head alternate kept separate from article-domain types to preserve layering. */
 type Alternate = {
   readonly hrefLang: string;
   readonly route: RootedPath;
 };
 
-/*
- * Every prop here has a default below, which is why each admits `undefined`
- * explicitly. Under `exactOptionalPropertyTypes` a bare `?:` means "omit me",
- * and a layout forwarding its own optional prop has no way to omit anything;
- * `| undefined` is the type saying the default answers both absences alike.
- */
+/* Explicit `undefined` supports forwarding defaults under `exactOptionalPropertyTypes`. */
 type Props = {
   readonly title?: string | undefined;
   readonly description?: string | undefined;
@@ -60,29 +51,10 @@ const {
 
 const pageTitle = title ? `${title} | ${site.name}` : site.name;
 
-/*
- * Which deployment is being built, decided once, from the one declaration in
- * `config/deployments.ts`. Failure is a defect rather than an expected
- * outcome: a build that cannot identify its own target would emit canonical
- * URLs and an indexing policy that are guesses, so it fails instead.
- */
+/* Resolve the declared deployment once; an unknown target must fail the build. */
 const target = orThrow(activeTarget(Astro.site), "deployment");
 
-/*
- * The canonical URL names the *canonical* deployment, on every target.
- *
- * This is the whole point of modelling deployments: a page's authoritative
- * address is a fact about the site, not about the build that emitted it. Each
- * build used to canonicalise to its own origin, so the mirror declared itself
- * authoritative and then separately asked not to be indexed: two derivations
- * of one decision, disagreeing. Now a crawler landing on any copy is pointed
- * at the same URL.
- *
- * `canonicalRoute` overrides the page's own address for the one case where
- * they differ: a page that is a second serving of another. It arrives
- * site-relative and is mounted on the active base first, so it enters
- * `canonicalHref` in the same coordinate system `Astro.url.pathname` would.
- */
+/* Canonical URL always names canonical deployment; `canonicalRoute` handles alternate renditions. */
 const deployed = (route: RootedPath): string => joinRoute(target.base, route);
 
 const canonical = orThrow(
@@ -93,19 +65,13 @@ const canonical = orThrow(
   "canonical URL",
 );
 
-/* Alternates resolve the same way: every href in the cluster points at the
-   canonical deployment, whichever copy of the site emitted it. */
+/* Alternate links also target canonical deployment from every mirror. */
 const alternateLinks = alternates.map(({ hrefLang, route }) => ({
   hrefLang,
   href: orThrow(canonicalHref(target, deployed(route)), `alternate ${hrefLang}`),
 }));
 
-/*
- * Only the canonical copy asks to be indexed; two indexed copies of one site
- * compete as duplicates. robots.txt cannot carry this to a mirror served
- * beneath a base path, because a crawler reads robots.txt only from the origin
- * root, so the request travels in the document itself.
- */
+/* Only canonical copy is indexable; robots.txt cannot carry policy beneath a base path. */
 const isIndexable = indexable(target.role);
 ---
 
@@ -119,10 +85,8 @@ const isIndexable = indexable(target.role);
     <link rel="canonical" href={canonical} />
     {
       /*
-      Emitted on every page of a bilingual article, bare and suffixed alike:
-      hreflang annotations must be reciprocal to be honoured, so each page of
-      the cluster declares the whole cluster.
-    */
+       * Every rendition declares the full reciprocal hreflang cluster.
+       */
     }
     {
       alternateLinks.map(({ hrefLang, href }) => (
@@ -130,12 +94,7 @@ const isIndexable = indexable(target.role);
       ))
     }
     {
-      /*
-      The second half of sitemap discovery. robots.txt names the sitemap for
-      crawlers that fetch it; this reaches the ones that do not, and it is the
-      only mechanism that works at all beneath a base path, where robots.txt is
-      never read.
-    */
+      /* HTML sitemap link reaches crawlers that skip robots.txt, including base-path mirrors. */
     }
     <link rel="sitemap" type="application/xml" href={assetUrl("/sitemap-index.xml")} />
     <link rel="icon" href={assetUrl("/favicon.svg")} type="image/svg+xml" />
@@ -148,21 +107,15 @@ const isIndexable = indexable(target.role);
     <meta name="twitter:card" content="summary_large_image" />
 
     {
-      /*
-      There is deliberately no theme script here. The system preference is the
-      single source of truth, and `color-scheme: light dark` plus `light-dark()`
-      resolve it in CSS before first paint, so there is no stored preference to
-      restore, no state to desynchronise, and no flash to prevent.
-    */
+      /* CSS resolves system theme before paint; no stored state or flash needs managing. */
     }
   </head>
 
   <body class="bg-canvas text-ink font-sans text-body min-h-dvh antialiased">
     {
       /*
-      `sr-only` plus `focus:not-sr-only` is the whole skip link: no offscreen
-      transform to maintain, and it stays reachable if CSS transforms fail.
-    */
+       * Focusable skip link needs no transform and survives CSS failure.
+       */
     }
     <a
       class="sr-only focus:not-sr-only focus:absolute focus:top-2xs focus:left-2xs focus:z-100 focus:inline-flex focus:min-h-control focus:items-center focus:rounded-md focus:bg-accent focus:px-sm focus:text-control focus:text-on-accent focus:no-underline"
@@ -175,15 +128,14 @@ const isIndexable = indexable(target.role);
 
     {
       /*
-      The frame lives here, not in the pages. A page renders sections and has
-      no way to state a width, so the column cannot differ between one page and
-      the next, which it previously did, by 26rem.
-
-      `outline-none` because this is a programmatic focus target for the skip
-      link, not something the reader tabbed to.
-    */
+       * Layout owns frame width; main is only a programmatic skip-link target.
+       */
     }
-    {/* The gap above the footer belongs to this layout, which owns both. */}
+    {
+      /*
+       * Gap above the footer belongs to this layout, which owns both.
+       */
+    }
     <main
       class="mx-auto mb-section w-full max-w-frame px-md outline-none md:px-lg"
       id="main"

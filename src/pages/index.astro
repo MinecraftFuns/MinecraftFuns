@@ -11,7 +11,7 @@ import { postSummaries } from "../lib/posts.ts";
 import { featuredProjects } from "../lib/projects.ts";
 import { routeUrl } from "../lib/url.ts";
 
-// The three most recent posts; the blog index holds the rest.
+// Three most recent posts; blog index holds rest.
 const recentPosts = await postSummaries(3);
 const selected = featuredProjects();
 ---

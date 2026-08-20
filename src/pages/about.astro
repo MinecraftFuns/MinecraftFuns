@@ -15,18 +15,9 @@ import {
 import { routeUrl } from "../lib/url.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-/*
- * This page absorbs what was previously split across "CV" and "About". The two
- * overlapped almost entirely: a CV is a structured view of the same facts a
- * bio states in prose. One page, prose first, structured sections beneath.
- *
- * Only verifiable facts appear below. Sections for experience, skills, and
- * awards are left as commented templates at the foot of this file rather than
- * filled with plausible-looking placeholder text: an invented internship that
- * ships to a live CV is worse than a short one.
- */
+/* One page replaces overlapping CV/About views; only verifiable facts render. */
 
-/* Read off the key, so rotating it cannot leave a stale one printed here. */
+/* Derive fingerprint from key source so rotation updates the page automatically. */
 const fingerprint = await siteFingerprint();
 
 /*
@@ -39,8 +30,7 @@ const educationEntries: readonly Entry[] = education.map((entry) => ({
   body: {
     tag: "lines",
     title: entry.institution,
-    /* `detail` is optional, so an absent one contributes no line at all
-       rather than an empty paragraph holding space. */
+    /* Omit absent detail rather than rendering an empty paragraph. */
     notes: [entry.credential, entry.detail].filter((note) => note !== undefined),
   },
 }));
@@ -58,8 +48,9 @@ const contactEntries: readonly Entry[] = [
   <PageIntro kind="page" eyebrow="About" title={site.name}>
     <div class="prose">
       {
-        /* The standing facts are interpolated, not written: this sentence is
-          one of the three surfaces that once disagreed on the year. */
+        /*
+         * Identity text comes from one source to prevent drift.
+         */
       }
       <p>
         I am a {standingPhrase} undergraduate at the {standing.institution}, taking a {
@@ -92,9 +83,7 @@ const contactEntries: readonly Entry[] = [
   </Section>
 
   {
-    /*
-    Template for the remaining CV sections. Uncomment and fill; the shape is
-    the same data an education entry is built from.
+    /* Template for future CV sections; uncomment and fill with verified data.
 
     <Section id="experience" title="Experience">
       <EntryList

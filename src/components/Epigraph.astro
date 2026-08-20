@@ -9,8 +9,7 @@ import type { HttpsUrl } from "../schema.ts";
  * says so to a screen reader. `cite` carries the source for machines; the
  * visible link is the one a human follows.
  */
-/* A quotation nobody can check is worth less than no quotation, so the source
-   is required rather than defaulted away. */
+/* Source is required; unverifiable quotations are excluded. */
 type Props = {
   readonly quote: string;
   readonly author: string;
@@ -26,8 +25,9 @@ const { quote, author, source } = Astro.props;
   </blockquote>
 
   {
-    /* The one em dash this project keeps: a typographic convention with a fixed
-      meaning, not a substitute for punctuation somebody should have chosen. */
+    /*
+     * Em dash is typographic convention here, not substitute punctuation.
+     */
   }
   <figcaption class="note mt-xs">
     &mdash; {author},{" "}

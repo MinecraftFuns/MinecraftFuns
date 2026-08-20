@@ -24,28 +24,11 @@ import { clashesBy } from "../prelude/distinct.ts";
 export type { HeaderConfig, HostConfig, RedirectConfig, RedirectStatus };
 
 /**
- * Host directives: the two path-keyed declaration files a static host reads.
- *
- * A rule is a claim about a path, that something is served there or used to
- * be, and nothing checks those claims. Modelling them buys three things:
- *
- *  1. Paths are resolved against the deployment's base. Written literally they
- *     are correct on exactly one build target, and reading the file cannot
- *     tell you which.
- *  2. The wildcard is structural rather than a character inside a string, so
- *     matching is a comparison and no pattern language needs escaping.
- *  3. Rules that cannot fire are detectable. A redirect shadowed by an earlier
- *     one, or pointing at itself, is dead config, and dead config is rot.
- *
- * Pure and total. Nothing here reads the clock, the environment, or the disk.
+ * Pure model for host directives. Base resolution is explicit, wildcards are
+ * structural, and dead rules are detectable before emitting host files.
  */
 
-/**
- * A path pattern, deliberately smaller than the language the host accepts.
- * Cloudflare permits a splat anywhere plus named placeholders; this models an
- * exact path and a prefix, which is all this site uses. Widening it later is a
- * change to this sum rather than to every place a pattern is written.
- */
+/** Exact or prefix pattern; intentionally narrower than the host language. */
 export type PathPattern =
   | { readonly tag: "exact"; readonly path: string }
   | { readonly tag: "prefix"; readonly path: string };
@@ -63,11 +46,7 @@ const SPLAT: Readonly<Record<PathPattern["tag"], string>> = {
 export const renderPattern = (pattern: PathPattern): string =>
   `${pattern.path}${SPLAT[pattern.tag]}`;
 
-/**
- * Whether a concrete path is matched. Because the wildcard is a variant rather
- * than a character, the two cases are string equality and `startsWith`: no
- * regular expression, and so nothing to escape.
- */
+/** Match exact paths by equality and prefix paths by `startsWith`. */
 export const patternMatches = (pattern: PathPattern, path: string): boolean => {
   switch (pattern.tag) {
     case "exact":
@@ -96,11 +75,7 @@ export type Redirect = {
   readonly status: RedirectStatus;
 };
 
-/**
- * First match wins, so order is significant here in a way it is not in
- * `_headers`. Static rules precede wildcards, which the host documents as the
- * faster arrangement.
- */
+/** Render redirects in order; host semantics use first match. */
 export const renderRedirects = (redirects: readonly Redirect[]): string =>
   `${redirects
     .map(({ from, to, status }) => `${renderPattern(from)} ${to} ${status}`)
@@ -110,19 +85,12 @@ export const renderRedirects = (redirects: readonly Redirect[]): string =>
 // Headers
 // ---------------------------------------------------------------------------
 
-/**
- * A sum, because `!` is not part of a header's name but an operator the format
- * spells by prefixing one. In the name string, `"! link"` would be a possible
- * value of a field whose type says "header name".
- */
+/** Set/remove sum keeps header operator `!` out of names. */
 export type HeaderOp =
   | { readonly tag: "set"; readonly name: string; readonly value: string }
   | { readonly tag: "remove"; readonly name: string };
 
-/**
- * The non-empty list is the type saying what a runtime check otherwise would:
- * a rule with no operations names a path and does nothing to it.
- */
+/** Non-empty operations prevent rules that emit no directive. */
 export type HeaderRule = {
   readonly pattern: PathPattern;
   readonly ops: NonEmpty<HeaderOp>;
@@ -139,53 +107,23 @@ const renderOp = (op: HeaderOp): string => {
   }
 };
 
-/**
- * Every matching rule contributes: headers accumulate rather than the first
- * match winning, so a later rule refines an earlier one instead of replacing it.
- */
+/** Render all matching header rules; later rules refine earlier ones. */
 export const renderHeaders = (rules: readonly HeaderRule[]): string =>
   `${rules
     .map((rule) => [renderPattern(rule.pattern), ...rule.ops.map(renderOp)].join("\n"))
     .join("\n\n")}\n`;
 
 // ---------------------------------------------------------------------------
-// Config surface
+// Config surface: decode host syntax into the abstract model above.
 // ---------------------------------------------------------------------------
-//
-// Above is the abstract syntax, what code manipulates; below is the concrete
-// syntax, what a person writes in `src/config`, and the decoder between them.
-//
-// They differ deliberately. A pattern is a plain string ending in `*` because
-// that is how the host's documentation spells it; it becomes a variant here,
-// where being structural is what makes matching a comparison. Config is
-// written site-relative, so nobody editing a rule needs to know the deployment
-// has a base path at all.
 
-/**
- * Applies the deployment's base to a site-relative path. The parameter is a
- * plain string rather than a `RootedPath` because a pattern's path is one, for
- * the reason given below.
- */
+/** Apply deployment base to a site-relative host pattern. */
 export type Resolve = (path: string) => string;
 
-/**
- * The decision procedure for `RedirectTarget`. An `HttpsUrl` cannot begin with
- * a slash and a `RootedPath` must, so the leading slash is not a heuristic
- * about the string but the discriminant of the union, and this eliminates it.
- */
+/** Distinguish rooted local targets from absolute external targets. */
 const isRooted = (href: RedirectTarget): href is RootedPath => href.startsWith("/");
 
-/**
- * Total, and now smaller than it was: the leading slash is `RootedPath`'s to
- * prove, so this parses the one property a type cannot state. TypeScript has
- * no negation, and "contains no `*` except at the end" is the complement of a
- * pattern; a conditional type could decide it for a literal, at a cost in
- * diagnostics that a build-time reason paid in plain English does not.
- *
- * `RootedPath` proves less than it looks: `//host` is one, and is an authority
- * rather than a path. Resolution is where that is caught, and is why a pattern
- * holds a plain string once resolved.
- */
+/** Parse a rooted exact/prefix pattern; resolution catches `//host` authorities. */
 export const parsePathPattern = (raw: RootedPath): Parsed<PathPattern> => {
   const star = raw.indexOf("*");
   if (star === -1) return ok(exactPath(raw));

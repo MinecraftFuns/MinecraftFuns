@@ -5,23 +5,7 @@ import BaseLayout from "./BaseLayout.astro";
 import type { Href } from "../lib/url.ts";
 import type { Chrome } from "./chrome.ts";
 
-/**
- * A page that is an introduction followed by a list of rows.
- *
- * Four pages were this shape written out four times: both indexes and both
- * taxonomy pages. Each carried its own copy of the section wrapper, the rule
- * above the list, the `*:last:border-b-0` that closes it, and, twice, an empty
- * state. They agreed, but only because they were written the same week; the
- * home page's list already differs, having no rule above it.
- *
- * What varies between the four is the row component and the words. Everything
- * structural is here.
- *
- * The empty state reads the slot rather than taking a count. A `count` prop
- * would let a page claim one number and render another, and the honest
- * question is not "how many items are there" but "did anything render".
- * Rendering the slot first answers exactly that, so the two cannot disagree.
- */
+/** Shared intro/list shell; rendered slot output determines the empty state. */
 type Props = {
   /** The document title. Distinct from `heading`, which is the page's h1. */
   readonly title: string;
@@ -41,13 +25,7 @@ type Props = {
 const { title, description, chrome, eyebrow, heading, lede, label, empty, back } =
   Astro.props;
 
-/*
- * Both slots are rendered before anything is laid out, because the spacing
- * around a slot must not exist when the slot produced nothing. A component
- * that renders conditionally cannot be trusted to have rendered, so asking it
- * is the only way to know; a wrapper placed unconditionally would leave its
- * margin behind and open a gap under an absent row of tags.
- */
+/* Render slots before layout so empty slots leave no spacing. */
 const browse = Astro.slots.has("browse") ? await Astro.slots.render("browse") : "";
 const hasBrowse = browse.trim() !== "";
 
@@ -60,12 +38,8 @@ const isEmpty = rows.trim() === "";
 
   {
     /*
-    Every gap on this page is declared here, by the container that owns it.
-    `PostTags` and `DocCategories` used to bring their own, one with a top
-    margin and one with a bottom, so the same slot spaced differently on the
-    blog and the docs and the blog's tags sat flush against the rule below.
-    Neither child could own a gap it shares with a sibling it never sees.
-  */
+     * Container owns shared slot spacing; children cannot see sibling gaps.
+     */
   }
   {hasBrowse && <div class="mb-lg" set:html={browse} />}
 
@@ -74,8 +48,7 @@ const isEmpty = rows.trim() === "";
       isEmpty ? (
         <p class="text-ink-subtle py-lg">{empty}</p>
       ) : (
-        /* This list has no section head above it, so it supplies the rule that
-           a head would otherwise draw. */
+        /* No section head, so list supplies the top rule. */
         <div class="border-hairline border-t *:last:border-b-0">
           <Fragment set:html={rows} />
         </div>

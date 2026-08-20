@@ -1,25 +1,5 @@
 #!/usr/bin/env node
-/**
- * Source gate: no `break`, no `continue`.
- *
- * Both are non-local jumps: where a loop body ends comes to depend on how
- * deeply it nests rather than on what it computes, so the exit condition
- * cannot be named, passed, or tested apart from the loop around it. Every loop
- * here is the backend of a fold, a filter, or a partial map, each of which has
- * somewhere better to put it:
- *
- *   continue on a predicate     a predicate, composed with `allOf`
- *   continue past a bad value   a function returning `undefined`
- *   break on a hit              `find`, `some`, or `every`
- *   break on a count            `slice` before the work, not a counter during it
- *   break in a `switch`         `return` from the case
- *
- * No exemption for `switch`: a case that breaks falls through when somebody
- * forgets, and a case that returns cannot.
- *
- * This parses rather than greps, because `break` and `continue` are ordinary
- * words that occur in prose, identifiers, and string literals.
- */
+/** Source gate rejecting non-local loop jumps; AST parsing avoids text matches. */
 
 import { readdir, readFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
@@ -34,18 +14,13 @@ const DIALECT: Readonly<Record<string, ts.ScriptKind>> = {
   ".ts": ts.ScriptKind.TS,
   ".mjs": ts.ScriptKind.JS,
   ".js": ts.ScriptKind.JS,
-  /* An `.astro` file is its frontmatter, blanked back to its own offsets;
-     the template holds markup, which has no statements to jump out of. */
+  /* Astro frontmatter contains statements; its template does not. */
   ".astro": ts.ScriptKind.TS,
 };
 
 const extensionOf = (path: string): string => `.${path.split(".").pop()}`;
 
-/**
- * Every jump in one file. Pure and total: an unparseable file yields
- * whatever TypeScript recovered from it rather than throwing, which is the
- * right failure mode for a gate that must not become the reason a build stops.
- */
+/** Find forbidden jumps using TypeScript's recovered AST. */
 /** A forbidden jump: which file, which line, and which keyword. */
 export type Jump = {
   readonly path: string;
@@ -83,10 +58,10 @@ export const jumps = (path: string, source: string): readonly Jump[] => {
   return found;
 };
 
-/** The two jumps this gate refuses. */
+/** Jumps this gate refuses. */
 type Keyword = "break" | "continue";
 
-/** What to reach for instead, keyed by the jump that was written. */
+/** Preferred structural replacement for each forbidden jump. */
 const REMEDY: Readonly<Record<Keyword, string>> = {
   continue:
     "lift the condition into a predicate, or return `undefined` from a function the loop pushes when present",

@@ -67,8 +67,6 @@ const {
 
 const { spacing, title: titleClass } = INTRO.page;
 
-/* One validated value, two renderings: `datetime` carries the machine form
-   and the text the reader's, in the article's own language. */
 const displayDate = formatDateIn(date, SITE_TIME_ZONE, dateLocaleOf(lang));
 ---
 
@@ -96,10 +94,9 @@ const displayDate = formatDateIn(date, SITE_TIME_ZONE, dateLocaleOf(lang));
   <h1 class:list={["text-ink mt-xs", titleClass]}>{title}</h1>
   <p class="text-ink-muted mt-sm max-w-measure text-body-lg">{description}</p>
   {
-    /* The gap belongs to this header, not to the tag list, which is also used
-      on the blog index where the spacing above it is different. Conditioned on
-      the same emptiness `PostTags` checks, so no margin is left behind when a
-      post carries no tags. */
+    /*
+     * Gap belongs here; the index reuses PostTags with different spacing.
+     */
   }
   {
     tags.length > 0 && (

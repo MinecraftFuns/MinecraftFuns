@@ -7,38 +7,19 @@ type Props = { readonly post: PostSummary };
 
 const { post } = Astro.props;
 
-/*
- * Marked only when the row leads somewhere the reader may not expect: a post
- * with no rendition in the site's own language. The badge is the language
- * naming itself, 中文 rather than "Chinese", because it addresses the reader
- * who can follow the link. A bilingual post needs nothing here; its row leads
- * to English, and the article offers the crossing.
- */
+/* Badge only non-primary-language posts; label uses that language's name. */
 const badge =
   post.lang === SITE_LANG
     ? undefined
     : { label: nativeNameOf(post.lang), lang: bcp47Of(post.lang) };
-
-/*
- * `datetime` carries the machine-readable calendar date and the text carries
- * the human-readable one. They are now two renderings of a single validated
- * value rather than two independent computations that can disagree, which is
- * exactly how the previous version shipped `datetime="2026-07-14"` next to the
- * text "Jul 13, 2026".
- */
+/* Render one validated date as machine value and localized text. */
 const displayDate = formatIsoDate(post.date);
 ---
 
 {
   /*
-  Adapted from Linear's changelog row rather than its card grid: writing is a
-  chronological list, and rows stay scannable at length where a grid would not.
-
-  Two regimes. Narrow is two columns with the title spanning both and the date
-  dropping beneath it, so the content column is never squeezed. At `md` every
-  explicit placement is released and the three cells auto-place across
-  `grid-cols-row`.
-*/
+   * Chronological rows stack the date below the title until `md`.
+   */
 }
 <a
   class="group border-hairline grid grid-cols-row-stacked items-baseline gap-md border-b py-md no-underline md:grid-cols-row"

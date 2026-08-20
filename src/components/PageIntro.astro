@@ -1,18 +1,7 @@
 ---
 import { INTRO, type IntroKind } from "./intro.ts";
 
-/**
- * The opening block of every page: eyebrow, title, and optional lede.
- *
- * `kind` is a closed sum over the two openings this site has, and `INTRO` maps
- * it to both padding and title role at once. The record lives in `intro.ts`
- * because `ArticleHeader` is the same opening with different metadata and must
- * resolve it from the same place.
- *
- * Titles carry no width cap. The frame is narrow enough to set the line length
- * itself, and `text-wrap: balance` handles the ragged edge; the three
- * different character caps this replaced were three guesses at one number.
- */
+/** Shared page opening; closed kind maps spacing and title style from `INTRO`. */
 type Props = {
   readonly kind: IntroKind;
   readonly eyebrow: string;
@@ -24,13 +13,7 @@ const { kind, eyebrow, title, lede } = Astro.props;
 
 const { spacing, title: titleClass } = INTRO[kind];
 
-/*
- * The gap to whatever a page puts below the lede belongs here, not to the
- * page. Three pages each brought their own and one of them disagreed: two
- * spaced their buttons by `lg` and About spaced its prose by `md`, so one
- * structural position had two answers. Rendered first so an empty slot leaves
- * no margin behind.
- */
+/* Slot owns the shared gap; render first so empty content leaves no margin. */
 const extra = Astro.slots.has("default") ? await Astro.slots.render("default") : "";
 const hasExtra = extra.trim() !== "";
 ---

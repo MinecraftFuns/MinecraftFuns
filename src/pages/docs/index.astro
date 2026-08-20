@@ -6,8 +6,7 @@ import { docCategories, docSummaries } from "../../lib/docs.ts";
 
 const docs = await docSummaries();
 
-/* Both come from the same collection, so the browse list cannot offer a
-   category that no doc below is filed under. */
+/* One collection supplies categories and rows, preventing orphaned links. */
 const categories = (await docCategories()).map((taxon) => taxon.label);
 ---
 

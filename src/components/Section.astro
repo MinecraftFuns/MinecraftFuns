@@ -1,19 +1,7 @@
 ---
 import type { Href } from "../lib/url.ts";
 
-/**
- * A titled section with a ruled head.
- *
- * This exists because four pages previously wrote the same block by hand and
- * had already drifted: one section was `--space-xl` tall and the rest
- * `--space-lg`, and the heading rule appeared on About but nowhere else. One
- * component means the drift is not merely fixed but unrepresentable.
- *
- * The trailing element is a closed sum rather than two optional props, which
- * would have admitted the state where both are set and nothing said which
- * wins. All three variants are live: Projects counts, the home page links,
- * About has neither.
- */
+/** Shared ruled section; closed trailing union prevents conflicting variants. */
 export type SectionTrailing =
   | { readonly tag: "link"; readonly href: Href; readonly label: string }
   | { readonly tag: "count"; readonly value: number };
@@ -27,12 +15,7 @@ type Props = {
 
 const { id, title, blurb, trailing } = Astro.props;
 
-/*
- * Astro templates cannot host a `switch`, so exhaustiveness is stated as a
- * type; see the longer note in `EntryList.astro`. Asking about the sum itself
- * rather than about `trailing` also drops the `undefined` case, which was
- * never part of the question.
- */
+/* Astro has no switch; this type check enforces trailing-union coverage. */
 type Unhandled = Exclude<SectionTrailing["tag"], "link" | "count">;
 
 const _exhaustive: [Unhandled] extends [never] ? true : never = true;
@@ -41,10 +24,8 @@ void _exhaustive;
 
 {
   /*
-  The head aligns on the baseline rather than the top, so the trailing element
-  lines up with the heading whether or not a blurb sits beneath it; one rule
-  covering both arrangements.
-*/
+   * Baseline alignment keeps trailing content level with the heading.
+   */
 }
 <section class="py-lg" aria-labelledby={id}>
   <div

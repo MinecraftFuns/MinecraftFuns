@@ -7,10 +7,7 @@ import { postSummaries, postTags } from "../../lib/posts.ts";
 
 const posts = await postSummaries();
 
-/* `PostTags` again rather than a browse-specific component: these are the same
-   links a post renders, and one list of the blog's tags is the point. Both
-   come from the same collection, so no tag here is missing from the posts
-   below. */
+/* Reuse PostTags and one taxonomy source for consistent tag links. */
 const tags = (await postTags()).map((taxon) => taxon.label);
 ---
 

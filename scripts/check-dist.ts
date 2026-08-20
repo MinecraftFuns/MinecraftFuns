@@ -1,25 +1,6 @@
 /**
- * Artifact checks.
- *
- * Everything else in the gate validates *source*: markdownlint reads Markdown,
- * `astro check` reads types, the unit tests read modules. None of them look at
- * what the build actually emitted, which is how a base-path bug once passed a
- * clean typecheck and a full test run while producing a site whose every
- * navigation link 404ed.
- *
- * These checks read `dist/` and assert properties of the deployable itself.
- * With no pull request between a green run and production, this is the last
- * thing standing between a mistake and the live site.
- *
- * Design notes:
- *  - Violations are *accumulated*, not thrown. One run reports every problem,
- *    because fixing them one CI round-trip at a time is how people start
- *    skipping the gate.
- *  - The pure functions below are exported and covered by check-dist.test.ts,
- *    which feeds them known-bad input. A detector nobody tests is a detector
- *    that silently stops detecting.
- *  - HTML is matched with targeted regexes rather than parsed. Adequate for
- *    output we generate ourselves; it would not be for arbitrary HTML.
+ * Validate emitted artifacts, not only source. Findings accumulate, helpers
+ * are tested, and targeted HTML regexes are acceptable for generated output.
  */
 
 import { readFile, stat } from "node:fs/promises";
@@ -32,10 +13,7 @@ import { mapConcurrent } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
 import { cannotRun, report } from "./lib/gate.ts";
 
-/**
- * The data model the checks are written against. None of it existed before:
- * as `.js` this pipeline moved untyped records between twenty functions.
- */
+/** Typed data model for artifact checks. */
 
 /** One thing wrong with the artifact, grouped by `check` when reported. */
 export type Violation = {
@@ -96,23 +74,9 @@ export type Options = {
 // Pure helpers
 // ---------------------------------------------------------------------------
 
-/*
- * This module deliberately does not import src/lib/url.ts.
- *
- * A gate that shares code with the thing it validates shares the thing's bugs:
- * a mistake in link construction would be reproduced identically here and the
- * two would agree on a wrong answer. The duplication is the independence, and
- * it is the point. What is shared instead is the platform's URL parser, which
- * neither side wrote.
- *
- * Config is a different matter and *is* imported, at the effect boundary
- * below. `src/config/deployments.ts` is data, not derivation: re-declaring the
- * canonical origin here would not buy independence, it would only create a
- * second place for it to be wrong. The rule is to duplicate the reasoning and
- * share the facts.
- */
+/* Duplicate URL reasoning here so the gate does not share link-construction bugs. */
 
-/** Local, so the rule above holds: the same one line, not the same module. */
+/** Local copy keeps validation independent from production URL logic. */
 const slashTerminated = (path: string): string =>
   path.endsWith("/") ? path : `${path}/`;
 

@@ -6,11 +6,7 @@ import ArticlePage from "../../layouts/ArticlePage.astro";
 import { publishedDocs, summarise, type PublishedDoc } from "../../lib/docs.ts";
 import { routeUrl } from "../../lib/url.ts";
 
-/*
- * `[slug]`, not `[...slug]`: docs are flat, and a single segment says so in
- * the filename. A rest parameter would accept the nested route that
- * `publishedDocs` refuses to build.
- */
+/* Flat docs use `[slug]`; `publishedDocs` rejects nested paths. */
 export async function getStaticPaths() {
   const docs = await publishedDocs();
   return docs.map((doc) => ({ params: { slug: doc.slug }, props: { doc } }));
@@ -22,8 +18,7 @@ const { doc } = Astro.props;
 const { entry } = doc;
 const { Content } = await render(entry);
 
-/* Through `summarise` so the header and the index row cannot report different
-   reading times, or a different category, for the same page. */
+/* Shared summarization keeps header and index metadata consistent. */
 const { readingMinutes: minutes, category } = summarise(doc);
 ---
 

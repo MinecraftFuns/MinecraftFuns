@@ -3,26 +3,9 @@ import { site } from "../config/site.ts";
 import type { EducationEntry } from "../schema.ts";
 import { bcp47Of, SITE_LANG } from "./lang.ts";
 
-/**
- * Who runs this site, in words: every sentence-shaped rendering of the facts
- * in `config/about.ts`, derived here once.
- *
- * The About page, the site description, and the education table each phrase
- * the same standing differently, and as authored prose they had already
- * drifted once ("second-year" against "third-year" against the truth).
- * Deriving the phrases makes the drift unrepresentable for every surface the
- * build renders; the README, which GitHub renders straight from the repo, is
- * the one surface derivation cannot reach, so `scripts/check-readme.ts`
- * reconciles it against the same atoms instead.
- *
- * Pure and total; formatting only.
- */
+/** Derive every rendered identity phrase from `config/about.ts`. */
 
-/**
- * "A and B", or "A, B and C": the chrome language's own list conjunction,
- * from the platform rather than a hand-rolled join that would re-derive
- * comma placement.
- */
+/** Format major names with the chrome locale's conjunction rules. */
 const LIST = new Intl.ListFormat(bcp47Of(SITE_LANG), {
   style: "long",
   type: "conjunction",
@@ -35,12 +18,7 @@ export const majorsPhrase: string = LIST.format(standing.majors);
 export const standingPhrase: string = `${standing.ordinal}-year`;
 
 /**
- * "Double major in X and Y", honest about the count: one major is not a
- * double major, and a third would make "double" a lie. The count is widened
- * to `number` first, because the config's tuple type makes today's length a
- * literal and the other branches statically dead; the branches are for the
- * config this file cannot see yet.
- */
+/** Choose singular, double, or plural major wording from configured count. */
 const majorCount: number = standing.majors.length;
 
 const CREDENTIAL_PREFIX: string =
@@ -52,11 +30,7 @@ export const credentialPhrase: string = `${CREDENTIAL_PREFIX} ${majorsPhrase}`;
 export const minorPhrase: string | undefined =
   standing.minor === undefined ? undefined : `Minor in ${standing.minor}`;
 
-/**
- * Mid-sentence forms: only the leading article is lowered, so the subject
- * names keep their capitals. "double major in Computer Science and
- * Cognitive Science", not "double major in computer science".
- */
+/** Lower only the first character; subject names retain capitals. */
 const lowerFirst = (phrase: string): string =>
   `${phrase.charAt(0).toLowerCase()}${phrase.slice(1)}`;
 
@@ -68,11 +42,7 @@ export const minorClause: string | undefined =
 /** "Fourth year", for the education table's period column. */
 const period: string = `${standing.ordinal.charAt(0).toUpperCase()}${standing.ordinal.slice(1)} year`;
 
-/**
- * The education table, derived rather than authored: the one entry the
- * standing describes. A second degree, when there is one, becomes config
- * again; today it would be placeholder shape with nothing true to hold.
- */
+/** Derive the education row from standing facts. */
 export const educationEntries: readonly EducationEntry[] = [
   {
     institution: standing.institution,
@@ -82,11 +52,7 @@ export const educationEntries: readonly EducationEntry[] = [
   },
 ];
 
-/**
- * The default document description: the studied facts, then the editorial
- * tail from `config/site.ts`, which is the only part of this sentence that
- * is authored rather than derived.
- */
+/** Compose derived study facts with the authored site tagline. */
 export const siteDescription: string = `${majorsPhrase} at the ${standing.institution}. ${site.tagline}`;
 
 /** The About page's own meta description. */

@@ -15,36 +15,10 @@ import type { PostTag } from "./labels.ts";
 import { byRecencyWith, type IsoDate } from "./time.ts";
 
 /**
- * The article algebra: renditions grouped by the folder that owns them, and
- * the invariants no single file can carry.
- *
- * Pure and generic in the entry payload `E`, so the whole of the multilingual
- * model is testable without `astro:content`; `lib/posts.ts` is the shell that
- * instantiates it at `CollectionEntry<"blog">`.
- *
- * There is no per-article "primary language" field anywhere in this model,
- * and that is the design: `LANGS` is a preference order, an article's
- * renditions are kept sorted by it, and the primary rendition is the *head*
- * of a `NonEmpty` list. A configured primary that an article lacks, the
- * classic invalid state of a default-language flag, is therefore not
- * representable: whatever the article has, its best rendition exists by the
- * type of the list it heads.
- *
- * Three facts hold of every `Article` this module returns, none of which a
- * per-file schema can see:
- *
- *  1. It has at least one rendition: `NonEmpty` says so.
- *  2. It has at least one *original*: an article whose every rendition is a
- *     translation has no source text anywhere, which is not a state to
- *     render but a mistake to name.
- *  3. Its renditions agree on the article-level facts, `date` and `tags`,
- *     and no two claim one language. Each file restates the shared facts,
- *     redundancy in the same sense as the archive folders restating the
- *     date: safe exactly because `assemble` checks it.
- *
- * That the list is preference-ordered is `assemble`'s to establish and, like
- * reconciliation in `lib/posts.ts`, holds by it being the only producer; a
- * property of the whole list is not one an element type can carry.
+ * Multilingual article model. `assemble` enforces nonempty renditions, one
+ * original, shared date/tags, unique languages, and preference ordering.
+ * `NonEmpty` makes the best available rendition the head, so no primary flag
+ * can name a language an article lacks.
  */
 
 // ---------------------------------------------------------------------------
@@ -59,7 +33,7 @@ import { byRecencyWith, type IsoDate } from "./time.ts";
 export type Provenance =
   { readonly tag: "original" } | { readonly tag: "translation"; readonly by: Translator };
 
-/** The frontmatter decoding: no `translation` field means the original. */
+/** Decode absent `translation` as the original rendition. */
 export const provenanceOf = (translation: Translator | undefined): Provenance =>
   translation === undefined
     ? { tag: "original" }
@@ -74,12 +48,11 @@ export type Rendition<E> = {
 
 export type Article<E> = {
   readonly path: PostPath;
-  /** Agreed across renditions; `assemble` checked. */
+  /** Shared across renditions; `assemble` checks agreement. */
   readonly date: IsoDate;
-  /** Agreed across renditions, and monolingual: a tag is a `PostTag`, whose
-   *  `Sluggable` proof only ASCII-representable labels can discharge. */
+  /** Shared tags; `PostTag` carries the sluggable proof. */
   readonly tags: readonly PostTag[];
-  /** Distinct languages, sorted by `LANGS` preference; head is the primary. */
+  /** Unique, preference-ordered languages; head is primary. */
   readonly renditions: NonEmpty<Rendition<E>>;
 };
 
@@ -94,26 +67,18 @@ export type Article<E> = {
  */
 export const primary = <E>(article: Article<E>): Rendition<E> => article.renditions[0];
 
-/** The rendition in `lang`, when the article has one. O(|LANGS|) at most. */
+/** Find the rendition in `lang`, if present. */
 export const renditionOf = <E>(
   article: Article<E>,
   lang: Lang,
 ): Rendition<E> | undefined =>
   article.renditions.find((rendition) => rendition.lang === lang);
 
-/**
- * Every rendition except the one in `lang`, in preference order: what a page
- * rendering that language links across to.
- */
+/** Renditions other than `lang`, still preference ordered. */
 export const othersOf = <E>(article: Article<E>, lang: Lang): readonly Rendition<E>[] =>
   article.renditions.filter((rendition) => rendition.lang !== lang);
 
-/**
- * The rendition the translations were made from: the best-preferred one
- * marked original. For any rendition that *is* a translation this exists and
- * is a different rendition, by invariant 2; the `undefined` is for callers
- * asking about an article they have not checked.
- */
+/** Find the original rendition; unchecked articles may have none. */
 export const originalOf = <E>(article: Article<E>): Rendition<E> | undefined =>
   article.renditions.find((rendition) => rendition.provenance.tag === "original");
 
@@ -121,19 +86,7 @@ export const originalOf = <E>(article: Article<E>): Rendition<E> | undefined =>
 // URLs
 // ---------------------------------------------------------------------------
 
-/**
- * The canonical site-relative URL of one rendition: the bare URL for the
- * primary, the language-suffixed one for the rest. A sole rendition is its
- * article's primary whatever its language, so a Chinese-only article lives
- * at its slug: the language is metadata rather than identity.
- *
- * Every non-`SITE_LANG` rendition is additionally *served* at its suffixed
- * URL, primary or not (see `lib/posts.ts` and the blog route), so
- * `/blog/YYYY/MM/slug/zh/` holds from the day a Chinese rendition exists: a
- * better-preferred translation arriving later changes what the bare URL
- * renders, never where the Chinese lives. `SITE_LANG` alone needs no such
- * insurance, because nothing can ever displace it.
- */
+/** Bare URL for primary; language-suffixed URL for every other rendition. */
 export const canonicalPathOf = <E>(article: Article<E>, lang: Lang): RootedPath =>
   lang === primary(article).lang ? hrefOf(article.path) : langHrefOf(article.path, lang);
 
@@ -143,11 +96,7 @@ export type Alternate = {
   readonly route: RootedPath;
 };
 
-/**
- * The `hreflang` alternates every page of a multilingual article declares:
- * one per rendition plus `x-default` at the bare URL. Empty for a
- * monolingual article, which has no alternative to declare.
- */
+/** Build reciprocal `hreflang` links plus `x-default` for multilingual articles. */
 export const alternatesOf = <E>(article: Article<E>): readonly Alternate[] =>
   article.renditions.length < 2
     ? []
@@ -163,7 +112,7 @@ export const alternatesOf = <E>(article: Article<E>): readonly Alternate[] =>
 // Assembly
 // ---------------------------------------------------------------------------
 
-/** One decoded file, as the shell hands it over: identity plus restated facts. */
+/** One decoded file: identity plus facts reconciled against its path. */
 export type RenditionRecord<E> = {
   readonly path: PostPath;
   readonly lang: Lang;
@@ -176,14 +125,9 @@ export type RenditionRecord<E> = {
 const sameTags = (a: readonly PostTag[], b: readonly PostTag[]): boolean =>
   a.length === b.length && a.every((tag, index) => tag === b[index]);
 
-/**
- * The invariants of one folder's worth of files. Accumulating: an article
- * disagreeing on its date *and* missing its original is two findings, and
- * reporting them one build at a time turns one mistake into two builds.
- */
+/** Validate one article's files, accumulating independent findings. */
 const article = <E>(records: readonly RenditionRecord<E>[]): Parsed<Article<E>[]> => {
-  /* Unreachable through the filesystem, where two files for one language are
-     one path, but this function is total over its actual input. */
+  /* Filesystem paths are unique per language; keep duplicate input handling total. */
   const duplicated = clashesBy(records, (record) => record.lang).map(
     ([, later]) => `two files both claim the ${later.lang} rendition`,
   );
@@ -204,30 +148,21 @@ const article = <E>(records: readonly RenditionRecord<E>[]): Parsed<Article<E>[]
         ]),
   ]);
 
-  /* Invariant 2. This is also what refuses a lone translation: a single
-     rendition marked `translation:` is an article whose source text exists
-     nowhere. */
+  /* A translation-only article has no source and must fail validation. */
   const orphaned = records.some((record) => record.provenance.tag === "original")
     ? []
     : [
         "every rendition is marked translation:, so the original is missing; the rendition the others were translated from carries no translation: field",
       ];
 
-  /*
-   * The preference order is imposed here, once, where articles are minted:
-   * every consumer downstream reads "best rendition" off the head of this
-   * list rather than re-deriving the policy. `toSorted` keeps the input
-   * untouched; the sort is over at most |LANGS| elements.
-   */
+  /* Establish preference order once; `toSorted` leaves input records untouched. */
   const renditions = nonEmpty(
     records
       .toSorted((a, b) => byPreference(a.lang, b.lang))
       .map(({ lang, provenance, entry }) => ({ lang, provenance, entry })),
   );
 
-  /* `undefined` only when `records` was empty, which the destructuring above
-     already returned on; spelled as a check rather than an assertion so the
-     totality is the checker's to see. */
+  /* Keep the empty case explicit so totality stays checkable without assertion. */
   return renditions === undefined
     ? okUnless(duplicated, [])
     : okUnless(
@@ -243,16 +178,7 @@ const article = <E>(records: readonly RenditionRecord<E>[]): Parsed<Article<E>[]
       );
 };
 
-/**
- * Group decoded files into articles and check what only the grouping can
- * check. One pass to group, one per article to verify: O(N) over the
- * collection with a `Map` keyed by the article route, against a filter per
- * article which would rescan the collection once per folder.
- *
- * Failures accumulate across articles, each labelled with the folder it
- * belongs to, and articles come back newest first: the one ordering every
- * consumer wants, established where the collection is admitted.
- */
+/** Group, validate, and recency-sort articles in one collection pass. */
 export const assemble = <E>(
   records: readonly RenditionRecord<E>[],
 ): Parsed<readonly Article<E>[]> => {

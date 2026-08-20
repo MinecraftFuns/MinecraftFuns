@@ -4,9 +4,7 @@ import PageIntro from "../components/PageIntro.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { routeUrl } from "../lib/url.ts";
 
-/* Both hosts serve /404.html for an unmatched path, so this needs no route
-   configuration, only to exist. It is read more attentively than most pages
-   here: the reader has stopped and is looking at the address bar. */
+/* Both hosts serve this static /404.html; no route configuration is needed. */
 ---
 
 <BaseLayout title="Not found" description="A well-formed address that refers to nothing.">

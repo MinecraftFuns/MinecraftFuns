@@ -4,12 +4,7 @@ import { isWithin, routeUrl } from "../lib/url.ts";
 
 const { pathname } = Astro.url;
 
-/*
- * Resolve each nav target once, then reuse it for both the link and the
- * current-section test. `Astro.url.pathname` already carries the deployment's
- * base path, so the comparison has to be made against a resolved target rather
- * than the raw config value.
- */
+/* Resolve targets once; active-state checks must include the deployment base. */
 const items = nav.map((item) => ({
   ...item,
   target: routeUrl(item.href),
@@ -26,8 +21,9 @@ const items = nav.map((item) => ({
       aria-label={`${site.name}, home`}
     >
       {
-        /* One of the few sanctioned uses of the accent. Sized to the cap height
-          of the name beside it, and on the 4px base like everything else. */
+        /*
+         * Accent is reserved here and sized to the brand's cap height.
+         */
       }
       <span class="bg-accent size-xs rounded-xs" aria-hidden="true"></span>
       <span class="hidden xs:inline">{site.name}</span>
@@ -35,21 +31,15 @@ const items = nav.map((item) => ({
 
     {
       /*
-      The chips carry inline padding, so the nav is pulled outward by exactly
-      that padding: what should line up with the frame edge is the last label,
-      not the hover box around it.
-    */
+       * Offset by chip padding so labels, not hover boxes, align to the frame.
+       */
     }
     <nav class="ms-auto -me-2xs xs:-me-xs" aria-label="Primary">
       <ul class="flex items-center" role="list">
         {
           items.map((item) => (
             <li>
-              {/*
-                `flex`, not `inline-flex`: an inline box would sit on the list
-                item's baseline and inherit its half-leading, making the chip
-                taller than the token says and misaligning it against the brand.
-              */}
+              {/* `flex` avoids inline baseline leading changing chip height. */}
               <a
                 class="text-body text-ink-subtle hover:bg-surface-1 hover:text-ink current:text-ink flex min-h-control items-center rounded-md px-2xs no-underline transition-colors xs:px-xs"
                 href={item.target}

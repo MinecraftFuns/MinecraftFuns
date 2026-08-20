@@ -13,9 +13,7 @@ import type { DeploymentsConfig } from "../schema.ts";
  * follow from `lib/deployment.ts`.
  */
 export const deployments = {
-  /* Cloudflare Pages serves it and it is the only deployment on which
-     `_headers` and `_redirects` do anything, but the provider could change
-     without this becoming a different deployment, so the name is the domain. */
+  /* Host-specific files apply here; identity remains the canonical domain. */
   canonical: {
     id: "joefang-org",
     origin: "https://joefang.org",
@@ -23,9 +21,7 @@ export const deployments = {
   },
 
   mirrors: [
-    /* A *project* repository rather than a `<user>.github.io` one, so Pages
-       serves it beneath `/MinecraftFuns`. A repository whose name matches the
-       account is easy to mistake for a user site; only `<user>.github.io` is. */
+    /* Project repository means GitHub Pages serves beneath `/MinecraftFuns`. */
     {
       id: "github-pages",
       origin: "https://minecraftfuns.github.io",
