@@ -18,37 +18,51 @@ export const majorsPhrase: string = LIST.format(standing.majors);
 export const standingPhrase: string = `${standing.ordinal}-year`;
 
 /**
-/** Choose singular, double, or plural major wording from configured count. */
-const majorCount: number = standing.majors.length;
+ * Raise the first character only; subject names keep their own capitals.
+ *
+ * The one case transformation in this module. Every clause below is stored in
+ * the form that composes into running prose, and is raised where a sentence or
+ * a table cell begins. Storing the raised form instead would need this
+ * function's inverse as well, and two spellings of one clause are two things
+ * that can disagree.
+ */
+const sentenceCase = (clause: string): string =>
+  `${clause.charAt(0).toUpperCase()}${clause.slice(1)}`;
+
+/**
+ * One major reads "major in", two "double major in", anything else the plural.
+ *
+ * A table rather than a comparison chain, because `majors` is a `const` tuple:
+ * its `length` is a literal type, and the checker rightly refuses `=== 1`
+ * against a tuple of two as a comparison that cannot hold. Widening the count
+ * to `number` would silence that, which is how the branches got to look live
+ * while being decided at compile time. Indexing is partial under
+ * `noUncheckedIndexedAccess`, so `??` is the totalizing step and says which
+ * case is the default.
+ */
+const CREDENTIAL_PREFIXES: Readonly<Record<number, string>> = {
+  1: "major in",
+  2: "double major in",
+};
 
 const CREDENTIAL_PREFIX: string =
-  majorCount === 1 ? "Major in" : majorCount === 2 ? "Double major in" : "Majors in";
+  CREDENTIAL_PREFIXES[standing.majors.length] ?? "majors in";
 
-export const credentialPhrase: string = `${CREDENTIAL_PREFIX} ${majorsPhrase}`;
+/** "double major in Computer Science and Cognitive Science". */
+export const credentialClause: string = `${CREDENTIAL_PREFIX} ${majorsPhrase}`;
 
-/** "Minor in Statistics", or nothing at all: never an empty line. */
-export const minorPhrase: string | undefined =
-  standing.minor === undefined ? undefined : `Minor in ${standing.minor}`;
-
-/** Lower only the first character; subject names retain capitals. */
-const lowerFirst = (phrase: string): string =>
-  `${phrase.charAt(0).toLowerCase()}${phrase.slice(1)}`;
-
-export const credentialClause: string = lowerFirst(credentialPhrase);
-
+/** "minor in Statistics", or nothing at all: never an empty line. */
 export const minorClause: string | undefined =
-  minorPhrase === undefined ? undefined : lowerFirst(minorPhrase);
-
-/** "Fourth year", for the education table's period column. */
-const period: string = `${standing.ordinal.charAt(0).toUpperCase()}${standing.ordinal.slice(1)} year`;
+  standing.minor === undefined ? undefined : `minor in ${standing.minor}`;
 
 /** Derive the education row from standing facts. */
 export const educationEntries: readonly EducationEntry[] = [
   {
     institution: standing.institution,
-    credential: credentialPhrase,
-    ...(minorPhrase === undefined ? {} : { detail: minorPhrase }),
-    period,
+    credential: sentenceCase(credentialClause),
+    /* Omit absent detail rather than rendering an empty paragraph. */
+    ...(minorClause === undefined ? {} : { detail: sentenceCase(minorClause) }),
+    period: sentenceCase(`${standing.ordinal} year`),
   },
 ];
 

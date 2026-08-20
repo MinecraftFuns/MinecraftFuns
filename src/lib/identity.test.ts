@@ -6,7 +6,6 @@ import { site } from "../config/site.ts";
 import {
   aboutDescription,
   credentialClause,
-  credentialPhrase,
   educationEntries,
   majorsPhrase,
   minorClause,
@@ -33,20 +32,21 @@ describe("identity", () => {
 
   it("is honest about the major count", () => {
     // Two majors today, so "double"; the prefix is derived, not written.
-    assert.ok(credentialPhrase.startsWith("Double major in "));
-  });
-
-  it("lowers only the leading word for mid-sentence use", () => {
     assert.ok(credentialClause.startsWith("double major in "));
     standing.majors.forEach((major) => {
       assert.ok(credentialClause.includes(major), "subject keeps its capitals");
     });
   });
 
+  it("raises one clause rather than storing a second spelling of it", () => {
+    const [entry] = educationEntries;
+    assert.equal(entry?.credential.slice(1), credentialClause.slice(1));
+    assert.equal(entry?.credential.charAt(0), credentialClause.charAt(0).toUpperCase());
+  });
+
   it("derives the education table from the same atoms", () => {
     const [entry] = educationEntries;
     assert.equal(entry?.institution, standing.institution);
-    assert.equal(entry?.credential, credentialPhrase);
     assert.ok(entry?.period.endsWith(" year"));
   });
 
