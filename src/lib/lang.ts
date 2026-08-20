@@ -121,19 +121,9 @@ export const nativeNameOf = (lang: Lang): string => found(nativeName, lang);
  */
 export const dateLocaleOf = (lang: Lang): string => found(dateLocale, lang);
 
-/**
- * Which of the two phrasings a site wants. Named at every call rather than
- * defaulted: the choice is a fact about where the string is being rendered,
- * and a default would let a listing row silently inherit a header's wording.
- */
 export type ReadingTimeForm = keyof ReadingTimeWording;
 
-/**
- * "4 min read", or 「阅读约 4 分钟」. A property of the language the surrounding
- * text is written in, exactly like `dateLocaleOf`: an article's meta line
- * takes the article's language, and a listing row is chrome, so it takes
- * `SITE_LANG`.
- */
+/** Takes the language of the surrounding text, exactly like `dateLocaleOf`. */
 export const readingTimeIn = (
   lang: Lang,
   minutes: number,

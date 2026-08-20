@@ -18,27 +18,15 @@ export const majorsPhrase: string = LIST.format(standing.majors);
 export const standingPhrase: string = `${standing.ordinal}-year`;
 
 /**
- * Raise the first character only; subject names keep their own capitals.
- *
- * The one case transformation in this module. Every clause below is stored in
- * the form that composes into running prose, and is raised where a sentence or
- * a table cell begins. Storing the raised form instead would need this
- * function's inverse as well, and two spellings of one clause are two things
- * that can disagree.
+ * Clauses below are stored mid-sentence; this is the only place they are
+ * raised. Subject names keep their own capitals.
  */
 const sentenceCase = (clause: string): string =>
   `${clause.charAt(0).toUpperCase()}${clause.slice(1)}`;
 
 /**
- * One major reads "major in", two "double major in", anything else the plural.
- *
- * A table rather than a comparison chain, because `majors` is a `const` tuple:
- * its `length` is a literal type, and the checker rightly refuses `=== 1`
- * against a tuple of two as a comparison that cannot hold. Widening the count
- * to `number` would silence that, which is how the branches got to look live
- * while being decided at compile time. Indexing is partial under
- * `noUncheckedIndexedAccess`, so `??` is the totalizing step and says which
- * case is the default.
+ * A table, not a comparison chain: `majors` is a `const` tuple, so its `length`
+ * is a literal type and the checker refuses `=== 1` against a tuple of two.
  */
 const CREDENTIAL_PREFIXES: Readonly<Record<number, string>> = {
   1: "major in",

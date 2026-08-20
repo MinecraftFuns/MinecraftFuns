@@ -92,18 +92,10 @@ export type DeploymentsConfig = {
  * varies independently of the code, which is how the content can be
  * announced as "zh-Hans" while living at `/zh/`.
  */
-/**
- * Wording that wraps a number. A pair rather than a template string: "{n} min"
- * admits a missing token and a repeated one, where this admits exactly one
- * insertion point and needs no parsing to find it.
- */
+/** Wording around a number. A pair, so there is exactly one insertion point. */
 export type Affixed = { readonly before: string; readonly after: string };
 
-/**
- * How a language says "4 min read". Two forms because the two sites differ in
- * room, not in language: a header can afford the verb, a listing row is one
- * unwrapped line.
- */
+/** "4 min read" in a header; "4 min" where a row must not wrap. */
 export type ReadingTimeWording = {
   readonly full: Affixed;
   readonly compact: Affixed;
@@ -121,12 +113,7 @@ export type LanguageConfig = {
    * follow "en-CA" date conventions.
    */
   readonly dateLocale: string;
-  /**
-   * Read where the surrounding text is, not where the reader is: the meta
-   * line of a Chinese article is Chinese throughout, so the minute count is
-   * phrased under this language exactly as the date is formatted under
-   * `dateLocale`.
-   */
+  /** Phrased under this language, as `dateLocale` formats dates under it. */
   readonly readingTime: ReadingTimeWording;
 };
 
