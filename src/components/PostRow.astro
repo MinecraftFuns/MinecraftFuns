@@ -1,5 +1,5 @@
 ---
-import { bcp47Of, nativeNameOf, SITE_LANG } from "../lib/lang.ts";
+import { bcp47Of, nativeNameOf, readingTimeIn, SITE_LANG } from "../lib/lang.ts";
 import type { PostSummary } from "../lib/posts.ts";
 import { formatIsoDate } from "../lib/time.ts";
 
@@ -42,7 +42,7 @@ const displayDate = formatIsoDate(post.date);
   </div>
 
   <span class="meta whitespace-nowrap">
-    {post.readingMinutes} min{
+    {readingTimeIn(SITE_LANG, post.readingMinutes, "compact")}{
       badge && (
         <>
           {" "}

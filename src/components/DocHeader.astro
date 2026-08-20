@@ -1,5 +1,6 @@
 ---
 import { categoryHref, type DocCategory } from "../lib/docs.ts";
+import { readingTimeIn, SITE_LANG } from "../lib/lang.ts";
 import { INTRO } from "./intro.ts";
 
 /** Doc opening; separate from the post header because metadata differs. */
@@ -26,7 +27,7 @@ const { spacing, title: titleClass } = INTRO.page;
       {category}
     </a>
     <span aria-hidden="true">·</span>
-    <span>{readingMinutes} min read</span>
+    <span>{readingTimeIn(SITE_LANG, readingMinutes, "full")}</span>
   </p>
   <h1 class:list={["text-ink mt-xs", titleClass]}>{title}</h1>
   <p class="text-ink-muted mt-sm max-w-measure text-body-lg">{description}</p>

@@ -1,5 +1,6 @@
 ---
 import type { DocSummary } from "../lib/docs.ts";
+import { readingTimeIn, SITE_LANG } from "../lib/lang.ts";
 
 /** Docs index row; shares the post rhythm without its date column. */
 type Props = { readonly doc: DocSummary };
@@ -20,6 +21,6 @@ const { doc } = Astro.props;
   </div>
 
   <span class="meta shrink-0 whitespace-nowrap">
-    {doc.readingMinutes} min
+    {readingTimeIn(SITE_LANG, doc.readingMinutes, "compact")}
   </span>
 </a>

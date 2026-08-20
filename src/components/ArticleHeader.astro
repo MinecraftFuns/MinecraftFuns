@@ -1,5 +1,5 @@
 ---
-import { dateLocaleOf, type Lang } from "../lib/lang.ts";
+import { dateLocaleOf, type Lang, readingTimeIn } from "../lib/lang.ts";
 import type { PostTag } from "../lib/posts.ts";
 import { formatDateIn, SITE_TIME_ZONE, type IsoDate } from "../lib/time.ts";
 import type { Href } from "../lib/url.ts";
@@ -74,7 +74,7 @@ const displayDate = formatDateIn(date, SITE_TIME_ZONE, dateLocaleOf(lang));
   <p class="meta flex items-center gap-2xs">
     <time datetime={date}>{displayDate}</time>
     <span aria-hidden="true">·</span>
-    <span>{readingMinutes} min read</span>
+    <span>{readingTimeIn(lang, readingMinutes, "full")}</span>
     {
       alternates.map((alternate) => (
         <>

@@ -13,6 +13,24 @@ import type { LanguagesConfig } from "../schema.ts";
  * that render it (`TranslationNote.astro`) before the site builds.
  */
 export const languages = [
-  { code: "en", bcp47: "en", nativeName: "English", dateLocale: "en-CA" },
-  { code: "zh", bcp47: "zh-Hans", nativeName: "中文", dateLocale: "zh-CN" },
+  {
+    code: "en",
+    bcp47: "en",
+    nativeName: "English",
+    dateLocale: "en-CA",
+    readingTime: {
+      full: { before: "", after: " min read" },
+      compact: { before: "", after: " min" },
+    },
+  },
+  {
+    code: "zh",
+    bcp47: "zh-Hans",
+    nativeName: "中文",
+    dateLocale: "zh-CN",
+    readingTime: {
+      full: { before: "阅读约 ", after: " 分钟" },
+      compact: { before: "约 ", after: " 分钟" },
+    },
+  },
 ] as const satisfies LanguagesConfig;

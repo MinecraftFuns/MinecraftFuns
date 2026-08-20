@@ -1,6 +1,7 @@
 import { languages } from "../config/languages.ts";
 import { invalid, ok, okUnless, orThrow, type Parsed } from "../prelude/adt.ts";
 import { clashesBy } from "../prelude/distinct.ts";
+import type { ReadingTimeWording } from "../schema.ts";
 
 /**
  * The language vocabulary, derived from `config/languages.ts` and nothing
@@ -78,6 +79,9 @@ const indexed = <T>(field: (language: (typeof languages)[number]) => T) =>
 const bcp47 = indexed(({ bcp47: tag }) => tag);
 const nativeName = indexed(({ nativeName: name }) => name);
 const dateLocale = indexed(({ dateLocale: locale }) => locale);
+const readingTime = indexed(({ readingTime: wording }) => wording);
+/* One formatter per language, built at module load rather than per row. */
+const countFormat = indexed(({ bcp47: tag }) => new Intl.NumberFormat(tag));
 const preference = new Map<Lang, number>(
   languages.map(({ code }, index) => [code, index]),
 );
@@ -116,6 +120,28 @@ export const nativeNameOf = (lang: Lang): string => found(nativeName, lang);
  * the language, not of the site: a Chinese article dates itself in Chinese.
  */
 export const dateLocaleOf = (lang: Lang): string => found(dateLocale, lang);
+
+/**
+ * Which of the two phrasings a site wants. Named at every call rather than
+ * defaulted: the choice is a fact about where the string is being rendered,
+ * and a default would let a listing row silently inherit a header's wording.
+ */
+export type ReadingTimeForm = keyof ReadingTimeWording;
+
+/**
+ * "4 min read", or 「阅读约 4 分钟」. A property of the language the surrounding
+ * text is written in, exactly like `dateLocaleOf`: an article's meta line
+ * takes the article's language, and a listing row is chrome, so it takes
+ * `SITE_LANG`.
+ */
+export const readingTimeIn = (
+  lang: Lang,
+  minutes: number,
+  form: ReadingTimeForm,
+): string => {
+  const { before, after } = found(readingTime, lang)[form];
+  return `${before}${found(countFormat, lang).format(minutes)}${after}`;
+};
 
 /** Position in the preference order, for sorting renditions by it. */
 export const preferenceOf = (lang: Lang): number => found(preference, lang);

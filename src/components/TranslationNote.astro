@@ -1,6 +1,7 @@
 ---
 import { bcp47Of, type Lang, type Translator } from "../lib/lang.ts";
 import type { Href } from "../lib/url.ts";
+import type { Affixed } from "../schema.ts";
 
 /** Discloses translation provenance and links to the original in page language. */
 type Props = {
@@ -16,9 +17,7 @@ const originalName =
   new Intl.DisplayNames([lang], { type: "language" }).of(original.lang) ?? original.lang;
 
 /** Record wording across closed language and translator unions. */
-const WORDING: Readonly<
-  Record<Lang, Record<Translator, { readonly before: string; readonly after: string }>>
-> = {
+const WORDING: Readonly<Record<Lang, Record<Translator, Affixed>>> = {
   en: {
     machine: { before: "Machine-translated from the ", after: "." },
     human: { before: "Translated from the ", after: "." },
