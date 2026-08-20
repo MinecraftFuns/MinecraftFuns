@@ -1,0 +1,74 @@
+---
+import Button from "./Button.astro";
+import { nextHref, pageHref, prevHref, type Page } from "../lib/paging.ts";
+import type { RootedPath } from "../schema.ts";
+
+/**
+ * Walking a listing that does not fit on one page.
+ *
+ * Renders nothing when there is only one page: `total` says so, and a control
+ * offering no destinations is worse than no control. Every address comes from
+ * `pageHref`, so the first page is linked at the listing's own route and not
+ * at a `/page/1/` that would serve the same posts at a second URL.
+ *
+ * Numbers as well as arrows, because a reader landing on page three from a
+ * search result needs to see where they are and that there is a page one.
+ */
+type Props = {
+  readonly base: RootedPath;
+  readonly page: Page<unknown>;
+  /** Names the control for assistive technology. */
+  readonly label: string;
+};
+
+const { base, page, label } = Astro.props;
+
+const previous = prevHref(base, page);
+const next = nextHref(base, page);
+
+const numbers = Array.from({ length: page.total }, (_, index) => ({
+  index: index + 1,
+  href: pageHref(base, index + 1),
+  current: index + 1 === page.index,
+}));
+---
+
+{
+  page.total > 1 && (
+    <nav
+      class="border-hairline mt-xl flex items-center gap-xs border-t pt-lg"
+      aria-label={label}
+    >
+      {previous !== undefined && (
+        <Button href={previous} tone="secondary" size="compact">
+          Newer
+        </Button>
+      )}
+
+      <ol
+        class="text-body-sm text-ink-tertiary flex flex-wrap items-center gap-2xs"
+        role="list"
+      >
+        {numbers.map(({ index, href, current }) => (
+          <li>
+            {current ? (
+              <span class="text-ink px-2xs tabular-nums" aria-current="page">
+                {index}
+              </span>
+            ) : (
+              <a class="link-muted px-2xs tabular-nums" href={href}>
+                {index}
+              </a>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      {next !== undefined && (
+        <Button href={next} tone="secondary" size="compact">
+          Older
+        </Button>
+      )}
+    </nav>
+  )
+}

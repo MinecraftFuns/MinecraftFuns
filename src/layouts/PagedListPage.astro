@@ -1,0 +1,54 @@
+---
+import Paginator from "../components/Paginator.astro";
+import PostRow from "../components/PostRow.astro";
+import ListPage from "./ListPage.astro";
+import type { Page } from "../lib/paging.ts";
+import type { PostSummary } from "../lib/posts.ts";
+import type { Href } from "../lib/url.ts";
+import type { RootedPath } from "../schema.ts";
+
+/**
+ * One page of a post listing.
+ *
+ * Page one lives at the listing's own route and the rest under `/page/N/`,
+ * which is two route files for every listing. They share this, so the two
+ * cannot come to disagree about what a page of the blog looks like; a route
+ * file is left holding its `getStaticPaths` and nothing else.
+ *
+ * The title carries the page number past the first, so four pages of an
+ * archive are four documents rather than four copies of one.
+ */
+type Props = {
+  readonly title: string;
+  readonly description: string;
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly lede: string;
+  readonly label: string;
+  readonly empty: string;
+  /** Where this listing lives; every page address derives from it. */
+  readonly base: RootedPath;
+  readonly page: Page<PostSummary>;
+  readonly back?: { readonly href: Href; readonly label: string };
+};
+
+const { title, description, eyebrow, heading, lede, label, empty, base, page, back } =
+  Astro.props;
+
+const paged = page.index > 1 ? ` (page ${page.index} of ${page.total})` : "";
+---
+
+<ListPage
+  title={`${title}${paged}`}
+  description={description}
+  eyebrow={eyebrow}
+  heading={heading}
+  lede={lede}
+  label={label}
+  empty={empty}
+  back={back}
+>
+  <slot name="browse" slot="browse" />
+  {page.items.map((post) => <PostRow post={post} />)}
+  <Paginator base={base} page={page} label={`${label}, pages`} slot="after" />
+</ListPage>

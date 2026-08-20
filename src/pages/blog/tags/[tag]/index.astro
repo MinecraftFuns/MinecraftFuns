@@ -1,39 +1,44 @@
 ---
-import PostRow from "../../../components/PostRow.astro";
-import ListPage from "../../../layouts/ListPage.astro";
-import type { NonEmpty } from "../../../prelude/adt.ts";
-import { postTags, type PostSummary, type PostTag } from "../../../lib/posts.ts";
-import { routeUrl } from "../../../lib/url.ts";
+import PagedListPage from "../../../../layouts/PagedListPage.astro";
+import { firstPage, type Page } from "../../../../lib/paging.ts";
+import { postTags, type PostSummary } from "../../../../lib/posts.ts";
+import { tagListing, type TagListing } from "../../../../lib/tag-listing.ts";
+import { routeUrl } from "../../../../lib/url.ts";
 
-/* Taxonomy-derived pages; validation rejects empty or colliding slugs first. */
+/**
+ * A tag's first page. Taxonomy-derived, and `postTags` has already refused an
+ * empty or colliding slug, so every path here addresses a real listing.
+ */
 export async function getStaticPaths() {
   const tags = await postTags();
-  return tags.map((taxon) => ({
-    params: { tag: taxon.slug },
-    props: { tag: taxon.label, posts: taxon.items },
-  }));
+
+  return tags.map((taxon) => {
+    const listing = tagListing(taxon);
+    return {
+      params: { tag: taxon.slug },
+      /* A taxon's items are non-empty, so its first page always exists. */
+      props: { listing, page: firstPage(listing.pages) },
+    };
+  });
 }
 
 type Props = {
-  readonly tag: PostTag;
-  /* NonEmpty because every tag belongs to a post. */
-  readonly posts: NonEmpty<PostSummary>;
+  readonly listing: TagListing;
+  readonly page: Page<PostSummary> | undefined;
 };
 
-const { tag, posts } = Astro.props;
-
-const count = `${posts.length} post${posts.length === 1 ? "" : "s"}`;
+const { listing, page } = Astro.props;
 ---
 
-<ListPage
-  title={`Posts tagged ${tag}`}
-  description={`Writing tagged ${tag}, newest first.`}
-  eyebrow="Tag"
-  heading={tag}
-  lede={`${count} tagged ${tag}, newest first.`}
-  label={`Posts tagged ${tag}`}
-  empty="No posts published yet."
-  back={{ href: routeUrl("/blog"), label: "All posts" }}
->
-  {posts.map((post) => <PostRow post={post} />)}
-</ListPage>
+{
+  page !== undefined && (
+    <PagedListPage
+      {...listing.intro}
+      title={listing.title}
+      description={listing.description}
+      base={listing.base}
+      page={page}
+      back={{ href: routeUrl("/blog"), label: "All posts" }}
+    />
+  )
+}

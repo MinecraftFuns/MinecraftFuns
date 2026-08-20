@@ -1,0 +1,42 @@
+---
+import PagedListPage from "../../../../../layouts/PagedListPage.astro";
+import { restPages, type Page } from "../../../../../lib/paging.ts";
+import { postTags, type PostSummary } from "../../../../../lib/posts.ts";
+import { tagListing, type TagListing } from "../../../../../lib/tag-listing.ts";
+import { routeUrl } from "../../../../../lib/url.ts";
+
+/**
+ * A tag's pages after the first.
+ *
+ * Generates nothing while every tag fits on one page, which is the case
+ * today. It exists so that the day one does not, the route is already there
+ * and already agrees with how the blog paginates.
+ */
+export async function getStaticPaths() {
+  const tags = await postTags();
+
+  return tags.flatMap((taxon) => {
+    const listing = tagListing(taxon);
+    return restPages(listing.pages).map((page) => ({
+      params: { tag: taxon.slug, page: String(page.index) },
+      props: { listing, page },
+    }));
+  });
+}
+
+type Props = {
+  readonly listing: TagListing;
+  readonly page: Page<PostSummary>;
+};
+
+const { listing, page } = Astro.props;
+---
+
+<PagedListPage
+  {...listing.intro}
+  title={listing.title}
+  description={listing.description}
+  base={listing.base}
+  page={page}
+  back={{ href: routeUrl("/blog"), label: "All posts" }}
+/>

@@ -476,9 +476,39 @@ export const noOutput = ({ html }: Artifact): readonly Violation[] =>
     : [];
 
 export const missingRequired = ({ present }: Artifact): readonly Violation[] =>
-  ["index.html", "favicon.svg"]
+  ["index.html", "favicon.svg", "favicon.ico", "apple-touch-icon.png"]
     .filter((required) => !present.has(required))
     .map((required) => violation("output", `missing required file: ${required}`));
+
+/** A listing's first page, addressed as a page rather than as the listing. */
+const FIRST_PAGE = /(?:^|\/)page\/1(?:\/|$)/;
+
+/**
+ * Page one of a listing lives at the listing's own route, never at
+ * `/page/1/`. `lib/paging.ts` makes that true by construction, routing every
+ * address through one function; this is the assertion that it stayed true,
+ * because the failure is silent. Both copies would render, and the archive
+ * would divide its inbound links and its indexing between two URLs holding
+ * identical posts.
+ *
+ * Files and links are both checked: a route nobody links to is still a page a
+ * crawler can find, and a link to a page that is not generated is a 404.
+ */
+export const firstPageAliases = ({
+  relativeFiles,
+  html,
+}: Artifact): readonly Violation[] => [
+  ...relativeFiles
+    .filter((path) => FIRST_PAGE.test(path))
+    .map((path) => violation("paging", `${path}: page one is the listing's own route`)),
+  ...html.flatMap(({ path, text }) =>
+    extractReferences(text)
+      .filter((reference) => FIRST_PAGE.test(reference))
+      .map((reference) =>
+        violation("paging", `${path}: links ${reference} rather than the listing`),
+      ),
+  ),
+];
 
 /**
  * Zero client JavaScript, a deliberate design decision: the theme follows the
@@ -606,6 +636,7 @@ export const stylesheetIntegrity = ({ css, palette }: Artifact): readonly Violat
  */
 export const CHECKS: readonly ((artifact: Artifact) => readonly Violation[])[] = [
   missingRequired,
+  firstPageAliases,
   clientScripts,
   templateLeakage,
   linkIntegrity,

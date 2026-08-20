@@ -1,0 +1,48 @@
+---
+import TagStrip from "../../../components/TagStrip.astro";
+import PagedListPage from "../../../layouts/PagedListPage.astro";
+import { restPages, type Page } from "../../../lib/paging.ts";
+import { BLOG_DESCRIPTION, BLOG_INTRO } from "../../../lib/listings.ts";
+import {
+  BLOG_BASE,
+  postPages,
+  tagBrowse,
+  type PostSummary,
+} from "../../../lib/posts.ts";
+import type { Browse } from "../../../lib/browse.ts";
+import type { PostTag } from "../../../lib/labels.ts";
+import type { Taxon } from "../../../lib/taxonomy.ts";
+
+/**
+ * The blog's pages after the first.
+ *
+ * `restPages` drops page one, which the blog's own route serves, so this
+ * route cannot generate the `/page/1/` that would put one set of posts at two
+ * addresses. A blog that fits on one page generates nothing here.
+ */
+export async function getStaticPaths() {
+  const [pages, strip] = await Promise.all([postPages(), tagBrowse()]);
+
+  return restPages(pages).map((page) => ({
+    params: { page: String(page.index) },
+    props: { page, strip },
+  }));
+}
+
+type Props = {
+  readonly page: Page<PostSummary>;
+  readonly strip: Browse<Taxon<PostTag, PostSummary>> | undefined;
+};
+
+const { page, strip } = Astro.props;
+---
+
+<PagedListPage
+  {...BLOG_INTRO}
+  title="Blog"
+  description={BLOG_DESCRIPTION}
+  base={BLOG_BASE}
+  page={page}
+>
+  {strip !== undefined && <TagStrip strip={strip} slot="browse" />}
+</PagedListPage>

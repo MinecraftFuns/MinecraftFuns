@@ -1,25 +1,38 @@
 ---
-import PostRow from "../../components/PostRow.astro";
-import PostTags from "../../components/PostTags.astro";
+import TagStrip from "../../components/TagStrip.astro";
 import ListPage from "../../layouts/ListPage.astro";
-import { site } from "../../config/site.ts";
-import { postSummaries, postTags } from "../../lib/posts.ts";
+import PagedListPage from "../../layouts/PagedListPage.astro";
+import { firstPage } from "../../lib/paging.ts";
+import { BLOG_DESCRIPTION, BLOG_INTRO } from "../../lib/listings.ts";
+import { BLOG_BASE, postPages, tagBrowse } from "../../lib/posts.ts";
 
-const posts = await postSummaries();
-
-/* Reuse PostTags and one taxonomy source for consistent tag links. */
-const tags = (await postTags()).map((taxon) => taxon.label);
+/**
+ * The blog's first page, at the blog's own URL.
+ *
+ * Pages after this one are `blog/page/[page].astro`. The split is what keeps
+ * the archive off a second address: were page one also served at `/page/1/`,
+ * every link to the blog would be divided between two URLs holding the same
+ * posts.
+ *
+ * An archive with nothing in it has no first page, and renders the plain
+ * listing instead of a paginated one holding an imaginary page.
+ */
+const page = firstPage(await postPages());
+const strip = await tagBrowse();
 ---
 
-<ListPage
-  title="Blog"
-  description={`Notes on software, systems, and cognitive science by ${site.name}, in English and Chinese.`}
-  eyebrow="Blog"
-  heading="Notes I wrote down so I would not have to work them out twice."
-  lede="Mostly software and systems, some cognitive science, and a batch of older posts in Chinese from my competitive programming years. Written for whoever hits the same problem next, which is usually me."
-  label="All posts"
-  empty="No posts published yet."
->
-  <PostTags slot="browse" tags={tags} />
-  {posts.map((post) => <PostRow post={post} />)}
-</ListPage>
+{
+  page === undefined ? (
+    <ListPage {...BLOG_INTRO} title="Blog" description={BLOG_DESCRIPTION} />
+  ) : (
+    <PagedListPage
+      {...BLOG_INTRO}
+      title="Blog"
+      description={BLOG_DESCRIPTION}
+      base={BLOG_BASE}
+      page={page}
+    >
+      {strip !== undefined && <TagStrip strip={strip} slot="browse" />}
+    </PagedListPage>
+  )
+}

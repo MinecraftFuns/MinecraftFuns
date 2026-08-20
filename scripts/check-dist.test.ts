@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import {
   acceptableCanonicals,
   canonicalLinks,
+  firstPageAliases,
   candidatePaths,
   CHECKS,
   clientScripts,
@@ -28,6 +29,7 @@ import {
   templateLeakage,
   webKeyDirectory,
   undefinedCustomProperties,
+  type Artifact,
   type Deployment,
   type Document,
   type Resolves,
@@ -119,6 +121,12 @@ const page = (body: string, route: string = ""): string =>
   `<!doctype html><html><head>
    <link rel="canonical" href="https://example.test/MinecraftFuns/${route}"/>
    </head><body>${body}</body></html>`;
+
+/** The icons `missingRequired` asks for, which no fixture is about. */
+const ICONS = {
+  "favicon.ico": "ico",
+  "apple-touch-icon.png": "png",
+} as const;
 
 const checksIn = (violations: readonly Violation[]): ReadonlySet<string> =>
   new Set(violations.map((v) => v.check));
@@ -475,6 +483,7 @@ describe("inspect", () => {
     const violations = await inspectTree({
       "index.html": page('<a href="/MinecraftFuns/work">w</a>'),
       "favicon.svg": "<svg/>",
+      ...ICONS,
       "work/index.html": page("work", "work/"),
     });
     assert.deepEqual(violations, []);
@@ -485,6 +494,7 @@ describe("inspect", () => {
     const violations = await inspectTree({
       "index.html": page('<a href="/work">w</a>'),
       "favicon.svg": "<svg/>",
+      ...ICONS,
       "work/index.html": page("work", "work/"),
     });
     assert.ok(checksIn(violations).has("base-path"));
@@ -494,6 +504,7 @@ describe("inspect", () => {
     const violations = await inspectTree({
       "index.html": page('<a href="/MinecraftFuns/cv">cv</a>'),
       "favicon.svg": "<svg/>",
+      ...ICONS,
     });
     assert.ok(checksIn(violations).has("dead-link"));
   });
@@ -514,12 +525,14 @@ describe("inspect", () => {
     const inline = await inspectTree({
       "index.html": page("<script>alert(1)</script>"),
       "favicon.svg": "<svg/>",
+      ...ICONS,
     });
     assert.ok(checksIn(inline).has("zero-js"));
 
     const emitted = await inspectTree({
       "index.html": page("x"),
       "favicon.svg": "<svg/>",
+      ...ICONS,
       "_astro/island.js": "console.log(1)",
     });
     assert.ok(checksIn(emitted).has("zero-js"));
@@ -529,6 +542,7 @@ describe("inspect", () => {
     const violations = await inspectTree({
       "index.html": page("<p>undefined</p>"),
       "favicon.svg": "<svg/>",
+      ...ICONS,
     });
     assert.ok(checksIn(violations).has("leakage"));
   });
@@ -537,6 +551,7 @@ describe("inspect", () => {
     const missing = await inspectTree({
       "index.html": "<!doctype html><html><body>x</body></html>",
       "favicon.svg": "<svg/>",
+      ...ICONS,
     });
     assert.ok(checksIn(missing).has("canonical"));
 
@@ -544,6 +559,7 @@ describe("inspect", () => {
       "index.html":
         '<!doctype html><html><head><link rel="canonical" href="https://elsewhere.test/"/></head><body>x</body></html>',
       "favicon.svg": "<svg/>",
+      ...ICONS,
     });
     assert.ok(checksIn(foreign).has("canonical"));
   });
@@ -557,6 +573,7 @@ describe("inspect", () => {
       {
         "index.html": `<!doctype html><html><head><link rel="canonical" href="https://mirror.test/MinecraftFuns/"/></head><body>x</body></html>`,
         "favicon.svg": "<svg/>",
+        ...ICONS,
       },
       {
         site: "https://mirror.test",
@@ -572,6 +589,7 @@ describe("inspect", () => {
       {
         "index.html": `<!doctype html><html><head><link rel="canonical" href="https://joefang.test/"/></head><body><a href="/MinecraftFuns/work">w</a></body></html>`,
         "favicon.svg": "<svg/>",
+        ...ICONS,
         "work/index.html": `<html><head><link rel="canonical" href="https://joefang.test/work/"/></head><body>w</body></html>`,
       },
       {
@@ -587,6 +605,7 @@ describe("inspect", () => {
     const violations = await inspectTree({
       "index.html": page("x"),
       "favicon.svg": "<svg/>",
+      ...ICONS,
       "_astro/index.css": ".a{color:#5e6ad2}",
     });
     assert.ok(checksIn(violations).has("palette"));
@@ -609,6 +628,7 @@ describe("inspect", () => {
       {
         "index.html": `<!doctype html><html><head><link rel="canonical" href="https://example.test/"/></head><body><a href="/work">w</a></body></html>`,
         "favicon.svg": "<svg/>",
+        ...ICONS,
         "work/index.html":
           '<html><head><link rel="canonical" href="https://example.test/work/"/></head><body>w</body></html>',
       },
@@ -629,8 +649,8 @@ const artifact = (over = {}) => ({
   base: "/",
   normalisedBase: "/",
   canonical: { origin: "https://example.test", base: "/" },
-  present: new Set(["index.html", "favicon.svg"]),
-  relativeFiles: ["index.html", "favicon.svg"],
+  present: new Set([...Object.keys(ICONS), "index.html", "favicon.svg"]),
+  relativeFiles: [...Object.keys(ICONS), "index.html", "favicon.svg"],
   html: [],
   css: [],
   js: [],
@@ -684,7 +704,13 @@ describe("checks as data", () => {
     const found = missingRequired(artifact({ present: new Set(["index.html"]) }));
     assert.deepEqual(
       found.map(({ detail }) => detail),
-      ["missing required file: favicon.svg"],
+      [
+        "missing required file: favicon.svg",
+        /* The two a browser asks for without being told, when the response it
+           is decorating carries no `<link rel="icon">` to read. */
+        "missing required file: favicon.ico",
+        "missing required file: apple-touch-icon.png",
+      ],
     );
   });
 
@@ -760,6 +786,56 @@ describe("checks as data", () => {
     assert.deepEqual(
       found.map(({ check }) => check),
       ["palette"],
+    );
+  });
+});
+
+describe("firstPageAliases", () => {
+  const artifact = (
+    relativeFiles: readonly string[],
+    html: readonly { path: string; text: string }[],
+  ) => ({ relativeFiles, html }) as unknown as Artifact;
+
+  it("passes an artifact whose listings start at their own route", () => {
+    assert.deepEqual(
+      firstPageAliases(
+        artifact(
+          ["blog/index.html", "blog/page/2/index.html", "blog/page/10/index.html"],
+          [{ path: "blog/index.html", text: '<a href="/blog/page/2/">2</a>' }],
+        ),
+      ),
+      [],
+    );
+  });
+
+  it("reports a generated /page/1/, which would serve one listing at two URLs", () => {
+    const found = firstPageAliases(artifact(["blog/page/1/index.html"], []));
+    assert.equal(found.length, 1);
+    assert.match(found[0]!.detail, /page one is the listing's own route/);
+  });
+
+  it("reports a link to /page/1/ even when no such page was generated", () => {
+    const found = firstPageAliases(
+      artifact([], [{ path: "blog/index.html", text: '<a href="/blog/page/1/">1</a>' }]),
+    );
+    assert.equal(found.length, 1);
+    assert.match(found[0]!.detail, /rather than the listing/);
+  });
+
+  it("catches a nested listing, not only the blog's own", () => {
+    assert.equal(
+      firstPageAliases(artifact(["blog/tags/editorial/page/1/index.html"], [])).length,
+      1,
+    );
+  });
+
+  it("does not mistake a page numbered 1 followed by more digits", () => {
+    // `/page/10/` and `/page/12/` are ordinary pages.
+    assert.deepEqual(
+      firstPageAliases(
+        artifact(["blog/page/10/index.html", "blog/page/12/index.html"], []),
+      ),
+      [],
     );
   });
 });

@@ -19,7 +19,7 @@ type Props = {
   /** Shown in place of the list when nothing rendered. */
   readonly empty: string;
   /** Present on pages that are a slice of a larger index. */
-  readonly back?: { readonly href: Href; readonly label: string };
+  readonly back?: { readonly href: Href; readonly label: string } | undefined;
 };
 
 const { title, description, chrome, eyebrow, heading, lede, label, empty, back } =
@@ -31,6 +31,11 @@ const hasBrowse = browse.trim() !== "";
 
 const rows = await Astro.slots.render("default");
 const isEmpty = rows.trim() === "";
+
+/* Rendered here for the same reason `browse` is: an empty slot must leave no
+   spacing behind it. A paginator on a single-page listing renders nothing. */
+const after = Astro.slots.has("after") ? await Astro.slots.render("after") : "";
+const hasAfter = after.trim() !== "";
 ---
 
 <BaseLayout title={title} description={description} chrome={chrome}>
@@ -54,6 +59,7 @@ const isEmpty = rows.trim() === "";
         </div>
       )
     }
+    {hasAfter && <Fragment set:html={after} />}
   </section>
 
   {back !== undefined && <BackLink href={back.href} label={back.label} />}
