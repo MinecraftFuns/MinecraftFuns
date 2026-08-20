@@ -1,0 +1,26 @@
+---
+title: "Electronics Will Not Harm Contemporary Society"
+description: "A rebuttal to the view that electronics 'waste time' and harm society, argued from the diminishing returns of creative work and the trend toward social automation."
+date: "2021-05-30"
+tags: ["Essays"]
+translation: machine
+---
+
+![photography of mountain near body of water](https://bafkreiesbkqgm4ao46ijxyspavv5r5pfdlu5yldd23qoxv4cn72gm4fr4y.ipfs.dweb.link)
+
+Flipping through the freshly printed "grade-level excellent essays," I found that many of them argue that the "temptation" or "abuse" of electronics harms contemporary society. I hold a somewhat different view, which may not be fully mature, but I want to record it here first.
+
+Electronics take up time in people's lives, and some ways of using them that are considered "inappropriate," such as reading web novels, playing games, or watching videos, are seen as "wasting time." All of this seems to be taken for granted, but have we considered whether, if we put that "wasted" time into "more meaningful" pursuits, there would actually be any output?
+
+In the traditional sense, being "meaningful" might mean broadening one's knowledge or deepening one's understanding of things. As for "broadening knowledge," it is true that the more time invested, the more one knows; but the problem is that most of this "knowledge" is scattered and unsystematic, useful only as small talk over tea, with no further value. As for "deepening understanding," time investment is necessary, but the return is not necessarily linear. This is especially true for creative work, such as writing code: the more time spent does not mean the result gets more perfect. In fact, overexertion can even backfire badly, so spending less time might be better.
+
+In the past, in an era without the internet that relied mainly on manual labor, more work truly did mean more reward. But the birth of the internet has allowed everyone to become a "human encyclopedia": knowing scattered, unsystematic "facts" serves no real purpose. Creative work partly refutes the idea of "more work, more reward" as well; in such work, the longer one works, the more noticeably efficiency declines. Therefore, even when electronics are used to pass the time, we should not consider them to be "wasting" our time. In fact, they help us regulate stress and improve our work efficiency. Our time is inevitably occupied by all kinds of mundane matters, and electronics are just one of them: no better, no worse.
+
+There is another question worth discussing: does consuming time necessarily cause social harm? As automation advances, a very small amount of human labor can be converted into enormous productivity. In the not-too-distant future, we have reason to believe that most people will become "idle." Even now, if you disconnect from the internet, you gain at least an hour or two of extra free time in a day (students excepted). Yet compared to tedious meetings and "office politics" (as a classmate, Xu Kuan, once put it), the time taken up by electronics may only be a small fraction. Add in team-building exercises, Party-building sessions, and the like, and electronics are in fact not the main reason time gets consumed. Even after so much time has been consumed this way, it has never had a noticeable impact on social development. So on what basis do people accuse electronics of wasting time and harming society?
+
+On a personal level, everyone has a different "level" and different upbringing, and so people pass the time differently. The older generation drinks tea, chats, and plays mahjong, and they do not "blame themselves" for it; young people today using electronics to pass the time should not be blamed either. Some people have refined tastes or lofty ambitions and choose "more meaningful" ways to spend their free time, but it cannot be denied that most people are ordinary, and they pass the time in whatever way suits them, which is beyond reproach. As for whether electronics have caused a decline in social efficiency, some argue that "not using your phone would free up a lot of time." But the problem is that such time is usually fragmented and unable to sustain focus. Putting that time into work would yield extremely little output, and might even yield negative output. The proper use of that time is simply to "rest a bit." Using electronics is the widely accepted way to rest in this era. If even that is called "harm," then what joy is left in life?
+
+From an individual standpoint, there are indeed cases where excessive use of electronics seriously affects someone's life, but these are a "small minority." Analyzing extreme cases cannot lead to the conclusion that electronics "cause harm to society." Still, many students are unwilling to be counted among the "majority," which is why some of them criticize electronics in the "grade-level excellent essays." Electronics will not cause harm to society, but their harm to the individual is a matter that deserves separate discussion.
+
+* [Original document (page 1)](https://bafkreibqcyenpxx4ykvltfhk4uldo6ay5jad7cidtiggbjhfdtazd5yw7m.ipfs.inbrowser.link/)
+* [Original document (page 2)](https://bafkreih2ohbq3ijvxgtxbk2qtzmqfq46jsbzksjkvebpxhozeojcnhmitm.ipfs.inbrowser.link/)
