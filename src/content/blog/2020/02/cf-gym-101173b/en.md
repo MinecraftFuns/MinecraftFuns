@@ -156,7 +156,7 @@ Hall's theorem states that if the above fact holds for every nonempty subset of 
 
 ### Proof
 
-![证明霍尔定理](https://bafkreifydvtalnuxr6o7l6dm3jbcxl54v6a7m6corqkc7tns6gob7rpkxi.ipfs.dweb.link)
+![Proof of Hall's theorem](https://bafkreifydvtalnuxr6o7l6dm3jbcxl54v6a7m6corqkc7tns6gob7rpkxi.ipfs.dweb.link)
 
 Cached - [http://faculty.wwu.edu/sarkara/hall.pdf](https://bafkreigxbfy2otqvi3rzfvldrlvhvwqvagxdkext7m4llohjjl7vbhnqx4.ipfs.inbrowser.link/)
 
@@ -164,7 +164,7 @@ Cached - [http://faculty.wwu.edu/sarkara/hall.pdf](https://bafkreigxbfy2otqvi3rz
 
 Suppose the two vertex sets are `X` and `Y`; then the size of the bipartite graph's maximum matching is `|X| - max{|W| - N(W)}`, where `W` is a subset of `X`  
 > For certain special problems, this lets you find the maximum matching directly without building the graph  
-> From [Hall定理 二分图完美匹配 - dummyummy - 博客园](https://bafkreih6gsfrwjjtaqgap4u3rffvh34bm2mwpjpwopzxwylfnsuz66vqgm.ipfs.inbrowser.link/)  
+> From [Hall's theorem and perfect bipartite matching - dummyummy - cnblogs](https://bafkreih6gsfrwjjtaqgap4u3rffvh34bm2mwpjpwopzxwylfnsuz66vqgm.ipfs.inbrowser.link/)  
 > Let the two vertex sets of bipartite graph `G` be `X` and `Y` (assume `|X| ≤ |Y|`). The **necessary and sufficient condition** for `G` to have a set of vertex-disjoint edges with one endpoint exactly covering `X` (that is, **a perfect matching on the `X` side exists**) is: **any `k` vertices in `X` are adjacent to at least `k` vertices in `Y`**; that is, for a vertex subset `W` of `X`, letting `N(W)` denote all neighbors of `W`, Hall's theorem says that for any `W`, `|W| ≤ |N(W)|`
 
 ---
@@ -210,7 +210,7 @@ The woman's response strategy:
 
 This continues round after round until, at some point, **no one is single anymore**; the next round has no new proposals, and the whole process ends automatically. **The resulting marriage arrangement** is then guaranteed to be stable.
 
-![稳定婚姻](https://bafkreicclusoacxzjhfkqrgzr4gebazxa5qlgszcl6n3kxna4mcmdwavzi.ipfs.dweb.link)
+![The stable marriage algorithm, round by round](https://bafkreicclusoacxzjhfkqrgzr4gebazxa5qlgszcl6n3kxna4mcmdwavzi.ipfs.dweb.link)
 
 ### Correctness
 
@@ -238,6 +238,6 @@ Next, we still need to prove that the resulting pairing is indeed stable.
 > Some references are scattered throughout the text instead, sorry about that
 
 * [GYM 101173B - Bipartite Blanket - a free man - CSDN](https://bafybeia52k3ua4uxmsi5s57pykdaxfcr4i7aicota723l3sf3vsh4j4hpq.ipfs.inbrowser.link/)
-* [【Codeforces】Gym 101173B Bipartite Blanket 霍尔定理+状压DP - Ogiso_Setsuna - 博客园](https://bafkreiankx4zl2htixcquhgmicn25kg4i5iyhplovqwrfdi2fjaglfwadi.ipfs.inbrowser.link/)
-* [稳定婚姻匹配问题 - 唔哩Wulili - 博客园](https://bafkreihtn7raqggotg2x7ie2vwqz57l7ihmjsqx6cnaodevth5akgwk3la.ipfs.inbrowser.link/)
+* [Codeforces Gym 101173B Bipartite Blanket: Hall's theorem and bitmask DP - Ogiso_Setsuna - cnblogs](https://bafkreiankx4zl2htixcquhgmicn25kg4i5iyhplovqwrfdi2fjaglfwadi.ipfs.inbrowser.link/)
+* [The stable marriage matching problem - Wulili - cnblogs](https://bafkreihtn7raqggotg2x7ie2vwqz57l7ihmjsqx6cnaodevth5akgwk3la.ipfs.inbrowser.link/)
 * [Hall's marriage theorem - Wikipedia](https://bafkreied4azbfmpmagjuoboqj42irglrvi6tfhsartswdv6jdt4d5git2a.ipfs.inbrowser.link/)

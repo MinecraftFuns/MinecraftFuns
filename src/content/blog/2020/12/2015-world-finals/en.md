@@ -156,7 +156,7 @@ On a rectangular grid sheet of a given length and width, pick four points on the
 
 > Solution
 
-![屏幕截图 2020-11-19 151553.jpg](https://bafkreibxizaji54setl57rbbextfjappxg5kzu3xesoil4jl66vnlumedm.ipfs.dweb.link)
+![A parallelogram inscribed in the sheet, with the four corner triangles shaded](https://bafkreibxizaji54setl57rbbextfjappxg5kzu3xesoil4jl66vnlumedm.ipfs.dweb.link)
 
 The area of the parallelogram equals the area of the enclosing rectangle minus the areas of the four small triangles.
 

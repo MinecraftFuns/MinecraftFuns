@@ -27,7 +27,7 @@ Sandboxie is a sandbox-based isolation program for 32-bit and 64-bit Windows NT-
 
 ![sandboxie](https://ragnarok.joefang.org/static/xvhqhu88i0b5j7jh3guv691s930t6ja6d.png)
 
-"DingTalk" ran normally inside Sandboxie Plus; login, group chat, and other features all worked fine with no noticeable performance drop. Sandboxie did pop up an error message:
+"DingTalk" ran normally inside Sandboxie Plus; login, group chat, and other features all worked fine with no noticeable performance drop. Sandboxie did pop up an error, SBIE2203, saying it had failed to reach the Sandboxie service:
 
 ```text
 DingTalk.exe (3568)：SBIE2203 与 Sandboxie 服务的通信失败: *GUIPROXY_00000001; MsgId: 12 - DingTalk.exe [C0000024]
@@ -35,7 +35,7 @@ DingTalk.exe (3568)：SBIE2203 与 Sandboxie 服务的通信失败: *GUIPROXY_00
 
 "Tor Browser" failed to launch, reporting a missing DLL file.
 
-"GitHub Desktop" launched normally, but Sandboxie popped up an error message:
+"GitHub Desktop" launched normally, but Sandboxie popped up an error, SBIE2205, reporting a service it does not implement:
 
 ```text
 git.exe (19676)：SBIE2205 未实现该服务: ConsoleInit (C00000D4)

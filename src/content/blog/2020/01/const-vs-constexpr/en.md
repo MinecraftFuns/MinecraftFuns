@@ -42,21 +42,21 @@ private:
     mutable int age;
 };
 
-// 可以执行
+// compiles
 string
 Person::getName() const
 {
     return this->name;
 }
 
-// 不能执行
+// does not compile: name is not mutable
 string Person::getName() const
 {
     this->name = "test";
     return this->name;
 }
 
-//可以执行
+// compiles: age is mutable
 void Person::setAge() const
 {
     ++age;
@@ -78,11 +78,11 @@ constexpr int foo(int i)
 int main()
 {
     int i = 10;
-    // 成功调用
+    // fine: foo(5) is a constant expression
     array<int, foo(5)> arr;
-    // 成功调用
+    // fine: an ordinary run-time call
     foo(i);
-    // 错误
+    // error: foo(i) is not a constant expression
     array<int, foo(i)> arr1;
     return 0;
 }

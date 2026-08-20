@@ -48,4 +48,4 @@ Install it from the [Chrome Web Store](https://chrome.google.com/webstore/detail
 Some useful ~~pirated / cracked~~ software: [http://183.91.54.237:7080/masuit/soft/tree/master](http://183.91.54.237:7080/masuit/soft/tree/master)
 
 > [![memset0's avatar](https://bafkreifoiocil7nu3vxuyszpjcj3orv64z7mrkaq3ypo5arltx3w2tqyqq.ipfs.dweb.link)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/):
-> There's a software licensing outfit that goes by the mocking nickname 司马马克丁, notorious for its aggressive anti-piracy crackdowns, so cracked versions of most software it represents basically can't be found through search engines. This repository still has a few of them, though.
+> There's a software licensing outfit that goes by the mocking nickname 司马马克丁, a curse-word twist on its real name 思杰马克丁, notorious for its aggressive anti-piracy crackdowns, so cracked versions of most software it represents basically can't be found through search engines. This repository still has a few of them, though.

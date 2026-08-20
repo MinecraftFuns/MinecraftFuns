@@ -115,9 +115,9 @@ First, `SG(0) = 0`.
 So we can compute the SG function like this.
 
 ```cpp
-// f: 可改变当前状态的方式，要在 getSG 之前预处理
-// SG: 0 ~ n的 SG 函数值
-// S: x 后继状态的集合
+// f: the moves available out of a state; fill this in before calling getSG
+// SG: the SG value of every state 0..n
+// S: the SG values of x's successors
 
 int f[N], SG[MX];
 bitset<MX> S;
@@ -125,19 +125,19 @@ bitset<MX> S;
 void getSG(int n)
 {
     memset(SG, 0, sizeof(SG));
-    // 因为 SG(0) 始终等于0，所以 i 从 1 开始
+    // SG(0) is always 0, so start from 1
     for (int i = 1; i <= n; i++)
     {
-        // 每一次都要将上一状态的后继集合重置
+        // the previous state's successors are no longer ours
         S.reset();
         for (int j = 0; f[j] <= i && j <= N; j++)
         {
-            S.set(SG[i - f[j]]); // 将后继状态的 SG 函数值进行标记
+            S.set(SG[i - f[j]]); // mark the successor's SG value as taken
         }
         for (int j = 0;; j++)
         {
             if (!S.test(j))
-            { // 查询当前后继状态 SG 值中最小的非零值
+            { // the mex: the smallest value no successor holds
                 SG[i] = j;
                 break;
             }

@@ -51,7 +51,7 @@ void read(T &x, Args &... args)
 > Usage: you can refer to any header in the `STL`; here is an example from the `<algorithm>` header on my computer  
 
 ```cpp
-// 这里删除了一些版权声明
+// copyright notice trimmed
 
 #ifndef _GLIBCXX_ALGORITHM
 #define _GLIBCXX_ALGORITHM 1
@@ -77,12 +77,12 @@ void read(T &x, Args &... args)
 * Example
 
 ```cpp
-#pragma GCC optimize(2) // 氧气
-#pragma GCC optimize(3) // 臭氧
-#pragma GCC optimize("Ofast,no-stack-protector,unroll-loops,fast-math") // 极端优化
+#pragma GCC optimize(2) // oxygen
+#pragma GCC optimize(3) // ozone
+#pragma GCC optimize("Ofast,no-stack-protector,unroll-loops,fast-math") // everything else
 ```
 
-* Everyday 卡常 (constant-factor squeezing)
+* Everyday constant-factor squeezing (卡常)
 
 ```cpp
 #pragma GCC optimize(2)

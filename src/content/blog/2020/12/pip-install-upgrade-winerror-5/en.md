@@ -10,7 +10,7 @@ translation: machine
 
 ![0.webp](https://bafkreicnacyi2kzjv5jzyj2islipt2l7hzedp5hnluhx7mvyarlhx62ks4.ipfs.dweb.link)
 
-After running `pip install --upgrade cffi`, I got this error:
+After running `pip install --upgrade cffi`, I got a flat access denial (the message is in Chinese because Windows was):
 
 ```bash
 ERROR: Could not install packages due to an EnvironmentError: [WinError 5] 拒绝访问。: '{path_to_python}\\python38\\lib\\site-packages\\_cffi_backend.cp38-win_amd64.pyd'
