@@ -1,0 +1,27 @@
+name: Set up Node and dependencies
+description: >-
+  The shared toolchain prelude, consumed by every job that runs repository
+  code. The Node major and the install discipline are stated here and nowhere
+  else, so deploy.yml and audit.yml cannot drift apart step by step. The
+  repository must already be checked out; a local action is resolved from the
+  workspace, so checkout is the one step that cannot live here.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v7
+      with:
+        # The build major. Deliberately not read from `engines.node`, which
+        # states a *minimum* (">=24"); resolving that range would silently
+        # move CI onto a new major the day one ships.
+        node-version: "24"
+        cache: npm
+        cache-dependency-path: package-lock.json
+
+    # `ci` rather than `install`: it installs exactly the lockfile's tree and
+    # fails if package.json and the lockfile disagree, so CI cannot silently
+    # resolve a different dependency graph than the one committed.
+    - name: Install dependencies
+      run: npm ci
+      shell: bash

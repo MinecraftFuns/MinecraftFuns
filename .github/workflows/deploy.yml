@@ -29,13 +29,6 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
-env:
-  # The build major. Deliberately not read from `engines.node`, which states a
-  # *minimum* (">=24"); resolving that range would silently move CI onto a new
-  # major the day one ships. audit.yml states the same major; keep them in
-  # step when bumping.
-  NODE_VERSION: "24"
-
 jobs:
   # ---------------------------------------------------------------------------
   # Validate once. Nothing here produces an artifact or touches the outside
@@ -47,11 +40,6 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-    outputs:
-      # The declared deployments, and which of them is canonical. Consumed by
-      # the build matrix and by the joefang-org artifact check.
-      targets: ${{ steps.deployments.outputs.targets }}
-      canonical: ${{ steps.deployments.outputs.canonical }}
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -66,149 +54,34 @@ jobs:
           submodules: false
           show-progress: false
 
-      - name: Set up Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      # `ci` rather than `install`: it installs exactly the lockfile's tree and
-      # fails if package.json and the lockfile disagree, so CI cannot silently
-      # resolve a different dependency graph than the one committed.
-      - name: Install dependencies
-        run: npm ci
+      # The toolchain prelude lives in one composite action shared with
+      # audit.yml, so the Node major and the install discipline cannot drift
+      # between the flows; the action's own comments carry the rationale.
+      - name: Set up Node and dependencies
+        uses: ./.github/actions/setup
 
       # Formatting, types, project rules, and the unit tests: everything that
       # does not need a build. Running them in their own job means one
       # execution gates every target below, instead of repeating per matrix
-      # entry. The build and its artifact checks live in the matrix job, which
-      # is the only place a base path exists.
+      # entry. The build and its artifact checks live in build.yml, which is
+      # the only place a base path exists.
       - name: Check
         run: npm run check
 
-      # The build matrix is *derived*, not written here. Every origin, base
-      # path, and deployment name comes from src/config/deployments.ts, which
-      # is also what the canonical links, the indexing policy, and the artifact
-      # checks read. A matrix entry naming a base the config does not declare
-      # would build a coherent, wrong artifact with nothing to say so; there is
-      # now no second place for one to be written.
-      #
-      # It runs here rather than in its own job because this job has already
-      # paid for the checkout and the install.
-      - name: Resolve deployments
-        id: deployments
-        run: node scripts/deployment-matrix.ts
-
   # ---------------------------------------------------------------------------
-  # Build once per deployment. A base path is baked into every generated link,
-  # so the two origins genuinely need two artifacts, the same validated source
-  # compiled against different parameters, not two independent pipelines.
-  #
-  # `matrix.id` is the deployment's only name. It is simultaneously the GitHub
-  # environment, the artifact, and the job label, so nothing in this file has
-  # to map one identifier onto another.
+  # Build every declared deployment through the shared build workflow, the
+  # same pipeline audit.yml uses, so the two flows cannot drift. Every origin,
+  # base path, and deployment name is resolved inside that boundary from
+  # src/config/deployments.ts; this file names a scope and nothing else.
   # ---------------------------------------------------------------------------
   build:
-    name: Build ${{ matrix.id }}
+    name: Build
     needs: verify
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
     permissions:
       contents: read
-    strategy:
-      # Let both deployments report. They are two parameterisations of one
-      # source, so knowing whether a failure is specific to one or common to
-      # both is the first diagnostic question; cancelling the sibling destroys
-      # it. The publish jobs still require every leg to succeed.
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON(needs.verify.outputs.targets) }}
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-          submodules: false
-          show-progress: false
-
-      - name: Set up Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build ${{ matrix.id }} (${{ matrix.origin }}${{ matrix.base }})
-        env:
-          SITE_URL: ${{ matrix.origin }}
-          SITE_BASE: ${{ matrix.base }}
-        run: npm run build
-
-      # Source-level checks cannot see the deployable. This reads dist/ and
-      # asserts the properties that only exist after a build: every internal
-      # link carries the base path and resolves to a real file, every page
-      # canonicalises to the *canonical* deployment rather than to itself, no
-      # template value leaked, no client script appeared, and no colour outside
-      # the palette reached the stylesheet.
-      #
-      # It runs per deployment, because the base path it validates differs
-      # between them; the check is worthless if it does not match what was
-      # built. The canonical origin it compares against does not vary, and is
-      # read from the same config the build used.
-      - name: Check built artifact
-        env:
-          SITE_URL: ${{ matrix.origin }}
-          SITE_BASE: ${{ matrix.base }}
-        run: npm run dist:check
-
-      # Pages expects one specifically named artifact, which the github-pages
-      # job consumes. Retention stays at the default single day: it is an
-      # intermediate, superseded by the next push.
-      #
-      # Selected by name rather than by a `pages:` flag in the matrix. The flag
-      # was a second way of saying "this one is github-pages", and a matrix
-      # entry could set it inconsistently with its own id.
-      - name: Upload Pages artifact
-        if: matrix.id == 'github-pages'
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist/
-          retention-days: 1
-          # Mandatory here, and the reason is not obvious: this action tars the
-          # directory with `--exclude=.[^/]*` unless this is exactly 'true', so
-          # every dot-directory is silently dropped on the way to the artifact.
-          # `dist/.well-known/` is the only one, and it holds the entire Web
-          # Key Directory and both Matrix delegation documents. Losing it
-          # breaks PGP key discovery and Matrix federation while every other
-          # check still passes, because nothing else in the build is hidden.
-          include-hidden-files: true
-
-      # Every other deployment is published by a job of its own rather than by
-      # an official action, so its build travels there as an ordinary artifact
-      # named for the deployment. `if-no-files-found: error` turns a silently
-      # empty upload into a failure, which matters more here than for Pages: an
-      # empty directory would otherwise be committed to the deployment
-      # repository and blank the live site.
-      - name: Upload ${{ matrix.id }} artifact
-        if: matrix.id != 'github-pages'
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ matrix.id }}
-          path: dist/
-          retention-days: 7
-          if-no-files-found: error
-          # Defaults to false, which excludes every dot-path from the artifact.
-          # See the note on the Pages upload above: `.well-known/` is the whole
-          # Web Key Directory and both Matrix delegation documents, and it
-          # disappears here with no warning and no failed check.
-          include-hidden-files: true
-          # Re-running a failed job would otherwise collide with the artifact
-          # left by the previous attempt and fail on upload.
-          overwrite: true
+    uses: ./.github/workflows/build.yml
+    with:
+      targets: all
 
   # ---------------------------------------------------------------------------
   # joefang.org, the primary domain.
@@ -272,11 +145,12 @@ jobs:
       name: joefang-org
       url: https://joefang.org
     env:
-      # The canonical deployment, resolved from config by the `verify` job.
-      # The checks below compare the artifact against these rather than against
-      # literals, so renaming a deployment cannot leave a stale expectation.
-      CANONICAL_ORIGIN: ${{ fromJSON(needs.verify.outputs.canonical).origin }}
-      CANONICAL_BASE: ${{ fromJSON(needs.verify.outputs.canonical).base }}
+      # The canonical deployment, resolved from config inside the shared build
+      # workflow. The checks below compare the artifact against these rather
+      # than against literals, so renaming a deployment cannot leave a stale
+      # expectation.
+      CANONICAL_ORIGIN: ${{ fromJSON(needs.build.outputs.canonical).origin }}
+      CANONICAL_BASE: ${{ fromJSON(needs.build.outputs.canonical).base }}
     steps:
       # No `actions/checkout` of this repository: this job publishes an
       # artifact that has already been built and checked, and giving it the

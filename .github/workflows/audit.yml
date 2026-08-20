@@ -6,14 +6,14 @@ name: Audit site
 # load-bearing: deploy.yml serializes whole runs through its `pages`
 # concurrency group (deliberately, so an older build can never overwrite a
 # newer deployment), which means every job it contains extends the lock every
-# subsequent push must wait on. The audit consumes nothing from that pipeline;
-# it checks out and builds for itself. As a job there, its twenty minutes of
-# browser time held the deployment queue; here it holds nothing.
+# subsequent push must wait on. Nothing here holds that lock; no deployment
+# ever waits for an audit.
 #
-# It shares the deploy triggers, so every deployed commit is audited, but no
-# deployment ever waits for an audit. Findings land in the job summary and in
-# a downloadable artifact; the point is to learn about problems, not to hold
-# the site hostage to a slow browser.
+# Separate flow, shared pipeline: the build comes from the same workflow
+# deploy.yml builds through, so the tree the browser examines is produced and
+# checked exactly as the tree production receives. Findings land in the job
+# summary and in a downloadable artifact; the point is to learn about
+# problems, not to hold the site hostage to a slow browser.
 on:
   push:
     branches: [main]
@@ -25,16 +25,23 @@ permissions: {}
 # nothing and gate nothing, so they are free to run side by side. Each run
 # keeps its own summary and artifact; there is no "latest" to protect.
 
-env:
-  # The build major. Deliberately not read from `engines.node`, which states a
-  # *minimum* (">=24"); resolving that range would silently move CI onto a new
-  # major the day one ships. deploy.yml states the same major; keep them in
-  # step when bumping.
-  NODE_VERSION: "24"
-
 jobs:
+  # The canonical deployment only: joefang.org at the root is the primary
+  # target, so that is the configuration worth holding to standard. A failure
+  # here is not a new signal, because the same commit is failing the same
+  # shared pipeline in deploy.yml; the non-blocking promise above concerns
+  # the audit itself, which cannot gate anything.
+  build:
+    name: Build
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build.yml
+    with:
+      targets: canonical
+
   audit:
     name: Audit standalone build (non-blocking)
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     # A crashed audit is a finding about the audit, not about the site; keep
@@ -43,6 +50,8 @@ jobs:
     permissions:
       contents: read
     steps:
+      # The source is for the audit driver and its dependencies; the site
+      # itself arrives below as the shared workflow's checked artifact.
       - name: Check out source
         uses: actions/checkout@v7
         with:
@@ -50,15 +59,8 @@ jobs:
           submodules: false
           show-progress: false
 
-      - name: Set up Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Set up Node and dependencies
+        uses: ./.github/actions/setup
 
       # Latest stable Chrome rather than the Chromium the pinned Playwright
       # ships: the driver stays reproducible through the lockfile while the
@@ -68,18 +70,18 @@ jobs:
       - name: Install the latest stable Chrome
         run: npx playwright install --with-deps chrome
 
-      # Audit the standalone build: joefang.org at the root is the eventual
-      # primary target, so that is the configuration worth holding to standard.
-      - name: Build
-        env:
-          SITE_URL: https://joefang.org
-          SITE_BASE: /
-        run: npm run build
+      # Byte-for-byte the artifact the build workflow checked, not a second
+      # build of the same commit that could quietly diverge from it.
+      - name: Download the canonical build
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ fromJSON(needs.build.outputs.canonical).id }}
+          path: dist
 
       - name: Audit
         env:
-          SITE_URL: https://joefang.org
-          SITE_BASE: /
+          SITE_URL: ${{ fromJSON(needs.build.outputs.canonical).origin }}
+          SITE_BASE: ${{ fromJSON(needs.build.outputs.canonical).base }}
         run: npm run audit
 
       - name: Publish report to the job summary

@@ -1,0 +1,183 @@
+name: Build deployments
+
+# The one statement of how this site is built and checked.
+#
+# `workflow_call` only: no triggers of its own. deploy.yml builds every
+# declared deployment through this workflow and publishes the artifacts;
+# audit.yml builds the canonical one and holds a browser against it. Sharing
+# the pipeline at a workflow boundary is what keeps the two flows from
+# drifting: neither can acquire a private notion of how a build works,
+# because neither contains one.
+#
+# The boundary is deliberately narrow. Callers name a *scope*, "all" or
+# "canonical", never coordinates: every origin, base path, and deployment
+# name is resolved here from src/config/deployments.ts, so a caller cannot
+# request an artifact the config does not declare.
+on:
+  workflow_call:
+    inputs:
+      targets:
+        description: Deployments to build, as a scope ("all" or "canonical")
+        type: string
+        required: true
+    outputs:
+      canonical:
+        description: The canonical deployment's matrix leg, as JSON
+        value: ${{ jobs.resolve.outputs.canonical }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # The matrix is *derived*, not written by a caller. Every origin, base path,
+  # and deployment name comes from src/config/deployments.ts, which is also
+  # what the canonical links, the indexing policy, and the artifact checks
+  # read. A matrix entry naming a base the config does not declare would build
+  # a coherent, wrong artifact with nothing to say so; there is no place for
+  # one to be written.
+  # ---------------------------------------------------------------------------
+  resolve:
+    name: Resolve deployments
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+      canonical: ${{ steps.deployments.outputs.canonical }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          submodules: false
+          show-progress: false
+
+      - name: Set up Node and dependencies
+        uses: ./.github/actions/setup
+
+      - name: Resolve deployments
+        id: deployments
+        run: node scripts/deployment-matrix.ts
+
+      # The scope is this workflow's entire input surface, and here is its
+      # smart-constructor boundary: two named cases, anything else rejected
+      # loudly before a runner-minute is spent building.
+      - name: Select ${{ inputs.targets }}
+        id: select
+        env:
+          TARGETS: ${{ steps.deployments.outputs.targets }}
+          CANONICAL: ${{ steps.deployments.outputs.canonical }}
+          SCOPE: ${{ inputs.targets }}
+        run: |
+          set -euo pipefail
+          case "$SCOPE" in
+            all) echo "matrix=${TARGETS}" >> "$GITHUB_OUTPUT" ;;
+            canonical) echo "matrix=[${CANONICAL}]" >> "$GITHUB_OUTPUT" ;;
+            *)
+              echo "::error::unknown targets scope '${SCOPE}'; declared scopes are 'all' and 'canonical'"
+              exit 1
+              ;;
+          esac
+
+  # ---------------------------------------------------------------------------
+  # Build once per selected deployment. A base path is baked into every
+  # generated link, so distinct origins genuinely need distinct artifacts, the
+  # same source compiled against different parameters, not independent
+  # pipelines.
+  #
+  # `matrix.id` is the deployment's only name. It is simultaneously the GitHub
+  # environment, the artifact, and the job label, so nothing here or in a
+  # caller has to map one identifier onto another.
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build ${{ matrix.id }}
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      # Let every selected deployment report. They are parameterisations of
+      # one source, so knowing whether a failure is specific to one or common
+      # to all is the first diagnostic question; cancelling siblings destroys
+      # it. deploy.yml's publish jobs still require every leg to succeed.
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve.outputs.matrix) }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          submodules: false
+          show-progress: false
+
+      - name: Set up Node and dependencies
+        uses: ./.github/actions/setup
+
+      - name: Build ${{ matrix.id }} (${{ matrix.origin }}${{ matrix.base }})
+        env:
+          SITE_URL: ${{ matrix.origin }}
+          SITE_BASE: ${{ matrix.base }}
+        run: npm run build
+
+      # Source-level checks cannot see the deployable. This reads dist/ and
+      # asserts the properties that only exist after a build: every internal
+      # link carries the base path and resolves to a real file, every page
+      # canonicalises to the *canonical* deployment rather than to itself, no
+      # template value leaked, no client script appeared, and no colour outside
+      # the palette reached the stylesheet.
+      #
+      # It runs per deployment, because the base path it validates differs
+      # between them; the check is worthless if it does not match what was
+      # built. The canonical origin it compares against does not vary, and is
+      # read from the same config the build used.
+      - name: Check built artifact
+        env:
+          SITE_URL: ${{ matrix.origin }}
+          SITE_BASE: ${{ matrix.base }}
+        run: npm run dist:check
+
+      # Pages expects one specifically named artifact, which deploy.yml's
+      # github-pages job consumes. Retention stays at the default single day:
+      # it is an intermediate, superseded by the next push.
+      #
+      # Selected by name rather than by a `pages:` flag in the matrix. The flag
+      # was a second way of saying "this one is github-pages", and a matrix
+      # entry could set it inconsistently with its own id.
+      - name: Upload Pages artifact
+        if: matrix.id == 'github-pages'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/
+          retention-days: 1
+          # Mandatory here, and the reason is not obvious: this action tars the
+          # directory with `--exclude=.[^/]*` unless this is exactly 'true', so
+          # every dot-directory is silently dropped on the way to the artifact.
+          # `dist/.well-known/` is the only one, and it holds the entire Web
+          # Key Directory and both Matrix delegation documents. Losing it
+          # breaks PGP key discovery and Matrix federation while every other
+          # check still passes, because nothing else in the build is hidden.
+          include-hidden-files: true
+
+      # Every other deployment travels as an ordinary artifact named for the
+      # deployment, consumed by a publish job or by the audit.
+      # `if-no-files-found: error` turns a silently empty upload into a
+      # failure, which matters more here than for Pages: an empty directory
+      # would otherwise be committed to the deployment repository and blank
+      # the live site.
+      - name: Upload ${{ matrix.id }} artifact
+        if: matrix.id != 'github-pages'
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.id }}
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+          # Defaults to false, which excludes every dot-path from the artifact.
+          # See the note on the Pages upload above: `.well-known/` is the whole
+          # Web Key Directory and both Matrix delegation documents, and it
+          # disappears here with no warning and no failed check.
+          include-hidden-files: true
+          # Re-running a failed job would otherwise collide with the artifact
+          # left by the previous attempt and fail on upload.
+          overwrite: true
