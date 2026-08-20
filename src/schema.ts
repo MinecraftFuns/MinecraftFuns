@@ -140,6 +140,21 @@ export type SiteConfig = {
 };
 
 /**
+ * How the blog's listings are cut up.
+ *
+ * Both are whole numbers greater than zero, which a type cannot say and
+ * `lib/paging.ts` and `lib/browse.ts` parse at import instead. They are here
+ * rather than in a component because each is a value somebody might want to
+ * change without reading code, which is what this directory is for.
+ */
+export type BlogConfig = {
+  /** Posts per page. Page one keeps the listing's own URL. */
+  readonly pageSize: number;
+  /** Tags on the browse strip; the rest live on the tag directory page. */
+  readonly tagPreview: number;
+};
+
+/**
  * A nav entry. The target is written site-relative and *unresolved*: the
  * header mounts it on the deployment's base, which is why this is a
  * `RootedPath` and not a `lib/url.ts` `Href`.

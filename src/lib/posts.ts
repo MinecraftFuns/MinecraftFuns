@@ -1,5 +1,7 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
+import { blog } from "../config/blog.ts";
+
 import { andThen, collect, inContext, mapParsed, orThrow } from "../prelude/adt.ts";
 import { memoiseBy, once } from "../prelude/memo.ts";
 import { reconcile } from "./archive.ts";
@@ -14,10 +16,13 @@ import {
 import type { Lang } from "./lang.ts";
 import type { PostTag } from "./labels.ts";
 import { readingMinutes } from "./reading.ts";
+import { browse, parsePreviewSize, type Browse, type PreviewSize } from "./browse.ts";
+import { paginate, parsePageSize, type Listing, type PageSize } from "./paging.ts";
 import { slugify } from "./slug.ts";
 import { taxonomy, type Taxon } from "./taxonomy.ts";
 import type { IsoDate } from "./time.ts";
 import { routeUrl, type Href } from "./url.ts";
+import type { RootedPath } from "../schema.ts";
 
 /* Re-exported: a tag is part of the blog's vocabulary, and no consumer should
    need to know which leaf module the brand is declared in. */
@@ -151,7 +156,7 @@ export const postSummaries = async (
  * and the route `taxonomy` generates are two calls to one function. A tag with
  * no usable segment, or two sharing one, fails the build in `postTags`.
  */
-export const tagHref = (tag: PostTag): Href => routeUrl(`/blog/tags/${slugify(tag)}`);
+export const tagHref = (tag: PostTag): Href => routeUrl(tagBase(tag));
 
 /** The blog's tags, alphabetically, each with its posts newest first. */
 export const postTags = async (): Promise<readonly Taxon<PostTag, PostSummary>[]> =>
@@ -159,3 +164,36 @@ export const postTags = async (): Promise<readonly Taxon<PostTag, PostSummary>[]
     taxonomy(await postSummaries(), (post) => post.tags),
     "blog tags",
   );
+
+// ---------------------------------------------------------------------------
+// Listings
+// ---------------------------------------------------------------------------
+
+/**
+ * The blog's listing shape, parsed from config at import so a page size of
+ * zero fails the build rather than producing a route per post, or none.
+ */
+export const PAGE_SIZE: PageSize = orThrow(
+  parsePageSize(blog.pageSize),
+  "src/config/blog.ts pageSize",
+);
+
+export const TAG_PREVIEW: PreviewSize = orThrow(
+  parsePreviewSize(blog.tagPreview),
+  "src/config/blog.ts tagPreview",
+);
+
+/** Where the blog's own listing lives; every page of it derives from this. */
+export const BLOG_BASE = "/blog" as const satisfies RootedPath;
+
+/** Where a tag's listing lives. One function, so links and routes agree. */
+export const tagBase = (tag: PostTag): RootedPath => `/blog/tags/${slugify(tag)}`;
+
+/** All posts, cut into pages. */
+export const postPages = async (): Promise<Listing<PostSummary>> =>
+  paginate(await postSummaries(), PAGE_SIZE);
+
+/** The tags the browse strip shows, and how many it leaves for the directory. */
+export const tagBrowse = async (): Promise<
+  Browse<Taxon<PostTag, PostSummary>> | undefined
+> => browse(await postTags(), TAG_PREVIEW);
