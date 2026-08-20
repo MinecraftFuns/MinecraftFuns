@@ -1,5 +1,5 @@
 ---
-title: "Classical Chinese Lecture Notes"
+title: "Classical Chinese Lecture Notes: Words and Syntax"
 description: "High school classical Chinese lecture notes on content words vs. function words, flexible word usage (causative, putative, and benefactive), elliptical sentences, and four inverted sentence patterns, with classic examples."
 date: "2021-01-11"
 tags: ["Chinese Literature", "Notes"]

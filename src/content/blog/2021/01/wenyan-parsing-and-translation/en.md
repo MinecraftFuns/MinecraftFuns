@@ -1,5 +1,5 @@
 ---
-title: "Classical Chinese Lecture Notes"
+title: "Classical Chinese Lecture Notes: Parsing and Translation"
 description: "High school classical Chinese lecture notes covering common cues for sentence punctuation, how to check cultural-knowledge multiple choice questions, techniques for comprehension/judgment multiple choice questions, and a seven-step method for translating classical Chinese."
 date: "2021-01-12"
 tags: ["Chinese Literature", "Notes"]
