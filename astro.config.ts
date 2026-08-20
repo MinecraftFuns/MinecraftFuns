@@ -91,6 +91,22 @@ export default defineConfig({
             pattern: "/_redirects",
             entrypoint: "./src/routes/redirects.ts",
           });
+          /* All three icons are rendered from src/assets/favicon.svg, so the
+             mark cannot be updated in one file and stale in another. Two of
+             the names are ones a browser guesses when it has no document to
+             read a `<link>` from, which is why they are routes at all. */
+          injectRoute({
+            pattern: "/favicon.svg",
+            entrypoint: "./src/routes/favicon-svg.ts",
+          });
+          injectRoute({
+            pattern: "/favicon.ico",
+            entrypoint: "./src/routes/favicon-ico.ts",
+          });
+          injectRoute({
+            pattern: "/apple-touch-icon.png",
+            entrypoint: "./src/routes/apple-touch-icon.ts",
+          });
         },
       },
     },

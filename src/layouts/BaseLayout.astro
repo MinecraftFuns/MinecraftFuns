@@ -97,7 +97,23 @@ const isIndexable = indexable(target.role);
       /* HTML sitemap link reaches crawlers that skip robots.txt, including base-path mirrors. */
     }
     <link rel="sitemap" type="application/xml" href={assetUrl("/sitemap-index.xml")} />
+    {
+      /*
+       * The mark, in the three forms that between them cover every client.
+       * All three are rendered from one SVG; see `lib/icons.ts`.
+       *
+       * `sizes="32x32"` on the ICO is not a description, it is the documented
+       * workaround for Chrome preferring an ICO over an SVG when the ICO
+       * claims no size. Without it the theme-aware vector loses to a raster.
+       *
+       * A document that names these does not need them guessed. The guessed
+       * copies at the origin root exist for responses that are *not*
+       * documents, which have no head to carry a link.
+       */
+    }
+    <link rel="icon" href={assetUrl("/favicon.ico")} sizes="32x32" />
     <link rel="icon" href={assetUrl("/favicon.svg")} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={assetUrl("/apple-touch-icon.png")} />
     {!isIndexable && <meta name="robots" content="noindex" />}
 
     <meta property="og:type" content={type} />
