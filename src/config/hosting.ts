@@ -23,28 +23,41 @@ export const hosting = {
        * about joefang.org specifically, and being a claim is what keeps it
        * from rotting.
        *
-       * `link` carries the resource hints, as one header holding a
-       * comma-separated list: the decoder refuses a rule that sets the same
-       * header twice, because only the last would survive.
+       * `link` carries the resource hints. Written as one header even when it
+       * holds one hint, since the decoder refuses a rule that sets the same
+       * header twice: a second hint joins this value, comma-separated.
        *
        * The preconnect is to the origin serving the archive's images. A hint
-       * in the document `<head>` cannot arrive before the document does;
-       * this one is read while the HTML is still in flight, so the handshake
-       * overlaps the download rather than following it. The origin is
-       * written literally because this file is a leaf that imports nothing,
-       * and it is the only place in the source that names it: the image URLs
-       * themselves live in the Markdown, which is where a specific file is
-       * named.
+       * in the document `<head>` cannot arrive before the document does; this
+       * one is read while the HTML is still in flight, so the handshake
+       * overlaps the download rather than following it. The origin is written
+       * literally because this file is a leaf that imports nothing, and it is
+       * the only place in the source that names it: the image URLs themselves
+       * live in the Markdown, which is where a specific file is named.
        *
-       * One origin, and no more: the images not yet mirrored are addressed
-       * through a subdomain gateway, `<cid>.ipfs.dweb.link`, which is a
-       * separate origin per image. Preconnecting those would open a
-       * connection per image to save nothing.
+       * One origin, and no more. The images not yet mirrored are addressed
+       * through a subdomain gateway, `<cid>.ipfs.dweb.link`, a separate
+       * origin per image, so a connection warmed for one is useless to the
+       * next and preconnecting them would open a connection to save nothing.
+       *
+       * No `crossorigin`: these load as ordinary images, which is a no-CORS
+       * fetch, and the attribute would warm a CORS connection the images
+       * never use while leaving the one they do use cold. No `as` either;
+       * it says what a resource *is*, and a preconnect fetches none.
+       *
+       * A `</favicon.svg>; rel="prefetch"; as="image"` hint sat here and has
+       * been removed rather than corrected. `prefetch` is specified for a
+       * resource "likely to be required for a followup navigation", so it
+       * was the wrong relation for a subresource of the current page; `as`
+       * is specified for `preload` and `modulepreload` and does nothing on a
+       * prefetch; the icon is already declared by `<link rel="icon">` in
+       * `BaseLayout`; and, unlike the origin above, that path needed the
+       * deployment's base, which header *values* never receive.
        */
       path: "/*",
       set: {
         "x-declaration": "<https://joefang.org/docs/declaration/>",
-        link: '</favicon.svg>; rel="prefetch"; as="image", <https://ragnarok.joefang.org>; rel="preconnect"',
+        link: '<https://ragnarok.joefang.org>; rel="preconnect"',
       },
     },
     {
