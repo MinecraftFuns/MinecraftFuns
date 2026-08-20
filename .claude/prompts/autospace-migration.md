@@ -20,8 +20,12 @@ browser does the work. That is the whole migration.
 1. The only edit you may make is deleting a single space character.
 2. Never add a character. Never change a word. Never translate anything.
    Never reflow, rewrap, or reindent a line. Never reorder anything.
-3. Never edit a line the tool did not report.
-4. Never edit a file outside `src/content/`.
+3. Never edit a line the tool did not report, and on a line it did report,
+   delete only the spaces it reported. A line usually has other spaces on it.
+   Those stay. In particular a space after a bracket, as in `parity(a) 附到`,
+   is not one of yours unless the tool named it.
+4. Only edit files named `zh.md`. The tool will never name any other file; if
+   you think it did, you misread it.
 5. Never run `git add`, `git commit`, `git push`, `git checkout`, or
    `git restore`. Never delete a file.
 6. Never spawn a sub-agent or delegate any part of this task.

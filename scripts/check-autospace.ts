@@ -31,15 +31,38 @@
  *   and non-ideographs; a full stop is neither, so `。 Then` would keep its
  *   wide gap forever and stripping it produces `。Then` with nothing to
  *   restore. The character classes below say ideograph, not "CJK".
+ * - English renditions. A Chinese term quoted inside an English sentence,
+ *   `the nickname 司马马克丁`, is separated by an English word space, and an
+ *   engine that replaced it with 0.125ic would be tightening a gap that was
+ *   never inter-script spacing. The unit of migration is a rendition written
+ *   in an ideographic language, not a boundary found anywhere at all.
  */
 
 import { readdir, readFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
 
+import { languages } from "../src/config/languages.ts";
 import { each, report } from "./lib/gate.ts";
 
 /** The archive. Nothing outside it is written in Chinese. */
 const ROOT = "src/content";
+
+/**
+ * Primary language subtags whose writing system is set with ideographs. A fact
+ * about scripts rather than about this site, which is why it is spelled here
+ * and not in the language table.
+ */
+const IDEOGRAPHIC = new Set(["zh", "ja", "ko"]);
+
+/**
+ * The rendition filenames this gate reads, derived from the language table so
+ * that adding Japanese to the blog adds it to the gate in the same edit.
+ */
+const RENDITIONS = new Set(
+  languages
+    .filter(({ bcp47 }) => IDEOGRAPHIC.has(bcp47.split("-")[0] ?? ""))
+    .map(({ code }) => `${code}.md`),
+);
 
 /*
  * The two sides of an autospace boundary, as the engine understands them.
@@ -59,6 +82,45 @@ const BOUNDARY = new RegExp(
   `(?<=[${IDEOGRAPH}]) (?=[${ALPHANUMERIC}])|(?<=[${ALPHANUMERIC}]) (?=[${IDEOGRAPH}])`,
   "gu",
 );
+
+const IDEOGRAPH_CHAR = new RegExp(`[${IDEOGRAPH}]`, "u");
+const ALPHANUMERIC_CHAR = new RegExp(`[${ALPHANUMERIC}]`);
+
+/**
+ * Whether the engine can space *both* ends of the Latin token this space sits
+ * against, which is the condition for deleting the space to be an improvement
+ * rather than a lopsided gap.
+ *
+ * The engine spaces an ideograph against a letter or a digit and against
+ * nothing else. A token that closes on punctuation, `O(n)` or `parity(a)`, is
+ * therefore only half eligible: delete the space in front of it and
+ * `差分 O(n) 处理` renders a hairline gap on the left against a full word
+ * space on the right. There is no stylesheet that repairs this. The missing
+ * value is `ideograph-symbol`, proposed in csswg-drafts#9479 and still open,
+ * and the `replace` keyword that would even the two out is specified but
+ * unimplemented everywhere.
+ *
+ * So symmetry is a property of the token, not of the boundary, and a token the
+ * engine cannot finish keeps its typed spaces at both ends. Walks to the far
+ * end of the token: O(token length), and tokens are words.
+ */
+const balanced = (line: string, at: number): boolean => {
+  const inward = IDEOGRAPH_CHAR.test(line[at - 1] ?? "") ? 1 : -1;
+
+  const stops = (index: number): boolean => {
+    const char = line[index];
+    return char === undefined || char === " " || IDEOGRAPH_CHAR.test(char);
+  };
+
+  let end = at + inward;
+  while (!stops(end)) end += inward;
+
+  /* The token's far character, and whatever it faces across an optional gap. */
+  const tip = line[end - inward] ?? "";
+  const beyond = line[line[end] === " " ? end + inward : end] ?? "";
+
+  return ALPHANUMERIC_CHAR.test(tip) || !IDEOGRAPH_CHAR.test(beyond);
+};
 
 /*
  * Spans within a prose line that are quoted rather than typeset. Masked, not
@@ -143,12 +205,14 @@ export const sites = (path: string, source: string): readonly Site[] => {
 
     const masked = mask(line);
     found.push(
-      ...[...masked.matchAll(BOUNDARY)].map(({ index: at }) => ({
-        path,
-        line: index + 1,
-        column: at + 1,
-        context: line.slice(Math.max(0, at - WINDOW), at + WINDOW + 1),
-      })),
+      ...[...masked.matchAll(BOUNDARY)]
+        .filter(({ index: at }) => balanced(masked, at))
+        .map(({ index: at }) => ({
+          path,
+          line: index + 1,
+          column: at + 1,
+          context: line.slice(Math.max(0, at - WINDOW), at + WINDOW + 1),
+        })),
     );
   });
 
@@ -159,10 +223,10 @@ export const sites = (path: string, source: string): readonly Site[] => {
 // Effect boundary
 // ---------------------------------------------------------------------------
 
-const markdownUnder = async (dir: string): Promise<readonly string[]> => {
+const renditionsUnder = async (dir: string): Promise<readonly string[]> => {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true });
   return entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+    .filter((entry) => entry.isFile() && RENDITIONS.has(entry.name))
     .map((entry) => resolve(entry.parentPath, entry.name));
 };
 
@@ -170,14 +234,15 @@ const main = async () => {
   /*
    * Named files narrow the gate to one worklist at a time, which is what a
    * migration needs: a column is only valid until the line it points into is
-   * edited, so the loop has to be re-run per file rather than read once. With
-   * no arguments the gate is the whole archive, which is what CI needs.
+   * edited, so the loop has to be re-run per file rather than read once. A
+   * named file is read whatever it is called, since naming it is the caller's
+   * assertion that it wants that file; the rendition filter governs the walk.
    */
   const requested = process.argv.slice(2);
   const files =
     requested.length > 0
       ? requested.map((path) => resolve(path))
-      : await markdownUnder(ROOT);
+      : await renditionsUnder(ROOT);
 
   const found = (
     await Promise.all(
