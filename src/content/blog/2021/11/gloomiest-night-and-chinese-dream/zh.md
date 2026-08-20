@@ -139,6 +139,6 @@ tags: ["Repost"]
 
 一句真话能比整个世界还重，一个梦想能让生命迸射光芒！
 
-![沉思者](https://bafkreihdep6gootkrg5bf46y7mzqwjfquj67b6nbd6i5zccymxv2x7htgy.ipfs.dweb.link)
+![沉思者](https://ragnarok.joefang.org/static/x0d310pcea8r32jdrg411vsmv385kmpev.jpg)
 
 [沉思者 | 维基百科](https://zh.wikipedia.org/wiki/%E6%B2%89%E6%80%9D%E8%80%85) :backup[https://web.archive.org/web/20210812075718/https://zh.wikipedia.org/wiki/%E6%B2%89%E6%80%9D%E8%80%85]

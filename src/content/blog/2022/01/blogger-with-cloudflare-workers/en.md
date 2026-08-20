@@ -7,9 +7,9 @@ translation: machine
 ---
 
 <picture>
-    <source srcset="https://bafkreighfalumzyxollf2kzr6xngqzna3loinaqb4ho3kqnnk2x3fijdx4.ipfs.inbrowser.link/"
+    <source srcset="https://ragnarok.joefang.org/static/x9ttvpc55fh0rgn7iqcm33qprrdk0rmi6.svg"
             type="image/svg+xml">
-    <img src="https://bafkreidjfy6ptu7pzzbzn5r7kfbppao7ior4p3z4vw34rwa7uazavvu2ti.ipfs.inbrowser.link/" alt="Cloudflare Workers logo" />
+    <img src="https://bafkreidjfy6ptu7pzzbzn5r7kfbppao7ior4p3z4vw34rwa7uazavvu2ti.ipfs.dweb.link/" alt="Cloudflare Workers logo" />
 </picture>
 
 ## The problem
@@ -158,7 +158,7 @@ For less technical readers: replace `const blogHost = '𝚝𝚠𝚘-𝚙𝚕𝚞
 
 I originally meant to stay quiet and get rich off this, but during summer break in 2021 I saw [@SophonCI](https://t.me/SophonCI) wrestling with the same problem, so I shared this solution with him. There's a string in the code, `blog-proxy-2cff9aba`, which was originally this project's name; I Googled it and found that [this person blogs pretty diligently](https://www.cnblogs.com/Helium-Air/p/15646483.html) 😀 and had put my code out there:
 
-![Screenshot](https://bafkreic6uojg4vgrnhjtbawatprim77smjesxn65wvduamvjlyyv7sxkb4.ipfs.dweb.link)
+![Screenshot](https://ragnarok.joefang.org/static/xn8a0b2f9kmfl4t5pe46m6mgptpcsr973.png)
 
 So I figured I'd ~~pad out~~ write a post about it too 😂.
 
@@ -194,7 +194,7 @@ As mentioned above, Blogger uses the `lh*.googleusercontent.com` family of domai
 
 For load-balancing and similar reasons, Blogger's backend loads images from several different domains when rendering a page.
 
-![Screenshot](https://bafkreigair73ipybchaptdohbffjnywgyi2bxklggow72ya6x7q7wjm3zi.ipfs.dweb.link)
+![Screenshot](https://ragnarok.joefang.org/static/xqsfej4jui5t429k7qev8aafemq8oj7tj.webp)
 
 These domains are equivalent to one another. To improve the cache hit rate, we consistently use `𝚕𝚑𝟹.𝚐𝚘𝚘𝚐𝚕𝚎𝚞𝚜𝚎𝚛𝚌𝚘𝚗𝚝𝚎𝚗𝚝.𝚌𝚘𝚖` inside the Worker to fetch and cache the resource.
 

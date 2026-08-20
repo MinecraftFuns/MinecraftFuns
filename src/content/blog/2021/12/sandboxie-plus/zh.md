@@ -5,7 +5,7 @@ date: "2021-12-10"
 tags: ["Tools", "Security"]
 ---
 
-![github](https://bafkreidy5a4pyicrpuoufwr4g6f6xctrsub4xetoec3bswl4ty4oqaooba.ipfs.dweb.link)
+![github](https://ragnarok.joefang.org/static/xmf127c5bosq54ekb5l4l6d2fnb4a4d7l.jpg)
 
 2020 年寒假时，我曾经尝试使用 Sandboxie 运行「课后网」，结果不尽如人意。随后一年多的时间里，本着「隐私至上」的原则，我没有在个人电脑中安装过国产软件。
 
@@ -13,18 +13,18 @@ tags: ["Tools", "Security"]
 
 ## 关于 Sandboxie Plus
 
-![icon](https://bafkreieynxazoaelpsyujj3nnhscu7i35ukt75vndk5fboe5p6krrvcosq.ipfs.dweb.link)
+![icon](https://ragnarok.joefang.org/static/x1bit1c4eq8cuacigcerepme12fnsmt2m.png)
 
 Sandboxie 是一款基于沙盒的隔离软件，适用于 32 位和 64 位的基于 Windows NT 的操作系统。它创建了一个类似沙盒的隔离操作环境。在 Sandboxie 中可以安装并运行应用程序，而不会永久修改`本地 / 映射驱动器`和 `Windows 注册表`。
 
 > GitHub [sandboxie-plus / Sandboxie](https://github.com/sandboxie-plus/Sandboxie)  
 > 官网 [Sandboxie-Plus | Open Source sandbox-based isolation software](https://sandboxie-plus.com/)  
 
-![introduction](https://bafkreiah5w7qqekmi7azbdrsnztz2yvgudjhh2bnjebhlkmof2k4b334ju.ipfs.dweb.link)
+![introduction](https://ragnarok.joefang.org/static/xfbvbd136qa7ogapjn553e0mldqeu94s7.png)
 
 ## 测试与体验
 
-![sandboxie](https://bafkreibceghepw25jzpg24dcfpnasq4bqvroztcpqnql4jyujupnhx2dhm.ipfs.dweb.link)
+![sandboxie](https://ragnarok.joefang.org/static/xvhqhu88i0b5j7jh3guv691s930t6ja6d.png)
 
 「钉钉」在 Sandboxie Plus 中运行正常，登录、群聊等功能均可正常工作，未出现可感知的性能下降。Sandboxie 弹出错误信息：
 

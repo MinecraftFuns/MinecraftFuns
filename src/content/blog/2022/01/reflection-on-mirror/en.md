@@ -20,4 +20,4 @@ And some civilizations, weakened and lacking confidence, the kind that issue pol
 >
 > I do not know how the Southern Song compares with today, but toward its foreign enemies it had clearly already declared itself a vassal, while at home it was especially full of elaborate rituals and endless nagging trivia. Just as an unlucky person is especially full of taboos, its spirit of openness and grandeur was entirely extinguished. Nothing much changed after that either. I once saw, on an old painting displayed in the Hall of Antiquities, a seal inscription made up of several Roman letters. But that was the seal of the so-called "Our Sacred Ancestor, the Benevolent Emperor," the ruler who had conquered the Han people, so he dared to use it; a Han subject would not have dared. Even now, even among artists, does anyone dare to use a seal with foreign script?
 
-![Lu Xun](https://bafkreianaqqvguwocznopbkeh7rouw57m3armfbuqkefrykecwcyr4eys4.ipfs.dweb.link)
+![Lu Xun](https://ragnarok.joefang.org/static/x0l9vgugneorug7g2k17di6ugovbqlggn.webp)

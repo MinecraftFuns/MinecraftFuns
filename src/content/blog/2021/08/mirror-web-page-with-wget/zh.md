@@ -5,7 +5,7 @@ date: "2021-08-06"
 tags: ["Tools", "Guide"]
 ---
 
-![wget](https://bafkreih2tw2lciw3qim2o6eqzxjmeu6xueqlstaauuliorfnedvn2o4ewq.ipfs.dweb.link)
+![wget](https://ragnarok.joefang.org/static/xpg0nc24oqf3ssbu82kls7psisgfl7ggl.webp)
 
 有时候我们需要把一个网页保存下来，可能是想离线浏览，也可能是存档 / 备份。
 

@@ -5,7 +5,7 @@ date: "2022-01-13"
 tags: ["Tools", "Guide"]
 ---
 
-![eric.webp](https://bafybeibiioe6ptf4j7llvgxs3kes3kulzj5eow3nf627si7nn3qb4beava.ipfs.dweb.link)
+![eric.webp](https://ragnarok.joefang.org/static/x8co60u01bpfd6aq6r7u4h5ge6onik2g8.webp)
   
 > 互联网上的「永久链接」可能并没有那么「永久」。
 

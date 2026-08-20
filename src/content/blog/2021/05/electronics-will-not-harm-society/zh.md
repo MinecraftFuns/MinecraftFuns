@@ -5,7 +5,7 @@ date: "2021-05-30"
 tags: ["Essays"]
 ---
 
-![photography of mountain near body of water](https://bafkreiesbkqgm4ao46ijxyspavv5r5pfdlu5yldd23qoxv4cn72gm4fr4y.ipfs.dweb.link)
+![photography of mountain near body of water](https://ragnarok.joefang.org/static/xcs22qfav8o6nm6mht5rnm2kcbe1g4c2n.webp)
 
 翻看了刚刚印出的“年级优秀作文”，发现许多作文认为电子产品的“诱惑”或“滥用”会对当代社会带来危害。我有一个不太一样的观点，可能并不成熟，但还是先记录一下。
 

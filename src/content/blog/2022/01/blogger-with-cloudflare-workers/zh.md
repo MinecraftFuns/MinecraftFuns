@@ -6,9 +6,9 @@ tags: ["Blogger", "Cloudflare", "Guide"]
 ---
 
 <picture>
-    <source srcset="https://bafkreighfalumzyxollf2kzr6xngqzna3loinaqb4ho3kqnnk2x3fijdx4.ipfs.inbrowser.link/"
+    <source srcset="https://ragnarok.joefang.org/static/x9ttvpc55fh0rgn7iqcm33qprrdk0rmi6.svg"
             type="image/svg+xml">
-    <img src="https://bafkreidjfy6ptu7pzzbzn5r7kfbppao7ior4p3z4vw34rwa7uazavvu2ti.ipfs.inbrowser.link/" alt="Cloudflare Workers logo" />
+    <img src="https://bafkreidjfy6ptu7pzzbzn5r7kfbppao7ior4p3z4vw34rwa7uazavvu2ti.ipfs.dweb.link/" alt="Cloudflare Workers logo" />
 </picture>
 
 ## 问题
@@ -157,7 +157,7 @@ async function handleRequest(request) {
 
 本来是想闷声发大财的，2021 年暑假时看到 [@SophonCI](https://t.me/SophonCI) 也在折腾这个问题，于是把这个方案分享给他了。代码里放了一个字符串 `blog-proxy-2cff9aba`，本来是这个项目的名字，然后我 Google 了一下，发现[这位同学博客写得挺勤快的](https://www.cnblogs.com/Helium-Air/p/15646483.html) 😀，把我的代码放出来了：
 
-![屏幕截图](https://bafkreic6uojg4vgrnhjtbawatprim77smjesxn65wvduamvjlyyv7sxkb4.ipfs.dweb.link)
+![屏幕截图](https://ragnarok.joefang.org/static/xn8a0b2f9kmfl4t5pe46m6mgptpcsr973.png)
 
 于是我也来水一篇博客 😂。
 
@@ -193,7 +193,7 @@ body = body.replace(/lh\w*?.googleusercontent.com/g, proxyHost + '/_image')
 
 出于负载均衡之类的原因，Blogger 后端在渲染网页时会使用多个不同的域名加载图片。
 
-![屏幕截图](https://bafkreigair73ipybchaptdohbffjnywgyi2bxklggow72ya6x7q7wjm3zi.ipfs.dweb.link)
+![屏幕截图](https://ragnarok.joefang.org/static/xqsfej4jui5t429k7qev8aafemq8oj7tj.webp)
 
 这组域名是等价的。我们希望能提高缓存的命中率，所以在 Workers 中统一使用 `𝚕𝚑𝟹.𝚐𝚘𝚘𝚐𝚕𝚎𝚞𝚜𝚎𝚛𝚌𝚘𝚗𝚝𝚎𝚗𝚝.𝚌𝚘𝚖` 来获取资源并缓存。
 

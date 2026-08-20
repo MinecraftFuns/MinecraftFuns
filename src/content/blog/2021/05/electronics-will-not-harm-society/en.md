@@ -6,7 +6,7 @@ tags: ["Essays"]
 translation: machine
 ---
 
-![photography of mountain near body of water](https://bafkreiesbkqgm4ao46ijxyspavv5r5pfdlu5yldd23qoxv4cn72gm4fr4y.ipfs.dweb.link)
+![photography of mountain near body of water](https://ragnarok.joefang.org/static/xcs22qfav8o6nm6mht5rnm2kcbe1g4c2n.webp)
 
 Flipping through the freshly printed "grade-level excellent essays," I found that many of them argue that the "temptation" or "abuse" of electronics harms contemporary society. I hold a somewhat different view, which may not be fully mature, but I want to record it here first.
 

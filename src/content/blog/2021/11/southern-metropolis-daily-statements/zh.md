@@ -180,4 +180,4 @@ tags: ["Repost"]
 
 人间之所以还有希望，人生之所以还值得留恋，是因为作为个体，人有向善的一面，有嫉恶如仇的一面，这是人性中光辉、温暖的一面，也是人间还有希望的原因。人类美好的品性会把我们拖上更好的道路。我坚信这一点。再见吧，谢谢大家！
 
-![沉思者](https://bafkreigyjpxuicq3rzbwwbyg3cvbrrf4zfmaz6cf4al7ealiglryzjliu4.ipfs.dweb.link)
+![沉思者](https://ragnarok.joefang.org/static/xfet3t8s5r49pk0jc88g35lfgftbf2810.jpg)

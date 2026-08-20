@@ -7,7 +7,7 @@ tags: ["Repost"]
 
 > 在民法的慈母般的眼里，每一个人就是整个国家。——孟德斯鸠
 
-![banner](https://bafybeifqkaigdjbzo4abrofrrcan4eixbnfnmjffngodts53rs7ezjiyde.ipfs.dweb.link/)
+![banner](https://ragnarok.joefang.org/static/xbvajctmtbc5iq0mrr7mp9fm30403o61q.webp)
 
 ## 1
 
@@ -85,4 +85,4 @@ tags: ["Repost"]
 
 [原文](https://bafkreidcb7qmdvidvombiytunpsj4pdsz63vuv4gviaa7xgyunnueh2ouu.ipfs.inbrowser.link/)
 
-![精神明亮的人](https://bafkreibbebzthqvk72jbeoxuuzfi75ab5qy5ra7ow75ag7rzdxlsszmmfu.ipfs.dweb.link)
+![精神明亮的人](https://ragnarok.joefang.org/static/xvkd03ehopikd3091lmegs6op9fkmdqau.webp)

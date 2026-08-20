@@ -13,9 +13,9 @@ tags: ["Windows", "Life"]
 
 这个问题已经严重干扰到我的体验了，所以开始折腾。网上的调试方法似乎都要分析 dump 出来的文件，很麻烦。直接打开 `Dell` 自带的 `SupportAssist`，查看`历史记录`，可以看到关于蓝屏错误的一些信息。
 
-![1](https://bafkreicbrzkbtoda2xwn56eigjfwfglu56zaxwdbfpkoojba6mv2c7pony.ipfs.dweb.link)
+![1](https://ragnarok.joefang.org/static/x92d1tqs1ho57c5lu2ps6151eh0gms66a.webp)
 
-![0](https://bafkreiawqwz2f5umysdgusas3ukgusrft5nkggms7l3nznnwy5eu2jibmq.ipfs.dweb.link)
+![0](https://ragnarok.joefang.org/static/xia80qs5mgvn0tugnm8ga0c8ts2d30jbc.webp)
 
 问题直接指向了 `SmartByte Traffic Control Callout Driver`，版本是 `9.8.4.9`，路径是 `C:\WINDOWS\system32\DRIVERS\SmbCo10X64.sys`。
 

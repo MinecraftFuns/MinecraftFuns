@@ -6,7 +6,7 @@ tags: ["Tools", "Security"]
 translation: machine
 ---
 
-![github](https://bafkreidy5a4pyicrpuoufwr4g6f6xctrsub4xetoec3bswl4ty4oqaooba.ipfs.dweb.link)
+![github](https://ragnarok.joefang.org/static/xmf127c5bosq54ekb5l4l6d2fnb4a4d7l.jpg)
 
 During winter break in 2020, I once tried running "Homework Help Network" with Sandboxie, and the result was less than satisfying. For over a year afterward, on the principle of "privacy first," I didn't install any domestic Chinese software on my personal computer.
 
@@ -14,18 +14,18 @@ Until recently, when another wave of the pandemic hit and we went back to online
 
 ## About Sandboxie Plus
 
-![icon](https://bafkreieynxazoaelpsyujj3nnhscu7i35ukt75vndk5fboe5p6krrvcosq.ipfs.dweb.link)
+![icon](https://ragnarok.joefang.org/static/x1bit1c4eq8cuacigcerepme12fnsmt2m.png)
 
 Sandboxie is a sandbox-based isolation program for 32-bit and 64-bit Windows NT-based operating systems. It creates a sandbox-like isolated operating environment. Applications can be installed and run inside Sandboxie without permanently modifying `local / mapped drives` and the `Windows registry`.
 
 > GitHub: [sandboxie-plus / Sandboxie](https://github.com/sandboxie-plus/Sandboxie)
 > Official site: [Sandboxie-Plus | Open Source sandbox-based isolation software](https://sandboxie-plus.com/)
 
-![introduction](https://bafkreiah5w7qqekmi7azbdrsnztz2yvgudjhh2bnjebhlkmof2k4b334ju.ipfs.dweb.link)
+![introduction](https://ragnarok.joefang.org/static/xfbvbd136qa7ogapjn553e0mldqeu94s7.png)
 
 ## Testing and experience
 
-![sandboxie](https://bafkreibceghepw25jzpg24dcfpnasq4bqvroztcpqnql4jyujupnhx2dhm.ipfs.dweb.link)
+![sandboxie](https://ragnarok.joefang.org/static/xvhqhu88i0b5j7jh3guv691s930t6ja6d.png)
 
 "DingTalk" ran normally inside Sandboxie Plus; login, group chat, and other features all worked fine with no noticeable performance drop. Sandboxie did pop up an error message:
 

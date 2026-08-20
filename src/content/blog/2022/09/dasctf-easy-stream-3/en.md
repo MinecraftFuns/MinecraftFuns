@@ -12,7 +12,7 @@ tags: ["CTF", "Security"]
 
 As a freshman in university with limited knowledge of cybersecurity, I was introduced to Capture the Flag (CTF) competitions for the first time. Although CTF and Olympiad in Informatics (OI) share some criteria, such as a high demand for coding ability and the need for bravery when things go wrong, I found that CTF problems require more flexible thinking patterns.
 
-![hero.webp](https://bafkreihct75b7fqhn5yhh3ojzcmy6bnvplangwgevekgh7lahlz6wnf2mu.ipfs.dweb.link/)
+![hero.webp](https://ragnarok.joefang.org/static/xeenv11353go28aobqp0sp539k0r24l6m.webp)
 
 The source code for the problem is available on [GitHub Gist](https://gist.github.com/MinecraftFuns/d6873a1b8aa67d83df02408afb58e2a4), and I recommend you look at it before continuing to read.
 

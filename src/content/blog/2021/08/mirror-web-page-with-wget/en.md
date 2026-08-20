@@ -6,7 +6,7 @@ tags: ["Tools", "Guide"]
 translation: machine
 ---
 
-![wget](https://bafkreih2tw2lciw3qim2o6eqzxjmeu6xueqlstaauuliorfnedvn2o4ewq.ipfs.dweb.link)
+![wget](https://ragnarok.joefang.org/static/xpg0nc24oqf3ssbu82kls7psisgfl7ggl.webp)
 
 Sometimes we need to save a web page, whether to browse offline or to archive / back it up.
 

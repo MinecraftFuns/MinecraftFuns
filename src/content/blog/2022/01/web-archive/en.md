@@ -6,7 +6,7 @@ tags: ["Tools", "Guide"]
 translation: machine
 ---
 
-![eric.webp](https://bafybeibiioe6ptf4j7llvgxs3kes3kulzj5eow3nf627si7nn3qb4beava.ipfs.dweb.link)
+![eric.webp](https://ragnarok.joefang.org/static/x8co60u01bpfd6aq6r7u4h5ge6onik2g8.webp)
 
 > A "permalink" on the internet may not be quite so permanent.
 

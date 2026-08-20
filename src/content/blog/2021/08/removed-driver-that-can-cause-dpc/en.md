@@ -14,9 +14,9 @@ Then recently, for several days in a row, opening the Chrome address bar and typ
 
 This problem had already seriously disrupted my experience, so I started digging in. The debugging methods online all seem to require analyzing dump files, which is a hassle. I opened Dell's built-in `SupportAssist` directly and checked its `History`, which showed some information about the blue screen errors.
 
-![1](https://bafkreicbrzkbtoda2xwn56eigjfwfglu56zaxwdbfpkoojba6mv2c7pony.ipfs.dweb.link)
+![1](https://ragnarok.joefang.org/static/x92d1tqs1ho57c5lu2ps6151eh0gms66a.webp)
 
-![0](https://bafkreiawqwz2f5umysdgusas3ukgusrft5nkggms7l3nznnwy5eu2jibmq.ipfs.dweb.link)
+![0](https://ragnarok.joefang.org/static/xia80qs5mgvn0tugnm8ga0c8ts2d30jbc.webp)
 
 The problem pointed straight at the `SmartByte Traffic Control Callout Driver`, version `9.8.4.9`, at the path `C:\WINDOWS\system32\DRIVERS\SmbCo10X64.sys`.
 

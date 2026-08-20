@@ -5,7 +5,7 @@ date: "2022-01-14"
 tags: ["Repost"]
 ---
 
-![程益中](https://bafkreif6xvvykdpy7lbehhbn2ib3azndtmqoci6ogz6usly3uhgbrw7kmu.ipfs.dweb.link)
+![程益中](https://ragnarok.joefang.org/static/x42qbvha6k0cjc603450qqrhvm5j0n5rc.webp)
 
 > 注：本文译自华盛顿邮报驻北京办事处前主任 [Philip Pan（潘公凯）](https://zh.wikipedia.org/wiki/%E6%BD%98%E5%85%AC%E5%87%AF_(%E8%AE%B0%E8%80%85)):backup[https://bafkreifc4sbw5p67wlr7vbrvpjr2elmz4fhqwo5oahmpkz6prx3iqv2k3m.ipfs.inbrowser.link/] 著[《*Out of Mao's Shadow*（走出毛的阴影）》](https://www.goodreads.com/book/show/2418533.Out_of_Mao_s_Shadow):backup[https://bafybeiahyraddylyqrtcgxxor4j4x4rmvipxuenpsuqdi7froza3qv2iuy.ipfs.inbrowser.link/] 一书第九章《*The Newspaperman*（报人）》，译者詹涓，编辑魏寒枫。
 
