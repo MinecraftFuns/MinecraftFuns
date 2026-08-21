@@ -10,12 +10,16 @@ const { categories } = Astro.props;
 
 {
   categories.length > 0 && (
-    <nav class="flex flex-wrap gap-2xs" aria-label="Categories">
-      {categories.map((category) => (
-        <Button href={categoryHref(category)} tone="secondary" size="compact">
-          {category}
-        </Button>
-      ))}
+    <nav aria-label="Categories">
+      <ul class="flex flex-wrap items-center gap-2xs" role="list">
+        {categories.map((category) => (
+          <li>
+            <Button href={categoryHref(category)} tone="secondary" size="compact">
+              {category}
+            </Button>
+          </li>
+        ))}
+      </ul>
     </nav>
   )
 }

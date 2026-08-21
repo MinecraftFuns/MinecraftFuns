@@ -1,5 +1,5 @@
 ---
-import { INTRO, type IntroKind } from "./intro.ts";
+import { INTRO, INTRO_EXTRA, INTRO_LEDE, type IntroKind } from "./intro.ts";
 
 /** Shared page opening; closed kind maps spacing and title style from `INTRO`. */
 type Props = {
@@ -21,10 +21,6 @@ const hasExtra = extra.trim() !== "";
 <section class:list={[spacing]}>
   <p class="text-eyebrow text-ink-subtle uppercase">{eyebrow}</p>
   <h1 class:list={["mt-xs text-ink", titleClass]}>{title}</h1>
-  {
-    lede !== undefined && (
-      <p class="mt-md max-w-measure text-body-lg text-ink-muted">{lede}</p>
-    )
-  }
-  {hasExtra && <div class="mt-lg" set:html={extra} />}
+  {lede !== undefined && <p class:list={[INTRO_LEDE]}>{lede}</p>}
+  {hasExtra && <div class:list={[INTRO_EXTRA]} set:html={extra} />}
 </section>

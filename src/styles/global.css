@@ -553,7 +553,8 @@
    * appearance in the project has one owner, whatever colour it settles on.
    */
   .link-muted {
-    color: var(--color-ink-tertiary);
+    /* Link text must clear 4.5:1 like any text; tertiary does not. */
+    color: var(--color-ink-subtle);
     text-decoration: none;
     transition: color var(--default-transition-duration)
       var(--default-transition-timing-function);
@@ -596,12 +597,19 @@
    * Both bind size, leading, tracking, and weight together, the same way the
    * type scale does, so a role cannot be half-applied.
    */
+  /*
+   * Dates, reading times, and categories are content, so they wear
+   * `ink-subtle`, the quietest step that clears 4.5:1 at caption size.
+   * `ink-tertiary` measures 3.99:1 light / 4.41:1 dark on the canvas, which
+   * its own declaration limits to decoration; for a while this class wore it
+   * anyway.
+   */
   .meta {
     font-family: var(--font-mono);
     font-size: var(--text-caption);
     line-height: var(--text-caption--line-height);
     font-weight: var(--text-caption--font-weight);
-    color: var(--color-ink-tertiary);
+    color: var(--color-ink-subtle);
   }
 
   .note {
@@ -626,9 +634,10 @@
     color: var(--color-ink-tertiary);
   }
 
+  /* Same rule as Epigraph and TranslationNote; 2px was the one heavy border. */
   .prose blockquote {
     padding-left: var(--spacing-md);
-    border-left: 2px solid var(--color-hairline-strong);
+    border-left: 1px solid var(--color-hairline-strong);
     color: var(--color-ink-subtle);
   }
 

@@ -13,7 +13,7 @@ type Props = {
 const { strip } = Astro.props;
 ---
 
-<ul class="flex flex-wrap gap-2xs" role="list">
+<ul class="flex flex-wrap items-center gap-2xs" role="list">
   {
     strip.shown.map((taxon) => (
       <li>

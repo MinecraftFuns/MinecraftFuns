@@ -10,7 +10,7 @@ const { tags } = Astro.props;
 
 {
   tags.length > 0 && (
-    <ul class="flex flex-wrap gap-2xs" role="list">
+    <ul class="flex flex-wrap items-center gap-2xs" role="list">
       {tags.map((tag) => (
         <li>
           <Button href={tagHref(tag)} tone="secondary" size="compact">

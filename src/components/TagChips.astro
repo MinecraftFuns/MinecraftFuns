@@ -13,14 +13,12 @@ const { tags } = Astro.props;
 
 {
   tags.length > 0 && (
-    <ul class="flex flex-wrap gap-2xs" role="list">
+    <ul class="flex flex-wrap items-center gap-2xs" role="list">
       {tags.map((taxon) => (
         <li>
           <Button href={tagHref(taxon.label)} tone="secondary" size="compact">
             {taxon.label}
-            <span class="text-ink-tertiary ms-2xs tabular-nums">
-              {taxon.items.length}
-            </span>
+            <span class="text-ink-subtle ms-2xs tabular-nums">{taxon.items.length}</span>
           </Button>
         </li>
       ))}

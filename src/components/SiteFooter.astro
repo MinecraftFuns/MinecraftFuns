@@ -10,7 +10,13 @@ const fingerprint = await siteFingerprint();
 ---
 
 <footer class="note border-hairline border-t py-xl">
-  <div class="mx-auto grid w-full max-w-frame grid-cols-footer gap-lg px-md md:px-lg">
+  {
+    /* Baseline-align the columns: the brand line and the eyebrows differ in size,
+      so top alignment leaves their first lines on three different baselines. */
+  }
+  <div
+    class="mx-auto grid w-full max-w-frame grid-cols-footer items-baseline gap-lg px-md md:px-lg"
+  >
     <div class="flex flex-col gap-2xs">
       <p class="text-ink text-control">{site.name}</p>
       <p class="text-caption">

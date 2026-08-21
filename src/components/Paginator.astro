@@ -35,18 +35,23 @@ const numbers = Array.from({ length: page.total }, (_, index) => ({
         </Button>
       )}
 
-      <ol
-        class="text-body-sm text-ink-tertiary flex flex-wrap items-center gap-2xs"
-        role="list"
-      >
+      <ol class="text-body-sm flex flex-wrap items-center gap-2xs" role="list">
         {numbers.map(({ index, href, current }) => (
           <li>
+            {/* One box for both states, so digits sit on one line and every
+                number is a WCAG 2.5.8 target like the buttons beside it. */}
             {current ? (
-              <span class="text-ink px-2xs tabular-nums" aria-current="page">
+              <span
+                class="text-ink inline-flex min-h-target items-center px-xs tabular-nums"
+                aria-current="page"
+              >
                 {index}
               </span>
             ) : (
-              <a class="link-muted px-2xs tabular-nums" href={href}>
+              <a
+                class="link-muted inline-flex min-h-target items-center px-xs tabular-nums"
+                href={href}
+              >
                 {index}
               </a>
             )}
