@@ -10,7 +10,7 @@ translation: machine
 
 This essay is a sharp satire of xenophobes, and its argument still holds up today.
 
-"Your country's" promotion of a "cultural confidence" policy is, in essence, "cultural insecurity." A truly confident civilization should not feel panic toward foreign civilizations.
+The Chinese state's "cultural confidence" policy is, in essence, a lack of cultural confidence. A truly confident civilization should not feel panic toward foreign civilizations.
 
 > Think back to how expansive and open-minded the Han people once were: newly arrived plants and animals were used without hesitation as decorative motifs. The Tang people were not weak either; for instance, the stone animals in front of Han-dynasty tombs were mostly sheep, tigers, celestial deer, and guardian beasts, yet the Zhaoling Mausoleum in Chang'an bears carvings of a horse pierced by an arrow, and even an ostrich, an approach unprecedented in earlier ages. Not to mention tombs today: even in ordinary paintings, does anyone dare to use a foreign flower or a foreign bird? Even on personal seals, does anyone dare to use cursive script or an unrefined character? Many refined people insist on recording the year using the sexagenary cycle, afraid to use the Republican calendar. I do not know whether there simply are no artists bold enough, or whether such artists exist but are persecuted by the public until they can only wither and die.
 
