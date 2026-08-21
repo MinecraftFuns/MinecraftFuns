@@ -110,7 +110,7 @@ describe("reconcile", () => {
   it("rejects a rendition filed in the wrong month", () => {
     const result = reconcile("2026/07/a-post/en", isoDate("2026-08-01"));
     assert.equal(result.tag, "invalid");
-    // The reason has to name both halves, or the author has to go find them.
+    // The diagnostic must name both conflicting date halves.
     if (result.tag === "invalid") {
       assert.match(explain(result), /2026\/07/);
       assert.match(explain(result), /2026\/08/);

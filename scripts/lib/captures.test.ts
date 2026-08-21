@@ -12,11 +12,7 @@ describe("captures", () => {
     assert.deepEqual([...captures("a=1 b=2".matchAll(/(\w)=(\d)/g), 2)], ["1", "2"]);
   });
 
-  /*
-   * The reason this exists. An alternation leaves one branch's group absent on
-   * every match, which the pattern makes impossible for the branch that fired
-   * and the type cannot tell apart from a missing capture.
-   */
+  /* Alternation leaves the non-selected capture undefined at runtime. */
   it("drops a group that did not participate", () => {
     assert.deepEqual([...captures(`"a" 'b'`.matchAll(/"(\w)"|'(\w)'/g))], ["a"]);
     assert.deepEqual([...captures(`"a" 'b'`.matchAll(/"(\w)"|'(\w)'/g), 2)], ["b"]);

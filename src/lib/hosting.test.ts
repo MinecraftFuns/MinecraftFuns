@@ -19,9 +19,7 @@ import {
   type Redirect,
 } from "./hosting.ts";
 
-/* Joined rather than indexed: `assert.match` needs a string, and the first
-   element of a possibly-empty array is not one. An empty list joins to "" and
-   fails every match, which is the answer indexing was reaching for. */
+/* Join so empty findings fail assertions instead of producing `undefined`. */
 const reasons = (problems: readonly { readonly reason: string }[]): string =>
   problems.map((problem) => problem.reason).join("\n");
 
@@ -31,11 +29,7 @@ describe("PathPattern", () => {
     assert.equal(renderPattern(prefixPath("/pgp.")), "/pgp.*");
   });
 
-  /*
-   * The wildcard is a variant, not a character, so matching needs no pattern
-   * language and nothing needs escaping. A path containing regex metacharacters
-   * is just a string here.
-   */
+  /* The wildcard is structural; other characters remain literal. */
   it("matches without a pattern language, so metacharacters are literal", () => {
     assert.ok(patternMatches(exactPath("/a.b+c"), "/a.b+c"));
     assert.equal(patternMatches(exactPath("/a.b+c"), "/axbxc"), false);
@@ -61,18 +55,7 @@ describe("covers", () => {
     assert.equal(covers(exactPath("/pg"), exactPath("/pgp")), false);
   });
 
-  /*
-   * The law relating the two functions, and the reason `covers` may declare a
-   * rule dead:
-   *
-   *   covers(outer, inner)  =>  forall p. matches(inner, p) => matches(outer, p)
-   *
-   * Soundness is the direction that matters. A false positive fails the build
-   * over a rule that is genuinely reachable; a false negative only leaves dead
-   * config in place. The pattern language is finite over a small alphabet, so
-   * this is checked by enumeration rather than by sampling: 196 pairs against
-   * 7 paths is exhaustive, deterministic, and instant.
-   */
+  /* Exhaustively check that coverage implies matching every inner path. */
   const PATHS = ["", "/", "/a", "/a/", "/ab", "/a/b", "/b"] as const;
   const PATTERNS = PATHS.flatMap((path) => [exactPath(path), prefixPath(path)]);
 
@@ -89,15 +72,13 @@ describe("covers", () => {
     );
   });
 
-  /* Guards against the quantified test above passing by saying nothing: an
-     empty inner filter satisfies it vacuously. */
+  /* Prevent the coverage law from passing vacuously. */
   it("does cover something, and does refuse something", () => {
     assert.ok(PATTERNS.some((inner) => covers(prefixPath("/a"), inner)));
     assert.ok(PATTERNS.some((inner) => !covers(exactPath("/a"), inner)));
   });
 
-  /* Shadow detection scans every earlier rule, so it rests on both of these
-     without either being written down anywhere. */
+  /* These properties support ordered shadow detection. */
   it("is reflexive", () => {
     PATTERNS.forEach((pattern) => assert.ok(covers(pattern, pattern)));
   });
@@ -202,10 +183,7 @@ describe("parsePathPattern", () => {
     });
   });
 
-  /* The domain models a trailing wildcard only, so a mid-path one is refused
-     rather than silently treated as a literal asterisk. This is the whole of
-     what the parser decides: `RootedPath` owns the leading slash, so there is
-     no test here for an unrooted path and no way to write one. */
+  /* Only trailing wildcards are valid; rootedness is enforced by the type. */
   it("rejects a star anywhere but the end", () => {
     assert.equal(parsePathPattern("/a/*/b").tag, "invalid");
     assert.equal(parsePathPattern("/*x").tag, "invalid");
@@ -236,8 +214,7 @@ describe("decodeHostConfig", () => {
     assert.match(renderHeaders(decoded.value.headers), /^\/base\/pgp$/m);
   });
 
-  /* The wildcard is not part of the path, so only the literal half is resolved
-     and no base logic ever sees an asterisk. */
+  /* Resolve only the literal prefix; the wildcard is not a path segment. */
   it("resolves only the literal half of a prefix", () => {
     const decoded = decodeHostConfig(
       { headers: [], redirects: [{ from: "/pgp.*", to: "/pgp" }] },
@@ -266,11 +243,7 @@ describe("decodeHostConfig", () => {
     assert.equal(decoded.tag === "ok" && decoded.value.redirects[0]?.status, 301);
   });
 
-  /*
-   * `HeaderConfig` requires one of `set`/`remove`, so a rule declaring neither
-   * is a compile error and has no test. A type cannot say a record has keys,
-   * which leaves exactly this case for the decoder.
-   */
+  /* The decoder still handles an empty `set` object at runtime. */
   it("rejects a header rule whose only declaration is empty", () => {
     const decoded = decodeHostConfig(
       { headers: [{ path: "/a", set: {} }], redirects: [] },
@@ -279,8 +252,7 @@ describe("decodeHostConfig", () => {
     assert.equal(decoded.tag, "invalid");
   });
 
-  /* Config is edited by hand, so a run that reports one mistake at a time turns
-     a typo into a sequence of builds. */
+  /* Report independent hand-edited config errors together. */
   it("reports every problem at once rather than the first", () => {
     const decoded = decodeHostConfig(
       {
@@ -327,7 +299,7 @@ describe("renderHeaders", () => {
     );
   });
 
-  /* `!` is an operator the format spells by prefixing a name, not part of one. */
+  /* Removal prefixes the property name with the format's `!` operator. */
   it("renders removal with the bang the format defines", () => {
     const text = renderHeaders([
       { pattern: exactPath("/a"), ops: [{ tag: "remove", name: "link" }] },

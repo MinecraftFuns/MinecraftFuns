@@ -3,7 +3,7 @@ import { bcp47Of, type Lang, type Translator } from "../lib/lang.ts";
 import type { Href } from "../lib/url.ts";
 import type { Affixed } from "../schema.ts";
 
-/** Discloses translation provenance and links to the original in page language. */
+/** Translation provenance note, linked to the original. */
 type Props = {
   readonly lang: Lang;
   readonly by: Translator;
@@ -12,11 +12,11 @@ type Props = {
 
 const { lang, by, original } = Astro.props;
 
-/* `Intl.DisplayNames.of` permits undefined; valid `Lang` makes fallback unreachable. */
+/* Valid `Lang` makes the `Intl.DisplayNames.of` fallback unreachable. */
 const originalName =
   new Intl.DisplayNames([lang], { type: "language" }).of(original.lang) ?? original.lang;
 
-/** Record wording across closed language and translator unions. */
+/** Wording for every language and translator variant. */
 const WORDING: Readonly<Record<Lang, Record<Translator, Affixed>>> = {
   en: {
     machine: { before: "Machine-translated from the ", after: "." },

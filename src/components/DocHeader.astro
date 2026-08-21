@@ -17,11 +17,7 @@ const { spacing, title: titleClass } = INTRO.page;
 ---
 
 <header class:list={["border-hairline border-b", spacing]}>
-  {
-    /*
-     * Inline category link; WCAG 2.5.8's inline exception applies.
-     */
-  }
+  {/* Inline category link qualifies for WCAG 2.5.8's exception. */}
   <p class="meta flex items-center gap-2xs">
     <a class="link-muted" href={categoryHref(category)}>
       {category}

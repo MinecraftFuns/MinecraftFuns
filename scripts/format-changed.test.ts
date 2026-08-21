@@ -3,11 +3,7 @@ import { describe, it } from "node:test";
 
 import { partitionStaged } from "./format-changed.ts";
 
-/*
- * The one rule in this script that can lose work: a file with both staged and
- * unstaged edits must not be formatted, because re-adding it would commit the
- * half its author held back.
- */
+/* Never format a staged file that also has unstaged edits. */
 describe("partitionStaged", () => {
   it("formats a file staged in full", () => {
     assert.deepEqual(partitionStaged(["a.ts"], []), { format: ["a.ts"], skip: [] });

@@ -1,7 +1,7 @@
 ---
 import type { Href } from "../lib/url.ts";
 
-/** Label/value list; closed body union centralizes each value shape's rendering. */
+/** Label/value list with closed rendering variants. */
 export type EntryBody =
   | {
       readonly tag: "lines";
@@ -9,7 +9,7 @@ export type EntryBody =
       readonly notes: readonly string[];
     }
   | { readonly tag: "link"; readonly href: Href; readonly label: string }
-  /** A machine-readable string: a fingerprint, an identifier, a hash. */
+  /** Machine-readable value such as a fingerprint or hash. */
   | { readonly tag: "mono"; readonly value: string };
 
 export type Entry = {
@@ -21,7 +21,7 @@ type Props = { readonly entries: readonly Entry[] };
 
 const { entries } = Astro.props;
 
-/* Tuple conditional enforces exhaustive rendering without a runtime walk. */
+/* Type-only exhaustive check; Astro has no switch. */
 type Unhandled = Exclude<EntryBody["tag"], "lines" | "link" | "mono">;
 
 const _exhaustive: [Unhandled] extends [never] ? true : never = true;

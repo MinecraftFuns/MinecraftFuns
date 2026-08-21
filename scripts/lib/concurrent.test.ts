@@ -6,9 +6,7 @@ import { mapConcurrent } from "./concurrent.ts";
 const range = (n: number): readonly number[] => Array.from({ length: n }, (_, i) => i);
 
 describe("mapConcurrent", () => {
-  /* Results come back in the order they were asked for, however the workers
-     interleave. Reversing the delays makes the completion order the opposite
-     of the input order, which is the case a push-based version gets wrong. */
+  /* Completion order differs from input order, but results must not. */
   it("returns results in input order, not completion order", async () => {
     const results = await mapConcurrent(range(8), 4, async (n) => {
       await new Promise((resolve) => setTimeout(resolve, (8 - n) % 4));
@@ -18,7 +16,7 @@ describe("mapConcurrent", () => {
     assert.deepEqual([...results], [0, 2, 4, 6, 8, 10, 12, 14]);
   });
 
-  /* The bound is the point: without it this is `Promise.all`. */
+  /* The concurrency bound is the contract, not merely a Promise.all wrapper. */
   it("keeps no more than `limit` tasks in flight", async () => {
     let running = 0;
     let peak = 0;
@@ -48,8 +46,7 @@ describe("mapConcurrent", () => {
     assert.deepEqual([...(await mapConcurrent([], 4, async () => null))], []);
   });
 
-  /* A limit above the item count must not spawn idle workers that then loop
-     forever on an exhausted iterator. */
+  /* Oversized limits must not create idle workers on an exhausted iterator. */
   it("handles a limit larger than the list", async () => {
     assert.deepEqual([...(await mapConcurrent([1, 2], 99, async (n) => n))], [1, 2]);
   });

@@ -16,12 +16,7 @@ import {
   type DeploymentRole,
 } from "./deployment.ts";
 
-/*
- * These tests assert the *shape* of the derivation, not the current origins,
- * except where a literal is the clearest way to pin the one property that
- * matters. Renaming a deployment should not redden this file; losing the
- * exactly-one-canonical property should.
- */
+/* Test derivation shape so renaming a deployment does not rewrite the suite. */
 
 describe("targets", () => {
   it("lists the canonical deployment first, then every mirror", () => {
@@ -35,9 +30,7 @@ describe("targets", () => {
   });
 
   it("derives the role rather than reading it from config", () => {
-    /* The config type has no `role` field at all, so a mirror cannot be
-       declared canonical by hand. This is the property the whole design
-       rests on; if it ever fails, `DeploymentsConfig` grew a flag. */
+    /* Roles are derived; config cannot declare a mirror canonical by hand. */
     assert.equal("role" in deployments.canonical, false);
     assert.equal(canonicalTarget.role, "canonical");
     targets
@@ -129,9 +122,7 @@ describe("siteRelative", () => {
   });
 
   it("does not treat a sibling with a shared prefix as being within", () => {
-    /* `/MinecraftFunsXL/` starts with `/MinecraftFuns` as a string but is a
-       different deployment root. Slash-terminating both sides is what makes
-       the prefix test sound. */
+    /* A shared string prefix is not a shared deployment root. */
     assert.equal(
       siteRelative("/MinecraftFuns/", "/MinecraftFunsXL/blog/").tag,
       "invalid",

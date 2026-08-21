@@ -1,9 +1,5 @@
 #!/usr/bin/env node
-/**
- * Source gate for anonymous Tailwind values and page-level type styling.
- * Bracket syntax bypasses the closed theme; pages must compose styled
- * components rather than re-decide type roles.
- */
+/** Gate anonymous Tailwind values and page-level type styling. */
 
 import { readFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
@@ -30,13 +26,11 @@ export type Violation = {
 const RULES: readonly Rule[] = [
   {
     rule: "arbitrary-value",
-    /* Utility bracket syntax, not TypeScript indexing. */
     pattern: /\b[a-z][a-z0-9]*(?:-[a-z0-9]+)*-\[[^\]]*\]/g,
     remedy: "name the value in @theme and use the generated utility",
   },
   {
     rule: "arbitrary-property",
-    /* Class boundary and no post-colon space avoid index-signature matches. */
     pattern: /(?<=["'\s])\[[a-z-]+:[^\s\]]*\]/g,
     remedy: "use a utility, or add a rule to the components layer",
   },
@@ -46,13 +40,11 @@ const RULES: readonly Rule[] = [
     remedy: "declare a @custom-variant so the state has a name",
   },
   {
-    /* Detect hand-rolled accent-link styling. */
     rule: "inline-link-style",
     pattern: /hover:text-accent-hover/g,
     remedy: "use .link, or .link-in-text for a link inside a sentence",
   },
   {
-    /* Detect inline metadata styling within one attribute. */
     rule: "inline-meta-style",
     pattern:
       /"[^"]*\btext-ink-tertiary\b[^"]*\bfont-mono\b[^"]*"|"[^"]*\bfont-mono\b[^"]*\btext-ink-tertiary\b[^"]*"/g,
@@ -66,23 +58,19 @@ const RULES: readonly Rule[] = [
   },
 ];
 
-/**
- * The regions of an `.astro` file that can carry class names: the whole
- * template, and any string literal in the frontmatter; a class list extracted
- * to a `const` is still markup, and is exactly where a literal would hide.
- */
+/** Extract template and frontmatter string regions that can carry classes. */
 export const classRegions = (source: string): readonly string[] => {
   const parsed = frontmatter(source);
   if (parsed === undefined) return [source];
 
-  /* Keep only matched string-literal regions; unmatched alternatives become empty. */
+  /* Unmatched capture alternatives become empty regions. */
   const literals = [...parsed.body.matchAll(/"([^"\\\n]*)"|'([^'\\\n]*)'/g)].map(
     (literal) => literal[1] ?? literal[2] ?? "",
   );
   return [source.slice(parsed.after), ...literals];
 };
 
-/** Every anonymous value in one file's class regions. Pure and total. */
+/** Find anonymous values in class regions. */
 export const anonymousValues = (source: string): readonly Violation[] =>
   classRegions(source).flatMap((region) =>
     RULES.flatMap(({ rule, pattern, remedy }) =>
@@ -94,7 +82,7 @@ export const anonymousValues = (source: string): readonly Violation[] =>
     ),
   );
 
-/** Read utility role names from theme declarations, excluding modifiers/resets. */
+/** Read utility role names from theme declarations. */
 export const typeRoles = (css: string): readonly string[] =>
   captures(css.matchAll(/^\s*--text-([a-z0-9-]+):/gm)).filter(
     (role) => !role.includes("--") && !role.includes("*"),
@@ -117,14 +105,10 @@ export const typeRolesSet = (
     ),
   );
 
-// ---------------------------------------------------------------------------
-// Effect boundary
-// ---------------------------------------------------------------------------
-
 const main = async () => {
   const root = resolve(process.env.SRC_DIR ?? "src");
 
-  /* Component `.ts` can still carry markup class lists. */
+  /* Component `.ts` files can carry markup class lists. */
   const files = (await filesUnder(root)).filter(
     (path) =>
       path.endsWith(".astro") ||

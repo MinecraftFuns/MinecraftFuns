@@ -11,16 +11,7 @@ import {
 } from "./design.ts";
 import type { Finding } from "./checks.ts";
 
-/*
- * The probe runs in a browser CI can start but this machine cannot. Splitting
- * observation from judgement means the judgement (every rule that decides
- * whether something is a defect) is testable here, with synthetic
- * measurements standing in for a real page.
- *
- * These are mostly adversarial: values that *should* pass sit right next to
- * values that should not, because a conformance checker whose threshold is off
- * by a pixel either floods the report or says nothing.
- */
+/* Keep browser observation separate from testable design judgement. */
 
 const TOKENS = [4, 8, 12, 16, 24, 32, 48, 64];
 
@@ -127,12 +118,7 @@ describe("designFindings", () => {
     assert.deepEqual(designFindings(probe, context), []);
   });
 
-  /*
-   * The regression the rule exists for. Two components placed in one slot
-   * brought opposite margins, one leading and one trailing, so the tag row on
-   * the blog index sat flush on the rule beneath it. Every other rule passed:
-   * both blocks were aligned, and every value they did declare was a token.
-   */
+  /* Regression: adjacent components can each pass while their shared gap vanishes. */
   it("catches siblings that meet with no gap", () => {
     const probe = {
       flushPairs: [{ container: "main", before: "nav.tags", after: "section" }],
@@ -171,7 +157,7 @@ describe("designFindings", () => {
     const probe = {
       alignmentGroups: [{ container: "div.card", lefts: [24, 26, 24, 26], rights: [] }],
     };
-    // Duplicated edge values must not multiply into duplicated findings.
+    // Duplicate edge values produce one finding.
     assert.equal(designFindings(probe, context).length, 1);
   });
 

@@ -48,7 +48,7 @@ describe("parseTimeZone", () => {
   });
 
   it("accepts working aliases that supportedValuesOf omits", () => {
-    // The reason validation is a construction attempt rather than a list lookup.
+    // Validation must construct the zone; aliases may be absent from the list.
     assert.equal(parseTimeZone("US/Eastern").tag, "ok");
   });
 

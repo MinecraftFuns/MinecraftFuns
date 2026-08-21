@@ -13,13 +13,7 @@ import type { Browse } from "../../../lib/browse.ts";
 import type { PostTag } from "../../../lib/labels.ts";
 import type { Taxon } from "../../../lib/taxonomy.ts";
 
-/**
- * The blog's pages after the first.
- *
- * `restPages` drops page one, which the blog's own route serves, so this
- * route cannot generate the `/page/1/` that would put one set of posts at two
- * addresses. A blog that fits on one page generates nothing here.
- */
+/** Generate blog pages after page one; the base route owns page one. */
 export async function getStaticPaths() {
   const [pages, strip] = await Promise.all([postPages(), tagBrowse()]);
 

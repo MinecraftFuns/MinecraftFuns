@@ -7,20 +7,14 @@ type Props = { readonly post: PostSummary };
 
 const { post } = Astro.props;
 
-/* Badge only non-primary-language posts; label uses that language's name. */
+/* Non-primary renditions show their native language. */
 const badge =
   post.lang === SITE_LANG
     ? undefined
     : { label: nativeNameOf(post.lang), lang: bcp47Of(post.lang) };
-/* Render one validated date as machine value and localized text. */
 const displayDate = formatIsoDate(post.date);
 ---
 
-{
-  /*
-   * Chronological rows stack the date below the title until `md`.
-   */
-}
 <a
   class="group border-hairline grid grid-cols-row-stacked items-baseline gap-md border-b py-md no-underline md:grid-cols-row"
   href={post.href}

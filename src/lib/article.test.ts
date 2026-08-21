@@ -265,8 +265,7 @@ describe("elimination", () => {
   });
 });
 
-/* The checker proving these compile is most of the point; the assertions keep
-   the proof from being optimised into an unused import. */
+/* Assertions keep the compile-time model checks live. */
 describe("the model", () => {
   it("keeps language out of article identity", () => {
     const zh = record("2020/02/cf-1295/zh", "2020-02-03");

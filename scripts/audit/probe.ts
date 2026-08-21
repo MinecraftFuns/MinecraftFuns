@@ -1,12 +1,4 @@
-/**
- * Browser-side observation. These run inside the page via `page.evaluate`,
- * which serialises the function alone, so each is self-contained and shares
- * nothing with module scope.
- *
- * `pageProbe` merges layout and design measurement into one traversal: both
- * need the same visibility filter and the same computed style, and resolving
- * style twice per element is the dominant cost here.
- */
+/** Browser-side observations; probes are serialized by `page.evaluate`. */
 
 /** Interactive elements, per WCAG target-size and focus checks. */
 export const INTERACTIVE_SELECTOR =
@@ -31,8 +23,7 @@ export type ProbeOptions = {
   readonly spacingProperties: readonly string[];
 };
 
-/** The design half of `pageProbe`'s result, named so `design.ts` reads the
- *  same record this file builds rather than one that happens to match. */
+/** Design measurements returned by `pageProbe`. */
 export type Measurement = {
   readonly value: number;
   readonly selector: string;
@@ -123,10 +114,7 @@ const SPACING_PROPERTIES = [
   "column-gap",
 ];
 
-/**
- * Measure the page once, returning raw numbers only. Every verdict is reached
- * in Node, where it can be tested without a browser.
- */
+/** Measure layout once; Node-side code turns raw values into findings. */
 export const pageProbe = ({
   interactiveSelector,
   tokenNames,
@@ -137,7 +125,7 @@ export const pageProbe = ({
   readonly layout: LayoutProbe;
   readonly design: DesignProbe | null;
 } => {
-  /** One element worth measuring, with its style and box resolved once. */
+  /** One element with its computed style and box resolved once. */
   type Measured = {
     readonly element: Element;
     readonly style: CSSStyleDeclaration;
@@ -167,13 +155,7 @@ export const pageProbe = ({
       .join("")
       .trim();
 
-  /**
-   * Conjunction of predicates: the fold of the `&&` monoid, so a chain of
-   * filters becomes one pass. Both forms accept the same elements and evaluate
-   * each predicate the same number of times, since both stop at the first
-   * failure; what fusing removes is a traversal and an intermediate array per
-   * stage, which is worth removing over every element in the document.
-   */
+  /** Fuse predicates to avoid intermediate arrays over every element. */
   const allOf =
     <T,>(...predicates: readonly ((value: T) => boolean)[]) =>
     (value: T): boolean => {
@@ -183,14 +165,7 @@ export const pageProbe = ({
       return true;
     };
 
-  /**
-   * Consecutive pairs: `[a, b, c]` gives `[[a, b], [b, c]]`.
-   *
-   * Three questions below are about neighbours, and each was spelled as an
-   * offset index into the list being walked, which is the relationship stated
-   * as arithmetic. Carrying the previous element says it once, and says it
-   * without an index that only the surrounding `slice` proves is in range.
-   */
+  /** Return adjacent pairs: `[a, b, c]` becomes `[[a, b], [b, c]]`. */
   const consecutive = <T,>(items: readonly T[]): readonly (readonly [T, T])[] => {
     const pairs: (readonly [T, T])[] = [];
     let previous: T | undefined;
@@ -212,12 +187,7 @@ export const pageProbe = ({
     return [...seen.values()];
   };
 
-  /**
-   * One element measured, or nothing when it has no geometry worth measuring.
-   * The stages alternate between deciding and decorating, which no predicate
-   * combinator expresses, so the partiality is in the return type and each
-   * early return is the filter it replaces.
-   */
+  /** Return a visible element with geometry, or `undefined`. */
   const measured = (element: Element): Measured | undefined => {
     const style = getComputedStyle(element);
     if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) {
@@ -236,10 +206,7 @@ export const pageProbe = ({
     };
   };
 
-  /* `mapMaybe`, written out because `flatMap` would allocate a cell per
-     element just to encode absence. `querySelectorAll("*")` is the largest
-     collection this file touches, which is what makes the traversal worth
-     spelling here and nowhere else. */
+  /* Avoid allocating an option-like cell for every element. */
   const visible: Measured[] = [];
   for (const element of document.body.querySelectorAll("*")) {
     const entry = measured(element);
@@ -270,8 +237,7 @@ export const pageProbe = ({
     clipped: visible
       .filter(
         allOf(
-          // Ordered, not merely conjoined: `scrollWidth` below forces layout,
-          // so it is read only for the few elements that could possibly clip.
+          // Read layout-forcing widths only after the cheap style filter.
           ({ style }) => style.overflowX === "hidden" || style.overflow === "hidden",
           ({ element }) =>
             element.clientWidth > 0 && element.scrollWidth > element.clientWidth + 1,
@@ -300,8 +266,7 @@ export const pageProbe = ({
 
   if (!includeDesign) return { layout, design: null };
 
-  // Inline and contents boxes flow with text, so their edges carry no
-  // alignment intent and they are excluded from geometric comparison.
+  // Inline and contents boxes have no block-edge alignment intent.
   const laidOut = visible.filter(
     ({ style }) => style.display !== "inline" && style.display !== "contents",
   );
@@ -313,11 +278,7 @@ export const pageProbe = ({
       .filter((entry) => entry !== undefined)
       .slice(0, limits.children);
 
-  /* The first child is named here rather than indexed later. Two children is
-     the threshold for every question below, and `first` is the witness that
-     the group is not empty: a filter is a predicate to a reader and nothing at
-     all to a checker, so the one place that establishes the fact is the place
-     that should carry it. */
+  /* Name the first child once; every group below requires at least two. */
   const containers = laidOut
     .filter(({ element }) => element.children.length >= 2)
     .flatMap(({ element }) => {
@@ -361,12 +322,7 @@ export const pageProbe = ({
     .filter(({ gaps }) => gaps.length >= 2)
     .slice(0, 20);
 
-  /*
-   * Siblings whose boxes meet with nothing between them: the spacing bug no
-   * other rule sees, because each block is on the grid and aligned and the gap
-   * is simply absent, neither of them having declared it. Three conditions
-   * keep it quiet, each stated at its own predicate below.
-   */
+  /* Find stacked siblings with no declared gap. */
   const edge = (value: string): number => Number.parseFloat(value) || 0;
 
   const flushPairs = containers
@@ -386,8 +342,7 @@ export const pageProbe = ({
           edge(after.style.paddingTop) <= 1,
       ),
     )
-    // Truncate before describing: a pair beyond the cap is never reported, so
-    // building its selectors is work thrown away.
+    // Truncate before building selectors for unreported pairs.
     .slice(0, 20)
     .map(({ container, before, after }) => ({
       container: describe(container),
@@ -396,8 +351,7 @@ export const pageProbe = ({
     }));
 
   const sampled = laidOut.slice(0, limits.sampled);
-  // Token values come from the live page, so clamp()-based fluid scales
-  // resolve to whatever they are at this viewport.
+  // Read live values so fluid tokens resolve at this viewport.
   const rootStyle = getComputedStyle(document.documentElement);
 
   const measure = <T extends { readonly value: number }>(
@@ -477,7 +431,7 @@ export const pageProbe = ({
   return { layout, design };
 };
 
-/** Arguments for `pageProbe`, assembled here so the driver stays declarative. */
+/** Assemble probe arguments for the declarative audit driver. */
 export const probeOptions = (
   tokenNames: TokenNames,
   includeDesign: boolean,

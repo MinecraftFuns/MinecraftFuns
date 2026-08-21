@@ -4,14 +4,7 @@ import ListPage from "../../../layouts/ListPage.astro";
 import { postTags } from "../../../lib/posts.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
-/**
- * The tag directory: every tag, alphabetically, each with its post count.
- *
- * A guessable URL that answered with a 404 until now, and the destination the
- * blog's browse strip sends readers to once it stops showing every tag.
- * Alphabetical rather than ranked, because this is the page you arrive at
- * looking for a tag you already have in mind; the strip is the ranked view.
- */
+/** Alphabetical tag directory; the strip shows the ranked subset. */
 const tags = await postTags();
 
 const total = `${tags.length} tag${tags.length === 1 ? "" : "s"}`;

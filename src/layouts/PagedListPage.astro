@@ -7,17 +7,7 @@ import type { PostSummary } from "../lib/posts.ts";
 import type { Href } from "../lib/url.ts";
 import type { RootedPath } from "../schema.ts";
 
-/**
- * One page of a post listing.
- *
- * Page one lives at the listing's own route and the rest under `/page/N/`,
- * which is two route files for every listing. They share this, so the two
- * cannot come to disagree about what a page of the blog looks like; a route
- * file is left holding its `getStaticPaths` and nothing else.
- *
- * The title carries the page number past the first, so four pages of an
- * archive are four documents rather than four copies of one.
- */
+/** Shared paginated listing; page one uses the base route, later pages `/page/N/`. */
 type Props = {
   readonly title: string;
   readonly description: string;
@@ -26,7 +16,7 @@ type Props = {
   readonly lede: string;
   readonly label: string;
   readonly empty: string;
-  /** Where this listing lives; every page address derives from it. */
+  /** Base route for every page address. */
   readonly base: RootedPath;
   readonly page: Page<PostSummary>;
   readonly back?: { readonly href: Href; readonly label: string };

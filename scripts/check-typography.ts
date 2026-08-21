@@ -1,27 +1,5 @@
 #!/usr/bin/env node
-/**
- * Source gate: no literal U+2014 EM DASH.
- *
- * The character is banned in this project's own prose because it stands in for
- * a decision about punctuation somebody should have made: a colon, a
- * semicolon, or a full stop each say something the dash leaves vague.
- *
- * The literal character is what is forbidden, not the concept. `&mdash;` in
- * `Epigraph.astro` is the conventional mark before an attribution, where the
- * meaning is fixed, and an entity is deliberately a different thing to write.
- *
- * Which is also why the needle below is built from its code point: a gate that
- * spelled the character out would be its own first violation.
- *
- * Vendored skill definitions are excluded, being instructions this project
- * follows rather than prose it authors.
- *
- * Chinese renditions (`zh.md` in the blog archive) are excluded too, for the
- * opposite of an exemption: the ban exists because the dash dodges a
- * punctuation decision English prose should make, and in Chinese the doubled
- * form of the very character, the 破折号, *is* the decided punctuation. The
- * gate polices this project's English; it has no opinion to offer on Chinese.
- */
+/** Gate literal em dashes in authored prose; entities and Chinese renditions are exempt. */
 
 import { readdir, readFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
@@ -30,7 +8,7 @@ import { each, report } from "./lib/gate.ts";
 
 const EM_DASH = String.fromCodePoint(0x2014);
 
-/** Trees this project writes, and the extensions worth reading in each. */
+/** Authored trees and extensions to scan. */
 const ROOTS = ["src", "scripts", ".github/workflows"];
 const EXTENSIONS = [".ts", ".astro", ".mjs", ".js", ".css", ".md", ".yml", ".yaml"];
 const LOOSE = ["astro.config.ts", "README.md"];
@@ -42,7 +20,7 @@ export type EmDash = {
   readonly text: string;
 };
 
-/** Every occurrence in one file, with the line it sits on. Pure and total. */
+/** Every occurrence in one file, with its line. */
 export const emDashes = (path: string, source: string): readonly EmDash[] =>
   source
     .split("\n")
@@ -50,11 +28,7 @@ export const emDashes = (path: string, source: string): readonly EmDash[] =>
     .filter(({ text }) => text.includes(EM_DASH))
     .map(({ text, line }) => ({ path, line, text: text.trim() }));
 
-// ---------------------------------------------------------------------------
-// Effect boundary
-// ---------------------------------------------------------------------------
-
-/** A blog rendition written in Chinese; see the header for why it is exempt. */
+/** Chinese rendition excluded by the header policy. */
 const CHINESE_RENDITION = /[\\/]zh\.md$/;
 
 const sourcesUnder = async (dir: string): Promise<readonly string[]> => {

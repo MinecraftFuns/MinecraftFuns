@@ -22,11 +22,7 @@ describe("compareDocs", () => {
     );
   });
 
-  /*
-   * The property the whole comparator exists for: the result must depend on
-   * the docs and not on the order they arrived in. A title-only comparator
-   * passes every test above and still fails this one.
-   */
+  /* Sorting must not depend on loader traversal order. */
   it("gives the same order whatever order the loader walked the directory in", () => {
     const docs = [
       doc("Mail routing", "mail-routing"),
@@ -48,7 +44,7 @@ describe("compareDocs", () => {
     assert.ok(compareDocs(second, first) > 0);
   });
 
-  /* No two docs compare equal, because no two share a file name. */
+  /* Distinct filenames must not compare equal. */
   it("returns zero only for a doc against itself", () => {
     const only = doc("Mail routing", "mail-routing");
     assert.equal(compareDocs(only, only), 0);

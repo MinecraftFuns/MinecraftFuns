@@ -24,10 +24,7 @@ describe("spanOf", () => {
     assert.equal(spanOf(project({ since: 2024, until: 2025 }), 2030), "2024–2025");
   });
 
-  /*
-   * The reason the model changed. A live project used to carry its end year in
-   * config, so the card went stale every January and nothing said so.
-   */
+  /* Live projects derive their end year at read time. */
   it("runs live work to the year it is read in", () => {
     const live = project({ since: 2024, until: null });
     assert.equal(spanOf(live, 2026), "2024–2026");
@@ -53,7 +50,7 @@ describe("badgeFor", () => {
 });
 
 describe("wellOrdered", () => {
-  /* The one property of a span a type cannot state, so the only one tested. */
+  /* Test the span invariant the type cannot express. */
   it("rejects a project that ends before it starts", () => {
     assert.equal(wellOrdered(project({ since: 2026, until: 2024 })).tag, "invalid");
   });

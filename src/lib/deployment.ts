@@ -3,22 +3,22 @@ import type { DeploymentTargetConfig } from "../schema.ts";
 import { andThen, invalid, ok, type Parsed } from "../prelude/adt.ts";
 import { currentBase, joinBase, joinRoute, slashTerminated } from "./url.ts";
 
-/** Deployment identity and canonical-origin policy; pure except for `BASE_URL`. */
+/** Deployment identity and canonical-origin policy; reads `BASE_URL`. */
 
-/** Closed canonical/mirror sum, rather than a mutable boolean. */
+/** Canonical or mirror; role controls indexability. */
 export type DeploymentRole = "canonical" | "mirror";
 
-/** Deployment IDs derived from config and used as GitHub environments. */
+/** ID derives from config and names the GitHub environment. */
 export type DeploymentId =
   (typeof deployments.canonical)["id"] | (typeof deployments.mirrors)[number]["id"];
 
-/** Role derives from config position, never authored separately. */
+/** Role derives from config position. */
 export type DeploymentTarget = DeploymentTargetConfig & {
   readonly id: DeploymentId;
   readonly role: DeploymentRole;
 };
 
-/* Declared ID prevents constructing a target absent from config. */
+/* ID is limited to configured targets. */
 const withRole = (
   target: DeploymentTargetConfig & { readonly id: DeploymentId },
   role: DeploymentRole,
@@ -29,24 +29,24 @@ export const canonicalTarget: DeploymentTarget = withRole(
   "canonical",
 );
 
-/** Canonical target first, then configured mirrors. */
+/** Canonical target precedes mirrors. */
 export const targets: readonly DeploymentTarget[] = [
   canonicalTarget,
   ...deployments.mirrors.map((target) => withRole(target, "mirror")),
 ];
 
-/** Development defaults to a based mirror so root-only links fail early. */
+/** Development uses a mirror when available, exposing root-only link errors. */
 export const developmentTarget: DeploymentTarget =
   targets.find((target) => target.role === "mirror") ?? canonicalTarget;
 
-/* URL parser normalizes host case and default ports. */
+/* URL normalizes host case and default ports. */
 const sameOrigin = (a: string, b: string): boolean => {
   const parsed = URL.parse(a);
   const other = URL.parse(b);
   return parsed !== null && other !== null && parsed.origin === other.origin;
 };
 
-/** Parse environment values into a declared target; never guess unknown pairs. */
+/** Match environment origin/base to a declared target; never infer unknown pairs. */
 export const findTarget = (origin: string, base: string): Parsed<DeploymentTarget> => {
   const wanted = slashTerminated(base);
   const found = targets.find(
@@ -70,7 +70,7 @@ export const activeTarget = (site: URL | undefined): Parsed<DeploymentTarget> =>
     ? invalid("Astro.site is unset; astro.config.ts must assign `site`")
     : findTarget(site.origin, currentBase());
 
-/** Unmount a pathname; reject paths outside the deployment base. */
+/** Remove deployment base; reject paths outside it. */
 export const siteRelative = (base: string, pathname: string): Parsed<string> => {
   const mounted = slashTerminated(base);
   const within = slashTerminated(pathname);
@@ -80,7 +80,7 @@ export const siteRelative = (base: string, pathname: string): Parsed<string> => 
     : invalid(`${pathname} is not beneath the deployment base ${mounted}`);
 };
 
-/** Move an active-base path onto the canonical deployment without string surgery. */
+/** Move an active-base route to the canonical deployment. */
 export const canonicalHref = (
   target: DeploymentTarget,
   pathname: string,
@@ -94,12 +94,12 @@ export const canonicalHref = (
       : ok(url.href);
   });
 
-/** Where the canonical deployment publishes its sitemap. */
+/** Canonical sitemap URL. */
 export const canonicalSitemapUrl = (): string =>
   new URL(joinBase(canonicalTarget.base, "/sitemap-index.xml"), canonicalTarget.origin)
     .href;
 
-/** Index policy is total over deployment roles; new roles require a decision. */
+/** Every role has an explicit index policy. */
 const INDEXABLE: Readonly<Record<DeploymentRole, boolean>> = {
   canonical: true,
   mirror: false,

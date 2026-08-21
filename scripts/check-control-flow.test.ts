@@ -3,14 +3,7 @@ import { describe, it } from "node:test";
 
 import { jumps, type Jump } from "./check-control-flow.ts";
 
-/*
- * The violating code lives in template literals rather than in this file's
- * own statements, so the gate can be tested without the test file failing it.
- *
- * Half of these are adversarial. A grep would report every one of the "not a
- * jump" cases, which is the whole argument for parsing: `break` and
- * `continue` are ordinary English words and perfectly good identifiers.
- */
+/* Fixtures live in strings so this test file does not violate its own gate. */
 
 const keywords = (found: readonly Jump[]): readonly string[] =>
   found.map(({ keyword }) => keyword);
@@ -41,7 +34,7 @@ describe("jumps", () => {
   });
 
   it("finds jumps nested inside a function inside a loop", () => {
-    // A shallow walk that stopped at the first function boundary would miss it.
+    // The walker must continue through nested function bodies.
     const source =
       "for (;;) {\n  g(() => {\n    for (;;) {\n      continue;\n    }\n  });\n}";
     assert.deepEqual(jumps("a.ts", source), [
@@ -72,7 +65,7 @@ describe("jumps", () => {
   });
 
   it("reads .astro frontmatter at the file's own line numbers", () => {
-    // Blanking rather than slicing is what keeps this line number honest.
+    // Blanking preserves the original line numbers.
     const source =
       "---\nconst xs = [];\nfor (const x of ys) {\n  continue;\n}\n---\n<p>hi</p>\n";
     assert.deepEqual(jumps("a.astro", source), [

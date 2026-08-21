@@ -5,13 +5,7 @@ import { postTags, type PostSummary } from "../../../../../lib/posts.ts";
 import { tagListing, type TagListing } from "../../../../../lib/tag-listing.ts";
 import { routeUrl } from "../../../../../lib/url.ts";
 
-/**
- * A tag's pages after the first.
- *
- * Generates nothing while every tag fits on one page, which is the case
- * today. It exists so that the day one does not, the route is already there
- * and already agrees with how the blog paginates.
- */
+/** Generate tag pages after the first when pagination requires them. */
 export async function getStaticPaths() {
   const tags = await postTags();
 

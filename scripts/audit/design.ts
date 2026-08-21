@@ -1,4 +1,4 @@
-/** Check measured geometry against spacing, type, radius, alignment, and rhythm rules. */
+/** Check measured geometry against the design rules. */
 
 import type { Finding } from "./checks.ts";
 import type { DesignProbe, TokenNames } from "./probe.ts";
@@ -9,7 +9,7 @@ export const GRID_BASE = 4;
 /** Sub-pixel noise from rem, percentage, and clamp() values. */
 export const EPSILON = 0.5;
 
-/** Above this a difference reads as intentional; below it, as an accident. */
+/** Differences at or below this threshold read as accidental. */
 export const ALIGNMENT_TOLERANCE = 4;
 
 /**
@@ -95,11 +95,7 @@ export const nearMissPairs = (
   );
 };
 
-/**
- * Distinct gaps in a sequence that should be constant, or nothing when it is.
- * Clustering rather than equality keeps sub-pixel rounding from reading as a
- * rhythm break.
- */
+/** Return distinct gaps when sub-pixel rounding still leaves a rhythm break. */
 export const rhythmBreaks = (gaps: readonly number[]): readonly number[] => {
   if (gaps.length < 2) return [];
 
@@ -119,7 +115,7 @@ const SCALES = [
   { key: "fontSizes", tokenKey: "text", label: "font size" },
 ];
 
-/* Map probe group keys to measured edges; preserve literal keys with `as const`. */
+/* Map probe keys to measured edges. */
 const EDGES = [
   { key: "lefts", edge: "left" },
   { key: "rights", edge: "right" },

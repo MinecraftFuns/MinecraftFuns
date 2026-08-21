@@ -23,19 +23,16 @@ import { clashesBy } from "../prelude/distinct.ts";
 
 export type { HeaderConfig, HostConfig, RedirectConfig, RedirectStatus };
 
-/**
- * Pure model for host directives. Base resolution is explicit, wildcards are
- * structural, and dead rules are detectable before emitting host files.
- */
+/** Pure host-directive model; bases and wildcards stay explicit. */
 
-/** Exact or prefix pattern; intentionally narrower than the host language. */
+/** Exact or prefix pattern. */
 export type PathPattern =
   | { readonly tag: "exact"; readonly path: string }
   | { readonly tag: "prefix"; readonly path: string };
 
 export const exactPath = (path: string): PathPattern => ({ tag: "exact", path });
 
-/** Matches `path` and anything beneath it. Rendered with a trailing splat. */
+/** Match `path` and descendants; render with a trailing splat. */
 export const prefixPath = (path: string): PathPattern => ({ tag: "prefix", path });
 
 const SPLAT: Readonly<Record<PathPattern["tag"], string>> = {
@@ -46,7 +43,7 @@ const SPLAT: Readonly<Record<PathPattern["tag"], string>> = {
 export const renderPattern = (pattern: PathPattern): string =>
   `${pattern.path}${SPLAT[pattern.tag]}`;
 
-/** Match exact paths by equality and prefix paths by `startsWith`. */
+/** Match exact paths or descendants. */
 export const patternMatches = (pattern: PathPattern, path: string): boolean => {
   switch (pattern.tag) {
     case "exact":
@@ -58,15 +55,11 @@ export const patternMatches = (pattern: PathPattern, path: string): boolean => {
   }
 };
 
-/** Whether every path `inner` matches is also matched by `outer`. */
+/** Whether `outer` covers every path matched by `inner`. */
 export const covers = (outer: PathPattern, inner: PathPattern): boolean =>
   outer.tag === "prefix"
     ? inner.path.startsWith(outer.path)
     : inner.tag === "exact" && inner.path === outer.path;
-
-// ---------------------------------------------------------------------------
-// Redirects
-// ---------------------------------------------------------------------------
 
 export type Redirect = {
   readonly from: PathPattern;
@@ -75,22 +68,18 @@ export type Redirect = {
   readonly status: RedirectStatus;
 };
 
-/** Render redirects in order; host semantics use first match. */
+/** Render redirects in declaration order; first match wins. */
 export const renderRedirects = (redirects: readonly Redirect[]): string =>
   `${redirects
     .map(({ from, to, status }) => `${renderPattern(from)} ${to} ${status}`)
     .join("\n")}\n`;
 
-// ---------------------------------------------------------------------------
-// Headers
-// ---------------------------------------------------------------------------
-
-/** Set/remove sum keeps header operator `!` out of names. */
+/** Header set/remove operation; `!` stays out of names. */
 export type HeaderOp =
   | { readonly tag: "set"; readonly name: string; readonly value: string }
   | { readonly tag: "remove"; readonly name: string };
 
-/** Non-empty operations prevent rules that emit no directive. */
+/** Header rule with at least one operation. */
 export type HeaderRule = {
   readonly pattern: PathPattern;
   readonly ops: NonEmpty<HeaderOp>;
@@ -107,23 +96,19 @@ const renderOp = (op: HeaderOp): string => {
   }
 };
 
-/** Render all matching header rules; later rules refine earlier ones. */
+/** Render header rules in declaration order. */
 export const renderHeaders = (rules: readonly HeaderRule[]): string =>
   `${rules
     .map((rule) => [renderPattern(rule.pattern), ...rule.ops.map(renderOp)].join("\n"))
     .join("\n\n")}\n`;
 
-// ---------------------------------------------------------------------------
-// Config surface: decode host syntax into the abstract model above.
-// ---------------------------------------------------------------------------
-
-/** Apply deployment base to a site-relative host pattern. */
+/** Resolve a site-relative host pattern against deployment base. */
 export type Resolve = (path: string) => string;
 
-/** Distinguish rooted local targets from absolute external targets. */
+/** Distinguish rooted local from absolute external targets. */
 const isRooted = (href: RedirectTarget): href is RootedPath => href.startsWith("/");
 
-/** Parse a rooted exact/prefix pattern; resolution catches `//host` authorities. */
+/** Parse rooted exact/prefix pattern; resolution rejects `//host` authorities. */
 export const parsePathPattern = (raw: RootedPath): Parsed<PathPattern> => {
   const star = raw.indexOf("*");
   if (star === -1) return ok(exactPath(raw));
@@ -134,22 +119,22 @@ export const parsePathPattern = (raw: RootedPath): Parsed<PathPattern> => {
   return ok(prefixPath(raw.slice(0, -1)));
 };
 
-/* Only the literal half is resolved; the wildcard never reaches the URL parser. */
+/* Resolve literal half only; wildcard never reaches URL parser. */
 const resolvePattern = (pattern: PathPattern, resolve: Resolve): PathPattern =>
   pattern.tag === "exact"
     ? exactPath(resolve(pattern.path))
     : prefixPath(resolve(pattern.path));
 
-/* `mapParsed`: once the pattern parses, the rest of a redirect cannot fail. */
+/* Parsed pattern makes remaining redirect fields total. */
 const decodeRedirect = (config: RedirectConfig, resolve: Resolve): Parsed<Redirect> =>
   mapParsed(parsePathPattern(config.from), (from) => ({
     from: resolvePattern(from, resolve),
-    /* A destination leaving the site keeps its own authority. */
+    /* External destinations keep their authority. */
     to: isRooted(config.to) ? resolve(config.to) : config.to,
     status: config.status ?? 301,
   }));
 
-/* `andThen`: a rule that parses may still turn out to do nothing. */
+/* Parsed header rules can still have no operations. */
 const decodeHeaderRule = (config: HeaderConfig, resolve: Resolve): Parsed<HeaderRule> =>
   andThen(parsePathPattern(config.path), (pattern) => {
     const ops: HeaderOp[] = [
@@ -167,11 +152,7 @@ const decodeHeaderRule = (config: HeaderConfig, resolve: Resolve): Parsed<Header
       : ok({ pattern: resolvePattern(pattern, resolve), ops: declared });
   });
 
-/**
- * Decode the whole host policy, reporting every problem rather than the first:
- * config is edited by hand, and naming one mistake at a time turns a typo into
- * a sequence of builds.
- */
+/** Decode host policy and report independent errors together. */
 export const decodeHostConfig = (
   config: HostConfig,
   resolve: Resolve,
@@ -179,15 +160,13 @@ export const decodeHostConfig = (
   readonly headers: readonly HeaderRule[];
   readonly redirects: readonly Redirect[];
 }> =>
-  /* Independent, so `both`: a config with a bad header *and* a bad redirect
-     names both in one build. */
+  /* Header and redirect errors are independent. */
   andThen(
     both(
       collect(config.headers.map((rule) => decodeHeaderRule(rule, resolve))),
       collect(config.redirects.map((rule) => decodeRedirect(rule, resolve))),
     ),
-    /* Dependent, so `andThen`: shadowing and duplication are questions about
-       rules that decoded, and there are none to ask of a config that did not. */
+    /* Structural checks run only after both lists decode. */
     ([headers, redirects]) => {
       const problems = [...redirectProblems(redirects), ...headerProblems(headers)].map(
         ({ rule, reason }) => `${rule}: ${reason}`,
@@ -197,32 +176,22 @@ export const decodeHostConfig = (
     },
   );
 
-// ---------------------------------------------------------------------------
-// Structural checks
-// ---------------------------------------------------------------------------
-
 export type RuleProblem = {
   readonly rule: string;
   readonly reason: string;
 };
 
-/**
- * Rules that cannot do what they say: the defects visible in the declaration
- * alone. Whether a destination exists is a property of the artifact, and is
- * checked there.
- */
+/** Find declaration-level rule defects; artifact existence is checked elsewhere. */
 export const redirectProblems = (
   redirects: readonly Redirect[],
 ): readonly RuleProblem[] =>
   redirects.flatMap((redirect, index) => {
-    /* First match wins, so anything an earlier rule already covers is dead.
-       Bounded by the index rather than sliced to it: the slice allocated a
-       fresh array per rule to answer a question `find` can answer in place. */
+    /* First-match semantics make an earlier covering rule dead. */
     const shadow = redirects.find(
       (earlier, before) => before < index && covers(earlier.from, redirect.from),
     );
 
-    /* Three independent facts about one rule, each a reason or nothing. */
+    /* Check loop, destination, and shadowing independently. */
     return [
       patternMatches(redirect.from, redirect.to)
         ? "redirects to a path it matches, a loop"
@@ -241,10 +210,10 @@ export const redirectProblems = (
       }));
   });
 
-/** Header names are case-insensitive, so `Link` and `link` are one header. */
+/** Header names compare case-insensitively. */
 const headerName = (op: HeaderOp): string => op.name.toLowerCase();
 
-/** Header rules that quietly lose one of their own declarations. */
+/** Find duplicate declarations within a header rule. */
 export const headerProblems = (rules: readonly HeaderRule[]): readonly RuleProblem[] =>
   rules.flatMap((rule) =>
     clashesBy(rule.ops, headerName).map(([, later]) => ({

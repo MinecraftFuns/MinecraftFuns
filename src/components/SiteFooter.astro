@@ -3,35 +3,18 @@ import { site } from "../config/site.ts";
 import { elsewhere, siteFingerprint } from "../lib/contact.ts";
 import { currentYear } from "../lib/time.ts";
 
-/*
- * Reading the clock is an effect, so it happens here at the render edge rather
- * than inside a module constant. It is evaluated once at build time; the year
- * advances on redeploy, not at midnight.
- */
+/* Build year at render time; redeploy updates it. */
 const year = currentYear();
 
 const fingerprint = await siteFingerprint();
 ---
 
-{
-  /*
-   * Role set on footer; children override where needed.
-   */
-}
 <footer class="note border-hairline border-t py-xl">
   <div class="mx-auto grid w-full max-w-frame grid-cols-footer gap-lg px-md md:px-lg">
     <div class="flex flex-col gap-2xs">
       <p class="text-ink text-control">{site.name}</p>
       <p class="text-caption">
-        {
-          /*
-          Underlined, not merely coloured. This link sits inside a sentence,
-          which is the case WCAG 1.4.1 is about and the one the audit reports
-          as serious on every page: colour alone is not a distinction. The
-          standalone links elsewhere carry no underline because they are not
-          in running text.
-        */
-        }
+        {/* Inline links need more than color under WCAG 1.4.1. */}
         © {year} · Built with <a class="link-in-text" href="https://astro.build">Astro</a>
       </p>
     </div>
@@ -42,11 +25,7 @@ const fingerprint = await siteFingerprint();
         {
           elsewhere().map((link) => (
             <li>
-              {/*
-                A column of links is not text flow, so WCAG 2.5.8's inline
-                exception does not apply and the bare 21px line box was a real
-                target-size failure.
-              */}
+              {/* Standalone links need WCAG 2.5.8 target height. */}
               <a
                 class="text-ink-subtle hover:text-ink flex min-h-target w-fit items-center no-underline hover:underline"
                 href={link.href}
@@ -62,7 +41,6 @@ const fingerprint = await siteFingerprint();
 
     <div class="flex flex-col gap-2xs">
       <h2 class="text-eyebrow text-ink-subtle uppercase">PGP fingerprint</h2>
-      {/* Mono is reserved for machine-readable strings: this and code blocks. */}
       <p class="font-mono text-caption max-w-fingerprint wrap-anywhere">
         {fingerprint}
       </p>

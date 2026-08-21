@@ -5,10 +5,7 @@ import { postTags, type PostSummary } from "../../../../lib/posts.ts";
 import { tagListing, type TagListing } from "../../../../lib/tag-listing.ts";
 import { routeUrl } from "../../../../lib/url.ts";
 
-/**
- * A tag's first page. Taxonomy-derived, and `postTags` has already refused an
- * empty or colliding slug, so every path here addresses a real listing.
- */
+/** Generate the taxonomy-backed first page for each tag. */
 export async function getStaticPaths() {
   const tags = await postTags();
 
@@ -16,7 +13,7 @@ export async function getStaticPaths() {
     const listing = tagListing(taxon);
     return {
       params: { tag: taxon.slug },
-      /* A taxon's items are non-empty, so its first page always exists. */
+      /* Non-empty taxa always have a first page. */
       props: { listing, page: firstPage(listing.pages) },
     };
   });

@@ -12,11 +12,7 @@ describe("sitemapFilter", () => {
     assert.equal(include(at("/MinecraftFuns", "/404/")), false);
   });
 
-  /*
-   * The regression this module exists for. Substring containment excluded any
-   * route whose path merely spelled an excluded one somewhere inside it, which
-   * a post slug is free to do.
-   */
+  /* Exclusions are route matches, not substring matches inside slugs. */
   it("keeps a route that only contains an excluded one as text", () => {
     assert.ok(include(at("/MinecraftFuns", "/blog/2026/08/404-is-a-http-code/")));
     assert.ok(include(at("/MinecraftFuns", "/404-handling/")));
@@ -28,7 +24,7 @@ describe("sitemapFilter", () => {
     );
   });
 
-  /* Config is site-relative; the page carries the base. Both are resolved. */
+  /* Resolve both the configured base and the page URL. */
   it("excludes under a root deployment too", () => {
     const atRoot = sitemapFilter("/");
     assert.equal(atRoot(at("", "/404/")), false);

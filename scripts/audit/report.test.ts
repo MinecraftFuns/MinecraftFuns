@@ -9,15 +9,9 @@ import {
 } from "./checks.ts";
 import { toJson, toMarkdown, type Meta } from "./report.ts";
 
-/*
- * The browser-driven half of the audit cannot run here, so these cover the
- * half that can: deduplication, ordering, summarising, and rendering. A report
- * that silently drops or miscounts findings is worse than no report, because
- * it is believed.
- */
+/* These cover report logic without requiring the browser half of the audit. */
 
-/* Built as a `MergedFinding` so one fixture serves both halves: `dedupe`
-   accepts it as a `Finding`, and `toMarkdown` needs the contexts. */
+/* One fixture satisfies both deduplication and Markdown rendering. */
 const finding = (overrides: Partial<MergedFinding> = {}): MergedFinding => ({
   category: "accessibility",
   rule: "color-contrast",
@@ -145,8 +139,7 @@ describe("toMarkdown", () => {
   });
 
   it("never claims accessibility from a clean run", () => {
-    // Automated checks cover a minority of WCAG; a green report that implies
-    // otherwise is actively misleading.
+    // A green report covers only the automated subset of WCAG.
     for (const markdown of [toMarkdown([], META), toMarkdown([finding()], META)]) {
       assert.match(markdown, /minority of WCAG/);
     }
@@ -167,7 +160,7 @@ describe("toMarkdown", () => {
       .split("\n")
       .filter((line) => line.startsWith("| ") && line.includes("color-contrast"));
     assert.equal(tableRows.length, 1);
-    // Five columns means six pipes; an unescaped message would add more.
+    // Five columns require six unescaped pipe delimiters.
     assert.equal((tableRows.join("").match(/(?<!\\)\|/g) ?? []).length, 6);
   });
 

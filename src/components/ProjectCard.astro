@@ -7,16 +7,10 @@ type Props = { readonly project: Project };
 
 const { project } = Astro.props;
 
-/* Badge and span derive from one project state; null means no badge. */
 const badge = badgeFor(project);
 const span = spanOf(project, currentYear());
 ---
 
-{
-  /*
-   * Required `href` gives every card one hoverable shape.
-   */
-}
 <a
   class="border-hairline bg-surface-1 hover:border-hairline-strong hover:bg-surface-2 flex h-full flex-col gap-xs rounded-lg border p-md no-underline transition-colors"
   href={project.href}
@@ -42,7 +36,7 @@ const span = spanOf(project, currentYear());
       }
     </ul>
     {
-      /* Pill radius is allowed here; badges are the exception, buttons are not. */
+      /* Badge is the pill-radius exception; controls are not. */
       badge !== null && (
         <span class="bg-surface-2 text-ink-muted shrink-0 rounded-pill px-2xs py-3xs text-caption">
           {badge}

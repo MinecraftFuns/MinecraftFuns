@@ -1,7 +1,7 @@
 ---
 import type { Href } from "../lib/url.ts";
 
-/** Shared ruled section; closed trailing union prevents conflicting variants. */
+/** Ruled section with closed trailing variants. */
 export type SectionTrailing =
   | { readonly tag: "link"; readonly href: Href; readonly label: string }
   | { readonly tag: "count"; readonly value: number };
@@ -15,18 +15,13 @@ type Props = {
 
 const { id, title, blurb, trailing } = Astro.props;
 
-/* Astro has no switch; this type check enforces trailing-union coverage. */
+/* Type-only exhaustive check; Astro has no switch. */
 type Unhandled = Exclude<SectionTrailing["tag"], "link" | "count">;
 
 const _exhaustive: [Unhandled] extends [never] ? true : never = true;
 void _exhaustive;
 ---
 
-{
-  /*
-   * Baseline alignment keeps trailing content level with the heading.
-   */
-}
 <section class="py-lg" aria-labelledby={id}>
   <div
     class="border-hairline mb-md flex items-baseline justify-between gap-md border-b pb-md"

@@ -20,8 +20,7 @@ describe("memoiseBy", () => {
     assert.equal(built, 2);
   });
 
-  /* Identity, not just equality: callers rely on the cached value being the
-     same object, which is what makes a shared `Intl` formatter shared. */
+  /* Callers depend on cached results preserving object identity. */
   it("returns the same value, not an equal one", () => {
     const f = memoiseBy(
       (n: number) => String(n),
@@ -31,8 +30,7 @@ describe("memoiseBy", () => {
     assert.notEqual(f(1), f(2));
   });
 
-  /* The key is what distinguishes calls, so arguments that collapse to one key
-     are one call. `time.ts` relies on this for (zone, locale) pairs. */
+  /* Distinct argument tuples must produce distinct keys. */
   it("distinguishes calls by key alone", () => {
     let built = 0;
     const f = memoiseBy(
@@ -63,11 +61,7 @@ describe("once", () => {
     assert.equal(built, 1);
   });
 
-  /*
-   * On a promise it caches the promise, not the value, so concurrent callers
-   * share one run rather than racing to start several. This is what makes it
-   * correct for `publishedPosts`, which several pages await at once.
-   */
+  /* Caching the promise makes concurrent callers share one run. */
   it("caches the promise, so concurrent callers share one run", async () => {
     let runs = 0;
     const f = once(async () => {
@@ -80,8 +74,7 @@ describe("once", () => {
     assert.equal(runs, 1);
   });
 
-  /* A rejection is cached too. The work here is build-time, and a build that
-     failed once fails; re-running would only fail again more slowly. */
+  /* Rejections are cached too; build-time work must not retry implicitly. */
   it("caches a rejection rather than retrying", async () => {
     let runs = 0;
     const f = once(async () => {

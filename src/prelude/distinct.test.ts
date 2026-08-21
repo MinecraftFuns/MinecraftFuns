@@ -15,8 +15,7 @@ describe("distinctBy", () => {
     );
   });
 
-  /* First wins, stated rather than left to a collection's overwrite rule,
-     which keeps the last. The two differ on exactly this input. */
+  /* The collection must keep the first claimant, not the last overwrite. */
   it("keeps the first rather than the last", () => {
     assert.deepEqual(ids(distinctBy([row("a", "x"), row("b", "x")], (r) => r.key)), [
       "a",
@@ -39,8 +38,7 @@ describe("distinctBy", () => {
 });
 
 describe("clashesBy", () => {
-  /* Empty exactly when the key is injective, which is the property every
-     caller is really asking about. */
+  /* No clashes means the key is injective. */
   it("is empty when every key is distinct", () => {
     assert.deepEqual(
       clashesBy([row("a", "x"), row("b", "y")], (r) => r.key),
@@ -63,8 +61,7 @@ describe("clashesBy", () => {
     );
   });
 
-  /* Both halves, because every caller reports both: "X and Y both become Z"
-     needs the first as much as the second. */
+  /* A clash report needs both the first and later claimant. */
   it("reports every clash rather than the first", () => {
     const clashes = clashesBy(
       [row("a", "x"), row("b", "x"), row("c", "y"), row("d", "y")],
@@ -87,8 +84,7 @@ describe("clashesBy", () => {
     );
   });
 
-  /* Keys are compared by `Map` identity, so a non-primitive key is compared by
-     reference. Every caller here uses a string; this pins the contract. */
+  /* Non-primitive keys follow `Map` identity semantics. */
   it("compares keys as a Map does", () => {
     const shared = { name: "x" };
     assert.equal(clashesBy([row("a", "x"), row("b", "x")], () => shared).length, 1);

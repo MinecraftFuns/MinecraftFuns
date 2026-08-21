@@ -10,15 +10,7 @@ import {
 } from "./probe.ts";
 import { captures } from "../lib/captures.ts";
 
-/*
- * `page.evaluate` serialises the function and nothing else: the browser gets
- * the source text, not the module. A probe that reaches for a module-scope
- * helper therefore throws `x is not defined` inside the page, at which point
- * the audit reports a driver failure instead of findings, and does so only in
- * CI, where the browser actually runs.
- *
- * This asserts statically what cannot be observed locally.
- */
+/* `page.evaluate` receives only the function source, so probes must be self-contained. */
 
 /** Identifiers defined at module scope that a probe must not close over. */
 const MODULE_SCOPE = [
@@ -78,13 +70,13 @@ describe("probe serialisation", () => {
     it(`${name} is a plain function that can be stringified`, () => {
       assert.equal(typeof probe, "function");
       assert.doesNotThrow(() => probe.toString());
-      // A native or bound function cannot be serialised into the page.
+      // Native and bound functions cannot be serialized into the page.
       assert.doesNotMatch(probe.toString(), /\[native code\]/);
     });
   }
 
   it("detects a probe that would leak, so the check itself is trustworthy", () => {
-    // Guards against the assertion silently passing because the regex broke.
+    // Keep the leak detector itself under test.
     const leaky = "(a) => { return round(a) + EPSILON; }";
     const local = localNames(leaky);
     const leaked = MODULE_SCOPE.filter(

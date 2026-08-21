@@ -3,13 +3,7 @@ import Button from "./Button.astro";
 import type { Taxon } from "../lib/taxonomy.ts";
 import { tagHref, type PostSummary, type PostTag } from "../lib/posts.ts";
 
-/**
- * Tags as controls, each carrying how much is behind it.
- *
- * The count is what makes a directory of thirty-eight chips readable rather
- * than a wall: it says which are worth opening. `PostTags` renders the same
- * chips without counts where the strip is a shortcut rather than an index.
- */
+/** Tag-directory controls with post counts. */
 type Props = {
   readonly tags: readonly Taxon<PostTag, PostSummary>[];
 };

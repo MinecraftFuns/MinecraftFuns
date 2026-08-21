@@ -1,15 +1,8 @@
 ---
 import type { HttpsUrl } from "../schema.ts";
 
-/**
- * A quotation, set as page furniture rather than as content.
- *
- * `figure`/`blockquote`/`figcaption` rather than a styled `div`: the
- * attribution is the caption *of* the quotation, and only the figure element
- * says so to a screen reader. `cite` carries the source for machines; the
- * visible link is the one a human follows.
- */
-/* Source is required; unverifiable quotations are excluded. */
+/** Semantic quotation with machine-readable source. */
+/* Required source keeps quotations verifiable. */
 type Props = {
   readonly quote: string;
   readonly author: string;
@@ -24,11 +17,7 @@ const { quote, author, source } = Astro.props;
     {quote}
   </blockquote>
 
-  {
-    /*
-     * Em dash is typographic convention here, not substitute punctuation.
-     */
-  }
+  {/* Attribution uses the conventional em-dash entity. */}
   <figcaption class="note mt-xs">
     &mdash; {author},{" "}
     <a class="link" href={source.href}>{source.label}</a>

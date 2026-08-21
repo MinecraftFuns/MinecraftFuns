@@ -4,7 +4,7 @@ import { isWithin, routeUrl } from "../lib/url.ts";
 
 const { pathname } = Astro.url;
 
-/* Resolve targets once; active-state checks must include the deployment base. */
+/* Base-aware targets keep active state correct on mirrors. */
 const items = nav.map((item) => ({
   ...item,
   target: routeUrl(item.href),
@@ -20,26 +20,15 @@ const items = nav.map((item) => ({
       href={routeUrl("/")}
       aria-label={`${site.name}, home`}
     >
-      {
-        /*
-         * Accent is reserved here and sized to the brand's cap height.
-         */
-      }
       <span class="bg-accent size-xs rounded-xs" aria-hidden="true"></span>
       <span class="hidden xs:inline">{site.name}</span>
     </a>
 
-    {
-      /*
-       * Offset by chip padding so labels, not hover boxes, align to the frame.
-       */
-    }
     <nav class="ms-auto -me-2xs xs:-me-xs" aria-label="Primary">
       <ul class="flex items-center" role="list">
         {
           items.map((item) => (
             <li>
-              {/* `flex` avoids inline baseline leading changing chip height. */}
               <a
                 class="text-body text-ink-subtle hover:bg-surface-1 hover:text-ink current:text-ink flex min-h-control items-center rounded-md px-2xs no-underline transition-colors xs:px-xs"
                 href={item.target}

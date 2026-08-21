@@ -5,35 +5,34 @@ import BaseLayout from "./BaseLayout.astro";
 import type { Href } from "../lib/url.ts";
 import type { Chrome } from "./chrome.ts";
 
-/** Shared intro/list shell; rendered slot output determines the empty state. */
+/** Shared intro/list shell; slot output determines the empty state. */
 type Props = {
-  /** The document title. Distinct from `heading`, which is the page's h1. */
+  /** Document title, distinct from the page heading. */
   readonly title: string;
   readonly description: string;
   readonly chrome?: Chrome;
   readonly eyebrow: string;
   readonly heading: string;
   readonly lede: string;
-  /** Names the list for assistive technology. */
+  /** Accessible list name. */
   readonly label: string;
-  /** Shown in place of the list when nothing rendered. */
+  /** Empty-list message. */
   readonly empty: string;
-  /** Present on pages that are a slice of a larger index. */
+  /** Back link for a slice of a larger index. */
   readonly back?: { readonly href: Href; readonly label: string } | undefined;
 };
 
 const { title, description, chrome, eyebrow, heading, lede, label, empty, back } =
   Astro.props;
 
-/* Render slots before layout so empty slots leave no spacing. */
+/* Render slots before layout; empty slots leave no spacing. */
 const browse = Astro.slots.has("browse") ? await Astro.slots.render("browse") : "";
 const hasBrowse = browse.trim() !== "";
 
 const rows = await Astro.slots.render("default");
 const isEmpty = rows.trim() === "";
 
-/* Rendered here for the same reason `browse` is: an empty slot must leave no
-   spacing behind it. A paginator on a single-page listing renders nothing. */
+/* Empty after-slot must leave no spacing; single-page pagination renders nothing. */
 const after = Astro.slots.has("after") ? await Astro.slots.render("after") : "";
 const hasAfter = after.trim() !== "";
 ---
@@ -41,11 +40,6 @@ const hasAfter = after.trim() !== "";
 <BaseLayout title={title} description={description} chrome={chrome}>
   <PageIntro kind="page" eyebrow={eyebrow} title={heading} lede={lede} />
 
-  {
-    /*
-     * Container owns shared slot spacing; children cannot see sibling gaps.
-     */
-  }
   {hasBrowse && <div class="mb-lg" set:html={browse} />}
 
   <section aria-label={label} class:list={[back !== undefined && "mb-xl"]}>
@@ -53,7 +47,7 @@ const hasAfter = after.trim() !== "";
       isEmpty ? (
         <p class="text-ink-subtle py-lg">{empty}</p>
       ) : (
-        /* No section head, so list supplies the top rule. */
+        /* List supplies top rule when no section heading exists. */
         <div class="border-hairline border-t *:last:border-b-0">
           <Fragment set:html={rows} />
         </div>

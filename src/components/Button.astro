@@ -1,33 +1,10 @@
 ---
 import type { Href } from "../lib/url.ts";
 
-/**
- * A link styled as a control. The only place a control's look is decided.
- *
- * Appearance is a product of two closed sums, `tone` and `size`, each
- * eliminated by a total `Record`. All four combinations are designs that
- * exist, so no pairing is invalid and none needs guarding; adding a third tone
- * or size is a type error until it is given a look.
- *
- * What is now unrepresentable is the third thing a caller used to be able to
- * do: write its own class string and arrive at something that resembles a
- * control without being one. The tag lists did exactly that, and had already
- * drifted to a different radius, a different type role and a different border
- * from the buttons on the home page. A control is either built here or it is
- * not a control.
- *
- * That the records hold complete class-name literals is not incidental:
- * Tailwind's scanner reads source text, so a composed name like
- * `bg-${tone}-500` would generate nothing. Totality and scannability want the
- * same shape here.
- */
+/** Centralize control styling in closed, fully scannable tone/size variants. */
 export type ButtonTone = "primary" | "secondary";
 
-/**
- * `control` is the page-level call to action; `compact` is the same control at
- * the size a tag needs. Both minimum heights are the sizes the theme names for
- * WCAG 2.5.8, so no control can be built below target size by construction.
- */
+/** `control` is full-size; `compact` is the tag-sized WCAG target. */
 export type ButtonSize = "control" | "compact";
 
 type Props = {

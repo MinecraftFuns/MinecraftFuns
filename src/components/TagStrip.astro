@@ -5,18 +5,7 @@ import { tagHref, type PostSummary, type PostTag } from "../lib/posts.ts";
 import type { Taxon } from "../lib/taxonomy.ts";
 import { routeUrl } from "../lib/url.ts";
 
-/**
- * The way in to the archive by subject: the few tags with the most behind
- * them, then the door to the rest.
- *
- * The strip used to render every tag, which at thirty-eight was four rows of
- * chips between the reader and the first post. What it shows now is the
- * ranked head; `browse` decides how many and counts the remainder.
- *
- * The last chip is a link to the directory rather than a tag, and reads as
- * one: it names a count, not a subject, so it cannot be mistaken for a
- * seventh tag.
- */
+/** Ranked tag preview plus a link to the full directory. */
 type Props = {
   readonly strip: Browse<Taxon<PostTag, PostSummary>>;
 };

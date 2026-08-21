@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import { sites } from "./check-autospace.ts";
 
-/** A document with front matter, since every real rendition has one. */
+/** Build a rendition-like document with front matter. */
 const doc = (...body: readonly string[]): string =>
   ["---", 'title: "中文 Title"', "---", "", ...body].join("\n");
 
@@ -58,13 +58,13 @@ describe("check-autospace", () => {
   });
 
   it("spares a token the engine can only half space", () => {
-    /* `)` faces 处, and no engine spaces punctuation against an ideograph. */
+    /* Punctuation facing CJK text is not autospaced. */
     assert.deepEqual(columns("差分 O(n) 处理"), []);
     assert.deepEqual(columns("在 C# 里"), []);
   });
 
   it("spares both ends of such a token, not merely the punctuated one", () => {
-    /* Only the bare `a` is reported; `parity(a)` keeps the spaces around it. */
+    /* Report the bare token, not the punctuation-bound token. */
     assert.deepEqual(columns("把 parity(a) 附到 a 的最后"), [15, 17]);
   });
 
@@ -73,7 +73,7 @@ describe("check-autospace", () => {
   });
 
   it("reads the far end of the token, not the far end of the line", () => {
-    /* `RFC 7231` faces 见 with a letter and a full stop with a digit. */
+    /* Read the token's far end, not the line's final punctuation. */
     assert.deepEqual(columns("见 RFC 7231。"), [2]);
   });
 });

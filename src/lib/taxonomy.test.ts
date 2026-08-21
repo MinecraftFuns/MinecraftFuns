@@ -7,8 +7,7 @@ import { taxonomy } from "./taxonomy.ts";
 
 type Item = { readonly name: string; readonly labels: readonly Sluggable[] };
 
-/* Labels reach `taxonomy` already decoded, so the fixture asserts what the
-   collection schema establishes. The check itself lives in labels.test.ts. */
+/* Fixtures model labels after schema decoding; label validation is tested elsewhere. */
 const label = (raw: string): Sluggable => raw as Sluggable;
 
 const item = (name: string, ...labels: string[]): Item => ({
@@ -46,8 +45,7 @@ describe("taxonomy", () => {
     );
   });
 
-  /* Items keep the order they arrived in, so each collection's own ordering
-     (recency for posts, title for docs) survives into its taxon pages. */
+  /* Preserve the collection's incoming order within each taxon. */
   it("preserves the incoming order of items within a taxon", () => {
     assert.deepEqual(
       taxaOf([item("first", "x"), item("second", "x"), item("third", "x")]).map((t) =>
@@ -61,11 +59,7 @@ describe("taxonomy", () => {
     assert.deepEqual(taxaOf([]), []);
   });
 
-  /*
-   * The one failure this module still owns. Whether a single label has a
-   * usable segment is settled when frontmatter is decoded; whether two of them
-   * collide is a property of the collection, which no per-label check sees.
-   */
+  /* Label validity is decoded earlier; slug collisions are collection-level. */
   it("refuses two different labels that collapse to one slug", () => {
     const result = build([item("a", "Mail Routing"), item("b", "mail  routing")]);
     assert.equal(result.tag, "invalid");
@@ -78,8 +72,7 @@ describe("taxonomy", () => {
     assert.match(explain(result), /"a b"/);
   });
 
-  /* Accumulating, like every other check here: two collisions are two facts
-     about the collection, not two builds. */
+  /* Report every independent collision. */
   it("reports every collision rather than the first", () => {
     const result = build([
       item("a", "Mail Routing"),
@@ -100,8 +93,7 @@ describe("taxonomy", () => {
     );
   });
 
-  /* A label exists only by being on an item, so a taxon is never empty. The
-     type says so; this checks the construction agrees. */
+  /* Every taxon is created from at least one item. */
   it("never produces an empty taxon", () => {
     taxaOf([item("a", "x"), item("b", "y", "x")]).forEach(({ items }) =>
       assert.ok(items.length > 0),

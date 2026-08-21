@@ -14,22 +14,13 @@ import { bcp47Of, byPreference, type Lang, type Translator } from "./lang.ts";
 import type { PostTag } from "./labels.ts";
 import { byRecencyWith, type IsoDate } from "./time.ts";
 
-/**
- * Multilingual article model. `assemble` enforces nonempty renditions, one
- * original, shared date/tags, unique languages, and preference ordering.
- * `NonEmpty` makes the best available rendition the head, so no primary flag
- * can name a language an article lacks.
- */
+/** `assemble` validates shared metadata, one original, unique languages, and preference order. */
 
 // ---------------------------------------------------------------------------
 // Renditions
 // ---------------------------------------------------------------------------
 
-/**
- * Who a rendition's text came from. A sum, not a nullable `Translator`: the
- * original is a positive fact about a file, not the absence of a field, even
- * though absence is how the frontmatter spells it.
- */
+/** Rendition source; a sum distinguishes original text from translated text. */
 export type Provenance =
   { readonly tag: "original" } | { readonly tag: "translation"; readonly by: Translator };
 
@@ -74,7 +65,7 @@ export const renditionOf = <E>(
 ): Rendition<E> | undefined =>
   article.renditions.find((rendition) => rendition.lang === lang);
 
-/** Renditions other than `lang`, still preference ordered. */
+/** Renditions except `lang`, preserving preference order. */
 export const othersOf = <E>(article: Article<E>, lang: Lang): readonly Rendition<E>[] =>
   article.renditions.filter((rendition) => rendition.lang !== lang);
 
@@ -96,7 +87,7 @@ export type Alternate = {
   readonly route: RootedPath;
 };
 
-/** Build reciprocal `hreflang` links plus `x-default` for multilingual articles. */
+/** Build reciprocal `hreflang` links and `x-default`. */
 export const alternatesOf = <E>(article: Article<E>): readonly Alternate[] =>
   article.renditions.length < 2
     ? []
@@ -127,7 +118,7 @@ const sameTags = (a: readonly PostTag[], b: readonly PostTag[]): boolean =>
 
 /** Validate one article's files, accumulating independent findings. */
 const article = <E>(records: readonly RenditionRecord<E>[]): Parsed<Article<E>[]> => {
-  /* Filesystem paths are unique per language; keep duplicate input handling total. */
+  /* Duplicate paths are invalid; retain total handling for duplicate input. */
   const duplicated = clashesBy(records, (record) => record.lang).map(
     ([, later]) => `two files both claim the ${later.lang} rendition`,
   );
@@ -148,21 +139,21 @@ const article = <E>(records: readonly RenditionRecord<E>[]): Parsed<Article<E>[]
         ]),
   ]);
 
-  /* A translation-only article has no source and must fail validation. */
+  /* Translation-only articles have no source. */
   const orphaned = records.some((record) => record.provenance.tag === "original")
     ? []
     : [
         "every rendition is marked translation:, so the original is missing; the rendition the others were translated from carries no translation: field",
       ];
 
-  /* Establish preference order once; `toSorted` leaves input records untouched. */
+  /* Sort once; `toSorted` preserves input records. */
   const renditions = nonEmpty(
     records
       .toSorted((a, b) => byPreference(a.lang, b.lang))
       .map(({ lang, provenance, entry }) => ({ lang, provenance, entry })),
   );
 
-  /* Keep the empty case explicit so totality stays checkable without assertion. */
+  /* Keep the empty case explicit instead of asserting. */
   return renditions === undefined
     ? okUnless(duplicated, [])
     : okUnless(

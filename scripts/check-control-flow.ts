@@ -20,7 +20,6 @@ const DIALECT: Readonly<Record<string, ts.ScriptKind>> = {
 
 const extensionOf = (path: string): string => `.${path.split(".").pop()}`;
 
-/** Find forbidden jumps using TypeScript's recovered AST. */
 /** A forbidden jump: which file, which line, and which keyword. */
 export type Jump = {
   readonly path: string;
@@ -67,10 +66,6 @@ const REMEDY: Readonly<Record<Keyword, string>> = {
     "lift the condition into a predicate, or return `undefined` from a function the loop pushes when present",
   break: "use `find`, `some`, or `every`; in a `switch`, return from the case",
 };
-
-// ---------------------------------------------------------------------------
-// Effect boundary
-// ---------------------------------------------------------------------------
 
 /** Directories to scan, and the extensions worth parsing in each. */
 const ROOTS = ["src", "scripts"];

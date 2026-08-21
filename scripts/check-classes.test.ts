@@ -61,8 +61,7 @@ describe("anonymousValues", () => {
     assert.deepEqual(anonymousValues(source), []);
   });
 
-  // The patterns run over TypeScript as well as markup, so the shapes that
-  // look like bracket syntax but are not must stay quiet.
+  // The scanner sees TypeScript too; bracket-like syntax must stay quiet.
   it("does not mistake a TypeScript index signature for an arbitrary property", () => {
     const source = astro("type T = { [key: string]: number };", "<p />");
     assert.deepEqual(anonymousValues(source), []);
@@ -120,11 +119,7 @@ describe("typeRolesSet", () => {
     assert.equal(found[0]?.rule, "type-in-page");
   });
 
-  /*
-   * The regression this rule exists for: one list whose rows each chose their
-   * own size. Both are reported, and `text-body` is reported once rather than
-   * also matching inside `text-body-sm`.
-   */
+  /* Report each role once; do not count shorter roles inside longer names. */
   it("reports each role once, not once per shorter role it contains", () => {
     const found = typeRolesSet(
       '<p class="text-body">a</p><p class="text-body-sm">b</p>',
@@ -157,11 +152,7 @@ describe("typeRolesSet", () => {
   });
 });
 
-/*
- * The recipe rules. Each names a decision that had been made separately in
- * every component that needed it, so the tell is a *combination* rather than
- * a single class, and the pattern has to stay inside one attribute.
- */
+/* Recipe violations are class combinations within one attribute. */
 describe("recipe rules", () => {
   const rules = (source: string): readonly string[] =>
     anonymousValues(source).map(({ rule }) => rule);
@@ -190,8 +181,7 @@ describe("recipe rules", () => {
     }
   });
 
-  /* The regression the `[^"]*` bound exists for: two elements that each carry
-     half of a recipe are not a recipe. */
+  /* A recipe must stay within one element, not combine sibling attributes. */
   it("does not combine two elements into one violation", () => {
     const source = astro(
       "",
@@ -209,7 +199,7 @@ describe("recipe rules", () => {
   });
 
   it("leaves a mono value that is not metadata alone", () => {
-    // The fingerprint is mono and small but must be readable, so not tertiary.
+    // A small monospace value is readable and need not be tertiary.
     const source = astro("", '<p class="font-mono text-caption wrap-anywhere">x</p>');
     assert.deepEqual(rules(source), []);
   });

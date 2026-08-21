@@ -16,11 +16,7 @@ import {
   type Parsed,
 } from "./adt.ts";
 
-/*
- * The algebra every other module is written against, and the only one whose
- * laws nothing else can check: a module downstream that miscounts reasons
- * still typechecks and still fails builds, just with less to say.
- */
+/* These tests protect the error algebra's accumulation laws. */
 
 const reasons = (parsed: Parsed<unknown>): readonly string[] =>
   parsed.tag === "invalid" ? parsed.reasons : [];
@@ -62,11 +58,7 @@ describe("andThen", () => {
     );
   });
 
-  /*
-   * Fail-fast, and this is the property that makes `collect` a separate
-   * function rather than a fold over this one: after a failure there is no
-   * value to continue with, so no second reason ever comes into existence.
-   */
+  /* Fail-fast: no value exists to pass to the continuation after failure. */
   it("never runs the continuation after a failure", () => {
     let ran = false;
     const result = andThen(invalid<number>("first"), (n) => {
@@ -103,11 +95,7 @@ describe("both", () => {
     assert.deepEqual(both(ok(1), ok("x")), ok([1, "x"]));
   });
 
-  /*
-   * The whole reason `both` exists: `andThen` would typecheck here and report
-   * the first failure only, so a config with a bad header *and* a bad redirect
-   * would confess to one of them per build.
-   */
+  /* Unlike `andThen`, `both` retains failures from both independent inputs. */
   it("reports both sides when both fail", () => {
     assert.deepEqual(reasons(both(invalid("a"), invalid("b"))), ["a", "b"]);
   });
@@ -123,11 +111,7 @@ describe("inContext", () => {
     assert.deepEqual(inContext(ok(1), "where"), ok(1));
   });
 
-  /*
-   * Every reason, not just the first. An accumulated failure has one context
-   * and several mistakes, so labelling the batch once would leave every reason
-   * after the first unattributed.
-   */
+  /* Apply the context to every accumulated reason. */
   it("labels every reason of an accumulated failure", () => {
     assert.deepEqual(reasons(inContext(invalid("a", "b"), "file.md")), [
       "file.md: a",
@@ -165,10 +149,7 @@ describe("orThrow", () => {
 });
 
 describe("assertNever", () => {
-  /*
-   * Unreachable from typed code by construction, so it is reached here the
-   * only way it can be at runtime: untyped data crossing a boundary.
-   */
+  /* Runtime coverage for untyped data crossing the exhaustive boundary. */
   it("throws when untyped data reaches an exhausted eliminator", () => {
     assert.throws(() => assertNever("surprise" as never), TypeError);
   });

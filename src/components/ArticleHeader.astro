@@ -6,46 +6,16 @@ import type { Href } from "../lib/url.ts";
 import { INTRO } from "./intro.ts";
 import PostTags from "./PostTags.astro";
 
-/**
- * A post's opening block.
- *
- * The same opening as `PageIntro`'s `page` kind, with publication metadata
- * where an eyebrow would go. The spacing and title role come from `INTRO`
- * rather than being written out again, which is what the post page used to do:
- * `pt-xl pb-lg` and `text-display-md` spelled twice, in two files, with nothing
- * to notice if one moved.
- *
- * `datetime` carries the machine-readable date and the text the human-readable
- * one, both rendered from a single validated value.
- *
- * A post, and only a post. `DocHeader` is its own component rather than this
- * one with the date made optional: a doc is not a post that happens to lack a
- * date, and collapsing the two would mean every later change to how a post is
- * introduced arrives in the docs whether it suits them or not.
- */
+/** Post header; shared intro styles keep publication metadata in the same block. */
 type Props = {
   readonly title: string;
   readonly description: string;
   readonly date: IsoDate;
-  /**
-   * The language the body below this header is written in. The date is
-   * formatted under this language's locale, so a Chinese article dates
-   * itself 2020年1月25日: the meta line sits inside the article, not the
-   * chrome. The zone stays the site's; the day named must not shift with
-   * the reader's language.
-   */
+  /** Content language controls date locale; timezone remains site-wide. */
   readonly lang: Lang;
   readonly readingMinutes: number;
   readonly tags: readonly PostTag[];
-  /**
-   * The same article in its other languages, preference-ordered, empty when
-   * it has none. Each is rendered in the meta line in the *target*
-   * language's own name: a reader of Chinese scans for 中文, not for
-   * "Chinese". `hrefLang` says where the link leads and `lang`-tags the
-   * label itself, so screen readers switch voices for the words that need
-   * it. `undefined` admitted explicitly: the page forwards its own optional
-   * under `exactOptionalPropertyTypes`.
-   */
+  /** Other renditions, labeled in each target language. */
   readonly alternates?:
     | readonly {
         readonly href: Href;
@@ -93,11 +63,7 @@ const displayDate = formatDateIn(date, SITE_TIME_ZONE, dateLocaleOf(lang));
   </p>
   <h1 class:list={["text-ink mt-xs", titleClass]}>{title}</h1>
   <p class="text-ink-muted mt-sm max-w-measure text-body-lg">{description}</p>
-  {
-    /*
-     * Gap belongs here; the index reuses PostTags with different spacing.
-     */
-  }
+  {/* Index reuses PostTags with different spacing. */}
   {
     tags.length > 0 && (
       <div class="mt-md">

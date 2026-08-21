@@ -3,21 +3,11 @@ import Button from "./Button.astro";
 import { nextHref, pageHref, prevHref, type Page } from "../lib/paging.ts";
 import type { RootedPath } from "../schema.ts";
 
-/**
- * Walking a listing that does not fit on one page.
- *
- * Renders nothing when there is only one page: `total` says so, and a control
- * offering no destinations is worse than no control. Every address comes from
- * `pageHref`, so the first page is linked at the listing's own route and not
- * at a `/page/1/` that would serve the same posts at a second URL.
- *
- * Numbers as well as arrows, because a reader landing on page three from a
- * search result needs to see where they are and that there is a page one.
- */
+/** Pagination controls; page one links to the listing route, not `/page/1/`. */
 type Props = {
   readonly base: RootedPath;
   readonly page: Page<unknown>;
-  /** Names the control for assistive technology. */
+  /** Accessible name for the pagination control. */
   readonly label: string;
 };
 

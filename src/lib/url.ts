@@ -1,32 +1,29 @@
 import type { HttpsUrl, RootedPath } from "../schema.ts";
 
-/**
- * Base-aware links. Routes end in `/`; assets do not. WHATWG URL parsing owns
- * non-regular syntax, while one prefix case analysis protects base paths.
- */
+/** Base-aware links; routes end in `/`, assets do not. */
 
 declare const resolvedBrand: unique symbol;
 
-/** Branded path obtainable only through base-aware resolvers. */
+/** Path produced by a base-aware resolver. */
 type ResolvedPath = string & { readonly [resolvedBrand]: true };
 
-/** Base-resolved path or self-authoritative HTTPS URL. */
+/** Base-resolved path or authoritative HTTPS URL. */
 export type Href = ResolvedPath | HttpsUrl;
 
-/** Reserved non-resolving origin used as a temporary mount base. */
+/** Non-resolving origin used for temporary URL mounting. */
 const MOUNT_ORIGIN = "https://mount.invalid";
 
-/** Regular by nature: a suffix of one repeated character. */
+/** Trailing slash run. */
 const TRAILING_SLASHES = /\/+$/;
 
-/** Canonical slash-terminated route form for comparisons. */
+/** Canonical slash-terminated route. */
 export const slashTerminated = (path: string): string =>
   path.endsWith("/") ? path : `${path}/`;
 
-/** Classify hrefs that base-prefixing would corrupt. */
+/** Classify hrefs that base-prefixing must not touch. */
 export type HrefKind = "absolute" | "authority" | "fragment" | "site";
 
-/** Delegate absolute-URL syntax to `URL.canParse`; handle authority and fragment prefixes directly. */
+/** Use `URL.canParse`; classify authority and fragment prefixes separately. */
 export const classifyHref = (href: string): HrefKind => {
   if (URL.canParse(href)) return "absolute";
   if (href.startsWith("//")) return "authority";
@@ -34,13 +31,13 @@ export const classifyHref = (href: string): HrefKind => {
   return "site";
 };
 
-/** Prefix `path` beneath `base`; URL resolution would discard a rooted base path. */
+/** Mount `path` beneath `base` without discarding a rooted base path. */
 const mount = (base: string, path: string): URL => {
   const root = new URL(`${base.replace(TRAILING_SLASHES, "")}/`, MOUNT_ORIGIN);
   return new URL(path.startsWith("/") ? path.slice(1) : path, root);
 };
 
-/** The single point at which routes and assets differ. */
+/** Route/asset termination policy. */
 type Target = "route" | "asset";
 
 const TERMINATE: Readonly<Record<Target, (pathname: string) => string>> = {
@@ -48,7 +45,7 @@ const TERMINATE: Readonly<Record<Target, (pathname: string) => string>> = {
   asset: (pathname) => pathname,
 };
 
-/** Join a site path while preserving query and fragment placement. */
+/** Join site path while preserving query and fragment. */
 const join = (base: string, path: string, target: Target): string => {
   if (classifyHref(path) !== "site") return path;
 
@@ -56,28 +53,28 @@ const join = (base: string, path: string, target: Target): string => {
   return `${TERMINATE[target](url.pathname)}${url.search}${url.hash}`;
 };
 
-/** Join a file path to a base. Never slash-terminated. */
+/** Join file path to base without a trailing slash. */
 export const joinBase = (base: string, path: string): string => join(base, path, "asset");
 
-/** Join a page route to a base, in the canonical slash-terminated form. */
+/** Join page route to base with a trailing slash. */
 export const joinRoute = (base: string, path: string): string =>
   join(base, path, "route");
 
-/** Read Astro's base, defaulting to `/` for plain Node tests. */
+/** Read Astro base; default to `/` in plain Node tests. */
 export const currentBase = (): string => {
-  /* Only the environment object is optional; Astro supplies `BASE_URL` within it. */
+  /* Astro supplies `BASE_URL` inside optional `import.meta.env`. */
   const env = import.meta.env as { readonly BASE_URL: string } | undefined;
   return env?.BASE_URL ?? "/";
 };
 
-/** Resolve a rooted page route against the deployment base. */
+/** Resolve page route against deployment base. */
 export const routeUrl = (path: RootedPath): Href =>
   joinRoute(currentBase(), path) as ResolvedPath;
 
-/** Resolve an asset or host-directive path against the deployment base. */
+/** Resolve asset or host-directive path against deployment base. */
 export const assetUrl = (path: string): Href =>
   joinBase(currentBase(), path) as ResolvedPath;
 
-/** Test route containment with separator-aware resolved path prefixes. */
+/** Test route containment with separator-aware prefixes. */
 export const isWithin = (pathname: string, target: string): boolean =>
   slashTerminated(pathname).startsWith(slashTerminated(target));

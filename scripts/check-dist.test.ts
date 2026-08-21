@@ -37,17 +37,9 @@ import {
   type WkdEntry,
 } from "./check-dist.ts";
 
-/*
- * These are predominantly *negative* tests. A checker that has quietly stopped
- * catching things still reports success, which is the worst possible failure
- * mode for the last gate before production, so each check is fed input it is
- * supposed to reject, and asserted to reject it.
- */
+/* Most tests are negative: a silent checker still reports success. */
 
-/**
- * The single element, asserted. `found[0]` read the same and checked less: a
- * check reporting three problems where one was expected passed just as well.
- */
+/** Assert that a check found exactly one problem. */
 const only = <T>(items: readonly T[]): T => {
   const [first, ...rest] = items;
   assert.ok(
@@ -63,19 +55,13 @@ const TOKENS = `
   --color-ink-black-500: #496ab6;
 `;
 
-/*
- * A well-formed artifact publishes a key directory, so the fixtures carry a
- * minimal one. Presence is asserted rather than assumed: a build that silently
- * stopped emitting the key would otherwise look exactly like a clean run.
- * `wkdViolations` is tested directly for the malformed cases.
- */
+/* Keep ordinary fixtures valid; malformed WKD cases are tested directly. */
 const WKD_FIXTURE: Readonly<Record<string, string | Uint8Array>> = {
   ".well-known/openpgpkey/policy": "",
   ".well-known/openpgpkey/hu/s8y7oh5xrdpu9psba3i5ntk64ohouhga": Buffer.from([0x98, 0x01]),
 };
 
-/** What a fixture may override. `site` stands in for both halves of a
- *  deployment where a case does not care to separate them. */
+/** Deployment values a fixture may override. */
 type TreeOptions = {
   readonly base?: string;
   readonly site?: string;
@@ -83,7 +69,7 @@ type TreeOptions = {
   readonly tokensCss?: string;
 };
 
-/** Build a throwaway dist tree and inspect it. */
+/** Build and inspect a throwaway dist tree. */
 const inspectTree = async (
   files: Readonly<Record<string, string | Uint8Array>>,
   options: TreeOptions = {},
@@ -100,23 +86,13 @@ const inspectTree = async (
   return inspect({
     dist,
     base,
-    /* Defaults to the build's own parameters, so a fixture that says nothing
-       about deployments behaves as it did. The cases that matter pass a
-       canonical deployment *different* from the one being built, which is the
-       arrangement the exact check exists for. */
+    /* Default to the fixture's deployment; mirror cases override the canonical. */
     canonical: options.canonical ?? { origin: site, base },
     tokensCss: options.tokensCss ?? TOKENS,
   });
 };
 
-/**
- * A page carrying the canonical URL its own position implies.
- *
- * `route` is required for anything but the site root: the canonical check is
- * an exact comparison, so a helper that stamped one URL onto every fixture
- * would make every nested page a violation. It previously did exactly that,
- * and the containment check could not tell.
- */
+/** Build a page whose canonical matches its dist-relative route. */
 const page = (body: string, route: string = ""): string =>
   `<!doctype html><html><head>
    <link rel="canonical" href="https://example.test/MinecraftFuns/${route}"/>
@@ -148,8 +124,7 @@ describe("extractReferences", () => {
     const found = extractReferences(
       `<a href="/a">x</a><img SRC="/b.png"><link href='/skipped'><script src="/c.js">`,
     );
-    // Single-quoted attributes are deliberately out of scope; Astro emits
-    // double quotes. Asserted so the limitation is visible rather than assumed.
+    // Astro emits double-quoted attributes; single quotes are out of scope.
     assert.deepEqual(found, ["/a", "/b.png", "/c.js"]);
   });
 
@@ -203,8 +178,7 @@ describe("candidatePaths", () => {
   });
 
   it("strips a fragment that itself contains a question mark", () => {
-    // The standard splits the fragment first; a pattern reaching for the
-    // earliest of `?` or `#` would keep "?y" as part of the filename.
+    // URL parsing splits the fragment before interpreting its `?`.
     assert.ok(
       candidatePaths("/MinecraftFuns/work#a?y", "/MinecraftFuns/").includes(
         "work/index.html",
@@ -221,7 +195,7 @@ describe("candidatePaths", () => {
   });
 
   it("yields nothing for a protocol-relative reference at the root base", () => {
-    // "//evil.example/x" starts with "/" and so passed the old prefix test.
+    // A protocol-relative URL starts with `/` but has its own authority.
     assert.deepEqual(candidatePaths("//evil.example/x", "/"), []);
   });
 
@@ -263,9 +237,7 @@ describe("expectedCanonical", () => {
   });
 
   it("gives a language-suffixed route two acceptable canonicals", () => {
-    /* A rendition served at /zh/ may canonicalise to itself (a sibling owns
-       the bare URL) or to its parent (it is the sole rendition, served
-       twice); which one is right depends on files this check cannot see. */
+    /* A language rendition may canonicalize to itself or its parent route. */
     assert.deepEqual(
       acceptableCanonicals("blog/2020/09/game-theory/zh/index.html", CANONICAL, "/"),
       [
@@ -283,8 +255,7 @@ describe("expectedCanonical", () => {
   });
 
   it("does not mistake a slug for a language code", () => {
-    // Only the declared codes count; a slug that merely ends the path is not
-    // a language segment.
+    // A matching suffix is a language segment only when declared in config.
     assert.deepEqual(
       acceptableCanonicals("blog/2020/03/xdown/index.html", CANONICAL, "/"),
       [`${CANONICAL}/blog/2020/03/xdown/`],
@@ -292,9 +263,7 @@ describe("expectedCanonical", () => {
   });
 
   it("does not depend on the base the artifact was built for", () => {
-    /* The whole point: the same page emitted by any deployment must claim the
-       same canonical URL. The function takes no build parameters, so this is
-       true by construction rather than by care. */
+    /* Canonicals must be stable across deployments. */
     assert.equal(
       expectedCanonical("blog/index.html", CANONICAL, "/"),
       `${CANONICAL}/blog/`,
@@ -355,7 +324,7 @@ describe("hostDirectiveViolations", () => {
     );
   });
 
-  /* Exactly how the legacy files rotted: rules outliving what they described. */
+  /* Catch stale rules that outlive their generated paths. */
   it("catches a redirect to a path no file satisfies", () => {
     const found = hostDirectiveViolations({
       redirects: [{ from: "/old", to: "/declaration", status: "301" }],
@@ -414,8 +383,7 @@ describe("wkdViolations", () => {
   });
 
   it("catches an armored key where the binary one is mandatory", () => {
-    // "-----BEGIN" starts with 0x2d. This is the specific mistake the spec
-    // warns against, and it would leave clients unable to import the key.
+    // Armored keys start with `-` (0x2d), not an OpenPGP packet tag.
     const found = wkdViolations({ policy: true, keys: [key([0x2d, 0x2d])] });
     assert.match(only(found), /binary, not armored/);
   });
@@ -427,8 +395,7 @@ describe("wkdViolations", () => {
   it("catches a filename that is not a Z-Base-32 hash", () => {
     const found = wkdViolations({
       policy: true,
-      // 'l' and '0' are absent from Z-Base-32; a name using them would mean
-      // the encoder had drifted onto RFC 4648's alphabet.
+      // `l` and `0` belong to RFC 4648, not Z-Base-32.
       keys: [{ name: "l0" + "a".repeat(30), bytes: Uint8Array.from([0x98]) }],
     });
     assert.match(only(found), /Z-Base-32/);
@@ -449,8 +416,7 @@ describe("undefinedCustomProperties", () => {
   });
 
   it("allows an undefined property that supplies a fallback", () => {
-    // Tailwind's override slots are deliberately unset: an unset --tw-leading
-    // means "nothing overrode the role's line height".
+    // Tailwind override slots may be undefined when no value overrides them.
     const css = ".a{line-height:var(--tw-leading,var(--text-body--line-height))}";
     assert.deepEqual(undefinedCustomProperties(css), ["--text-body--line-height"]);
   });
@@ -490,7 +456,7 @@ describe("inspect", () => {
   });
 
   it("catches a link that forgot the base path", async () => {
-    // The exact bug that passed a clean typecheck and full test run.
+    // This regression passes typecheck and ordinary unit tests.
     const violations = await inspectTree({
       "index.html": page('<a href="/work">w</a>'),
       "favicon.svg": "<svg/>",
@@ -565,10 +531,7 @@ describe("inspect", () => {
   });
 
   it("catches a mirror that canonicalises to itself instead of to the canonical copy", async () => {
-    /* The regression that motivated the exact check. This artifact is
-       internally consistent and passes every other gate: its canonical tag
-       points at a real page, on its own origin, under its own base. It is
-       still wrong, because the authoritative copy lives elsewhere. */
+    /* A mirror can be internally consistent yet canonicalize to itself. */
     const selfCanonical = await inspectTree(
       {
         "index.html": `<!doctype html><html><head><link rel="canonical" href="https://mirror.test/MinecraftFuns/"/></head><body>x</body></html>`,
@@ -612,7 +575,7 @@ describe("inspect", () => {
   });
 
   it("accumulates rather than stopping at the first violation", async () => {
-    // One CI round-trip per defect is how a gate gets disabled.
+    // Accumulation keeps one defect from masking another.
     const violations = await inspectTree({
       "index.html": page('<a href="/work">w</a><p>undefined</p>'),
       "_astro/index.css": ".a{color:#5e6ad2;border-color:var(--nope)}",
@@ -638,12 +601,7 @@ describe("inspect", () => {
   });
 });
 
-/*
- * The checks that used to live inside `inspect` as pushes into a shared
- * accumulator. Each is now a function of an artifact literal, so it can be
- * tested without writing a directory and building a site into it, and each
- * appears once in `CHECKS`.
- */
+/* Each check accepts an artifact value, so no build is needed here. */
 
 const artifact = (over = {}) => ({
   base: "/",
@@ -669,9 +627,7 @@ describe("checks as data", () => {
     assert.ok(CHECKS.every((check) => typeof check === "function"));
   });
 
-  /* A conformant artifact, minimal but not empty: an empty one is *not*
-     silent, because the WKD spec requires a policy file and at least one key,
-     and a check that stayed quiet about their absence would be wrong. */
+  /* Minimal but conformant, including the WKD policy and one key. */
   it("finds nothing in a conformant artifact", () => {
     const wkd = {
       policy: true,
@@ -706,8 +662,7 @@ describe("checks as data", () => {
       found.map(({ detail }) => detail),
       [
         "missing required file: favicon.svg",
-        /* The two a browser asks for without being told, when the response it
-           is decorating carries no `<link rel="icon">` to read. */
+        /* Browser-requested icons when no explicit link exists. */
         "missing required file: favicon.ico",
         "missing required file: apple-touch-icon.png",
       ],

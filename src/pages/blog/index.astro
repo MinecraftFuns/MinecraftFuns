@@ -6,17 +6,7 @@ import { firstPage } from "../../lib/paging.ts";
 import { BLOG_DESCRIPTION, BLOG_INTRO } from "../../lib/listings.ts";
 import { BLOG_BASE, postPages, tagBrowse } from "../../lib/posts.ts";
 
-/**
- * The blog's first page, at the blog's own URL.
- *
- * Pages after this one are `blog/page/[page].astro`. The split is what keeps
- * the archive off a second address: were page one also served at `/page/1/`,
- * every link to the blog would be divided between two URLs holding the same
- * posts.
- *
- * An archive with nothing in it has no first page, and renders the plain
- * listing instead of a paginated one holding an imaginary page.
- */
+/** Blog base route owns page one; later pages use `/page/[page].astro`. */
 const page = firstPage(await postPages());
 const strip = await tagBrowse();
 ---

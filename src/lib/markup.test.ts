@@ -19,7 +19,7 @@ const registry = registryOf(DIRECTIVES);
 const cx = { lang: SITE_LANG } as const;
 const payload = (label: string): Payload => ({ label, attributes: {} });
 
-/** The rendered node, or the assertion failure that says what came instead. */
+/** Extract a rendered content node or fail the assertion. */
 const content = (result: ReturnType<typeof resolve>) => {
   assert.equal(result.tag, "ok");
   assert.equal(result.value.tag, "content");
@@ -40,8 +40,7 @@ describe("resolve: the three cases", () => {
   });
 
   it("returns an unpaired unknown name as its own text, so prose survives", () => {
-    // The case that matters: Sätteri reads `10:30` as a directive named `30`,
-    // and an unhandled directive is dropped, which would ship `10`.
+    // Preserve the `30` in `10:30` when Sätteri parses it as a directive.
     assert.deepEqual(resolve(registry, "text", "30", undefined, cx), {
       tag: "ok",
       value: { tag: "literal", text: ":30" },
