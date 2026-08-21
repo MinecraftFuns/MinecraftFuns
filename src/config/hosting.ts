@@ -4,30 +4,26 @@ import type { HostConfig } from "../schema.ts";
 export const hosting = {
   headers: [
     {
-      /*
-       * Site-wide declarations come first; preconnect the archive image origin.
-       *
-       * The edge policy is deliberately not `cache-control`: that header is the
-       * browser's, and this one is Cloudflare's. Of the three it recognises,
-       * `cloudflare-cdn-cache-control` is the most specific and the only one it
-       * consults, and it is not proxied downstream, so a reader still revalidates
-       * on every visit while the edge answers from its own copy.
-       *
-       * Five seconds of freshness keeps a deploy visible almost at once. The day
-       * of `stale-while-revalidate` after it is the part that matters: the object
-       * stays resident and servable while a background fetch refreshes it, and
-       * a page that is merely stale is still a page in cache. Speculative
-       * requests are answered from cache or refused, so residency is exactly the
-       * condition for a prefetch to be served at all. `must-revalidate` is absent
-       * on purpose; Cloudflare reads it as "does not serve stale", which would
-       * cancel the directive beside it.
-       */
+      /* Site-wide declarations come first; preconnect the archive image origin. */
       path: "/*",
       set: {
         "x-declaration": "<https://joefang.org/docs/declaration/>",
         link: '<https://ragnarok.joefang.org>; rel="preconnect"',
-        "cloudflare-cdn-cache-control": "public, max-age=5, stale-while-revalidate=86400",
       },
+    },
+    {
+      /*
+       * Astro fingerprints everything under `_astro/`, so the name is a hash of
+       * the bytes: `BaseLayout.DPwCTKn8.css` cannot come to mean anything else,
+       * because different bytes would be served under a different name. That is
+       * what `immutable` asserts, and here it is true by construction rather
+       * than by promise, so the year is safe and revalidation is pure waste.
+       *
+       * Fonts dominate: seventy-odd files, most of them woff2 subsets that
+       * never change between deploys unless the typeface does.
+       */
+      path: "/_astro/*",
+      set: { "cache-control": "public, max-age=31536000, immutable" },
     },
     {
       /* Static output needs the host to supply MIME, download, and cache policy. */
@@ -37,7 +33,7 @@ export const hosting = {
         "content-disposition": "attachment; filename=joefang.asc",
         "cache-control": "no-store",
       },
-      remove: ["link", "cloudflare-cdn-cache-control"],
+      remove: ["link"],
     },
     {
       /* The Web Key Directory spec requires the binary key and suggests this. */
@@ -46,7 +42,7 @@ export const hosting = {
         "content-type": "application/octet-stream",
         "cache-control": "no-store",
       },
-      remove: ["link", "cloudflare-cdn-cache-control"],
+      remove: ["link"],
     },
     {
       path: "/.well-known/openpgpkey/policy",
