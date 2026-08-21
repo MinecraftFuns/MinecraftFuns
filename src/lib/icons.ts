@@ -10,12 +10,12 @@ import { encodeIco, iconSizes, type IconSize } from "./ico.ts";
 const mark = once(() => Buffer.from(markSource));
 
 /*
- * ICO sizes. 16/32/48 serve tabs and classic shortcut sizes; 256 is what
- * Windows actually renders for pinned taskbar and large-icon views, and what
- * HiDPI displays downscale from. Payloads are PNG-compressed, so the largest
- * entry costs a few kilobytes, not the 256 KiB a BMP entry would.
+ * One ICO entry: `/favicon.ico` is the fallback behind the SVG, so it keeps
+ * one raster rather than a ladder of them. 128 halves cleanly into the 64,
+ * 32, and 16 that fallback consumers actually render, and the PNG payload
+ * costs 2 KB where 256 would cost 4.7 KB for pixels nothing displays.
  */
-const ICO_SIZES = iconSizes(16, 32, 48, 256);
+const ICO_SIZES = iconSizes(128);
 
 /** iOS home-screen size. */
 const APPLE_SIZE = iconSizes(180)[0];
