@@ -6,8 +6,7 @@ import { satteri } from "@astrojs/markdown-satteri";
 
 import { explain } from "./src/prelude/adt.ts";
 import { developmentTarget, findTarget } from "./src/lib/deployment.ts";
-import { siteMarkup } from "./src/lib/directives.ts";
-import { assertMarkupClean } from "./src/lib/markup.ts";
+import { siteMarkup, siteRejections } from "./src/lib/directives.ts";
 import { katexRendering } from "./src/lib/math.ts";
 import { sitemapFilter } from "./src/lib/sitemap.ts";
 
@@ -144,7 +143,7 @@ export default defineConfig({
      */
     {
       name: "markup-directives",
-      hooks: { "astro:build:done": () => assertMarkupClean() },
+      hooks: { "astro:build:done": () => siteRejections.assertClean() },
     },
     /*
      * The sitemap. `sitemap-index.xml` plus `sitemap-0.xml` is what this

@@ -3,13 +3,14 @@ import { describe, it } from "node:test";
 
 import { markdownToHtml } from "satteri";
 
-import { DIRECTIVES, siteMarkup } from "./directives.ts";
+import { DIRECTIVES, siteMarkup, siteRejections } from "./directives.ts";
 import { SITE_LANG } from "./lang.ts";
 import {
-  assertMarkupClean,
   directive,
   langOf,
+  markupPlugin,
   registryOf,
+  rejectionLog,
   resolve,
   type Payload,
 } from "./markup.ts";
@@ -173,7 +174,7 @@ describe("langOf", () => {
 
 /** Compile as the site does, and report anything the plugin rejected. */
 const render = (source: string, file = "zh.md") => {
-  assertMarkupClean(); // drain what an earlier case left, so failures attribute
+  siteRejections.assertClean(); // drain what an earlier case left, so failures attribute
   const { html } = markdownToHtml(source, {
     features: { directive: true },
     mdastPlugins: [siteMarkup],
@@ -181,7 +182,7 @@ const render = (source: string, file = "zh.md") => {
   });
   let rejected: string | undefined;
   try {
-    assertMarkupClean();
+    siteRejections.assertClean();
   } catch (error) {
     rejected = error instanceof Error ? error.message : String(error);
   }
@@ -242,20 +243,31 @@ describe("the pipeline: a rejected directive is reported, not dropped", () => {
   });
 });
 
-describe("assertMarkupClean", () => {
+describe("the rejection log", () => {
+  /* The reason the log is a value: one plugin's refusals are not another's. */
+  it("keeps two logs independent", () => {
+    const mine = rejectionLog();
+    markdownToHtml(":backup[nope]", {
+      features: { directive: true },
+      mdastPlugins: [markupPlugin(registry, mine)],
+    });
+    assert.doesNotThrow(() => siteRejections.assertClean());
+    assert.throws(() => mine.assertClean(), /is not a URL/);
+  });
+
   it("says nothing when every directive resolved", () => {
     render(":backup[https://archive.is/x]");
-    assert.doesNotThrow(() => assertMarkupClean());
+    assert.doesNotThrow(() => siteRejections.assertClean());
   });
 
   it("drains, so a rebuild does not re-report what was already raised", () => {
     // Compiled directly rather than through `render`, which drains for us.
-    assertMarkupClean();
+    siteRejections.assertClean();
     markdownToHtml(":backup[nope]", {
       features: { directive: true },
       mdastPlugins: [siteMarkup],
     });
-    assert.throws(() => assertMarkupClean(), /is not a URL/);
-    assert.doesNotThrow(() => assertMarkupClean());
+    assert.throws(() => siteRejections.assertClean(), /is not a URL/);
+    assert.doesNotThrow(() => siteRejections.assertClean());
   });
 });

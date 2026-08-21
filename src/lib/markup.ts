@@ -164,17 +164,34 @@ const whereIs = (
   return start?.line === undefined ? file : `${file}:${start.line}`;
 };
 
-/** Build-scoped rejected directives, drained after each run. */
-const failures: string[] = [];
+/**
+ * Where a traversal puts the directives it refused.
+ *
+ * The plugin and the build hook that raises its findings live in different
+ * modules, so the channel between them has to be something one can hold. A
+ * module-global array made that connection invisible to the typechecker and
+ * shared one log between every plugin a process constructs.
+ */
+export type Rejections = {
+  readonly record: (message: string) => void;
+  /** Raise everything recorded so far, and empty the log. */
+  readonly assertClean: () => void;
+};
 
-/** Raise all rejected directives after the build traversal. */
-export const assertMarkupClean = (): void => {
-  const found = failures.splice(0);
-  if (found.length > 0) {
-    throw new TypeError(
-      `markup rejected ${found.length} directive(s):\n  ${found.join("\n  ")}`,
-    );
-  }
+/** A fresh, independent rejection log. Mutation stays inside the closure. */
+export const rejectionLog = (): Rejections => {
+  const found: string[] = [];
+  return {
+    record: (message) => void found.push(message),
+    assertClean: () => {
+      const drained = found.splice(0);
+      if (drained.length > 0) {
+        throw new TypeError(
+          `markup rejected ${drained.length} directive(s):\n  ${drained.join("\n  ")}`,
+        );
+      }
+    },
+  };
 };
 
 /** Rebuild rejected source for development output. */
@@ -183,8 +200,8 @@ const sourceOf = (arity: Arity, name: string, payload: Payload | undefined): str
     ? `${SIGIL[arity]}${name}`
     : `${SIGIL[arity]}${name}[${payload.label}]`;
 
-/** Sätteri renderer and build-time rejection collector. */
-export const markupPlugin = (registry: Registry) => {
+/** Sätteri renderer, recording what it refuses into the given log. */
+export const markupPlugin = (registry: Registry, rejected: Rejections) => {
   const eliminate = (
     arity: Arity,
     node: DirectiveNode,
@@ -197,7 +214,7 @@ export const markupPlugin = (registry: Registry) => {
 
     switch (resolved.tag) {
       case "invalid":
-        failures.push(`${whereIs(ctx.fileURL, node)}: ${resolved.reasons.join("; ")}`);
+        rejected.record(`${whereIs(ctx.fileURL, node)}: ${resolved.reasons.join("; ")}`);
         /* Keep rejected source visible in `astro dev`; the build hook reports it. */
         ctx.replaceNode(node, {
           type: "text",
@@ -226,7 +243,7 @@ export const markupPlugin = (registry: Registry) => {
     leafDirective: (node, ctx) => eliminate("leaf", node, ctx),
     /* Reject unsupported containers instead of dropping their contents. */
     containerDirective: (node, ctx) => {
-      failures.push(
+      rejected.record(
         `${whereIs(ctx.fileURL, node)}: container directive ${JSON.stringify(node.name)}; none are defined, and ':::' has no meaning in this project`,
       );
     },

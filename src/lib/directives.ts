@@ -1,5 +1,11 @@
 import { invalid, ok } from "../prelude/adt.ts";
-import { directive, markupPlugin, registryOf, type Directive } from "./markup.ts";
+import {
+  directive,
+  markupPlugin,
+  registryOf,
+  rejectionLog,
+  type Directive,
+} from "./markup.ts";
 import type { Lang } from "./lang.ts";
 
 /** Site directive vocabulary; grammar and collision checks live in `markup.ts`. */
@@ -54,5 +60,8 @@ const LABEL: Readonly<Record<Lang, string>> = {
 /** Every directive the archive may use. */
 export const DIRECTIVES: readonly Directive[] = [backup];
 
+/** What `siteMarkup` refuses; `astro.config.ts` drains it once per build. */
+export const siteRejections = rejectionLog();
+
 /** The wired plugin, which is what `astro.config.ts` installs. */
-export const siteMarkup = markupPlugin(registryOf(DIRECTIVES));
+export const siteMarkup = markupPlugin(registryOf(DIRECTIVES), siteRejections);
