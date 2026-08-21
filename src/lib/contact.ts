@@ -1,7 +1,7 @@
 import { contact } from "../config/contact.ts";
 import type { HttpsUrl, PlatformName } from "../schema.ts";
 import { formatFingerprint, publishedKeys } from "./keys.ts";
-import { routeUrl, type Href } from "./url.ts";
+import { assetUrl, type Href } from "./url.ts";
 /** Resolve configured handles with platform-owned labels and URL shapes. */
 
 /** `satisfies` enforces platform coverage and absolute URL return types. */
@@ -34,7 +34,7 @@ export const profiles: readonly Profile[] = contact.profiles.map(
 );
 
 /** This site's key document, not a profile account. */
-export const pgpHref = (): Href => routeUrl("/pgp");
+export const pgpHref = (): Href => assetUrl("/pgp");
 
 /** Footer links: profiles plus the site's non-profile key document. */
 export const elsewhere = (): readonly Profile[] => [
