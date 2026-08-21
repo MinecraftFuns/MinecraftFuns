@@ -10,7 +10,9 @@ import { orThrow } from "../prelude/adt.ts";
 import { activeTarget, canonicalHref, indexable } from "../lib/deployment.ts";
 import { siteDescription } from "../lib/identity.ts";
 import { bcp47Of, SITE_LANG } from "../lib/lang.ts";
-import { assetUrl, joinRoute } from "../lib/url.ts";
+import { speculation } from "../config/speculation.ts";
+import { prefetchRules, serialise } from "../lib/speculation.ts";
+import { assetUrl, currentBase, joinRoute } from "../lib/url.ts";
 import type { RootedPath } from "../schema.ts";
 import type { Chrome } from "./chrome.ts";
 
@@ -89,6 +91,19 @@ const isIndexable = indexable(target.role);
     <link rel="icon" href={assetUrl("/favicon.ico")} sizes="32x32" />
     <link rel="icon" href={assetUrl("/favicon.svg")} type="image/svg+xml" />
     <link rel="apple-touch-icon" href={assetUrl("/apple-touch-icon.png")} />
+
+    {
+      /*
+       * Prefetch on hover. A data block, not a script: the engine parses the
+       * JSON and no JavaScript runs, so the zero-client-JS contract holds and
+       * an engine without the feature simply ignores the element.
+       */
+    }
+    <script
+      type="speculationrules"
+      is:inline
+      set:html={serialise(prefetchRules(currentBase(), speculation.eagerness))}
+    />
     {!isIndexable && <meta name="robots" content="noindex" />}
 
     <meta property="og:type" content={type} />
