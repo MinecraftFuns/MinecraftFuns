@@ -31,7 +31,7 @@ tags: ["Tools", "Guide"]
 
 [Arweave](https://www.arweave.org/) 可能是解决方案之一，它宣称提供了「永久」的存储。所谓「永久」是基于存储空间的价格呈指数级下降的原理，最终总存储成本会收敛到一个常数。在你将内容存储到该去中心化网络时，Arweave就一次性收取了这笔费用。
 
-我的选择是 [IPFS](https://ipfs.io/)。[Protocol Labs](https://protocol.ai/) 的 [Web3 Storage](https://web3.storage/) 向用户免费提供1 TiB的存储空间，且仅需一个可以收信的邮箱作为验证。并且，在IPFS网络中，可以很容易地将内容复制多份，跨服务商存储。即使Protocol Labs某天倒闭了，你也可以把这些内容迁移到其它服务商 / 本地的IPFS节点，不存在供应商锁定的问题。IPFS还解决了内容完整性的问题，可以验证文件自发布后未经篡改。并且，许多值得信任的社区成员正在运行IPFS网关，使得普通浏览器也能轻松地访问IPFS上的内容。这篇文章的头图就存储在IPFS上，CID是 `bafybeibiioe6ptf4j7llvgxs3kes3kulzj5eow3nf627si7nn3qb4beava`，可以通过网关 [ipfs.io](https://ipfs.io/ipfs/bafybeibiioe6ptf4j7llvgxs3kes3kulzj5eow3nf627si7nn3qb4beava) / [dweb.link](https://bafybeibiioe6ptf4j7llvgxs3kes3kulzj5eow3nf627si7nn3qb4beava.ipfs.dweb.link/) / [inbrowser.link](https://bafybeibiioe6ptf4j7llvgxs3kes3kulzj5eow3nf627si7nn3qb4beava.ipfs.inbrowser.link/) 访问。
+我的选择是 [IPFS](https://ipfs.io/)。[Protocol Labs](https://protocol.ai/) 的 [Web3 Storage](https://web3.storage/) 向用户免费提供1 TiB的存储空间，且仅需一个可以收信的邮箱作为验证。并且，在IPFS网络中，可以很容易地将内容复制多份，跨服务商存储。即使Protocol Labs某天倒闭了，你也可以把这些内容迁移到其它服务商 / 本地的IPFS节点，不存在供应商锁定的问题。IPFS还解决了内容完整性的问题，可以验证文件自发布后未经篡改。并且，许多值得信任的社区成员正在运行IPFS网关，使得普通浏览器也能轻松地访问IPFS上的内容。这篇文章的头图就存储在IPFS上，CID是 `bafybeibiioe6ptf4j7llvgxs3kes3kulzj5eow3nf627si7nn3qb4beava`，可以通过 [inbrowser.link](https://bafybeibiioe6ptf4j7llvgxs3kes3kulzj5eow3nf627si7nn3qb4beava.ipfs.inbrowser.link/) 这样的网关访问。
 
 于是，一个相对好用的网页存档方案就成型了。以下是一些实例：
 
