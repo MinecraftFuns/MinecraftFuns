@@ -2,12 +2,13 @@
 import TagChips from "../../../components/TagChips.astro";
 import ListPage from "../../../layouts/ListPage.astro";
 import { postTags } from "../../../lib/posts.ts";
+import { countedNoun } from "../../../lib/plural.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
 /** Alphabetical tag directory; the strip shows the ranked subset. */
 const tags = await postTags();
 
-const total = `${tags.length} tag${tags.length === 1 ? "" : "s"}`;
+const total = countedNoun(tags.length, "tag");
 ---
 
 <ListPage

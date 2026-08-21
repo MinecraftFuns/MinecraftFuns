@@ -3,6 +3,7 @@ import DocRow from "../../../components/DocRow.astro";
 import ListPage from "../../../layouts/ListPage.astro";
 import type { NonEmpty } from "../../../prelude/adt.ts";
 import { docCategories, type DocCategory, type DocSummary } from "../../../lib/docs.ts";
+import { countedNoun } from "../../../lib/plural.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
 /* Taxonomy-derived page; every category link points to an existing page. */
@@ -22,7 +23,7 @@ type Props = {
 
 const { category, docs } = Astro.props;
 
-const count = `${docs.length} guide${docs.length === 1 ? "" : "s"}`;
+const count = countedNoun(docs.length, "guide");
 ---
 
 <ListPage

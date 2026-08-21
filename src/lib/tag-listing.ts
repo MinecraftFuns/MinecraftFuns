@@ -1,4 +1,5 @@
 import { paginate, type Listing } from "./paging.ts";
+import { countedNoun } from "./plural.ts";
 import { PAGE_SIZE, tagBase, type PostSummary, type PostTag } from "./posts.ts";
 import type { Taxon } from "./taxonomy.ts";
 import type { RootedPath } from "../schema.ts";
@@ -31,7 +32,7 @@ export type TagListing = {
 };
 
 export const tagListing = (taxon: Taxon<PostTag, PostSummary>): TagListing => {
-  const count = `${taxon.items.length} post${taxon.items.length === 1 ? "" : "s"}`;
+  const count = countedNoun(taxon.items.length, "post");
 
   return {
     tag: taxon.label,
