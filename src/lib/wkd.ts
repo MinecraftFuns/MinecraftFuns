@@ -118,7 +118,3 @@ export const parseMailAddress = (raw: string): Parsed<MailAddress> => {
 /** Case-insensitive domain match. DNS is case-insensitive; local-parts are not. */
 export const isOnDomain = (address: MailAddress, domain: string): boolean =>
   address.domain.toLowerCase() === domain.toLowerCase();
-
-/** Where a key for this address is published, relative to the domain root. */
-export const wkdPath = (local: string): string =>
-  `/.well-known/openpgpkey/hu/${wkdHash(local)}`;
