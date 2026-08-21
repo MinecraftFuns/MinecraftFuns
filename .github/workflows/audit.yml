@@ -43,7 +43,13 @@ jobs:
     name: Audit standalone build (non-blocking)
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Generous, because the failure this guards against is a hang, not slowness:
+    # a browser walking every route can legitimately take a long time, and the
+    # run that gets killed part-way teaches nothing while costing a full build.
+    # Nothing waits on this job, so a stuck one delays no deployment; the only
+    # thing the limit has to do is stop a wedged run from occupying a runner
+    # indefinitely.
+    timeout-minutes: 60
     # A crashed audit is a finding about the audit, not about the site; keep
     # it from reddening the commit so a red mark still means "deploy broken".
     continue-on-error: true
