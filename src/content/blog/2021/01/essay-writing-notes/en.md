@@ -6,7 +6,7 @@ tags: ["Chinese Literature", "Notes"]
 translation: machine
 ---
 
-![0.webp](https://bafkreibm7oavrgochpe2oirhekzp2jzrc2ap3oskekebliikbjsbbw5wx4.ipfs.dweb.link)
+![0.webp](https://ragnarok.joefang.org/static/xhrtdpetsai8534mg3if3hac30rqqeb8g.webp)
 
 [Handout](https://bafybeihf5gby4uo5e7jtwzoiquw7reoiwzkni4ffdu5ulmogwajros6pxa.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210112085802/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/fc/2f/e5/cf/fc2fe5cf8b983d201bef031f5ada8e0b133917e7692f54c414466968a48ccb69.pdf]  
 [Supplementary handout](https://bafybeibym4f3j6bq64cwuh5iwgwq7g7zj7xbxyvntqaub66cbh53lymz34.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210112085836/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/cf/4e/02/04/cf4e02048c40c5baa904b97db61c870ea60a9416568f69a838601f61cd06adf2.pdf]  
@@ -186,5 +186,5 @@ An 800-character essay typically writes four `scenes`
 
 Common approaches: `the questioning method` / `falsification (pre-set assumptions)`
 
-> ![0.webp](https://bafkreia2gighgd732g432qtprqz7hyzxklkpim57jwdvx76w3snq3wwv3y.ipfs.dweb.link)  
-> ![0.webp](https://bafkreihjrjojjliflvqllrezci4toaoxdxvxys7ipuqtbuukinnuewavwy.ipfs.dweb.link)  
+> ![0.webp](https://ragnarok.joefang.org/static/x73cmk5krlg0l0ita7v0hvfdh2pjuahda.webp)  
+> ![0.webp](https://ragnarok.joefang.org/static/xkgv04ioqpft6pqacb1k51up8ebku8blc.webp)  

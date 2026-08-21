@@ -7,7 +7,7 @@ tags: ["Python", "Windows"]
 
 > 检查正在运行的Python解释器是否 **正在使用（占用）** 要更新的文件
 
-![0.webp](https://bafkreicnacyi2kzjv5jzyj2islipt2l7hzedp5hnluhx7mvyarlhx62ks4.ipfs.dweb.link)
+![0.webp](https://ragnarok.joefang.org/static/xnve44kj8o7sepk60h63ohc7rau92ad5s.webp)
 
 在运行 `pip install --upgrade cffi` 后，出现报错
 

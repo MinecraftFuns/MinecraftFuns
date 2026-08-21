@@ -9,7 +9,7 @@ tags: ["Game Theory", "Algorithms", "Notes"]
 
 有个叫博弈图的东西，把每个状态看作一个点，把它向它能推到的状态连边，如下图。
 
-![博弈图](https://bafkreielu4ilygbarlazjik3fu6kvmtn3mnkh2hollvthnnprxjqrb4r6m.ipfs.dweb.link)
+![博弈图](https://ragnarok.joefang.org/static/x7la3s0cd7ttmhaqtpgko9oorvrc0d11b.png)
 
 > 定义
 

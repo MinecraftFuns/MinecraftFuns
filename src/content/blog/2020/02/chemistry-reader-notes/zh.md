@@ -31,7 +31,7 @@ A.
 
 > 预览
 
-![预览 - 化学方程式](https://bafkreiayhx65r4yudurgg7rlxojp6bcxglxmvzz3ctzua2tt73muvpr5me.ipfs.dweb.link)
+![预览 - 化学方程式](https://ragnarok.joefang.org/static/xd7ov1q3t3bd1f40e9fehcbd99e67g80c.jpg)
 
 > 下载源文件：
 
@@ -61,11 +61,11 @@ A.
 * 元素周期表的**第IV主族**
 * 碳，硅，锗，锡，铅
 * 中间位置，容易生成共价化合物
-* 原子最外层电子排布式 ![ns2np2](https://bafkreibxslcygphcolepukdvbbleabr2pz4xmbjzhttwwvcx5p6y3ky2de.ipfs.dweb.link)
+* 原子最外层电子排布式 ![ns2np2](https://ragnarok.joefang.org/static/xfprk9ogubllnrj7iieq8gvu6bq7ag7do.jpg)
 * 性质递变，由上到下非金属性向金属性递变的趋势比氮族元素明显
 * 电负性比卤族、氧族和氮族小
 
-![图表](https://bafkreidmp2zvgne6sf5c6iqrkxyonvnqxwjen2hvizwoi3feoovbn7pega.ipfs.dweb.link)
+![图表](https://ragnarok.joefang.org/static/x4sd09jfgkugq7gp16nl4p9043p3i9nnt.jpg)
 
 1. 碳族元素的**熔点**和**沸点**随着**原子量增加**而**降低**。碳在3825 °C时升华。
 2. 碳族元素的密度及原子半径随着原子量增加而增加。
@@ -97,7 +97,7 @@ A.
 * 不注明温度，默认 **25 ℃**
 * [电离常数](https://bafkreigf5cwtsuvcan3zmd7bxnebzixlx7uo7zw7w4mb2g6azfkoc26o4y.ipfs.inbrowser.link/)
 
-![电离常数](https://bafkreiftp4keb7qzhax5rbv5z4fsi3xup3w2fa5uxt63k5c7ujhkjawqzm.ipfs.dweb.link)
+![电离常数](https://ragnarok.joefang.org/static/xm7pidee8iolc35sig3g8i1nmsc148te9.webp)
 
 * 多元弱酸各步电离的电离常数K1, K2, K3一般差距几个数量级，故酸性主要由第一步电离决定
 

@@ -92,15 +92,15 @@ $$\sum_{i=1}^{n-k}10^{i-1}\times (\sum_{j=1}^{n-i}a_j\times \binom{n-1-i}{k-1}+a
 
 这是样例 $1,2$ 的图，其中红色的边是其生成树。
 
-![18f227ee32f4cc1dc8e27cae7344f8d989b9f9cc407d5a4c938495b90c4485a8.jpg](https://bafkreigioogu6uf27gxepsbin7mwu2yfpolip6noljywwmuijerwiwe46i.ipfs.dweb.link)
+![18f227ee32f4cc1dc8e27cae7344f8d989b9f9cc407d5a4c938495b90c4485a8.jpg](https://ragnarok.joefang.org/static/xlap2red9gjtf9ki1qje4jud7ervhc27v.jpg)
 
-![56c3ac4a9a28df775875ec857621a6cfbeec97a793de03064e3e34e61df38cb3.jpg](https://bafkreiehf64ftjvwetrq22zowm5nsn2yishbn4spv7hzzc3ummxewm6tmu.ipfs.dweb.link)
+![56c3ac4a9a28df775875ec857621a6cfbeec97a793de03064e3e34e61df38cb3.jpg](https://ragnarok.joefang.org/static/xvdqg2nm0hn7edkrag6oa7ku46kvq2bh7.jpg)
 
 观察发现，如果存在两个环有边相交，就存在符合题意的两个点。因为我们可以取相交这段的起点和终点作为 $u,v$，然后就存在三条路径了。从生成树的角度，如果存在一条树边被两条非树边覆盖，就存在答案。
 
 现在对于每个连通块 $DFS$ 一遍。对每条非树边 $(a,b)$ 都暴力标记被它覆盖的树边。如果发现之前这个树边被非树边 $(c,d)$ 标记过，那么可以直接通过 $(a,b)$ 和 $(c,d)$ 获取答案。
 
-![屏幕截图2020-11-11 171828.jpg](https://bafkreidjtfxygh5ygpbd4nm6earhqaysd4m3dozo3sc6rebimd42jd44tu.ipfs.dweb.link)
+![屏幕截图2020-11-11 171828.jpg](https://ragnarok.joefang.org/static/x4vgl77m1oralla8uo0mfm8b0499eu966.jpg)
 
 我们钦定 $dep_b\gt dep_a$，$dep_d\gt dep_c$，且 $d$ 为 $b$ 的祖先。设 $e=\operatorname{LCA}(a,c)$，则三条路径分别为 $d\rightarrow e$，$d\rightarrow b\rightarrow a\rightarrow e$，$d\rightarrow c\rightarrow e$。找路径的实现上暴力跳 $fa$ 即可。
 

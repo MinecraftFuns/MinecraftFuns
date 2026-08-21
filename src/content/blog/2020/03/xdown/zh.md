@@ -5,11 +5,11 @@ date: "2020-03-03"
 tags: ["Tools"]
 ---
 
-![截图](https://bafkreiggwkt4axr6hcoftrfqimcoc5ayvqzpep6ngr4ynhgl4p6m7pia6y.ipfs.dweb.link)
+![截图](https://ragnarok.joefang.org/static/xkk437ofpmud40gcokq1c2gctq2d8tro7.webp)
 
 > 为了方便查看，关键名词在第一次出现时会给出官网链接，以后出现均标红
 
-之前 [![memset0's avatar](https://bafkreifoiocil7nu3vxuyszpjcj3orv64z7mrkaq3ypo5arltx3w2tqyqq.ipfs.dweb.link)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) 大佬在自己的 [博客](https://memset0.cn/motrix-experience) 里推荐了 [Motrix](https://motrix.app/) ，我也来 ~~水一篇文章~~ 推荐一个下载工具：[Xdown](https://xdown.org/)。
+之前 [![memset0's avatar](https://ragnarok.joefang.org/static/x0t3anf64o73dds7vg782028vnn0nmv04.webp)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) 大佬在自己的 [博客](https://memset0.cn/motrix-experience) 里推荐了 [Motrix](https://motrix.app/) ，我也来 ~~水一篇文章~~ 推荐一个下载工具：[Xdown](https://xdown.org/)。
 
 ## 获取
 
@@ -26,7 +26,7 @@ tags: ["Tools"]
 
 而 `uGet` 下 `Torrent` 的时候，不知道是我配置的问题还是软件的问题，速度不理想（uGet的 `Torrent` 是调用aria2来下载的，和 `Motrix` 一样）。
 
-http的下载，感觉还是 [uGet](https://ugetdm.com/) 更香。主要是 `Xdown` 界面确实比较简陋。（当然 [![memset0's avatar](https://bafkreifoiocil7nu3vxuyszpjcj3orv64z7mrkaq3ypo5arltx3w2tqyqq.ipfs.dweb.link)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) 大佬推荐的 `Motrix` 坠吼看了。）
+http的下载，感觉还是 [uGet](https://ugetdm.com/) 更香。主要是 `Xdown` 界面确实比较简陋。（当然 [![memset0's avatar](https://ragnarok.joefang.org/static/x0t3anf64o73dds7vg782028vnn0nmv04.webp)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) 大佬推荐的 `Motrix` 坠吼看了。）
 
 小文件一般直接Chrome下载，大文件需要多线程下载的话，Xdown和 `IDM` 速度上没什么区别。`IDM` 确实是老牌下载神器了，但是 `Xdown` 也不差。考虑到 `IDM` 是付费软件，我选 `Xdown` 。
 
@@ -46,5 +46,5 @@ http的下载，感觉还是 [uGet](https://ugetdm.com/) 更香。主要是 `Xdo
 
 一些实用的 ~~盗版 / 破解版~~ 软件 [http://183.91.54.237:7080/masuit/soft/tree/master](http://183.91.54.237:7080/masuit/soft/tree/master)
 
-> [![memset0's avatar](https://bafkreifoiocil7nu3vxuyszpjcj3orv64z7mrkaq3ypo5arltx3w2tqyqq.ipfs.dweb.link)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/)：  
+> [![memset0's avatar](https://ragnarok.joefang.org/static/x0t3anf64o73dds7vg782028vnn0nmv04.webp)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/)：  
 > 因为某名为司马马克丁的软件代理公司以打击盗版出了名，很多他们代理的软件的破解版搜索引擎基本搜不到，这个仓库里还是有一些的。

@@ -17,4 +17,4 @@ tags: ["Tools"]
 
 每次 `git push` 时，脚本都会自动刷新 `jsDelivr` 的缓存，所以（理论上来说）jsDelivr分发的版本就是最新版本。如果你碰到 `jsDelivr` 分发过时版本的情况，请将上述网址中的 `cdn.jsdelivr.net` 更改为 `purge.jsdelivr.net` 并访问，以刷新 `jsDelivr` 的缓存。
 
-![anime](https://bafkreih6naajnwy5vtc56aj47avho4efshjrxvzc665hpxda34m2sc3k6q.ipfs.dweb.link)
+![anime](https://ragnarok.joefang.org/static/x641f3856pcvk5i58gkttbg7k8aq8qpjn.webp)

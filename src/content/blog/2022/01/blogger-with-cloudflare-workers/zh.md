@@ -8,7 +8,7 @@ tags: ["Blogger", "Cloudflare", "Guide"]
 <picture>
     <source srcset="https://ragnarok.joefang.org/static/x9ttvpc55fh0rgn7iqcm33qprrdk0rmi6.svg"
             type="image/svg+xml">
-    <img src="https://bafkreidjfy6ptu7pzzbzn5r7kfbppao7ior4p3z4vw34rwa7uazavvu2ti.ipfs.dweb.link/" alt="Cloudflare Workers logo" />
+    <img src="https://ragnarok.joefang.org/static/xide2bm7ugt4b0ug5og0dumbmd7l1ammh.webp" alt="Cloudflare Workers logo" />
 </picture>
 
 ## 问题

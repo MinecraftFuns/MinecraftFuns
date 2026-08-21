@@ -5,7 +5,7 @@ date: "2021-04-07"
 tags: ["Chemistry", "Notes"]
 ---
 
-![anime](https://bafkreihabbwwmw3562fibikzhqjjx6agytw4pjv4p3bzm65iad7mywsmwm.ipfs.dweb.link)
+![anime](https://ragnarok.joefang.org/static/xilsn9pjasmj7pumh7ob8br8t2qc05q1d.webp)
 
 [讲义](https://bafybeif5bdcmaxlsyvnwjfz6qvmnfampuetmaueiwowz4fa4pfgtkydbpq.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210402142521/https://cdn.jsdelivr.net/gh/PetrichorA/page-ede8d44d@206deb3d/data.pdf]
 
@@ -19,7 +19,7 @@ tags: ["Chemistry", "Notes"]
 
 接口连接顺序：先排装置，再排接口
 
-![图片](https://bafkreieigmsayxb7l7ab3af3gl6djbzznaobixeek4fsiec7eyhvxnc744.ipfs.dweb.link)
+![图片](https://ragnarok.joefang.org/static/xvusu11fqjbog608dqpa1h91n14fl42n7.png)
 
 * A. 制备
 * B. 除杂
@@ -69,9 +69,9 @@ $N_2$ / $CO_2$ / 空气（$O_2,CO_2,H_2O,...$）
 
 #### 分水器
 
-![image](https://bafkreicshe3wkmrlhp5bbvdjix4lonqg4xevav6zqik5j6e32djgvw23ge.ipfs.dweb.link)
+![image](https://ragnarok.joefang.org/static/xl06niv3h92e6qp36niucmikdag196ja6.jpg)
 
-![equation](https://bafkreid2rmnfkjkhd7mb2s4efv3qmmzrcenrimosadnm7nt4ccpse4z6xm.ipfs.dweb.link)
+![equation](https://ragnarok.joefang.org/static/xm38vsmen6dnfduf4pl3527sq8idfi8hg.jpg)
 
 * 控制活塞，使水面高度始终在支管口略下处
 * 有利于有机层回流，提高原料利用率
@@ -117,11 +117,11 @@ $\eta=\frac{m_{real}}{m_{theorem}}\times 100\%$，实际值 $m_{real}$ 题目给
 
 脱水反应：环己醇脱水制备环己烯
 
-![1](https://bafkreic5rqlh5ji3y2g7gqsywvxjauqm7kh7ijktvjfrcn7you3a26lnym.ipfs.dweb.link)
+![1](https://ragnarok.joefang.org/static/xpc4bmukk5boeqrjghqknij33o5ngje5h.jpg)
 
 取代反应：甲苯制备邻甲基硝基苯
 
-![2](https://bafkreigzqusdnudqqiycqniphmbposuwxkmqgyw3b23yulixis7n44kcla.ipfs.dweb.link)
+![2](https://ragnarok.joefang.org/static/x08solm4lieuc8bjmklid9mnc56ef8n1s.jpg)
 
 #### 提高利用率的方法
 

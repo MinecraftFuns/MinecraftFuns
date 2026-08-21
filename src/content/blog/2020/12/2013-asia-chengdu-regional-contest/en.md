@@ -6,7 +6,7 @@ tags: ["ICPC", "Editorial"]
 translation: machine
 ---
 
-![hero.webp](https://bafkreidihxmn4zbpx7wmfqywwdpdpejikx5ko72mnj4o62p3pmxykd37zi.ipfs.dweb.link)
+![hero.webp](https://ragnarok.joefang.org/static/xckmh92jnejq7ul3jjl1fdprmh52or85k.webp)
 
 ## A
 

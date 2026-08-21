@@ -16,4 +16,4 @@ WSL developer `@benhillis` gave this [reply](https://github.com/microsoft/WSL/is
 
 So the entropy for `getrandom`, `/dev/random`, and `/dev/urandom` in WSL comes from Windows, not from what the Linux kernel collects.
 
-[![WSL](https://bafkreicu4oyoh5eycbayukmcxla5bpvj4wqfyxbbu6pbkt2lj6ec25ygeq.ipfs.dweb.link)](https://aka.ms/wslstore)
+[![WSL](https://ragnarok.joefang.org/static/xfag0ce5dcu8385fem152bu2r6hcvm9c2.webp)](https://aka.ms/wslstore)

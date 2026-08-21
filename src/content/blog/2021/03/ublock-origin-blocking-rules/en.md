@@ -18,4 +18,4 @@ The project is hosted on [GitHub](https://github.com/PetrichorA/filter-4400e6cd)
 
 Every `git push` triggers a script that automatically refreshes `jsDelivr`'s cache, so (in theory) the version jsDelivr serves is always the latest. If you run into `jsDelivr` serving a stale version, replace `cdn.jsdelivr.net` in the URLs above with `purge.jsdelivr.net` and visit it, to refresh `jsDelivr`'s cache.
 
-![anime](https://bafkreih6naajnwy5vtc56aj47avho4efshjrxvzc665hpxda34m2sc3k6q.ipfs.dweb.link)
+![anime](https://ragnarok.joefang.org/static/x641f3856pcvk5i58gkttbg7k8aq8qpjn.webp)

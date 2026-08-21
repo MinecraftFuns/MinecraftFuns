@@ -93,15 +93,15 @@ Given a simple undirected graph with $n$ vertices and $m$ edges, determine wheth
 
 This is the graph for samples $1,2$; the red edges form its spanning tree.
 
-![18f227ee32f4cc1dc8e27cae7344f8d989b9f9cc407d5a4c938495b90c4485a8.jpg](https://bafkreigioogu6uf27gxepsbin7mwu2yfpolip6noljywwmuijerwiwe46i.ipfs.dweb.link)
+![18f227ee32f4cc1dc8e27cae7344f8d989b9f9cc407d5a4c938495b90c4485a8.jpg](https://ragnarok.joefang.org/static/xlap2red9gjtf9ki1qje4jud7ervhc27v.jpg)
 
-![56c3ac4a9a28df775875ec857621a6cfbeec97a793de03064e3e34e61df38cb3.jpg](https://bafkreiehf64ftjvwetrq22zowm5nsn2yishbn4spv7hzzc3ummxewm6tmu.ipfs.dweb.link)
+![56c3ac4a9a28df775875ec857621a6cfbeec97a793de03064e3e34e61df38cb3.jpg](https://ragnarok.joefang.org/static/xvdqg2nm0hn7edkrag6oa7ku46kvq2bh7.jpg)
 
 Observation: if two cycles share an edge, then there exist two vertices satisfying the requirement, since we can take the endpoints of the shared segment as $u,v$, giving three paths. From the spanning-tree perspective, an answer exists whenever some tree edge is covered by two non-tree edges.
 
 Now DFS each connected component once. For every non-tree edge $(a,b)$, brute-force mark the tree edges it covers. If a tree edge was already marked by a non-tree edge $(c,d)$, the answer can be obtained directly from $(a,b)$ and $(c,d)$.
 
-![Screenshot 2020-11-11 171828.jpg](https://bafkreidjtfxygh5ygpbd4nm6earhqaysd4m3dozo3sc6rebimd42jd44tu.ipfs.dweb.link)
+![Screenshot 2020-11-11 171828.jpg](https://ragnarok.joefang.org/static/x4vgl77m1oralla8uo0mfm8b0499eu966.jpg)
 
 Fix $dep_b\gt dep_a$, $dep_d\gt dep_c$, with $d$ an ancestor of $b$. Let $e=\operatorname{LCA}(a,c)$; the three paths are $d\rightarrow e$, $d\rightarrow b\rightarrow a\rightarrow e$, and $d\rightarrow c\rightarrow e$. Finding the paths can be implemented by brute-force walking up parent pointers.
 

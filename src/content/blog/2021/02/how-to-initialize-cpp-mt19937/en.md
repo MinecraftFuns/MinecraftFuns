@@ -106,6 +106,6 @@ For issues with `std::random_device`, see [Everything You Never Wanted to Know a
 
 If you want to implement your own `random_device`, see [Simple Portable C++ Seed Entropy](https://www.pcg-random.org/posts/simple-portable-cpp-seed-entropy.html) :backup[https://archive.is/lWYhN].
 
-![girl](https://bafkreie3dxyqzeabopshajhehidlxqpspdvlr5dibwhoa4vqwussrxumcy.ipfs.dweb.link)
+![girl](https://ragnarok.joefang.org/static/xbgfcvc9ku5ttv4f9k1en8sk6ttd0v3lq.webp)
 
 [Image source](https://twitter.com/i/status/1363322601846677508) :backup[https://archive.is/MNVN6]

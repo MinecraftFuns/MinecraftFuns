@@ -7,7 +7,7 @@ tags: ["Blogger", "Guide"]
 
 > 太长不看：把想隐藏的内容用 `<template></template>` 包起来就可以了
 
-![0.webp](https://bafkreidosypdjxxesnrgrhspcxbopavqog3bbjzrqa6uj5yq3fgejzpr7i.ipfs.dweb.link)
+![0.webp](https://ragnarok.joefang.org/static/x95mb8sob6hfjcf4569peokelj7iqvqr5.webp)
 
 在跟随 [Blogger国内访问心得](https://blog.iljw.me/2016/09/blogger.html) 这篇文章魔改主题的时候，发现原文提供的方法
 

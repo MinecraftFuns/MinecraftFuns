@@ -8,7 +8,7 @@ tags: ["Codeforces", "Editorial"]
 * [链接](https://codeforces.com/contest/930) :backup[https://archive.is/3cPj6]
 * [参考代码](https://gist.github.com/MinecraftFuns/706d87a84abcdb36534820a7a8709609) :backup[https://archive.is/YCQPJ]
 
-![hero.webp](https://bafkreibbhurwk7asmxigw7d4teva7d7suus74x2cxeo2gq7lcl2encx2pi.ipfs.dweb.link/)
+![hero.webp](https://ragnarok.joefang.org/static/xjs75hvn6i1tfprs8gb5ov0vtthucblll.webp)
 
 ## 未独立完成的题目
 
@@ -67,7 +67,7 @@ tags: ["Codeforces", "Editorial"]
 
 考虑一枚黑棋怎么堵住白棋的一个方向。如图，黑棋可以限制白棋不能继续往右走。
 
-![屏幕截图2020-10-16 143227.jpg](https://bafkreia72vqgzevwcd6xeenaemr25mtity2hqlhziz4ggajno7aldm6jj4.ipfs.dweb.link)
+![屏幕截图2020-10-16 143227.jpg](https://ragnarok.joefang.org/static/x9fk9anuijvhap38l7od8e1r2h9eon9v5.jpg)
 
 黑棋和白棋横坐标之差为奇数，纵坐标之差为偶数。在纵坐标相同前黑棋只要一直和白棋反着走，纵坐标相同，横坐标差1后就可以一直顶着白棋了。一颗黑棋可以控制白棋的一个方向，所以要四颗黑棋才能控制一颗白棋。问题转化成“有多少个位置可以四个方向都被黑棋控制”。
 

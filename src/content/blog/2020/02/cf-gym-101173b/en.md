@@ -156,7 +156,7 @@ Hall's theorem states that if the above fact holds for every nonempty subset of 
 
 ### Proof
 
-![Proof of Hall's theorem](https://bafkreifydvtalnuxr6o7l6dm3jbcxl54v6a7m6corqkc7tns6gob7rpkxi.ipfs.dweb.link)
+![Proof of Hall's theorem](https://ragnarok.joefang.org/static/x1psdt8jtb1j6jutnqvn1i7n1vjsfpv1l.jpg)
 
 Cached - [http://faculty.wwu.edu/sarkara/hall.pdf](https://bafkreigxbfy2otqvi3rzfvldrlvhvwqvagxdkext7m4llohjjl7vbhnqx4.ipfs.inbrowser.link/)
 
@@ -210,7 +210,7 @@ The woman's response strategy:
 
 This continues round after round until, at some point, **no one is single anymore**; the next round has no new proposals, and the whole process ends automatically. **The resulting marriage arrangement** is then guaranteed to be stable.
 
-![The stable marriage algorithm, round by round](https://bafkreicclusoacxzjhfkqrgzr4gebazxa5qlgszcl6n3kxna4mcmdwavzi.ipfs.dweb.link)
+![The stable marriage algorithm, round by round](https://ragnarok.joefang.org/static/x84t2hsqqtaege7702cfrthe82c6md7ul.png)
 
 ### Correctness
 

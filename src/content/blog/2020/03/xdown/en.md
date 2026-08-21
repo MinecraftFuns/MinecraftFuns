@@ -6,11 +6,11 @@ tags: ["Tools"]
 translation: machine
 ---
 
-![Screenshot](https://bafkreiggwkt4axr6hcoftrfqimcoc5ayvqzpep6ngr4ynhgl4p6m7pia6y.ipfs.dweb.link)
+![Screenshot](https://ragnarok.joefang.org/static/xkk437ofpmud40gcokq1c2gctq2d8tro7.webp)
 
 > For readability, key terms link to the official site the first time they appear, and are marked in red afterward
 
-Previously, [![memset0's avatar](https://bafkreifoiocil7nu3vxuyszpjcj3orv64z7mrkaq3ypo5arltx3w2tqyqq.ipfs.dweb.link)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) recommended [Motrix](https://motrix.app/) on their own [blog](https://memset0.cn/motrix-experience). I'll ~~pad out a post too~~ recommend a download tool as well: [Xdown](https://xdown.org/).
+Previously, [![memset0's avatar](https://ragnarok.joefang.org/static/x0t3anf64o73dds7vg782028vnn0nmv04.webp)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) recommended [Motrix](https://motrix.app/) on their own [blog](https://memset0.cn/motrix-experience). I'll ~~pad out a post too~~ recommend a download tool as well: [Xdown](https://xdown.org/).
 
 ## Getting it
 
@@ -27,7 +27,7 @@ That's fairly accurate. Besides being free and ad-free, `Torrent` download speed
 
 As for downloading `Torrent`s with `uGet`, whether it's a configuration issue on my end or a software issue, the speed wasn't great (uGet's `Torrent` downloads are handled by calling aria2, the same as `Motrix`).
 
-For http downloads, I still find [uGet](https://ugetdm.com/) nicer to use. That's mainly because `Xdown`'s interface is admittedly rather plain. (Of course, the `Motrix` that [![memset0's avatar](https://bafkreifoiocil7nu3vxuyszpjcj3orv64z7mrkaq3ypo5arltx3w2tqyqq.ipfs.dweb.link)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) recommended is honestly the best of the bunch.)
+For http downloads, I still find [uGet](https://ugetdm.com/) nicer to use. That's mainly because `Xdown`'s interface is admittedly rather plain. (Of course, the `Motrix` that [![memset0's avatar](https://ragnarok.joefang.org/static/x0t3anf64o73dds7vg782028vnn0nmv04.webp)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/) recommended is honestly the best of the bunch.)
 
 For small files I usually just download directly in Chrome; for large files that need multi-threaded downloading, Xdown and `IDM` don't differ much in speed. `IDM` really is a veteran download tool, but `Xdown` isn't bad either. Given that `IDM` is paid software, I chose `Xdown`.
 
@@ -47,5 +47,5 @@ Install it from the [Chrome Web Store](https://chrome.google.com/webstore/detail
 
 Some useful ~~pirated / cracked~~ software: [http://183.91.54.237:7080/masuit/soft/tree/master](http://183.91.54.237:7080/masuit/soft/tree/master)
 
-> [![memset0's avatar](https://bafkreifoiocil7nu3vxuyszpjcj3orv64z7mrkaq3ypo5arltx3w2tqyqq.ipfs.dweb.link)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/):
+> [![memset0's avatar](https://ragnarok.joefang.org/static/x0t3anf64o73dds7vg782028vnn0nmv04.webp)](https://bafkreihlsxxh2pme5ldap7jzzimgj5wxphlg4uzsaiaec7okefercsok7a.ipfs.inbrowser.link/) [memset0](https://memset0.cn/):
 > There's a software licensing outfit that goes by the mocking nickname 司马马克丁, a curse-word twist on its real name 思杰马克丁, notorious for its aggressive anti-piracy crackdowns, so cracked versions of most software it represents basically can't be found through search engines. This repository still has a few of them, though.

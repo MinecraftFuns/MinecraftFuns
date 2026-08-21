@@ -95,7 +95,7 @@ tags: ["Codeforces", "Editorial"]
 
 三条弦总共有五种关系，其中2, 5是合法的。
 
-![五种类型](https://bafkreibxbez2623eglgxg2quexozkqfurg6yla6byrip2rxbmdnwaekovm.ipfs.dweb.link)
+![五种类型](https://ragnarok.joefang.org/static/xho9ek2kf454j53ii5cgidfvnhskn7i4g.png)
 
 但是2, 5的方案比较难算，考虑从总方案中减掉1, 3, 4的方案。
 

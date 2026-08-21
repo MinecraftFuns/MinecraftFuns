@@ -71,7 +71,7 @@ $$\sum_{i=1}^k \frac 1 {\binom n{|A_i|}} \le 1$$
 
 由于 $\binom n{|A_i|}\le \binom n{\lfloor\frac n 2\rfloor}$，$\frac 1{\binom n{|A_i|}} \ge \frac 1{\binom n{\lfloor\frac n 2\rfloor}}$，所以 $k\le\binom n{\lfloor\frac n 2\rfloor}$。原命题得证。
 
-![girl](https://bafkreifsxipccvifscj2hlt2iyc7j2fnklu3jcon66fatllp432xoq2mdu.ipfs.dweb.link)
+![girl](https://ragnarok.joefang.org/static/xd3pt2fqb1jhsilrom7q5nirgb7k71bgq.webp)
 
 [图片来源](https://twitter.com/i/status/1356483004672053248) :backup[https://archive.is/ghpIM]
 

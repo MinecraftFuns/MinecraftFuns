@@ -105,6 +105,6 @@ Generator mtr = ([]() -> Generator {
 
 如果你想自行实现一个 `random_device`，可以参考 [Simple Portable C++ Seed Entropy](https://www.pcg-random.org/posts/simple-portable-cpp-seed-entropy.html) :backup[https://archive.is/lWYhN]。
 
-![girl](https://bafkreie3dxyqzeabopshajhehidlxqpspdvlr5dibwhoa4vqwussrxumcy.ipfs.dweb.link)
+![girl](https://ragnarok.joefang.org/static/xbgfcvc9ku5ttv4f9k1en8sk6ttd0v3lq.webp)
 
 [图片来源](https://twitter.com/i/status/1363322601846677508) :backup[https://archive.is/MNVN6]

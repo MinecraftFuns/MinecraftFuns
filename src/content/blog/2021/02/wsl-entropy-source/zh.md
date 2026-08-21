@@ -15,4 +15,4 @@ GitHub上已经讨论过这个问题：[Does WSL provide decent entropy?](https:
 
 所以WSL中 `getrandom`、`/dev/random` 和 `/dev/urandom` 的熵是来自Windows的，而不是Linux内核收集的。
 
-[![WSL](https://bafkreicu4oyoh5eycbayukmcxla5bpvj4wqfyxbbu6pbkt2lj6ec25ygeq.ipfs.dweb.link)](https://aka.ms/wslstore)
+[![WSL](https://ragnarok.joefang.org/static/xfag0ce5dcu8385fem152bu2r6hcvm9c2.webp)](https://aka.ms/wslstore)

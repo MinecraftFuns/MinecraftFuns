@@ -6,7 +6,7 @@ tags: ["Chemistry", "Notes"]
 translation: machine
 ---
 
-![anime](https://bafkreihabbwwmw3562fibikzhqjjx6agytw4pjv4p3bzm65iad7mywsmwm.ipfs.dweb.link)
+![anime](https://ragnarok.joefang.org/static/xilsn9pjasmj7pumh7ob8br8t2qc05q1d.webp)
 
 [Handout](https://bafybeif5bdcmaxlsyvnwjfz6qvmnfampuetmaueiwowz4fa4pfgtkydbpq.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210402142521/https://cdn.jsdelivr.net/gh/PetrichorA/page-ede8d44d@206deb3d/data.pdf]
 
@@ -20,7 +20,7 @@ translation: machine
 
 Connection order: lay out the apparatus first, then the connectors
 
-![Diagram](https://bafkreieigmsayxb7l7ab3af3gl6djbzznaobixeek4fsiec7eyhvxnc744.ipfs.dweb.link)
+![Diagram](https://ragnarok.joefang.org/static/xvusu11fqjbog608dqpa1h91n14fl42n7.png)
 
 * A. Preparation
 * B. Purification
@@ -70,9 +70,9 @@ Add, at (some location), a (some vessel) containing (some reagent)
 
 #### Water Separator
 
-![image](https://bafkreicshe3wkmrlhp5bbvdjix4lonqg4xevav6zqik5j6e32djgvw23ge.ipfs.dweb.link)
+![image](https://ragnarok.joefang.org/static/xl06niv3h92e6qp36niucmikdag196ja6.jpg)
 
-![equation](https://bafkreid2rmnfkjkhd7mb2s4efv3qmmzrcenrimosadnm7nt4ccpse4z6xm.ipfs.dweb.link)
+![equation](https://ragnarok.joefang.org/static/xm38vsmen6dnfduf4pl3527sq8idfi8hg.jpg)
 
 * Control the stopcock so the water level stays just below the side-arm opening
 * Favors reflux of the organic layer, improving raw material utilization
@@ -118,11 +118,11 @@ $\eta=\frac{m_{real}}{m_{theorem}}\times 100\%$; the actual value $m_{real}$ is 
 
 Dehydration reaction: preparing cyclohexene from cyclohexanol dehydration
 
-![1](https://bafkreic5rqlh5ji3y2g7gqsywvxjauqm7kh7ijktvjfrcn7you3a26lnym.ipfs.dweb.link)
+![1](https://ragnarok.joefang.org/static/xpc4bmukk5boeqrjghqknij33o5ngje5h.jpg)
 
 Substitution reaction: preparing o-nitrotoluene from toluene
 
-![2](https://bafkreigzqusdnudqqiycqniphmbposuwxkmqgyw3b23yulixis7n44kcla.ipfs.dweb.link)
+![2](https://ragnarok.joefang.org/static/x08solm4lieuc8bjmklid9mnc56ef8n1s.jpg)
 
 #### Ways to Improve Utilization
 

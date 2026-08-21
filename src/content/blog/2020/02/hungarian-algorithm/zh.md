@@ -5,7 +5,7 @@ date: "2020-02-05"
 tags: ["Algorithms", "Graph Theory"]
 ---
 
-![hero.webp](https://bafkreigiqanywlpgo4etmho2wzvgezta6vnu7z3weehrx64cqhrelplz5y.ipfs.dweb.link)
+![hero.webp](https://ragnarok.joefang.org/static/xuesnij4mlhi6qvrusurnqoe366f2fgvk.webp)
 
 ## 二分图
 
@@ -15,7 +15,7 @@ tags: ["Algorithms", "Graph Theory"]
 二分图是**节点由两个集合组成**，且两个集合**内部没有边**的图。  
 > 换言之，**存在一种方案**，将节点划分成满足以上性质的两个集合。  
 
-![二分图](https://bafkreiht47wu537dh3gegkjvdpxkodwe32dq5eor3w56k6gntco5h6swrm.ipfs.dweb.link)
+![二分图](https://ragnarok.joefang.org/static/x32jo8pnpjv44a7f0eh7tuiobd8orts26.png)
 
 ### 性质
 

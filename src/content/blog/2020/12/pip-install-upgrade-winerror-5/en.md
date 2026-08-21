@@ -8,7 +8,7 @@ translation: machine
 
 > Check whether a running Python interpreter is **using (holding)** the file being updated
 
-![0.webp](https://bafkreicnacyi2kzjv5jzyj2islipt2l7hzedp5hnluhx7mvyarlhx62ks4.ipfs.dweb.link)
+![0.webp](https://ragnarok.joefang.org/static/xnve44kj8o7sepk60h63ohc7rau92ad5s.webp)
 
 After running `pip install --upgrade cffi`, I got a flat access denial (the message is in Chinese because Windows was):
 

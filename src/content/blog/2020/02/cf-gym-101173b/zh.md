@@ -155,7 +155,7 @@ int main()
 
 ### 证明
 
-![证明霍尔定理](https://bafkreifydvtalnuxr6o7l6dm3jbcxl54v6a7m6corqkc7tns6gob7rpkxi.ipfs.dweb.link)
+![证明霍尔定理](https://ragnarok.joefang.org/static/x1psdt8jtb1j6jutnqvn1i7n1vjsfpv1l.jpg)
 
 已缓存 - [http://faculty.wwu.edu/sarkara/hall.pdf](https://bafkreigxbfy2otqvi3rzfvldrlvhvwqvagxdkext7m4llohjjl7vbhnqx4.ipfs.inbrowser.link/)
 
@@ -209,7 +209,7 @@ int main()
 
 这样一轮一轮地进行下去，直到某个时候**所有人都不再单身**，下一轮将不会有任何新的表白发生，整个过程自动结束。**此时的婚姻搭配**就一定是稳定的了。
 
-![稳定婚姻](https://bafkreicclusoacxzjhfkqrgzr4gebazxa5qlgszcl6n3kxna4mcmdwavzi.ipfs.dweb.link)
+![稳定婚姻](https://ragnarok.joefang.org/static/x84t2hsqqtaege7702cfrthe82c6md7ul.png)
 
 ### 正确性
 

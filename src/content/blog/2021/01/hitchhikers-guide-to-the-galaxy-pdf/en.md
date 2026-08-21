@@ -6,7 +6,7 @@ tags: ["Reading", "Sharing"]
 translation: machine
 ---
 
-![data](https://bafkreies274ddqmm3gud7kkwjdfobfvcmc52gdebrh7yy6s4asiey6m4ru.ipfs.dweb.link)
+![data](https://ragnarok.joefang.org/static/xvlh9g6lvfgotncsdeuu5tfj9qmgp58br.webp)
 
 [The Hitchhiker's Guide to the Galaxy](https://zh.wikipedia.org/wiki/%E9%93%B6%E6%B2%B3%E7%B3%BB%E6%BC%AB%E6%B8%B8%E6%8C%87%E5%8D%97%E7%B3%BB%E5%88%97) is a series of science fiction novels written by the British author [Douglas Adams](https://zh.wikipedia.org/wiki/%E9%81%93%E6%A0%BC%E6%8B%89%E6%96%AF%C2%B7%E4%BA%9E%E7%95%B6%E6%96%AF).
 
@@ -29,7 +29,7 @@ Thanks to the original poster [@songkey](https://www.douban.com/people/sokey/) :
 
 The OneDrive link in the original post is dead, so the files could only be downloaded from Baidu Netdisk. ~~Out of my distaste for Baidu Netdisk~~ I uploaded both files to IPFS instead. You can access them through **any** IPFS gateway, such as [ipfs.io](https://ipfs.io/), [dweb.link](https://dweb.link/), and [inbrowser.link](https://inbrowser.link/).
 
-![0.webp](https://bafkreic76j23m57comk7mdtekff55dpxvifwivfo3qq6yedcvpcbxfxczu.ipfs.dweb.link)
+![0.webp](https://ragnarok.joefang.org/static/xnear3ntiiqvut57mkpglpufnbu5g5btm.webp)
 
 > `File name` 【精】《银河系漫游指南》`.pdf` (the Chinese translation)  
 > `SHA256` *aba61aba50f3911a9b33346843df5ae95ae8d4258b2256fa05b608dccdabcd00*  

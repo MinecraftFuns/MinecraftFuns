@@ -8,7 +8,7 @@ translation: machine
 
 > TL;DR: just wrap the content you want to hide in `<template></template>`.
 
-![0.webp](https://bafkreidosypdjxxesnrgrhspcxbopavqog3bbjzrqa6uj5yq3fgejzpr7i.ipfs.dweb.link)
+![0.webp](https://ragnarok.joefang.org/static/x95mb8sob6hfjcf4569peokelj7iqvqr5.webp)
 
 While hacking up a theme following the article [Notes on accessing Blogger from mainland China](https://blog.iljw.me/2016/09/blogger.html), I found that the method it offers,
 

@@ -9,7 +9,7 @@ translation: machine
 * [Link](https://codeforces.com/contest/930) :backup[https://archive.is/3cPj6]
 * [Reference code](https://gist.github.com/MinecraftFuns/706d87a84abcdb36534820a7a8709609) :backup[https://archive.is/YCQPJ]
 
-![hero.webp](https://bafkreibbhurwk7asmxigw7d4teva7d7suus74x2cxeo2gq7lcl2encx2pi.ipfs.dweb.link/)
+![hero.webp](https://ragnarok.joefang.org/static/xjs75hvn6i1tfprs8gb5ov0vtthucblll.webp)
 
 ## Problems not solved independently
 
@@ -68,7 +68,7 @@ On a board there are n black pieces and 1 white piece. Pieces can move up / down
 
 Consider how a single black piece can block one direction for white. As shown, a black piece can prevent white from moving further right.
 
-![Screenshot 2020-10-16 143227.jpg](https://bafkreia72vqgzevwcd6xeenaemr25mtity2hqlhziz4ggajno7aldm6jj4.ipfs.dweb.link)
+![Screenshot 2020-10-16 143227.jpg](https://ragnarok.joefang.org/static/x9fk9anuijvhap38l7od8e1r2h9eon9v5.jpg)
 
 The horizontal difference between the black and white piece is odd, and the vertical difference is even. Until the vertical coordinates match, the black piece just needs to keep moving opposite to white; once the vertical coordinates match and the horizontal difference is 1, it can keep pressing against white forever. One black piece can control one direction for white, so four black pieces are needed to control one white piece. The problem becomes: "how many positions have all four directions controlled by black pieces."
 

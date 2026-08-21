@@ -6,7 +6,7 @@ tags: ["Algorithms", "Graph Theory"]
 translation: machine
 ---
 
-![hero.webp](https://bafkreigiqanywlpgo4etmho2wzvgezta6vnu7z3weehrx64cqhrelplz5y.ipfs.dweb.link)
+![hero.webp](https://ragnarok.joefang.org/static/xuesnij4mlhi6qvrusurnqoe366f2fgvk.webp)
 
 ## Bipartite graphs
 
@@ -16,7 +16,7 @@ A bipartite graph, also called a bigraph, does exactly what its English name say
 A bipartite graph is a graph whose **nodes consist of two sets**, with **no edges inside either set**.
 > In other words, **there exists a way** to partition the nodes into two sets satisfying the property above.
 
-![Bipartite graph](https://bafkreiht47wu537dh3gegkjvdpxkodwe32dq5eor3w56k6gntco5h6swrm.ipfs.dweb.link)
+![Bipartite graph](https://ragnarok.joefang.org/static/x32jo8pnpjv44a7f0eh7tuiobd8orts26.png)
 
 ### Properties
 

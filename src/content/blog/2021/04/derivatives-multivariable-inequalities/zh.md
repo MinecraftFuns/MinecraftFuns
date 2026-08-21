@@ -5,7 +5,7 @@ date: "2021-04-03"
 tags: ["Mathematics", "Notes"]
 ---
 
-![girl](https://bafkreicx7z62fzb4fne7bhc4nf2jpj7pipr4kip6rldk5653rkwn3crina.ipfs.dweb.link)
+![girl](https://ragnarok.joefang.org/static/xdbobp37n5i4r90tjegcn19sf2334ic7h.webp)
 
 ## 思路
 
@@ -92,7 +92,7 @@ $\therefore a\le\frac 1 2$（必要）
 
 ### （四）
 
-![0](https://bafkreiby6gzjufczz5qui3ggqdacgjbtx2ivyzqw4eivaks3tm4ukop6ji.ipfs.dweb.link)
+![0](https://ragnarok.joefang.org/static/xd2bbph53llnqmcnj29h84h7fgg6fjaaq.jpg)
 
 ## 讲义
 

@@ -96,7 +96,7 @@ A cycle has 2n vertices. Choose 3 distinct chords, build 6 bear dens at their en
 
 Three chords can be in five kinds of relations in total, of which 2 and 5 are valid.
 
-![Five types](https://bafkreibxbez2623eglgxg2quexozkqfurg6yla6byrip2rxbmdnwaekovm.ipfs.dweb.link)
+![Five types](https://ragnarok.joefang.org/static/xho9ek2kf454j53ii5cgidfvnhskn7i4g.png)
 
 But counting cases 2 and 5 directly is hard, so instead subtract the counts of cases 1, 3, and 4 from the total.
 

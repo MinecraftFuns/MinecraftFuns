@@ -5,7 +5,7 @@ date: "2020-12-24"
 tags: ["ICPC", "Editorial"]
 ---
 
-![hero.webp](https://bafkreibduaf5i5gcyuifev6x4j6uchcgrhm5jgyseogbaoga562foxwik4.ipfs.dweb.link)
+![hero.webp](https://ragnarok.joefang.org/static/x5tattcoa5ojhadcr3hbml7tpls93i1ga.webp)
 
 ## A
 
@@ -117,7 +117,7 @@ tags: ["ICPC", "Editorial"]
 
 坎儿井是一种灌溉系统，由一条地下的水源和若干条竖直的井组成。
 
-![2016_final_H.png](https://bafkreiaqhp2stkm4aoqer65vwrutnviw2o3w4d4mujqmwsamy5vynxicx4.ipfs.dweb.link)
+![2016_final_H.png](https://ragnarok.joefang.org/static/xmib1r7s67ctcp225tdgshg35q8r847a8.png)
 
 本题中，将其抽象为如上模型。
 
@@ -155,7 +155,7 @@ tags: ["ICPC", "Editorial"]
 
 > 题解
 
-![屏幕截图2020-11-19 151553.jpg](https://bafkreibxizaji54setl57rbbextfjappxg5kzu3xesoil4jl66vnlumedm.ipfs.dweb.link)
+![屏幕截图2020-11-19 151553.jpg](https://ragnarok.joefang.org/static/xjiuv8ns0cp7266qrs5f31c6fgidvq6s6.jpg)
 
 平行四边形的面积等于外面矩形的面积减去四个小三角形的面积。
 

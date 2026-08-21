@@ -6,7 +6,7 @@ tags: ["ICPC", "Editorial"]
 translation: machine
 ---
 
-![hero.webp](https://bafkreibduaf5i5gcyuifev6x4j6uchcgrhm5jgyseogbaoga562foxwik4.ipfs.dweb.link)
+![hero.webp](https://ragnarok.joefang.org/static/x5tattcoa5ojhadcr3hbml7tpls93i1ga.webp)
 
 ## A
 
@@ -118,7 +118,7 @@ First precompute, for each position, where jumping one step `up / down / left / 
 
 A qanat is an irrigation system consisting of an underground water source and several vertical wells.
 
-![2016_final_H.png](https://bafkreiaqhp2stkm4aoqer65vwrutnviw2o3w4d4mujqmwsamy5vynxicx4.ipfs.dweb.link)
+![2016_final_H.png](https://ragnarok.joefang.org/static/xmib1r7s67ctcp225tdgshg35q8r847a8.png)
 
 In this problem, it is abstracted as the model shown above.
 
@@ -156,7 +156,7 @@ On a rectangular grid sheet of a given length and width, pick four points on the
 
 > Solution
 
-![A parallelogram inscribed in the sheet, with the four corner triangles shaded](https://bafkreibxizaji54setl57rbbextfjappxg5kzu3xesoil4jl66vnlumedm.ipfs.dweb.link)
+![A parallelogram inscribed in the sheet, with the four corner triangles shaded](https://ragnarok.joefang.org/static/xjiuv8ns0cp7266qrs5f31c6fgidvq6s6.jpg)
 
 The area of the parallelogram equals the area of the enclosing rectangle minus the areas of the four small triangles.
 

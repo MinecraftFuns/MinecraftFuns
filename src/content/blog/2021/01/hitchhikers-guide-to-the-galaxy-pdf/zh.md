@@ -5,7 +5,7 @@ date: "2021-01-15"
 tags: ["Reading", "Sharing"]
 ---
 
-![data](https://bafkreies274ddqmm3gud7kkwjdfobfvcmc52gdebrh7yy6s4asiey6m4ru.ipfs.dweb.link)
+![data](https://ragnarok.joefang.org/static/xvlh9g6lvfgotncsdeuu5tfj9qmgp58br.webp)
 
 [《银河系漫游指南》](https://zh.wikipedia.org/wiki/%E9%93%B6%E6%B2%B3%E7%B3%BB%E6%BC%AB%E6%B8%B8%E6%8C%87%E5%8D%97%E7%B3%BB%E5%88%97)是由英国作家[道格拉斯 · 亚当斯](https://zh.wikipedia.org/wiki/%E9%81%93%E6%A0%BC%E6%8B%89%E6%96%AF%C2%B7%E4%BA%9E%E7%95%B6%E6%96%AF)所写的一系列科幻小说。
 
@@ -28,7 +28,7 @@ tags: ["Reading", "Sharing"]
 
 原帖中OneDrive的链接挂了，只能从百度云下载。~~出于对百度云的厌恶~~ 我把两个文件传到IPFS上了。你可以通过**任意** IPFS Gateway访问，如 [ipfs.io](https://ipfs.io/)、[dweb.link](https://dweb.link/) 和 [inbrowser.link](https://inbrowser.link/)。
 
-![0.webp](https://bafkreic76j23m57comk7mdtekff55dpxvifwivfo3qq6yedcvpcbxfxczu.ipfs.dweb.link)
+![0.webp](https://ragnarok.joefang.org/static/xnear3ntiiqvut57mkpglpufnbu5g5btm.webp)
 
 > `文件名`【精】《银河系漫游指南》`.pdf`  
 > `SHA256` *aba61aba50f3911a9b33346843df5ae95ae8d4258b2256fa05b608dccdabcd00*  

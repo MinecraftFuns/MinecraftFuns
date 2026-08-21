@@ -32,7 +32,7 @@ A.
 
 > Preview
 
-![Preview - Chemical Equations](https://bafkreiayhx65r4yudurgg7rlxojp6bcxglxmvzz3ctzua2tt73muvpr5me.ipfs.dweb.link)
+![Preview - Chemical Equations](https://ragnarok.joefang.org/static/xd7ov1q3t3bd1f40e9fehcbd99e67g80c.jpg)
 
 > Download the source file:
 
@@ -62,11 +62,11 @@ A.
 * **Group IVA** of the periodic table
 * Carbon, silicon, germanium, tin, lead
 * A middle-position group, easily forming covalent compounds
-* Outermost electron configuration ![ns2np2](https://bafkreibxslcygphcolepukdvbbleabr2pz4xmbjzhttwwvcx5p6y3ky2de.ipfs.dweb.link)
+* Outermost electron configuration ![ns2np2](https://ragnarok.joefang.org/static/xfprk9ogubllnrj7iieq8gvu6bq7ag7do.jpg)
 * Properties shift down the group; the trend from nonmetallic to metallic character top to bottom is more pronounced than in the nitrogen group
 * Electronegativity is lower than that of the halogen, oxygen, and nitrogen groups
 
-![Chart](https://bafkreidmp2zvgne6sf5c6iqrkxyonvnqxwjen2hvizwoi3feoovbn7pega.ipfs.dweb.link)
+![Chart](https://ragnarok.joefang.org/static/x4sd09jfgkugq7gp16nl4p9043p3i9nnt.jpg)
 
 1. The **melting point** and **boiling point** of the carbon group elements **decrease** as **atomic mass increases**. Carbon sublimes at 3825 °C.
 2. The density and atomic radius of the carbon group elements increase as atomic mass increases.
@@ -98,7 +98,7 @@ A.
 * When temperature is not stated, assume **25 °C**
 * [Ionization constants](https://bafkreigf5cwtsuvcan3zmd7bxnebzixlx7uo7zw7w4mb2g6azfkoc26o4y.ipfs.inbrowser.link/)
 
-![Ionization constants](https://bafkreiftp4keb7qzhax5rbv5z4fsi3xup3w2fa5uxt63k5c7ujhkjawqzm.ipfs.dweb.link)
+![Ionization constants](https://ragnarok.joefang.org/static/xm7pidee8iolc35sig3g8i1nmsc148te9.webp)
 
 * The ionization constants K1, K2, K3 for successive ionization steps of a polyprotic weak acid generally differ by several orders of magnitude, so acidity is determined mainly by the first ionization step
 
