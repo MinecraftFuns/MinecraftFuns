@@ -97,7 +97,7 @@ Combining Method 2 and Method 3 proves the necessary-and-sufficient condition.
 
 ## Handout
 
-* [Original file (page 1)](https://bafkreiga2v67fpahktg6q5xxsl2mion3mbm5zhowhqq6zdw2kvw7t4vlma.ipfs.inbrowser.link/)
-* [Original file (page 2)](https://bafkreif2aeupiask2cs5xri4oerr2rtr6rwvgnvm4ovlbd67wefyanqwom.ipfs.inbrowser.link/)
-* [Original file (page 3)](https://bafkreihxt4zh6ok25kntbrquqqnqn6e2bcbv2l65ypftammo32gjtsdwhu.ipfs.inbrowser.link/)
-* [Original file (page 4)](https://bafkreiddvlnppokikgzxq2ngxfw4xoydelf6fyu3ff5pmnkfqmuiyrlrh4.ipfs.inbrowser.link/)
+* [Original file (page 1)](https://ragnarok.joefang.org/static/x5jb5iapnkonss5o0q96ftuhbu278v6nq.jpg)
+* [Original file (page 2)](https://ragnarok.joefang.org/static/xi9l0b58amsagt3atm26osi0g8tvbadl8.jpg)
+* [Original file (page 3)](https://ragnarok.joefang.org/static/xaboqbsnl45nsu9gr4utsi3ofjpjolvk0.jpg)
+* [Original file (page 4)](https://ragnarok.joefang.org/static/xlci3jgf4jus55sdub9a5lfllqfa9ngf8.jpg)

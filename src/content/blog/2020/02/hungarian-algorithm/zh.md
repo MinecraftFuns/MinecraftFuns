@@ -92,7 +92,7 @@ for (R int i = 1; i <= p; i++)
 }
 ```
 
-### 来自 [OI Wiki](https://oi-wiki.org/graph/bi-graph/) 的 [模板](https://bafkreieqdmspjkxumecsvzibka5swq25kvrhep3nlnjemmbiygytjsv6gm.ipfs.inbrowser.link/)
+### 来自 [OI Wiki](https://oi-wiki.org/graph/bi-graph/) 的 [模板](https://ragnarok.joefang.org/static/xodao0jd2psc2g314dk6s05c4u6csav0p.cpp)
 
 ```cpp
 #include <bits/stdc++.h>

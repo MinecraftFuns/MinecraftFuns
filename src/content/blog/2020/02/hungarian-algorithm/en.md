@@ -93,7 +93,7 @@ for (R int i = 1; i <= p; i++)
 }
 ```
 
-### [Template](https://bafkreieqdmspjkxumecsvzibka5swq25kvrhep3nlnjemmbiygytjsv6gm.ipfs.inbrowser.link/) from [OI Wiki](https://oi-wiki.org/graph/bi-graph/)
+### [Template](https://ragnarok.joefang.org/static/xodao0jd2psc2g314dk6s05c4u6csav0p.cpp) from [OI Wiki](https://oi-wiki.org/graph/bi-graph/)
 
 ```cpp
 #include <bits/stdc++.h>

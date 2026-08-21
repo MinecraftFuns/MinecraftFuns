@@ -35,7 +35,7 @@ A.
 
 > 下载源文件：
 
-* 高中化学方程式大全(完整版) [PDF](https://bafkreify3vz47n6taxdvrth3uekwpgr2n7zi3htxony7yeshx3xpqcucsq.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/MWgQzpso.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/jh7FwIGk.docx)
+* 高中化学方程式大全(完整版) [PDF](https://ragnarok.joefang.org/static/xovtftpjl7j4slf5q6f917e9ibkdqutg0.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/MWgQzpso.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/jh7FwIGk.docx)
 
 ---
 
@@ -45,12 +45,12 @@ A.
 > 有时候会提供第三个文件，即经过转换的原始文件  
 > 如果没有提供PDF预览，可以前往 `https://view.officeapps.live.com/op/view.aspx?src=文件地址` 预览（注意该服务仅支持Office文档），也可以在该页面将Office文档转换成PDF  
 
-* 高中化学方程式大全(完整版) [PDF](https://bafkreify3vz47n6taxdvrth3uekwpgr2n7zi3htxony7yeshx3xpqcucsq.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/MWgQzpso.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/jh7FwIGk.docx)
-* 高中化学知识框架 [PDF](https://bafybeieojg5t3yfxqgesmbnij72da4vij2h7gkyk3ypvgq2kll627erytu.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/WFnCGrZe.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/3d5QEzMi.docx) *该文档中大量内容以图片的形式展现，可能不适合编辑*
-* 高中化学公式大全 [PDF](https://bafkreiazqnki3qcav6ici3u7zkgaz3kagbbzeh2v2yca7je4guzwwxnd7e.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/aUsgrtRz.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/ib3ajtT6.docx)
-* 高中化学选修4知识点分类总结 [PDF](https://bafkreidvdkeyb5kegayw3tekzlo2hxkfxalun7zinj62uxgkfel2zar3ke.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/KrRNXbFn.doc)
-* 高中化学-化学与生活-归纳 [PDF](https://bafkreihw4w2bg2nayddd5ohgxxkggqe6omiktat3a7j5fqwkryhwpy5j7m.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/rmW6j1ly.doc)
-* 高中化学课标解析(2017年版) [PDF](https://bafybeig4exs76w5vuocloqre633ztyy746n3rhh7f4heoybn5747k2hyza.ipfs.inbrowser.link/) [`PPTX`](https://github.com/urlib/2e5/raw/0.0.0/VqBQD52O.pptx)
+* 高中化学方程式大全(完整版) [PDF](https://ragnarok.joefang.org/static/xovtftpjl7j4slf5q6f917e9ibkdqutg0.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/MWgQzpso.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/jh7FwIGk.docx)
+* 高中化学知识框架 [PDF](https://ragnarok.joefang.org/static/xcllds7p7d6kau81k49btj4kssj3lk9al.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/WFnCGrZe.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/3d5QEzMi.docx) *该文档中大量内容以图片的形式展现，可能不适合编辑*
+* 高中化学公式大全 [PDF](https://ragnarok.joefang.org/static/xpaq9ucncdk64g6n29tlqjrdtq1md6d5a.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/aUsgrtRz.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/ib3ajtT6.docx)
+* 高中化学选修4知识点分类总结 [PDF](https://ragnarok.joefang.org/static/x2utg6nhgbk66oo5irfs2rnhg6it2ls6s.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/KrRNXbFn.doc)
+* 高中化学-化学与生活-归纳 [PDF](https://ragnarok.joefang.org/static/xnon63bfju5if3k90g1gombepsadhvboe.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/rmW6j1ly.doc)
+* 高中化学课标解析(2017年版) [PDF](https://ragnarok.joefang.org/static/xv0rmpebnsqdiam3bt6shvhp6dcs1b270.pdf) [`PPTX`](https://github.com/urlib/2e5/raw/0.0.0/VqBQD52O.pptx)
 
 ---
 
@@ -95,7 +95,7 @@ A.
 
 * 通常，同一弱电解质，溶液越稀，电离度越大；温度越高，电离度越大
 * 不注明温度，默认 **25 ℃**
-* [电离常数](https://bafkreigf5cwtsuvcan3zmd7bxnebzixlx7uo7zw7w4mb2g6azfkoc26o4y.ipfs.inbrowser.link/)
+* [电离常数](https://ragnarok.joefang.org/static/xcoeeitajp7ev17k2u57jug5v26qa0173.pdf)
 
 ![电离常数](https://ragnarok.joefang.org/static/xm7pidee8iolc35sig3g8i1nmsc148te9.webp)
 

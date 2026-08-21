@@ -83,6 +83,6 @@ tags: ["Repost"]
 
 > 2000年
 
-[原文](https://bafkreidcb7qmdvidvombiytunpsj4pdsz63vuv4gviaa7xgyunnueh2ouu.ipfs.inbrowser.link/)
+[原文](https://ragnarok.joefang.org/static/xcbusmhk2aatu5rl90ebnauma4gqh8t13)
 
 ![精神明亮的人](https://ragnarok.joefang.org/static/xvkd03ehopikd3091lmegs6op9fkmdqau.webp)

@@ -24,7 +24,7 @@ For most tasks, the two services above are "good enough," just not "convenient."
 
 It helps to split archiving a page into two steps, "fetching the page" and "storing the content," since there are then plenty of ready-made tools for each.
 
-For "fetching the page," the browser extension [SingleFile](https://github.com/gildas-lormeau/SingleFile) can come close to "perfectly turning a page into a single HTML file." I saved an article, "Fighting Link Rot," and you can look at the [example](https://bafkreieowjptq7z5h6bju46jopd3nijqpa3aoeuregy55y325clju23lje.ipfs.inbrowser.link/) to see what the extension produces. SingleFile is available on [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/single-file), the [Chrome Web Store](https://chrome.google.com/webstore/detail/singlefile/mpiodijhokgodhhofbcjdecpffjipkle), and [Microsoft Edge Addons](https://microsoftedge.microsoft.com/addons/detail/singlefile/efnbkdcfmcmnhlkaijjjmhjjgladedno).
+For "fetching the page," the browser extension [SingleFile](https://github.com/gildas-lormeau/SingleFile) can come close to "perfectly turning a page into a single HTML file." I saved an article, "Fighting Link Rot," and you can look at the [example](https://ragnarok.joefang.org/static/xs3mn2i0h9h0go84rbga5nkli92mu09sk) to see what the extension produces. SingleFile is available on [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/single-file), the [Chrome Web Store](https://chrome.google.com/webstore/detail/singlefile/mpiodijhokgodhhofbcjdecpffjipkle), and [Microsoft Edge Addons](https://microsoftedge.microsoft.com/addons/detail/singlefile/efnbkdcfmcmnhlkaijjjmhjjgladedno).
 
 For "storing the content," there's no shortage of options. GitHub and GitLab offer free public/private repositories, and Cloudflare Pages offers free static-site hosting (GitHub Pages is thoroughly blocked in your country `￣へ￣`), so you can quickly cobble together a usable free storage-plus-sharing setup. AWS, Google Cloud, Alibaba Cloud, and Tencent Cloud all offer object storage (AWS/Google Cloud connections can be unreliable during certain periods, and Alibaba Cloud/Tencent Cloud review content for political sensitivity), but the cost of storing a handful of pages is negligible.
 
@@ -36,9 +36,9 @@ My choice is [IPFS](https://ipfs.io/). [Protocol Labs](https://protocol.ai/)'s [
 
 So, a reasonably convenient web archiving setup comes together. Here are a few examples:
 
-* [Live Not By Lies | Aleksandr Solzhenitsyn | www.orthodoxytoday.org](https://bafkreignhtl7ueljxzpv6w3ojkvr2x22javfbcsx7tm34g5w7rqrxfghfu.ipfs.inbrowser.link/)
-* [How Was a CIA Agent Discovered by Beijing? | iyouport.substack.com](https://bafybeidmvcvhmjk4wlatzxnbytixxq3hdojocan3w26o36m5pjo4jsztmi.ipfs.inbrowser.link/)
-* [Distributed Consensus and Decentralization | 1byte.io](https://bafkreid3vycse7u6m6vhjbsmgyep3zcsi4u7qk242hlcoaq7ph4nlvmeve.ipfs.inbrowser.link/)
+* [Live Not By Lies | Aleksandr Solzhenitsyn | www.orthodoxytoday.org](https://ragnarok.joefang.org/static/xpv9fvr14542itut27hqn3arvqmvj3qtc)
+* [How Was a CIA Agent Discovered by Beijing? | iyouport.substack.com](https://ragnarok.joefang.org/static/x3pmke07am24cjm00ai61pmdcv44jilss)
+* [Distributed Consensus and Decentralization | 1byte.io](https://ragnarok.joefang.org/static/x7gk710v8dbvodndgmb1cdv4er9020com)
 
 ## Update
 

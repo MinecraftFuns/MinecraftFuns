@@ -7,8 +7,8 @@ tags: ["Chinese Literature", "Notes"]
 
 ![0.webp](https://ragnarok.joefang.org/static/xhrtdpetsai8534mg3if3hac30rqqeb8g.webp)
 
-[讲义](https://bafybeihf5gby4uo5e7jtwzoiquw7reoiwzkni4ffdu5ulmogwajros6pxa.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210112085802/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/fc/2f/e5/cf/fc2fe5cf8b983d201bef031f5ada8e0b133917e7692f54c414466968a48ccb69.pdf]  
-[补充讲义](https://bafybeibym4f3j6bq64cwuh5iwgwq7g7zj7xbxyvntqaub66cbh53lymz34.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210112085836/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/cf/4e/02/04/cf4e02048c40c5baa904b97db61c870ea60a9416568f69a838601f61cd06adf2.pdf]  
+[讲义](https://ragnarok.joefang.org/static/xt2majpn1j47l221mvkc82sdsd2nvjr2n.pdf) :backup[https://web.archive.org/web/20210112085802/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/fc/2f/e5/cf/fc2fe5cf8b983d201bef031f5ada8e0b133917e7692f54c414466968a48ccb69.pdf]  
+[补充讲义](https://ragnarok.joefang.org/static/x7nh59iei7rtg1svq4dprel9chmdlth4m.pdf) :backup[https://web.archive.org/web/20210112085836/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.3/cf/4e/02/04/cf4e02048c40c5baa904b97db61c870ea60a9416568f69a838601f61cd06adf2.pdf]  
 
 ## 审题立意 `作文的灵魂`
 

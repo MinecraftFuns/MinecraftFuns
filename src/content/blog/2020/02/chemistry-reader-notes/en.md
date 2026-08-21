@@ -36,7 +36,7 @@ A.
 
 > Download the source file:
 
-* Complete Collection of High School Chemical Equations [PDF](https://bafkreify3vz47n6taxdvrth3uekwpgr2n7zi3htxony7yeshx3xpqcucsq.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/MWgQzpso.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/jh7FwIGk.docx)
+* Complete Collection of High School Chemical Equations [PDF](https://ragnarok.joefang.org/static/xovtftpjl7j4slf5q6f917e9ibkdqutg0.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/MWgQzpso.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/jh7FwIGk.docx)
 
 ---
 
@@ -46,12 +46,12 @@ A.
 > Sometimes a third file is provided, i.e. a converted version of the original file.  
 > If no PDF preview is provided, you can go to `https://view.officeapps.live.com/op/view.aspx?src=file address` to preview it (note this service only supports Office documents); you can also convert Office documents to PDF on that page.  
 
-* Complete Collection of High School Chemical Equations [PDF](https://bafkreify3vz47n6taxdvrth3uekwpgr2n7zi3htxony7yeshx3xpqcucsq.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/MWgQzpso.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/jh7FwIGk.docx)
-* High School Chemistry Knowledge Framework [PDF](https://bafybeieojg5t3yfxqgesmbnij72da4vij2h7gkyk3ypvgq2kll627erytu.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/WFnCGrZe.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/3d5QEzMi.docx) *A large amount of content in this document is presented as images and may not be suitable for editing.*
-* Complete Collection of High School Chemistry Formulas [PDF](https://bafkreiazqnki3qcav6ici3u7zkgaz3kagbbzeh2v2yca7je4guzwwxnd7e.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/aUsgrtRz.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/ib3ajtT6.docx)
-* Categorized Summary of Knowledge Points from High School Chemistry Elective 4 [PDF](https://bafkreidvdkeyb5kegayw3tekzlo2hxkfxalun7zinj62uxgkfel2zar3ke.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/KrRNXbFn.doc)
-* High School Chemistry: Chemistry and Life, a Summary [PDF](https://bafkreihw4w2bg2nayddd5ohgxxkggqe6omiktat3a7j5fqwkryhwpy5j7m.ipfs.inbrowser.link/) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/rmW6j1ly.doc)
-* Analysis of the High School Chemistry Curriculum Standards (2017 Edition) [PDF](https://bafybeig4exs76w5vuocloqre633ztyy746n3rhh7f4heoybn5747k2hyza.ipfs.inbrowser.link/) [`PPTX`](https://github.com/urlib/2e5/raw/0.0.0/VqBQD52O.pptx)
+* Complete Collection of High School Chemical Equations [PDF](https://ragnarok.joefang.org/static/xovtftpjl7j4slf5q6f917e9ibkdqutg0.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/MWgQzpso.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/jh7FwIGk.docx)
+* High School Chemistry Knowledge Framework [PDF](https://ragnarok.joefang.org/static/xcllds7p7d6kau81k49btj4kssj3lk9al.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/WFnCGrZe.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/3d5QEzMi.docx) *A large amount of content in this document is presented as images and may not be suitable for editing.*
+* Complete Collection of High School Chemistry Formulas [PDF](https://ragnarok.joefang.org/static/xpaq9ucncdk64g6n29tlqjrdtq1md6d5a.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/aUsgrtRz.doc) [`DOCX`](https://github.com/urlib/2e5/raw/0.0.0/ib3ajtT6.docx)
+* Categorized Summary of Knowledge Points from High School Chemistry Elective 4 [PDF](https://ragnarok.joefang.org/static/x2utg6nhgbk66oo5irfs2rnhg6it2ls6s.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/KrRNXbFn.doc)
+* High School Chemistry: Chemistry and Life, a Summary [PDF](https://ragnarok.joefang.org/static/xnon63bfju5if3k90g1gombepsadhvboe.pdf) [`DOC`](https://github.com/urlib/2e5/raw/0.0.0/rmW6j1ly.doc)
+* Analysis of the High School Chemistry Curriculum Standards (2017 Edition) [PDF](https://ragnarok.joefang.org/static/xv0rmpebnsqdiam3bt6shvhp6dcs1b270.pdf) [`PPTX`](https://github.com/urlib/2e5/raw/0.0.0/VqBQD52O.pptx)
 
 ---
 
@@ -96,7 +96,7 @@ A.
 
 * Generally, for the same weak electrolyte, the more dilute the solution, the greater the degree of ionization; the higher the temperature, the greater the degree of ionization
 * When temperature is not stated, assume **25 °C**
-* [Ionization constants](https://bafkreigf5cwtsuvcan3zmd7bxnebzixlx7uo7zw7w4mb2g6azfkoc26o4y.ipfs.inbrowser.link/)
+* [Ionization constants](https://ragnarok.joefang.org/static/xcoeeitajp7ev17k2u57jug5v26qa0173.pdf)
 
 ![Ionization constants](https://ragnarok.joefang.org/static/xm7pidee8iolc35sig3g8i1nmsc148te9.webp)
 

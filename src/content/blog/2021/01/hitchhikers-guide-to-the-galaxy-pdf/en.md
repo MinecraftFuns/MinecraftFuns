@@ -1,6 +1,6 @@
 ---
 title: "Sharing: PDF Edition of The Hitchhiker's Guide to the Galaxy"
-description: "Sharing IPFS, jsDelivr, and Internet Archive backup download links for the Chinese and English PDF editions of The Hitchhiker's Guide to the Galaxy."
+description: "Sharing mirror, jsDelivr, and Internet Archive backup download links for the Chinese and English PDF editions of The Hitchhiker's Guide to the Galaxy."
 date: "2021-01-15"
 tags: ["Reading", "Sharing"]
 translation: machine
@@ -34,7 +34,7 @@ The OneDrive link in the original post is dead, so the files could only be downl
 > `File name` 【精】《银河系漫游指南》`.pdf` (the Chinese translation)  
 > `SHA256` *aba61aba50f3911a9b33346843df5ae95ae8d4258b2256fa05b608dccdabcd00*  
 > `IPFS CID` **bafybeigcqgirpahkvexul66gilfadqtcxca6cyyf4oabysnvjvufiqhwv4**  
-> [IPFS Gateway link](https://bafybeigcqgirpahkvexul66gilfadqtcxca6cyyf4oabysnvjvufiqhwv4.ipfs.inbrowser.link/?filename=%E3%80%90%E7%B2%BE%E3%80%91%E3%80%8A%E9%93%B6%E6%B2%B3%E7%B3%BB%E6%BC%AB%E6%B8%B8%E6%8C%87%E5%8D%97%E3%80%8B.pdf)  
+> [Mirror link](https://ragnarok.joefang.org/static/xs368o27ejs1h8j68dt7t3ouagrjh0rse.pdf)  
 > [jsDelivr link](https://cdn.jsdelivr.net/gh/PetrichorA/page-8701e329@0.5.2/6596504f-ec41-7a97-0453-ab2deed23818.pdf)  
 > [Internet Archive backup](https://archive.org/download/20210116_20210116_0114/%E3%80%90%E7%B2%BE%E3%80%91%E3%80%8A%E9%93%B6%E6%B2%B3%E7%B3%BB%E6%BC%AB%E6%B8%B8%E6%8C%87%E5%8D%97%E3%80%8B.pdf)  
 >
@@ -42,6 +42,6 @@ The OneDrive link in the original post is dead, so the files could only be downl
 > `File name` 【精】《银河系漫游指南》（英）`.pdf` (the English original)  
 > `SHA256` *22358d1157b3aa7fc478b1700eab5e0c6c998e314e0b90ae0fec2a6d6d7e05f0*  
 > `IPFS CID` **bafkreibcgwgrcv5tvj74i6froahkwxqmnsmy4mkoboik4d7mfjww27qf6a**  
-> [IPFS Gateway link](https://bafkreibcgwgrcv5tvj74i6froahkwxqmnsmy4mkoboik4d7mfjww27qf6a.ipfs.inbrowser.link/?filename=%E3%80%90%E7%B2%BE%E3%80%91%E3%80%8A%E9%93%B6%E6%B2%B3%E7%B3%BB%E6%BC%AB%E6%B8%B8%E6%8C%87%E5%8D%97%E3%80%8B%EF%BC%88%E8%8B%B1%EF%BC%89.pdf)  
+> [Mirror link](https://ragnarok.joefang.org/static/xku2nof9pv6c0amnuselnok4ba7r442su.pdf)  
 > [jsDelivr link](https://cdn.jsdelivr.net/gh/PetrichorA/page-8701e329@0.5.2/e45feae3-3232-2984-3ee9-30472822132e.pdf)  
 > [Internet Archive backup](https://archive.org/download/20210116_20210116_0114/%E3%80%90%E7%B2%BE%E3%80%91%E3%80%8A%E9%93%B6%E6%B2%B3%E7%B3%BB%E6%BC%AB%E6%B8%B8%E6%8C%87%E5%8D%97%E3%80%8B%EF%BC%88%E8%8B%B1%EF%BC%89.pdf)  

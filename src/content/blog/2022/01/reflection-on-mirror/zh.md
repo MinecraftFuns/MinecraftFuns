@@ -5,7 +5,7 @@ date: "2022-01-17"
 tags: ["Essays"]
 ---
 
-> [看镜有感 | 鲁迅文集 · 杂文集 · 坟](https://bafkreice33ndk2llowzlmo6s3xtiovzytt3f4aatr5toynm5uvr5lbiq7y.ipfs.inbrowser.link/)
+> [看镜有感 | 鲁迅文集 · 杂文集 · 坟](https://ragnarok.joefang.org/static/xk3qe72a2ckk1ovi94n0lfj1fr2ffhdog)
 
 这篇文章非常犀利地讽刺了排外主义者，文章的观点放在现在也不过时。
 

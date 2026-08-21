@@ -7,7 +7,7 @@ tags: ["Chemistry", "Notes"]
 
 ![anime](https://ragnarok.joefang.org/static/xilsn9pjasmj7pumh7ob8br8t2qc05q1d.webp)
 
-[讲义](https://bafybeif5bdcmaxlsyvnwjfz6qvmnfampuetmaueiwowz4fa4pfgtkydbpq.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210402142521/https://cdn.jsdelivr.net/gh/PetrichorA/page-ede8d44d@206deb3d/data.pdf]
+[讲义](https://ragnarok.joefang.org/static/xd9otuqa5njnl9sdbs93qg5ne6ulrgpn2.pdf) :backup[https://web.archive.org/web/20210402142521/https://cdn.jsdelivr.net/gh/PetrichorA/page-ede8d44d@206deb3d/data.pdf]
 
 ## 气体实验流程
 

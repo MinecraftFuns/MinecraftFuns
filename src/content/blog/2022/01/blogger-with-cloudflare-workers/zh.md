@@ -219,7 +219,7 @@ if (url.pathname.startsWith('/_image/')) {
 
 ## 链接
 
-* [编程随想的博客 | program-think.blogspot.com](https://program-think.blogspot.com/) [$^\mathrm{Backup}$](https://bafkreifluze5k22qy4mxgd424wycj5ik2mdjkbrhhmigf5on7mruv3qlx4.ipfs.inbrowser.link/)
-* [Pricing · Cloudflare Workers文档 | developers.cloudflare.com](https://developers.cloudflare.com/workers/platform/pricing) [$^\mathrm{Backup}$](https://bafkreia56a6zx37esl6zurjqbuffsh65xubwuxn3inrf3xi6k4lnrlnzhu.ipfs.inbrowser.link/)
-* [Contact @SophonCI | t.me](https://t.me/SophonCI) [$^\mathrm{Backup}$](https://bafkreigm7rxtxesk6yceynysvy5ikjb3mfdw5bphnpppblzsmd7e6yadiy.ipfs.inbrowser.link/)
-* [用Cloudflare Workers反代Blogger | cnblogs.com](https://www.cnblogs.com/Helium-Air/p/15646483.html) [$^\mathrm{Backup}$](https://bafkreib3qyic376ciotlili7r34kkfjjmm64qpinzsqllreyfxwwz5tefi.ipfs.inbrowser.link/)
+* [编程随想的博客 | program-think.blogspot.com](https://program-think.blogspot.com/) [$^\mathrm{Backup}$](https://ragnarok.joefang.org/static/x15mmgcksrdjg00otno48pn92athaqd4e)
+* [Pricing · Cloudflare Workers文档 | developers.cloudflare.com](https://developers.cloudflare.com/workers/platform/pricing) [$^\mathrm{Backup}$](https://ragnarok.joefang.org/static/x5p4vu3gpbane8pe983ouvnhggul3hpn1)
+* [Contact @SophonCI | t.me](https://t.me/SophonCI) [$^\mathrm{Backup}$](https://ragnarok.joefang.org/static/xm4lu3lkr3g30is1sgq7trksfah0rvnrc)
+* [用Cloudflare Workers反代Blogger | cnblogs.com](https://www.cnblogs.com/Helium-Air/p/15646483.html) [$^\mathrm{Backup}$](https://ragnarok.joefang.org/static/xgjdonhj6t4ftb6t17s5vl6gn77vn3r8f)

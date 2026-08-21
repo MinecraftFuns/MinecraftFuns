@@ -22,5 +22,5 @@ On a personal level, everyone has a different "level" and different upbringing, 
 
 From an individual standpoint, there are indeed cases where excessive use of electronics seriously affects someone's life, but these are a "small minority." Analyzing extreme cases cannot lead to the conclusion that electronics "cause harm to society." Still, many students are unwilling to be counted among the "majority," which is why some of them criticize electronics in the "grade-level excellent essays." Electronics will not cause harm to society, but their harm to the individual is a matter that deserves separate discussion.
 
-* [Original document (page 1)](https://bafkreibqcyenpxx4ykvltfhk4uldo6ay5jad7cidtiggbjhfdtazd5yw7m.ipfs.inbrowser.link/)
-* [Original document (page 2)](https://bafkreih2ohbq3ijvxgtxbk2qtzmqfq46jsbzksjkvebpxhozeojcnhmitm.ipfs.inbrowser.link/)
+* [Original document (page 1)](https://ragnarok.joefang.org/static/xqs2mb0ka5spgarnang53smcdjtke3fea.jpg)
+* [Original document (page 2)](https://ragnarok.joefang.org/static/x2n314pa2ksrkjvs63gnrv8h0i22ma2uh.jpg)

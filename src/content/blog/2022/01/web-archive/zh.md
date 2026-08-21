@@ -23,7 +23,7 @@ tags: ["Tools", "Guide"]
 
 我们不妨把存档网页拆分成「获取网页」和「内容存储」两个步骤，这样就有很多现成的工具了。
 
-说到「获取网页」，浏览器插件 [SingleFile](https://github.com/gildas-lormeau/SingleFile) 可以几乎做到「完美地将网页转换成单个HTML」，我保存了一篇文章「对抗link rot」，可以查看[示例](https://bafkreieowjptq7z5h6bju46jopd3nijqpa3aoeuregy55y325clju23lje.ipfs.inbrowser.link/)以了解该插件的效果。SingleFile已在 [Firefox扩展](https://addons.mozilla.org/firefox/addon/single-file)、[Chrome网上应用店](https://chrome.google.com/webstore/detail/singlefile/mpiodijhokgodhhofbcjdecpffjipkle) 和 [Microsoft Edge Addons](https://microsoftedge.microsoft.com/addons/detail/singlefile/efnbkdcfmcmnhlkaijjjmhjjgladedno) 上线。
+说到「获取网页」，浏览器插件 [SingleFile](https://github.com/gildas-lormeau/SingleFile) 可以几乎做到「完美地将网页转换成单个HTML」，我保存了一篇文章「对抗link rot」，可以查看[示例](https://ragnarok.joefang.org/static/xs3mn2i0h9h0go84rbga5nkli92mu09sk)以了解该插件的效果。SingleFile已在 [Firefox扩展](https://addons.mozilla.org/firefox/addon/single-file)、[Chrome网上应用店](https://chrome.google.com/webstore/detail/singlefile/mpiodijhokgodhhofbcjdecpffjipkle) 和 [Microsoft Edge Addons](https://microsoftedge.microsoft.com/addons/detail/singlefile/efnbkdcfmcmnhlkaijjjmhjjgladedno) 上线。
 
 对于「内容存储」来说，可用的工具便不胜枚举了。GitHub和GitLab提供免费的公共 / 私人存储库，Cloudflare Pages提供免费的静态网页托管服务（GitHub Pages在你国被屏蔽得彻彻底底 `￣へ￣`），你可以迅速地拼凑出一个可用的免费存储 + 分享方案。AWS / Google Cloud / 阿里云 / 腾讯云均提供对象存储服务（AWS / Google Cloud在特殊时期可能连接不畅，阿里云 / 腾讯云会审核政治敏感的内容），存储几个网页所需的成本可以忽略。
 
@@ -35,9 +35,9 @@ tags: ["Tools", "Guide"]
 
 于是，一个相对好用的网页存档方案就成型了。以下是一些实例：
 
-* [Live Not By Lies | Aleksandr Solzhenitsyn | www.orthodoxytoday.org](https://bafkreignhtl7ueljxzpv6w3ojkvr2x22javfbcsx7tm34g5w7rqrxfghfu.ipfs.inbrowser.link/)
-* [中央情报局特工是如何被北京发现的？| iyouport.substack.com](https://bafybeidmvcvhmjk4wlatzxnbytixxq3hdojocan3w26o36m5pjo4jsztmi.ipfs.inbrowser.link/)
-* [分布式共识与去中心化 | 1byte.io](https://bafkreid3vycse7u6m6vhjbsmgyep3zcsi4u7qk242hlcoaq7ph4nlvmeve.ipfs.inbrowser.link/)
+* [Live Not By Lies | Aleksandr Solzhenitsyn | www.orthodoxytoday.org](https://ragnarok.joefang.org/static/xpv9fvr14542itut27hqn3arvqmvj3qtc)
+* [中央情报局特工是如何被北京发现的？| iyouport.substack.com](https://ragnarok.joefang.org/static/x3pmke07am24cjm00ai61pmdcv44jilss)
+* [分布式共识与去中心化 | 1byte.io](https://ragnarok.joefang.org/static/x7gk710v8dbvodndgmb1cdv4er9020com)
 
 ## 更新
 

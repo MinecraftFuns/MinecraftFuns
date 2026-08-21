@@ -96,7 +96,7 @@ $\therefore a\le\frac 1 2$（必要）
 
 ## 讲义
 
-* [原始文件（第1页）](https://bafkreiga2v67fpahktg6q5xxsl2mion3mbm5zhowhqq6zdw2kvw7t4vlma.ipfs.inbrowser.link/)
-* [原始文件（第2页）](https://bafkreif2aeupiask2cs5xri4oerr2rtr6rwvgnvm4ovlbd67wefyanqwom.ipfs.inbrowser.link/)
-* [原始文件（第3页）](https://bafkreihxt4zh6ok25kntbrquqqnqn6e2bcbv2l65ypftammo32gjtsdwhu.ipfs.inbrowser.link/)
-* [原始文件（第4页）](https://bafkreiddvlnppokikgzxq2ngxfw4xoydelf6fyu3ff5pmnkfqmuiyrlrh4.ipfs.inbrowser.link/)
+* [原始文件（第1页）](https://ragnarok.joefang.org/static/x5jb5iapnkonss5o0q96ftuhbu278v6nq.jpg)
+* [原始文件（第2页）](https://ragnarok.joefang.org/static/xi9l0b58amsagt3atm26osi0g8tvbadl8.jpg)
+* [原始文件（第3页）](https://ragnarok.joefang.org/static/xaboqbsnl45nsu9gr4utsi3ofjpjolvk0.jpg)
+* [原始文件（第4页）](https://ragnarok.joefang.org/static/xlci3jgf4jus55sdub9a5lfllqfa9ngf8.jpg)

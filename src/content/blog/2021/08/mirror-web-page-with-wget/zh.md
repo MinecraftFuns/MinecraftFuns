@@ -49,10 +49,10 @@ wget -mkEpnp https://example.com/something.html
 
 ## 你知道吗
 
-`wget` 在Windows下有一个单文件版本，非常适合放在U盘上随身携带，这里也一并放出来：[wget.exe](https://bafybmidj6zl4ellqyzhso63o3jvlfasjtzqnqij323ulvdwolf62z5kq2a.ipfs.inbrowser.link/?filename=wget.exe)。
+`wget` 在Windows下有一个单文件版本，非常适合放在U盘上随身携带，这里也一并放出来：[wget.exe](https://ragnarok.joefang.org/static/xv9437rv91ef9dritrmo3sm8h3uihra5s.exe)。
 
 ## 另请参阅
 
 * [Make Offline Mirror of a Site using `wget`](https://www.guyrutenberg.com/2014/05/02/make-offline-mirror-of-a-site-using-wget/) :backup[https://arweave.net/XBKigRYDTxEJkelD3LlekBlX4w1dngY6UKWoRXUKb_w]
 * [NTFS - 维基百科，自由的百科全书](https://zh.wikipedia.org/wiki/NTFS) :backup[https://arweave.net/bAjaNG3xyUrE11HXzrdduGzcLM1sYhV75dqHjg7mURs]
-* [wget.exe for Windows](https://bafybmidj6zl4ellqyzhso63o3jvlfasjtzqnqij323ulvdwolf62z5kq2a.ipfs.inbrowser.link/?filename=wget.exe) :backup[https://arweave.net/BrFz4svx6e9sw8n2NNZGSWJ_ftrEPcKxJPXglH2eaaE]
+* [wget.exe for Windows](https://ragnarok.joefang.org/static/xv9437rv91ef9dritrmo3sm8h3uihra5s.exe) :backup[https://arweave.net/BrFz4svx6e9sw8n2NNZGSWJ_ftrEPcKxJPXglH2eaaE]

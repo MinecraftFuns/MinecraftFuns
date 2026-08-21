@@ -13,7 +13,7 @@ translation: machine
 ## Problem link
 
 * [Codeforces](https://codeforces.com/gym/101173/attachments)
-* [PDF](https://bafkreibxglqbn6e7btfmilq5vtnyefyguvjidrnrn4t6vuoklnolrbcoea.ipfs.inbrowser.link/)
+* [PDF](https://ragnarok.joefang.org/static/xlaka79a7hlrdkrv863163f75fcs60kld.pdf)
 
 ---
 
@@ -26,7 +26,7 @@ Given an *n × m* **bipartite graph** with vertex weights, how many **subsets th
 If, in some matching of a graph, **every vertex is matched**, then it is a perfect matching.  
 > Obviously, a **perfect matching** must be a **maximum matching** *(every vertex in a perfect matching is already matched, so adding a new matching edge would necessarily conflict with an existing one)*, but **not every graph** has a **perfect matching**.
 
-[Related knowledge - Maximum matching / Perfect matching](https://bafkreihpfhjisduom22td3xbtbsseecbgesxqbit3vrjerorwtkr42gedq.ipfs.inbrowser.link/)
+[Related knowledge - Maximum matching / Perfect matching](https://ragnarok.joefang.org/static/x4jv45quntp22snp713613qi709bqotkr.pdf)
 
 > Matching: in graph theory, a "matching" is a set of edges in which no two edges share a common vertex.  
 > Maximum matching: among all matchings of a graph, the one containing the most matching edges is called the graph's maximum matching.  
@@ -43,7 +43,7 @@ Enumerate the states of *X* and *Y* separately, and use **Hall's theorem** to de
 
 ### Code
 
-> Full code available [here](https://bafkreifugimlrvug7s66weh3slmlcwtksjubnm4dj5g4wmaxo7rrv3upnm.ipfs.inbrowser.link/)
+> Full code available [here](https://ragnarok.joefang.org/static/xt7jq4q3960e0v38557nlnh2rba2qbb98.cpp)
 
 ```cpp
 C int N = 20;
@@ -158,13 +158,13 @@ Hall's theorem states that if the above fact holds for every nonempty subset of 
 
 ![Proof of Hall's theorem](https://ragnarok.joefang.org/static/x1psdt8jtb1j6jutnqvn1i7n1vjsfpv1l.jpg)
 
-Cached - [http://faculty.wwu.edu/sarkara/hall.pdf](https://bafkreigxbfy2otqvi3rzfvldrlvhvwqvagxdkext7m4llohjjl7vbhnqx4.ipfs.inbrowser.link/)
+Cached - [http://faculty.wwu.edu/sarkara/hall.pdf](https://ragnarok.joefang.org/static/xakdp9tg6schf19a49vtfgd87isj5clvm.pdf)
 
 ### A neat corollary
 
 Suppose the two vertex sets are `X` and `Y`; then the size of the bipartite graph's maximum matching is `|X| - max{|W| - N(W)}`, where `W` is a subset of `X`  
 > For certain special problems, this lets you find the maximum matching directly without building the graph  
-> From [Hall's theorem and perfect bipartite matching - dummyummy - cnblogs](https://bafkreih6gsfrwjjtaqgap4u3rffvh34bm2mwpjpwopzxwylfnsuz66vqgm.ipfs.inbrowser.link/)  
+> From [Hall's theorem and perfect bipartite matching - dummyummy - cnblogs](https://ragnarok.joefang.org/static/xlfhdntmsf6jt2h3it239c6bnqijrg5fr.pdf)  
 > Let the two vertex sets of bipartite graph `G` be `X` and `Y` (assume `|X| ≤ |Y|`). The **necessary and sufficient condition** for `G` to have a set of vertex-disjoint edges with one endpoint exactly covering `X` (that is, **a perfect matching on the `X` side exists**) is: **any `k` vertices in `X` are adjacent to at least `k` vertices in `Y`**; that is, for a vertex subset `W` of `X`, letting `N(W)` denote all neighbors of `W`, Hall's theorem says that for any `W`, `|W| ≤ |N(W)|`
 
 ---
@@ -237,7 +237,7 @@ Next, we still need to prove that the resulting pairing is indeed stable.
 > Links to the original content can be found in the `footnotes`  
 > Some references are scattered throughout the text instead, sorry about that
 
-* [GYM 101173B - Bipartite Blanket - a free man - CSDN](https://bafybeia52k3ua4uxmsi5s57pykdaxfcr4i7aicota723l3sf3vsh4j4hpq.ipfs.inbrowser.link/)
-* [Codeforces Gym 101173B Bipartite Blanket: Hall's theorem and bitmask DP - Ogiso_Setsuna - cnblogs](https://bafkreiankx4zl2htixcquhgmicn25kg4i5iyhplovqwrfdi2fjaglfwadi.ipfs.inbrowser.link/)
-* [The stable marriage matching problem - Wulili - cnblogs](https://bafkreihtn7raqggotg2x7ie2vwqz57l7ihmjsqx6cnaodevth5akgwk3la.ipfs.inbrowser.link/)
-* [Hall's marriage theorem - Wikipedia](https://bafkreied4azbfmpmagjuoboqj42irglrvi6tfhsartswdv6jdt4d5git2a.ipfs.inbrowser.link/)
+* [GYM 101173B - Bipartite Blanket - a free man - CSDN](https://ragnarok.joefang.org/static/xrt9p9gs29ojtun3uokv6d43742eb2omr.pdf)
+* [Codeforces Gym 101173B Bipartite Blanket: Hall's theorem and bitmask DP - Ogiso_Setsuna - cnblogs](https://ragnarok.joefang.org/static/xk1kaihp5gl2jriutmu07296pdatiuv9h.pdf)
+* [The stable marriage matching problem - Wulili - cnblogs](https://ragnarok.joefang.org/static/xqsv6e0dttgd4q4lcs82tkcb3jd3jtkg3.pdf)
+* [Hall's marriage theorem - Wikipedia](https://ragnarok.joefang.org/static/xsvegdmhbls6rduig2djmsikmescotgsu.pdf)

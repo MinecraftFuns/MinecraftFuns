@@ -81,4 +81,4 @@ but a 32-bit space is small enough that crude is the correct answer.
 easystream3 is entry level and needs very little insight. If it were a
 Codeforces problem I would tag it `implementation`.
 
-> This article is also available in [Chinese](https://bafkreiccxkgfot73sjtq6rx6ruvuks3dt4tf63nh6ksdtxupegsedh6bce.ipfs.inbrowser.link/?filename=Crypto.pdf).
+> This article is also available in [Chinese](https://ragnarok.joefang.org/static/x56c6fe33759pnuroopva8hslmkuptif5.pdf).

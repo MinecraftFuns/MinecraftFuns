@@ -21,5 +21,5 @@ tags: ["Essays"]
 
 从个体的角度讲，确实存在过度使用电子产品使生活受到严重影响的案例，但这只是“极少数”。如果拿极端的案例来分析，无法得出“对社会造成危害”的结论。但是，许多同学还是不甘于做“大多数”的，因此在“年级优秀作文”中会有同学对电子产品进行指责。电子产品不会对社会造成危害，但对个体的危害性，就应重新讨论了。
 
-* [原始文件（第1页）](https://bafkreibqcyenpxx4ykvltfhk4uldo6ay5jad7cidtiggbjhfdtazd5yw7m.ipfs.inbrowser.link/)
-* [原始文件（第2页）](https://bafkreih2ohbq3ijvxgtxbk2qtzmqfq46jsbzksjkvebpxhozeojcnhmitm.ipfs.inbrowser.link/)
+* [原始文件（第1页）](https://ragnarok.joefang.org/static/xqs2mb0ka5spgarnang53smcdjtke3fea.jpg)
+* [原始文件（第2页）](https://ragnarok.joefang.org/static/x2n314pa2ksrkjvs63gnrv8h0i22ma2uh.jpg)

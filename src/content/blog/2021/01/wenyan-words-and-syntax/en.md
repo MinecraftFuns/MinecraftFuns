@@ -8,7 +8,7 @@ translation: machine
 
 ![0.webp](https://ragnarok.joefang.org/static/x4ukou0h6juandf3losuub2pdje8dhhkg.webp)
 
-[Handout](https://bafybeicwkju2klpdmuxwus5bzmxidcsn7ia2z2546fmhifb7fzdvyzhsdi.ipfs.inbrowser.link/) :backup[https://web.archive.org/web/20210111114844/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.1/8d/d3/36/30/8dd33630122bce185ae03a90ad74123a7bc5d20e0f7a401e8c67a0c5f5198007.pdf]
+[Handout](https://ragnarok.joefang.org/static/xleoaf3usi25d3ace9nemr2p6tekgk9jl.pdf) :backup[https://web.archive.org/web/20210111114844/https://cdn.jsdelivr.net/gh/urlib/bin_12@0.0.1/8d/d3/36/30/8dd33630122bce185ae03a90ad74123a7bc5d20e0f7a401e8c67a0c5f5198007.pdf]
 
 ## Content Words and Function Words in Classical Chinese
 

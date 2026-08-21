@@ -12,7 +12,7 @@ tags: ["Codeforces", "Editorial", "Graph Theory", "Combinatorics"]
 ## 题目链接
 
 * [Codeforces](https://codeforces.com/gym/101173/attachments)
-* [PDF](https://bafkreibxglqbn6e7btfmilq5vtnyefyguvjidrnrn4t6vuoklnolrbcoea.ipfs.inbrowser.link/)
+* [PDF](https://ragnarok.joefang.org/static/xlaka79a7hlrdkrv863163f75fcs60kld.pdf)
 
 ---
 
@@ -25,7 +25,7 @@ tags: ["Codeforces", "Editorial", "Graph Theory", "Combinatorics"]
 如果一个图的某个匹配中，**所有的顶点都是匹配点**，那么它就是一个完美匹配。  
 > 显然，**完美匹配**一定是**最大匹配** *（完美匹配的任何一个点都已经匹配，添加一条新的匹配边一定会与已有的匹配边冲突）*，但**并非每个图**都存在**完美匹配**。
 
-[相关知识 - 最大匹配 / 完美匹配](https://bafkreihpfhjisduom22td3xbtbsseecbgesxqbit3vrjerorwtkr42gedq.ipfs.inbrowser.link/)
+[相关知识 - 最大匹配 / 完美匹配](https://ragnarok.joefang.org/static/x4jv45quntp22snp713613qi709bqotkr.pdf)
 
 > 匹配：在图论中，一个「匹配」是一个边的集合，其中任意两条边都没有公共顶点。  
 > 最大匹配：一个图所有匹配中，所含匹配边数最多的匹配，称为这个图的最大匹配。  
@@ -42,7 +42,7 @@ tags: ["Codeforces", "Editorial", "Graph Theory", "Combinatorics"]
 
 ### 代码
 
-> 完整代码见 [这里](https://bafkreifugimlrvug7s66weh3slmlcwtksjubnm4dj5g4wmaxo7rrv3upnm.ipfs.inbrowser.link/)
+> 完整代码见 [这里](https://ragnarok.joefang.org/static/xt7jq4q3960e0v38557nlnh2rba2qbb98.cpp)
 
 ```cpp
 C int N = 20;
@@ -157,13 +157,13 @@ int main()
 
 ![证明霍尔定理](https://ragnarok.joefang.org/static/x1psdt8jtb1j6jutnqvn1i7n1vjsfpv1l.jpg)
 
-已缓存 - [http://faculty.wwu.edu/sarkara/hall.pdf](https://bafkreigxbfy2otqvi3rzfvldrlvhvwqvagxdkext7m4llohjjl7vbhnqx4.ipfs.inbrowser.link/)
+已缓存 - [http://faculty.wwu.edu/sarkara/hall.pdf](https://ragnarok.joefang.org/static/xakdp9tg6schf19a49vtfgd87isj5clvm.pdf)
 
 ### 奇妙推论
 
 假设两边的点集分别为 `X，Y`，则二分图的最大匹配数为 `|X| - max{|W| - N(W)}`，其中 `W` 是 `X` 的子集  
 > 对于一些特殊的题目，它可以免去建图而直接求最大匹配  
-> 来自 [Hall定理 二分图完美匹配 - dummyummy - 博客园](https://bafkreih6gsfrwjjtaqgap4u3rffvh34bm2mwpjpwopzxwylfnsuz66vqgm.ipfs.inbrowser.link/)  
+> 来自 [Hall定理 二分图完美匹配 - dummyummy - 博客园](https://ragnarok.joefang.org/static/xlfhdntmsf6jt2h3it239c6bnqijrg5fr.pdf)  
 > 二分图 `G` 中的两部分顶点组成的集合分别为 `X, Y` (假设有 `|X| ≤ |Y|` )。`G` 中有一组无公共点的边，一端恰好为组成 `X` 的点（也就是**存在完美匹配**）的**充分必要条件**是：**`X` 中的任意 `k` 个点至少与 `Y` 中的 `k` 个点相邻**，即对于 `X` 中的一个点集 `W`，令 `N(W)` 为 `W` 的所有邻居，霍尔定理即对于任意 `W`，`|W| ≤ |N(W)|`
 
 ---
@@ -236,7 +236,7 @@ int main()
 > 指向原始内容的链接可见 `脚注`  
 > 部分参考资料散落在文中，请谅解
 
-* [GYM 101173B - Bipartite Blanket - a free man - CSDN](https://bafybeia52k3ua4uxmsi5s57pykdaxfcr4i7aicota723l3sf3vsh4j4hpq.ipfs.inbrowser.link/)
-* [【Codeforces】Gym 101173B Bipartite Blanket霍尔定理+状压DP - Ogiso_Setsuna - 博客园](https://bafkreiankx4zl2htixcquhgmicn25kg4i5iyhplovqwrfdi2fjaglfwadi.ipfs.inbrowser.link/)
-* [稳定婚姻匹配问题 - 唔哩Wulili - 博客园](https://bafkreihtn7raqggotg2x7ie2vwqz57l7ihmjsqx6cnaodevth5akgwk3la.ipfs.inbrowser.link/)
-* [Hall's marriage theorem - Wikipedia](https://bafkreied4azbfmpmagjuoboqj42irglrvi6tfhsartswdv6jdt4d5git2a.ipfs.inbrowser.link/)
+* [GYM 101173B - Bipartite Blanket - a free man - CSDN](https://ragnarok.joefang.org/static/xrt9p9gs29ojtun3uokv6d43742eb2omr.pdf)
+* [【Codeforces】Gym 101173B Bipartite Blanket霍尔定理+状压DP - Ogiso_Setsuna - 博客园](https://ragnarok.joefang.org/static/xk1kaihp5gl2jriutmu07296pdatiuv9h.pdf)
+* [稳定婚姻匹配问题 - 唔哩Wulili - 博客园](https://ragnarok.joefang.org/static/xqsv6e0dttgd4q4lcs82tkcb3jd3jtkg3.pdf)
+* [Hall's marriage theorem - Wikipedia](https://ragnarok.joefang.org/static/xsvegdmhbls6rduig2djmsikmescotgsu.pdf)

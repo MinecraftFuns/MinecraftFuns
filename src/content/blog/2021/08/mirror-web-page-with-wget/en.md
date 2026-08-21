@@ -50,10 +50,10 @@ where `np` is short for `--no-parent`.
 
 ## Did you know
 
-`wget` has a single-file build for Windows, which is great for carrying around on a USB drive; here it is too: [wget.exe](https://bafybmidj6zl4ellqyzhso63o3jvlfasjtzqnqij323ulvdwolf62z5kq2a.ipfs.inbrowser.link/?filename=wget.exe).
+`wget` has a single-file build for Windows, which is great for carrying around on a USB drive; here it is too: [wget.exe](https://ragnarok.joefang.org/static/xv9437rv91ef9dritrmo3sm8h3uihra5s.exe).
 
 ## See also
 
 * [Make Offline Mirror of a Site using `wget`](https://www.guyrutenberg.com/2014/05/02/make-offline-mirror-of-a-site-using-wget/) :backup[https://arweave.net/XBKigRYDTxEJkelD3LlekBlX4w1dngY6UKWoRXUKb_w]
 * [NTFS - Wikipedia](https://zh.wikipedia.org/wiki/NTFS) :backup[https://arweave.net/bAjaNG3xyUrE11HXzrdduGzcLM1sYhV75dqHjg7mURs]
-* [wget.exe for Windows](https://bafybmidj6zl4ellqyzhso63o3jvlfasjtzqnqij323ulvdwolf62z5kq2a.ipfs.inbrowser.link/?filename=wget.exe) :backup[https://arweave.net/BrFz4svx6e9sw8n2NNZGSWJ_ftrEPcKxJPXglH2eaaE]
+* [wget.exe for Windows](https://ragnarok.joefang.org/static/xv9437rv91ef9dritrmo3sm8h3uihra5s.exe) :backup[https://arweave.net/BrFz4svx6e9sw8n2NNZGSWJ_ftrEPcKxJPXglH2eaaE]
