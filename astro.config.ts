@@ -60,6 +60,29 @@ export default defineConfig({
    */
   vite: {
     plugins: [tailwindcss()],
+    /*
+     * Longer content hashes on the fingerprinted assets.
+     *
+     * `_astro/` is served `immutable` for a year, which is a promise that a
+     * name will never come to mean different bytes. The default eight
+     * base64url characters carry 48 bits, and while that is ample for the
+     * seventy-odd files here, the failure it admits is not a stale cache but a
+     * permanently wrong one: a collision would pin the wrong file under a name
+     * nobody can invalidate, since the name is the cache key and the year has
+     * already been promised.
+     *
+     * Twenty-one is the ceiling; rolldown rejects anything longer. At six bits
+     * a character that is 126 bits, which is where this stops, two short of a
+     * round number and about 2^78 times the margin the default gave.
+     */
+    build: {
+      rollupOptions: {
+        output: {
+          assetFileNames: "_astro/[name].[hash:21][extname]",
+          chunkFileNames: "_astro/[name].[hash:21].js",
+        },
+      },
+    },
   },
   /*
    * The sitemap is derived from the routes the build actually emitted, which
