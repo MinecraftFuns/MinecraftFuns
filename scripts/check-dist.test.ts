@@ -11,6 +11,9 @@ import {
   candidatePaths,
   CHECKS,
   clientScripts,
+  executes,
+  scriptKind,
+  scriptKinds,
   expectedCanonical,
   wkdViolations,
   parseRedirects,
@@ -792,5 +795,63 @@ describe("firstPageAliases", () => {
       ),
       [],
     );
+  });
+});
+
+describe("script classification", () => {
+  it("treats an absent or empty type as a classic script, per the standard", () => {
+    assert.deepEqual(scriptKind(undefined), { tag: "classic" });
+    assert.deepEqual(scriptKind(""), { tag: "classic" });
+    assert.deepEqual(scriptKind("   "), { tag: "classic" });
+  });
+
+  it("matches every JavaScript MIME essence, case-insensitively", () => {
+    [
+      "text/javascript",
+      "TEXT/JAVASCRIPT",
+      " application/ecmascript ",
+      "text/jscript",
+    ].forEach((type) => assert.deepEqual(scriptKind(type), { tag: "classic" }, type));
+  });
+
+  it("knows the two keyword types", () => {
+    assert.deepEqual(scriptKind("module"), { tag: "module" });
+    assert.deepEqual(scriptKind("MODULE"), { tag: "module" });
+    assert.deepEqual(scriptKind("importmap"), { tag: "importmap" });
+  });
+
+  it("calls anything else a data block, which is the point of the exercise", () => {
+    assert.deepEqual(scriptKind("speculationrules"), {
+      tag: "data",
+      type: "speculationrules",
+    });
+    assert.deepEqual(scriptKind("application/ld+json"), {
+      tag: "data",
+      type: "application/ld+json",
+    });
+  });
+
+  it("only classic and module scripts execute", () => {
+    assert.equal(executes({ tag: "classic" }), true);
+    assert.equal(executes({ tag: "module" }), true);
+    assert.equal(executes({ tag: "data", type: "speculationrules" }), false);
+  });
+
+  it("reads the type off a start tag however it is quoted", () => {
+    assert.deepEqual(scriptKinds('<script type="module" defer></script>'), [
+      { tag: "module" },
+    ]);
+    assert.deepEqual(scriptKinds("<script type='module'></script>"), [{ tag: "module" }]);
+    assert.deepEqual(scriptKinds("<script type=module></script>"), [{ tag: "module" }]);
+    assert.deepEqual(scriptKinds("<script defer></script>"), [{ tag: "classic" }]);
+  });
+
+  it("passes a speculation rules block and still catches a real script", () => {
+    const page =
+      '<html><head><script type="speculationrules">{"prefetch":[]}</script>' +
+      "</head><body><script>x()</script></body></html>";
+    const found = clientScripts(artifact({ html: [doc("i.html", page)] }));
+    assert.equal(found.length, 1);
+    assert.match(found[0]?.detail ?? "", /classic script/);
   });
 });

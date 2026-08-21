@@ -102,7 +102,6 @@ const ATTRIBUTE = '\\s*=\\s*"([^"]*)"';
 
 const REFERENCE = new RegExp(`\\b(?:href|src)${ATTRIBUTE}`, "gi");
 const CANONICAL = new RegExp(`<link\\s+rel="canonical"\\s+href${ATTRIBUTE}`, "i");
-const SCRIPT_ELEMENT = /<script\b/i;
 
 /** Extract raw `href`/`src` values in source order. */
 export const extractReferences = (html: string): readonly string[] =>
@@ -369,12 +368,100 @@ export const firstPageAliases = ({
   ),
 ];
 
+/*
+ * What HTML does with a `<script>`, decided the way the standard decides it.
+ *
+ * "No client JavaScript" is a claim about what the engine will execute, and a
+ * `<script>` tag is not that claim's subject: the `type` attribute is. HTML's
+ * "prepare the script element" sorts an element into exactly four outcomes,
+ * and only two of them run author code. The rest are data blocks, which the
+ * standard says are "not processed by the user agent, but instead by author
+ * script or other tools" - inert markup carrying JSON, no different in kind
+ * from a `<meta>` tag.
+ *
+ * Reading every `<script>` as JavaScript would therefore reject a speculation
+ * rules block, which is the shape this site uses to hint at the next page and
+ * which no engine executes.
+ */
+
+/** The MIME essences the standard counts as JavaScript. */
+const JAVASCRIPT: ReadonlySet<string> = new Set([
+  "application/ecmascript",
+  "application/javascript",
+  "application/x-ecmascript",
+  "application/x-javascript",
+  "text/ecmascript",
+  "text/javascript",
+  "text/javascript1.0",
+  "text/javascript1.1",
+  "text/javascript1.2",
+  "text/javascript1.3",
+  "text/javascript1.4",
+  "text/javascript1.5",
+  "text/jscript",
+  "text/livescript",
+  "text/x-ecmascript",
+  "text/x-javascript",
+]);
+
+/** The four outcomes, closed, so the policy below can be total. */
+export type ScriptKind =
+  | { readonly tag: "classic" }
+  | { readonly tag: "module" }
+  | { readonly tag: "importmap" }
+  | { readonly tag: "data"; readonly type: string };
+
+/** HTML's ASCII whitespace, which the type attribute is stripped of. */
+const SURROUNDING_SPACE = /^[\t\n\f\r ]+|[\t\n\f\r ]+$/g;
+
+/**
+ * Classify one element by its `type`, per "prepare the script element".
+ *
+ * Absent, empty, or a JavaScript MIME *essence* match is a classic script.
+ * Essence is the bare `type/subtype`, so a parameter makes it no longer a
+ * match and the standard calls the result a data block; this follows the
+ * standard rather than second-guessing it. Total on every string.
+ */
+export const scriptKind = (type: string | undefined): ScriptKind => {
+  if (type === undefined) return { tag: "classic" };
+  const essence = type.replace(SURROUNDING_SPACE, "").toLowerCase();
+  if (essence === "" || JAVASCRIPT.has(essence)) return { tag: "classic" };
+  if (essence === "module") return { tag: "module" };
+  if (essence === "importmap") return { tag: "importmap" };
+  return { tag: "data", type: essence };
+};
+
+/**
+ * Whether the engine runs author JavaScript for this element.
+ *
+ * An import map runs nothing itself; it only redirects the specifiers of
+ * module scripts, and a module script is rejected above, so one arriving alone
+ * is inert. It is reported all the same, because the only reason to ship one
+ * is to serve a module that should not be here either.
+ */
+export const executes = (kind: ScriptKind): boolean => kind.tag !== "data";
+
+/* One start tag; generated markup quotes its attributes, per the note above. */
+const SCRIPT_START = /<script\b([^>]*)>/gi;
+const TYPE_ATTRIBUTE = /\btype\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i;
+
+/** Every script element in a document, classified. O(n) in the markup. */
+export const scriptKinds = (html: string): readonly ScriptKind[] =>
+  [...html.matchAll(SCRIPT_START)].map(([, attributes]) => {
+    const found = TYPE_ATTRIBUTE.exec(attributes ?? "");
+    return scriptKind(found?.[1] ?? found?.[2] ?? found?.[3]);
+  });
+
 /** Enforce the site's zero-client-JavaScript contract. */
 export const clientScripts = ({ js, html }: Artifact): readonly Violation[] => [
   ...js.map((path) => violation("zero-js", `unexpected client script: ${path}`)),
-  ...html
-    .filter(({ text }) => SCRIPT_ELEMENT.test(text))
-    .map(({ path }) => violation("zero-js", `inline <script> in ${path}`)),
+  ...html.flatMap(({ path, text }) =>
+    scriptKinds(text)
+      .filter(executes)
+      .map((kind) =>
+        violation("zero-js", `${path}: <script> runs as a ${kind.tag} script`),
+      ),
+  ),
 ];
 
 /** A rendered "undefined" is a prop that went missing, visible to a reader. */
