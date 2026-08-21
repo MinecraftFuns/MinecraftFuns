@@ -45,7 +45,7 @@ export const authoredProjects: readonly Project[] = [
     title: "Serval",
     description:
       "Configuration and scripts served from a URL that never moves, filled in per caller. Every revision is kept and any of them can be restored, and unlike a Gist, an edit evicts the cache instead of serving stale content.",
-    href: "https://github.com/BTreeMap/Serval",
+    href: "https://s.joefang.org/serval",
     since: 2026,
     until: null,
     tags: ["Rust", "PostgreSQL", "Content-addressed"],
@@ -56,7 +56,7 @@ export const authoredProjects: readonly Project[] = [
     title: "Letterbox",
     description:
       "An Android mail client that does not tell the sender you opened their email. Remote images are blocked by default, and the ones you allow are fetched through a WARP tunnel the app builds itself in Rust, so no proxy operator is doing the logging either.",
-    href: "https://github.com/BTreeMap/Letterbox",
+    href: "https://s.joefang.org/letterbox",
     since: 2025,
     until: null,
     tags: ["Kotlin", "Rust", "Android"],
@@ -67,7 +67,7 @@ export const authoredProjects: readonly Project[] = [
     title: "Lynx",
     description:
       "A self-hosted short-link service whose links outlive what they point at. Destinations are edited in place and every earlier one stays restorable; deletion is refused by a database trigger rather than by code that has to remember.",
-    href: "https://github.com/BTreeMap/Lynx",
+    href: "https://s.joefang.org/lynx",
     since: 2025,
     until: null,
     tags: ["Rust", "OAuth", "Self-hosted"],
@@ -77,7 +77,7 @@ export const authoredProjects: readonly Project[] = [
     title: "h4ckath0n",
     description:
       "A hackathon starter kit that begins past the login screen, so a weekend team does not spend its first hours on authentication. Passkeys by default, and roles the server decides rather than the token.",
-    href: "https://github.com/BTreeMap/h4ckath0n",
+    href: "https://s.joefang.org/h4ckath0n",
     since: 2025,
     until: null,
     tags: ["Python", "FastAPI", "WebAuthn"],
@@ -87,7 +87,7 @@ export const authoredProjects: readonly Project[] = [
     title: "Dockerfiles",
     description:
       "Container images for the software I self-host, rebuilt twice a day so nothing runs for months on whatever its dependencies were the day it was built. Workers steal jobs from their peers once they run dry, so nothing waits behind the slowest shard.",
-    href: "https://github.com/BTreeMap/Dockerfiles",
+    href: "https://s.joefang.org/dockerfiles",
     since: 2024,
     until: null,
     tags: ["Docker", "GitHub Actions", "Self-hosted"],
@@ -97,7 +97,7 @@ export const authoredProjects: readonly Project[] = [
     title: "SKILLs",
     description:
       "Reusable procedures for coding agents, written as Markdown that names no particular project, so the same file works in any repository. This site is one of the repositories that reads them.",
-    href: "https://github.com/BTreeMap/SKILLs",
+    href: "https://s.joefang.org/skills",
     since: 2026,
     until: null,
     tags: ["Agents", "Markdown", "Tooling"],
