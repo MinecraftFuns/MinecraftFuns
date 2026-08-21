@@ -30,13 +30,12 @@ import { routeUrl } from "../lib/url.ts";
     </p>
     <p>
       Whether anything was ever here, a 404 does not say. There is a separate code for
-      that stronger claim, 410 Gone, and it is vanishingly rare because knowing a thing is
-      absent costs far more than failing to find it.
+      that stronger claim, 410 Gone, and almost nobody sends it: a server would have to
+      remember what it deleted, and this one keeps no such record.
     </p>
     <p>
       Probably a typo, and not necessarily yours. If a link on this site sent you here,
-      that is my bug: the <a href={routeUrl("/about")}>about page</a>
-      says how to reach me.
+      that is my bug: the <a href={routeUrl("/about")}>about page</a> says how to reach me.
     </p>
   </div>
 </BaseLayout>
