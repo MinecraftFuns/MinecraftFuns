@@ -54,7 +54,7 @@ const backup = directive<string>({
  */
 const LABEL: Readonly<Record<Lang, string>> = {
   en: "backup",
-  zh: "存档",
+  zh: "备份",
 };
 
 /** Every directive the archive may use. */

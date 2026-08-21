@@ -142,7 +142,21 @@ const payloadOf = (site: Site, label: string): Payload | undefined => {
   return paired ? { label, attributes } : undefined;
 };
 
-/** Derive rendition language from its filename; fall back to site language. */
+/**
+ * The language a directive renders in.
+ *
+ * The page cannot hand this down: Markdown is compiled before the component
+ * that knows the rendition exists. So this reads the same authority the
+ * article model reads: the filename, exactly as `archive.ts` reads it. `zh.md`
+ * *is* the Chinese rendition, and nothing else in the file says so.
+ *
+ * The site language is a decision here rather than a fallback, and the
+ * distinction matters: a name that is not a language code belongs to a
+ * document that has only one language (`declaration.md`, a doc), and a
+ * rendition's name always parses, because `article.ts` refuses to build an
+ * article from a file whose name it cannot read. There is no third case in
+ * which this quietly guesses wrong.
+ */
 export const langOf = (fileURL: URL | undefined): Lang => {
   if (fileURL === undefined) return SITE_LANG;
   const stem =

@@ -211,7 +211,7 @@ describe("the pipeline: prose survives the feature being on", () => {
 
 describe("the pipeline: directives render", () => {
   it("renders a backup in the rendition's own language", () => {
-    assert.match(render(":backup[https://archive.is/x]", "zh.md").html, /存档<\/a>/u);
+    assert.match(render(":backup[https://archive.is/x]", "zh.md").html, /备份<\/a>/u);
     assert.match(render(":backup[https://archive.is/x]", "en.md").html, /backup<\/a>/);
   });
 
