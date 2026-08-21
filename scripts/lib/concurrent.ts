@@ -15,3 +15,6 @@ export const mapConcurrent = async <T, R>(
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
   return results;
 };
+
+/** Open file handles, which a directory listing otherwise bounds. */
+export const READ_CONCURRENCY = 16;

@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /** Source gate rejecting non-local loop jumps; AST parsing avoids text matches. */
 
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
 
 import ts from "typescript";
 
+import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
+import { filesUnder } from "./lib/files.ts";
 import { moduleBodyOnly } from "./lib/frontmatter.ts";
 import { each, report } from "./lib/gate.ts";
 
@@ -70,24 +72,18 @@ const REMEDY: Readonly<Record<Keyword, string>> = {
 /** Directories to scan, and the extensions worth parsing in each. */
 const ROOTS = ["src", "scripts"];
 
-const sourcesUnder = async (dir: string): Promise<readonly string[]> => {
-  const entries = await readdir(dir, { recursive: true, withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isFile() && extensionOf(entry.name) in DIALECT)
-    .map((entry) => resolve(entry.parentPath, entry.name));
-};
+/** Only the dialects the parser knows; `jumps` would skip the rest anyway. */
+const parsable = (path: string): boolean => extensionOf(path) in DIALECT;
 
 const main = async () => {
   const files = [
-    ...(await Promise.all(ROOTS.map(sourcesUnder))).flat(),
+    ...(await Promise.all(ROOTS.map(filesUnder))).flat().filter(parsable),
     resolve("astro.config.ts"),
   ];
 
   const found = (
-    await Promise.all(
-      files.map(async (path) =>
-        jumps(relative(process.cwd(), path), await readFile(path, "utf8")),
-      ),
+    await mapConcurrent(files, READ_CONCURRENCY, async (path) =>
+      jumps(relative(process.cwd(), path), await readFile(path, "utf8")),
     )
   ).flat();
 

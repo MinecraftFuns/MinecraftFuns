@@ -7,7 +7,7 @@ import { assertNever } from "../src/prelude/adt.ts";
 import { deployments } from "../src/config/deployments.ts";
 import { languages } from "../src/config/languages.ts";
 import { captures } from "./lib/captures.ts";
-import { mapConcurrent } from "./lib/concurrent.ts";
+import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
 import { cannotRun, report } from "./lib/gate.ts";
 
@@ -75,9 +75,6 @@ export type Options = {
 /** Local copy keeps validation independent from production URL logic. */
 const slashTerminated = (path: string): string =>
   path.endsWith("/") ? path : `${path}/`;
-
-/** Open file handles, which a directory listing otherwise bounds. */
-const READ_CONCURRENCY = 16;
 
 /** A syntactically valid origin that can never resolve. RFC 2606 reserves it. */
 const PROBE_ORIGIN = "https://probe.invalid";
@@ -263,12 +260,24 @@ export const paletteFrom = (tokensCss: string): ReadonlySet<string> =>
 // Filesystem walk
 // ---------------------------------------------------------------------------
 
+/** Node marks a missing path with `ENOENT`; anything else is a real failure. */
+const isMissing = (error: unknown): boolean =>
+  error instanceof Error && "code" in error && error.code === "ENOENT";
+
+/**
+ * Absence, distinguished from inaccessibility.
+ *
+ * A bare `catch` would tell the reader to "run the build first" when the
+ * artifact is there but unreadable, which is the one instruction that cannot
+ * help. Permission and I/O errors propagate instead.
+ */
 const exists = async (path: string): Promise<boolean> => {
   try {
     await stat(path);
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    if (isMissing(error)) return false;
+    throw error;
   }
 };
 

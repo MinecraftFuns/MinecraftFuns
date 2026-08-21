@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { captures } from "./lib/captures.ts";
+import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
 import { frontmatter } from "./lib/frontmatter.ts";
 import { each, report } from "./lib/gate.ts";
@@ -88,22 +89,30 @@ export const typeRoles = (css: string): readonly string[] =>
     (role) => !role.includes("--") && !role.includes("*"),
   );
 
+/**
+ * Every `text-*` utility, capturing the whole role name.
+ *
+ * Maximal munch is what keeps a short role from matching inside a long one:
+ * `text-body-sm` yields `body-sm`, never `body`, so membership alone decides.
+ */
+const TYPE_UTILITY = /\btext-([a-z0-9]+(?:-[a-z0-9]+)*)/g;
+
 /** Find type roles used in one file without matching longer role names. */
 export const typeRolesSet = (
   source: string,
   roles: readonly string[],
-): readonly Violation[] =>
-  classRegions(source).flatMap((region) =>
-    roles.flatMap((role) =>
-      [...region.matchAll(new RegExp(`\\btext-${role}(?![-a-z0-9])`, "g"))].map(
-        (found) => ({
-          rule: "type-in-page",
-          text: found[0],
-          remedy: "move the markup into a component; pages compose, components set type",
-        }),
-      ),
-    ),
+): readonly Violation[] => {
+  const named = new Set(roles);
+  return classRegions(source).flatMap((region) =>
+    [...region.matchAll(TYPE_UTILITY)]
+      .filter(([, role]) => role !== undefined && named.has(role))
+      .map(([text]) => ({
+        rule: "type-in-page",
+        text,
+        remedy: "move the markup into a component; pages compose, components set type",
+      })),
   );
+};
 
 const main = async () => {
   const root = resolve(process.env.SRC_DIR ?? "src");
@@ -119,19 +128,17 @@ const main = async () => {
   const pages = `${join(root, "pages")}/`;
 
   const found = (
-    await Promise.all(
-      files.map(async (path) => {
-        const source = await readFile(path, "utf8");
-        const violations = [
-          ...anonymousValues(source),
-          ...(path.startsWith(pages) ? typeRolesSet(source, roles) : []),
-        ];
-        return violations.map((violation) => ({
-          ...violation,
-          path: relative(process.cwd(), path),
-        }));
-      }),
-    )
+    await mapConcurrent(files, READ_CONCURRENCY, async (path) => {
+      const source = await readFile(path, "utf8");
+      const violations = [
+        ...anonymousValues(source),
+        ...(path.startsWith(pages) ? typeRolesSet(source, roles) : []),
+      ];
+      return violations.map((violation) => ({
+        ...violation,
+        path: relative(process.cwd(), path),
+      }));
+    })
   ).flat();
 
   report({

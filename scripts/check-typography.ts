@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 /** Gate literal em dashes in authored prose; entities and Chinese renditions are exempt. */
 
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
 
+import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
+import { filesUnder } from "./lib/files.ts";
 import { each, report } from "./lib/gate.ts";
 
 const EM_DASH = String.fromCodePoint(0x2014);
@@ -31,28 +33,20 @@ export const emDashes = (path: string, source: string): readonly EmDash[] =>
 /** Chinese rendition excluded by the header policy. */
 const CHINESE_RENDITION = /[\\/]zh\.md$/;
 
-const sourcesUnder = async (dir: string): Promise<readonly string[]> => {
-  const entries = await readdir(dir, { recursive: true, withFileTypes: true });
-  return entries
-    .filter(
-      (entry) =>
-        entry.isFile() && EXTENSIONS.some((extension) => entry.name.endsWith(extension)),
-    )
-    .map((entry) => resolve(entry.parentPath, entry.name))
-    .filter((path) => !CHINESE_RENDITION.test(path));
-};
+/** Authored prose this gate reads, once the walk has found every file. */
+const authored = (path: string): boolean =>
+  EXTENSIONS.some((extension) => path.endsWith(extension)) &&
+  !CHINESE_RENDITION.test(path);
 
 const main = async () => {
   const files = [
-    ...(await Promise.all(ROOTS.map(sourcesUnder))).flat(),
+    ...(await Promise.all(ROOTS.map(filesUnder))).flat().filter(authored),
     ...LOOSE.map((path) => resolve(path)),
   ];
 
   const found = (
-    await Promise.all(
-      files.map(async (path) =>
-        emDashes(relative(process.cwd(), path), await readFile(path, "utf8")),
-      ),
+    await mapConcurrent(files, READ_CONCURRENCY, async (path) =>
+      emDashes(relative(process.cwd(), path), await readFile(path, "utf8")),
     )
   ).flat();
 

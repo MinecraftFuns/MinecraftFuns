@@ -496,101 +496,105 @@ const main = async () => {
   console.log(`audit: ${routes.length} route(s) at ${urlFor("/")}`);
 
   const server = await startPreview();
-  const browser = await launchBrowser();
-
   try {
-    /* Seeded from `routes`, so every lookup below has a value. Read through a
-       helper rather than asserting one: the map and the loop are built from the
-       same list, and a helper that inserts on miss keeps that a fact rather
-       than a claim. */
-    const documentsByRoute = new Map<string, Map<Scheme, DocumentFacts>>(
-      routes.map((route) => [route, new Map()]),
-    );
-    const documentsFor = (route: string): Map<Scheme, DocumentFacts> => {
-      const found = documentsByRoute.get(route);
-      if (found !== undefined) return found;
-      const fresh = new Map<Scheme, DocumentFacts>();
-      documentsByRoute.set(route, fresh);
-      return fresh;
-    };
-    const titles: [string, string][] = [];
-    const links = new Set<string>();
+    /* Acquired inside the bracket: a browser that fails to launch must not
+       leave the preview server holding the port. */
+    const browser = await launchBrowser();
+    try {
+      /* Seeded from `routes`, so every lookup below has a value. Read through a
+         helper rather than asserting one: the map and the loop are built from the
+         same list, and a helper that inserts on miss keeps that a fact rather
+         than a claim. */
+      const documentsByRoute = new Map<string, Map<Scheme, DocumentFacts>>(
+        routes.map((route) => [route, new Map()]),
+      );
+      const documentsFor = (route: string): Map<Scheme, DocumentFacts> => {
+        const found = documentsByRoute.get(route);
+        if (found !== undefined) return found;
+        const fresh = new Map<Scheme, DocumentFacts>();
+        documentsByRoute.set(route, fresh);
+        return fresh;
+      };
+      const titles: [string, string][] = [];
+      const links = new Set<string>();
 
-    for (const scheme of SCHEMES) {
-      for (const viewport of VIEWPORTS) {
-        const context = await browser.newContext({
-          viewport: { width: viewport.width, height: viewport.height },
-          colorScheme: scheme,
-          deviceScaleFactor: 1,
-        });
+      for (const scheme of SCHEMES) {
+        for (const viewport of VIEWPORTS) {
+          const context = await browser.newContext({
+            viewport: { width: viewport.width, height: viewport.height },
+            colorScheme: scheme,
+            deviceScaleFactor: 1,
+          });
 
-        for (const route of routes) {
-          const doc = await auditPage(context, route, viewport, scheme);
-          if (doc !== null) {
-            documentsFor(route).set(scheme, doc);
-            if (scheme === "light") {
-              titles.push([route, doc.title]);
-              doc.internalLinks.forEach((href) => links.add(href));
+          for (const route of routes) {
+            const doc = await auditPage(context, route, viewport, scheme);
+            if (doc !== null) {
+              documentsFor(route).set(scheme, doc);
+              if (scheme === "light") {
+                titles.push([route, doc.title]);
+                doc.internalLinks.forEach((href) => links.add(href));
+              }
             }
           }
+
+          await context.close();
         }
-
-        await context.close();
       }
+
+      documentsByRoute.forEach((byScheme, route) => checkSchemesDiffer(route, byScheme));
+      checkTitlesUnique(titles);
+
+      await overRoutes(
+        browser,
+        {
+          contextOptions: { viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" },
+          visit: async (page, route) => {
+            const { animated } = await page.evaluate(motionProbe);
+            if (animated.length > 0) {
+              record({
+                category: "accessibility",
+                rule: "reduced-motion-ignored",
+                impact: "moderate",
+                page: route,
+                message: `elements still animate under prefers-reduced-motion: ${animated.join(", ")}`,
+              });
+            }
+          },
+        },
+        routes,
+      );
+
+      // A CV that cannot be printed is a CV with a missing feature.
+      await overRoutes(
+        browser,
+        {
+          contextOptions: { viewport: { width: 1200, height: 1600 } },
+          prepare: (page) => page.emulateMedia({ media: "print" }),
+          visit: async (page, route) => {
+            if (await page.evaluate(overflowProbe)) {
+              record({
+                category: "readability",
+                rule: "print-overflow",
+                impact: "minor",
+                page: route,
+                message: "content overflows horizontally when printed",
+              });
+            }
+            await page.screenshot({
+              path: join(OUT, "screenshots", `print-${slug(route)}.png`),
+              fullPage: true,
+            });
+          },
+        },
+        routes,
+      );
+
+      await checkLinks(browser, [...links]);
+      return routes;
+    } finally {
+      await browser.close();
     }
-
-    documentsByRoute.forEach((byScheme, route) => checkSchemesDiffer(route, byScheme));
-    checkTitlesUnique(titles);
-
-    await overRoutes(
-      browser,
-      {
-        contextOptions: { viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" },
-        visit: async (page, route) => {
-          const { animated } = await page.evaluate(motionProbe);
-          if (animated.length > 0) {
-            record({
-              category: "accessibility",
-              rule: "reduced-motion-ignored",
-              impact: "moderate",
-              page: route,
-              message: `elements still animate under prefers-reduced-motion: ${animated.join(", ")}`,
-            });
-          }
-        },
-      },
-      routes,
-    );
-
-    // A CV that cannot be printed is a CV with a missing feature.
-    await overRoutes(
-      browser,
-      {
-        contextOptions: { viewport: { width: 1200, height: 1600 } },
-        prepare: (page) => page.emulateMedia({ media: "print" }),
-        visit: async (page, route) => {
-          if (await page.evaluate(overflowProbe)) {
-            record({
-              category: "readability",
-              rule: "print-overflow",
-              impact: "minor",
-              page: route,
-              message: "content overflows horizontally when printed",
-            });
-          }
-          await page.screenshot({
-            path: join(OUT, "screenshots", `print-${slug(route)}.png`),
-            fullPage: true,
-          });
-        },
-      },
-      routes,
-    );
-
-    await checkLinks(browser, [...links]);
-    return routes;
   } finally {
-    await browser.close();
     server.kill();
   }
 };

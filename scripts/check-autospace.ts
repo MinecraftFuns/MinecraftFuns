@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /** Gate typed inter-script spaces in ideographic renditions. */
 
-import { readdir, readFile } from "node:fs/promises";
-import { relative, resolve } from "node:path";
+import { readFile } from "node:fs/promises";
+import { basename, relative, resolve } from "node:path";
 
 import { languages } from "../src/config/languages.ts";
+import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
+import { filesUnder } from "./lib/files.ts";
 import { each, report } from "./lib/gate.ts";
 
 /** Content root; only ideographic renditions are scanned. */
@@ -136,12 +138,8 @@ export const sites = (path: string, source: string): readonly Site[] => {
   return found;
 };
 
-const renditionsUnder = async (dir: string): Promise<readonly string[]> => {
-  const entries = await readdir(dir, { recursive: true, withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isFile() && RENDITIONS.has(entry.name))
-    .map((entry) => resolve(entry.parentPath, entry.name));
-};
+/** A rendition is named by its language, so the basename decides. */
+const isRendition = (path: string): boolean => RENDITIONS.has(basename(path));
 
 const main = async () => {
   /* Named files form a rerunnable migration worklist. */
@@ -149,13 +147,11 @@ const main = async () => {
   const files =
     requested.length > 0
       ? requested.map((path) => resolve(path))
-      : await renditionsUnder(ROOT);
+      : (await filesUnder(ROOT)).filter(isRendition);
 
   const found = (
-    await Promise.all(
-      files.map(async (path) =>
-        sites(relative(process.cwd(), path), await readFile(path, "utf8")),
-      ),
+    await mapConcurrent(files, READ_CONCURRENCY, async (path) =>
+      sites(relative(process.cwd(), path), await readFile(path, "utf8")),
     )
   ).flat();
 
