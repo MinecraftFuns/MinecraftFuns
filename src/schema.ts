@@ -151,6 +151,14 @@ export type SiteConfig = {
 };
 
 /**
+ * How eagerly the engine may load a page nobody has asked for yet. The four
+ * values are the standard's own; naming them here keeps the config a leaf.
+ */
+export type Eagerness = "immediate" | "eager" | "moderate" | "conservative";
+
+export type SpeculationConfig = { readonly eagerness: Eagerness };
+
+/**
  * How the blog's listings are cut up.
  *
  * Both are whole numbers greater than zero, which a type cannot say and

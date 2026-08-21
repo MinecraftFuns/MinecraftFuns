@@ -3,6 +3,7 @@
 import { readFile, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
+import { assertNever } from "../src/prelude/adt.ts";
 import { deployments } from "../src/config/deployments.ts";
 import { languages } from "../src/config/languages.ts";
 import { captures } from "./lib/captures.ts";
@@ -439,7 +440,18 @@ export const scriptKind = (type: string | undefined): ScriptKind => {
  * is inert. It is reported all the same, because the only reason to ship one
  * is to serve a module that should not be here either.
  */
-export const executes = (kind: ScriptKind): boolean => kind.tag !== "data";
+export const executes = (kind: ScriptKind): boolean => {
+  switch (kind.tag) {
+    case "classic":
+    case "module":
+    case "importmap":
+      return true;
+    case "data":
+      return false;
+    default:
+      return assertNever(kind);
+  }
+};
 
 /* One start tag; generated markup quotes its attributes, per the note above. */
 const SCRIPT_START = /<script\b([^>]*)>/gi;

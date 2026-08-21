@@ -1,4 +1,4 @@
-import type { Eagerness } from "../lib/speculation.ts";
+import type { SpeculationConfig } from "../schema.ts";
 
 /**
  * How eagerly to load the next page before it is asked for.
@@ -10,6 +10,4 @@ import type { Eagerness } from "../lib/speculation.ts";
  * past. `conservative`, the default for document rules, waits for the press
  * and buys back only the handful of milliseconds between press and release.
  */
-export const speculation = { eagerness: "moderate" } as const satisfies {
-  readonly eagerness: Eagerness;
-};
+export const speculation = { eagerness: "moderate" } as const satisfies SpeculationConfig;

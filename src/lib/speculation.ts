@@ -13,8 +13,8 @@
  * to spend.
  */
 
-/** How strong a hint the engine should require. The standard's four values. */
-export type Eagerness = "immediate" | "eager" | "moderate" | "conservative";
+import type { NonEmpty } from "../prelude/adt.ts";
+import type { Eagerness } from "../schema.ts";
 
 /**
  * A document rule: the engine reads the links out of the page itself and keeps
@@ -28,7 +28,7 @@ export type DocumentRule = {
 };
 
 /** One action, at least one rule: an empty rule set is not worth emitting. */
-export type Rules = { readonly prefetch: readonly [DocumentRule, ...DocumentRule[]] };
+export type Rules = { readonly prefetch: NonEmpty<DocumentRule> };
 
 /** Every same-origin route under this deployment, and nothing above it. */
 export const hrefPattern = (base: string): string =>
