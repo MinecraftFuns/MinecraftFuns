@@ -15,9 +15,9 @@
  * so a migration has a finite, checkable worklist, and once that worklist is
  * empty it keeps the habit from creeping back into the next article.
  *
- * NOT YET IN `npm run rules`. The archive still carries roughly a thousand of
- * these; wiring it into the aggregate is the migration's last commit, not its
- * first. Until then it runs on its own as `npm run rules:autospace`.
+ * The archive it was written for is migrated, so this now runs in `npm run
+ * rules` and the interesting case is no longer the thousand it found but the
+ * one it has yet to see.
  *
  * What it deliberately does not flag:
  *
