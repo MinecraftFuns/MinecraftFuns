@@ -220,7 +220,7 @@ You've probably already noticed that the font used for `𝚝𝚠𝚘-𝚙𝚕�
 
 ## Links
 
-* [Program-Think's blog | program-think.blogspot.com](https://program-think.blogspot.com/) [$^\mathrm{Backup}$](https://ragnarok.joefang.org/static/x15mmgcksrdjg00otno48pn92athaqd4e)
-* [Pricing · Cloudflare Workers docs | developers.cloudflare.com](https://developers.cloudflare.com/workers/platform/pricing) [$^\mathrm{Backup}$](https://ragnarok.joefang.org/static/x5p4vu3gpbane8pe983ouvnhggul3hpn1)
-* [Contact @SophonCI | t.me](https://t.me/SophonCI) [$^\mathrm{Backup}$](https://ragnarok.joefang.org/static/xm4lu3lkr3g30is1sgq7trksfah0rvnrc)
-* [Reverse-proxying Blogger with Cloudflare Workers | cnblogs.com](https://www.cnblogs.com/Helium-Air/p/15646483.html) [$^\mathrm{Backup}$](https://ragnarok.joefang.org/static/xgjdonhj6t4ftb6t17s5vl6gn77vn3r8f)
+* [Program-Think's blog | program-think.blogspot.com](https://program-think.blogspot.com/) :backup[https://ragnarok.joefang.org/static/x15mmgcksrdjg00otno48pn92athaqd4e]
+* [Pricing · Cloudflare Workers docs | developers.cloudflare.com](https://developers.cloudflare.com/workers/platform/pricing) :backup[https://ragnarok.joefang.org/static/x5p4vu3gpbane8pe983ouvnhggul3hpn1]
+* [Contact @SophonCI | t.me](https://t.me/SophonCI) :backup[https://ragnarok.joefang.org/static/xm4lu3lkr3g30is1sgq7trksfah0rvnrc]
+* [Reverse-proxying Blogger with Cloudflare Workers | cnblogs.com](https://www.cnblogs.com/Helium-Air/p/15646483.html) :backup[https://ragnarok.joefang.org/static/xgjdonhj6t4ftb6t17s5vl6gn77vn3r8f]

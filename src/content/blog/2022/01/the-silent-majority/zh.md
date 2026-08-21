@@ -44,6 +44,6 @@ tags: ["Reading"]
 
 ## 链接
 
-* [二加二等于五 | zh.wikipedia.org](https://zh.wikipedia.org/wiki/%E4%BA%8C%E5%8A%A0%E4%BA%8C%E7%AD%89%E4%BA%8E%E4%BA%94) [$^\mathrm{Backup}$](https://ragnarok.joefang.org/static/x00203p9e1lsocvpm9odorbp6na9sikus.pdf)
+* [二加二等于五 | zh.wikipedia.org](https://zh.wikipedia.org/wiki/%E4%BA%8C%E5%8A%A0%E4%BA%8C%E7%AD%89%E4%BA%8E%E4%BA%94) :backup[https://ragnarok.joefang.org/static/x00203p9e1lsocvpm9odorbp6na9sikus.pdf]
 
 ![王小波](https://ragnarok.joefang.org/static/xhnh6liuh477ktu1ng71e4b4or66tknrj.webp)
