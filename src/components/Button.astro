@@ -1,4 +1,5 @@
 ---
+import { ARROW, type Direction } from "./navigation.ts";
 import {
   CONTROL_BASE,
   SIZE,
@@ -16,18 +17,41 @@ type Props = {
   readonly size: ControlSize;
   /** Marks the control as the page the reader is already on. */
   readonly current?: boolean;
+  /** Which way the control carries the reader; supplies the arrow. */
+  readonly direction?: Direction;
 };
 
-const { href, tone, size, current = false } = Astro.props;
+const { href, tone, size, current = false, direction } = Astro.props;
 
 /* The quiet tone is the only one that can be a current page, and says so. */
 const currentInk = tone === "quiet" ? "current:text-ink" : "";
+
+/*
+ * The side is read off the direction, never passed alongside it, so only one
+ * of these is ever a component and the other is always undefined.
+ */
+const arrow = direction === undefined ? undefined : ARROW[direction];
+const Leading = arrow?.leads === true ? arrow.icon : undefined;
+const Trailing = arrow?.leads === false ? arrow.icon : undefined;
 ---
 
 <a
-  class:list={[CONTROL_BASE, toneClass(tone), SIZE[size], currentInk]}
+  class:list={[
+    CONTROL_BASE,
+    toneClass(tone),
+    SIZE[size],
+    currentInk,
+    /* Only an arrow needs the gap; a bare label must not gain one. */
+    arrow !== undefined && "gap-3xs",
+  ]}
   href={href}
   aria-current={current ? "page" : undefined}
 >
+  {
+    /* Sized in `em`, so one arrow tracks whichever label it is given, and
+      coloured `currentColor` by the icon set, so it wears the tone's ink. */
+  }
+  {Leading !== undefined && <Leading class="shrink-0" size="1em" />}
   <slot />
+  {Trailing !== undefined && <Trailing class="shrink-0" size="1em" />}
 </a>

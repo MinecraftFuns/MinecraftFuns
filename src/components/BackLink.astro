@@ -2,7 +2,14 @@
 import Button from "./Button.astro";
 import type { Href } from "../lib/url.ts";
 
-/** Shared index backlink; decorative arrow hidden from assistive technology. */
+/**
+ * The way out of an article or a slice of an index.
+ *
+ * Full size, unlike a section's trailing control: this one stands alone under
+ * a rule rather than sharing a row with a heading. The direction is fixed
+ * here rather than accepted as a prop, because a back link that pointed
+ * onward would be lying about what it does.
+ */
 type Props = {
   readonly href: Href;
   readonly label: string;
@@ -12,12 +19,5 @@ const { href, label } = Astro.props;
 ---
 
 <footer class="border-hairline border-t pt-md">
-  {
-    /* Full size, unlike the section trailing control: this one stands alone
-      under an article and is the way out of it. */
-  }
-  <Button href={href} tone="secondary" size="control">
-    <span class="me-3xs" aria-hidden="true">←</span>
-    {label}
-  </Button>
+  <Button href={href} tone="quiet" size="control" direction="back">{label}</Button>
 </footer>
