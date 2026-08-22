@@ -33,7 +33,7 @@ const fingerprint = await siteFingerprint();
             <li>
               {/* Standalone links need WCAG 2.5.8 target height. */}
               <a
-                class="text-ink-subtle hover:text-ink flex min-h-target w-fit items-center no-underline hover:underline"
+                class="link-muted flex min-h-target w-fit items-center"
                 href={link.href}
                 rel={link.isIdentity ? "me" : undefined}
               >

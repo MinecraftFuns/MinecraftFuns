@@ -17,9 +17,9 @@ type Props = {
 const { href, tone, size } = Astro.props;
 
 const TONE: Readonly<Record<ButtonTone, string>> = {
-  primary: "border-transparent bg-accent text-on-accent hover:bg-accent-hover",
-  secondary:
-    "border-hairline bg-surface-1 text-ink hover:border-hairline-strong hover:bg-surface-2",
+  primary:
+    "border border-transparent bg-accent text-on-accent hover:bg-accent-hover transition-colors",
+  secondary: "surface-interactive text-ink",
 };
 
 const SIZE: Readonly<Record<ButtonSize, string>> = {
@@ -30,7 +30,7 @@ const SIZE: Readonly<Record<ButtonSize, string>> = {
 
 <a
   class:list={[
-    "inline-flex items-center rounded-md border no-underline transition-colors",
+    "inline-flex items-center rounded-md no-underline",
     TONE[tone],
     SIZE[size],
   ]}
