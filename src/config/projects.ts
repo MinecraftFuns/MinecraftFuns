@@ -102,6 +102,7 @@ export const authoredProjects: readonly Project[] = [
     until: null,
     tags: ["Agents", "Markdown", "Tooling"],
     kind: "side-project",
+    featured: true,
   },
   {
     title: "safeTO",
