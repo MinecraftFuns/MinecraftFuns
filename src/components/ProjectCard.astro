@@ -1,5 +1,6 @@
 ---
 import type { Project } from "../config/projects.ts";
+import { toneClass } from "./control.ts";
 import { badgeFor, spanOf } from "../lib/projects.ts";
 import { currentYear } from "../lib/time.ts";
 
@@ -12,7 +13,10 @@ const span = spanOf(project, currentYear());
 ---
 
 <a
-  class="control control-secondary flex h-full flex-col gap-xs rounded-lg p-md no-underline"
+  class:list={[
+    toneClass("secondary"),
+    "flex h-full flex-col gap-xs rounded-lg p-md no-underline",
+  ]}
   href={project.href}
 >
   <div class="flex items-baseline justify-between gap-2xs">

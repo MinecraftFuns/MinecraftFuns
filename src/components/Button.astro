@@ -1,48 +1,31 @@
 ---
+import {
+  CONTROL_BASE,
+  SIZE,
+  toneClass,
+  type ControlSize,
+  type ControlTone,
+} from "./control.ts";
 import type { Href } from "../lib/url.ts";
 
-/** Centralize control styling in closed, fully scannable tone/size variants. */
-
-/**
- * How loudly the control rests. The gesture is identical across all three,
- * and lives in `.control`; a tone supplies only the four colours it walks.
- */
-export type ButtonTone = "primary" | "secondary" | "quiet";
-
-/** `control` is full-size, `compact` the tag-sized WCAG target, `nav` the masthead. */
-export type ButtonSize = "control" | "compact" | "nav";
-
+/** Every control on the site; the tone and size vocabularies live in `control.ts`. */
 type Props = {
   readonly href: Href;
-  readonly tone: ButtonTone;
+  readonly tone: ControlTone;
   /** Required rather than defaulted: a control's size is a decision. */
-  readonly size: ButtonSize;
+  readonly size: ControlSize;
   /** Marks the control as the page the reader is already on. */
   readonly current?: boolean;
 };
 
 const { href, tone, size, current = false } = Astro.props;
 
-const TONE: Readonly<Record<ButtonTone, string>> = {
-  primary: "control-primary",
-  secondary: "control-secondary",
-  quiet: "control-quiet current:text-ink",
-};
-
-const SIZE: Readonly<Record<ButtonSize, string>> = {
-  control: "min-h-control px-sm text-control",
-  compact: "min-h-target px-2xs py-3xs text-body-sm",
-  /* Regular weight, unlike the other two: a masthead lists, it does not urge. */
-  nav: "min-h-control px-2xs text-body xs:px-xs",
-};
+/* The quiet tone is the only one that can be a current page, and says so. */
+const currentInk = tone === "quiet" ? "current:text-ink" : "";
 ---
 
 <a
-  class:list={[
-    "control inline-flex items-center rounded-md no-underline",
-    TONE[tone],
-    SIZE[size],
-  ]}
+  class:list={[CONTROL_BASE, toneClass(tone), SIZE[size], currentInk]}
   href={href}
   aria-current={current ? "page" : undefined}
 >
