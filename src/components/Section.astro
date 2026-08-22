@@ -1,4 +1,5 @@
 ---
+import Button from "./Button.astro";
 import type { Href } from "../lib/url.ts";
 
 /** Ruled section with closed trailing variants. */
@@ -33,9 +34,13 @@ void _exhaustive;
 
     {
       trailing?.tag === "link" && (
-        <a class="link text-body-sm shrink-0 whitespace-nowrap" href={trailing.href}>
-          {trailing.label}
-        </a>
+        <div class="shrink-0">
+          {/* Compact, so the control sits on the heading's row rather than
+              growing it. */}
+          <Button href={trailing.href} tone="secondary" size="compact">
+            {trailing.label}
+          </Button>
+        </div>
       )
     }
     {trailing?.tag === "count" && <span class="meta shrink-0">{trailing.value}</span>}

@@ -1,4 +1,5 @@
 ---
+import Button from "./Button.astro";
 import type { Href } from "../lib/url.ts";
 
 /** Shared index backlink; decorative arrow hidden from assistive technology. */
@@ -11,8 +12,12 @@ const { href, label } = Astro.props;
 ---
 
 <footer class="border-hairline border-t pt-md">
-  <a class="link inline-flex min-h-target items-center gap-3xs" href={href}>
-    <span aria-hidden="true">←</span>
+  {
+    /* Full size, unlike the section trailing control: this one stands alone
+      under an article and is the way out of it. */
+  }
+  <Button href={href} tone="secondary" size="control">
+    <span class="me-3xs" aria-hidden="true">←</span>
     {label}
-  </a>
+  </Button>
 </footer>
