@@ -37,9 +37,7 @@ const wording = WORDING[lang][by];
 ---
 
 <p class="note border-hairline-strong mt-md border-l pl-md">
-  {wording.before}<a
-    class="link-in-text"
-    href={original.href}
-    hreflang={bcp47Of(original.lang)}>{LINK_LABEL[lang]}</a
+  {wording.before}<a class="link" href={original.href} hreflang={bcp47Of(original.lang)}
+    >{LINK_LABEL[lang]}</a
   >{wording.after}
 </p>

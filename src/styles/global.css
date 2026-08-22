@@ -535,28 +535,25 @@
   /*
    * What a hover may move: the channel the element owns.
    *
-   * A control owns the space it sits on, so it answers with that space: every
-   * control in the project rises to `surface-2` under the pointer, whether it
-   * rests on `surface-1` like a button or on nothing like a nav item. One
-   * destination, because a hover that lands somewhere different per component
-   * is four gestures wearing one name. `surface-1` is not a candidate: it sits
-   * 1.08:1 from the canvas in both themes, which is a fill you cannot see.
+   * A control owns the space it sits on, so it answers with that space; the
+   * control block below owns that half. A link owns nothing but its own
+   * letters. The space around it belongs to the sentence, so a link may take
+   * no fill, and it may not deepen its colour either: that colour is
+   * inherited from the text it interrupts, and darkening it on hover claims a
+   * prominence the link does not hold at rest.
    *
-   * A link owns nothing but its own letters. The space around it belongs to
-   * the sentence, so a link may not take a fill, and it may not deepen its
-   * colour either: colour is inherited from the text it interrupts, and
-   * darkening it on hover claims a prominence the link does not hold at
-   * rest. What a link owns is its underline, so the underline is the whole
-   * gesture. Hidden underlines appear, visible ones thicken.
+   * What a link owns is its underline, so the underline is the whole gesture,
+   * and every link on the site drives it to one destination: `currentColor`
+   * at two pixels. Only the resting weight differs, which is the same shape
+   * as the controls, where the tones differ at rest and meet on hover.
    *
-   * The line is declared at rest and painted transparent rather than
-   * declared on hover, because `text-decoration-line` cannot animate and
-   * `text-decoration-color` can. Declared on hover it would snap while
-   * everything around it fades.
+   * The line is declared at rest and painted transparent where it should not
+   * show, rather than declared on hover, because `text-decoration-line`
+   * cannot animate and `text-decoration-color` can. Declared on hover it
+   * would snap while everything around it fades.
    */
   .prose a,
   .link,
-  .link-in-text,
   .link-muted,
   .row-title {
     text-decoration-line: underline;
@@ -567,66 +564,50 @@
     transition-timing-function: var(--default-transition-timing-function);
   }
 
+  /* The one destination. Every link, every family, every context. */
+  .prose a:hover,
+  .link:hover,
+  .link-muted:hover,
+  a:hover .row-title {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+
   /*
-   * Accent links. Inside running text the underline is permanent, because
-   * WCAG 1.4.1 forbids colour as the only thing separating a link from the
-   * words around it; on hover it thickens. A link standing on its own has
-   * nothing to be confused with, so it carries its underline hidden and
-   * reveals it instead.
+   * The content link, and the only accent link there is.
+   *
+   * It is underlined at rest without asking where it sits, because the
+   * question "is this link inside a sentence?" is one a class cannot answer
+   * and an author gets wrong: this project shipped an attribution reading
+   * "Orwell, Nineteen Eighty-Four" whose link revealed its underline only on
+   * hover, which WCAG F73 fails outright, beside a footer line that had
+   * chosen correctly. Two spellings of one idea, decided by hand. There is
+   * now one spelling, and it is the safe one.
    */
   .prose a,
-  .link,
-  .link-in-text {
+  .link {
     color: var(--color-accent);
     text-decoration-color: currentColor;
   }
 
-  .prose a:hover,
-  .link-in-text:hover {
-    text-decoration-thickness: 2px;
-  }
-
-  .link {
-    text-decoration-color: transparent;
-  }
-
-  .link:hover {
-    text-decoration-color: currentColor;
-  }
-
   /*
-   * A link inside a metadata line, quieter than an accent link because the
-   * line it sits in is already quiet. Here so that every link appearance in
-   * the project has one owner, whatever colour it settles on.
+   * The metadata link: quieter, because the line it sits in is already quiet.
+   * Its underline rests on a hairline rather than on nothing, so it is
+   * separated from the static dates and counts beside it before the pointer
+   * arrives. That holds in every context, so no call site has to know which
+   * context it is in.
    */
   .link-muted {
     /* Link text must clear 4.5:1 like any text; tertiary does not. */
     color: var(--color-ink-subtle);
-    text-decoration-color: transparent;
-  }
-
-  .link-muted:hover {
-    text-decoration-color: currentColor;
-  }
-
-  /*
-   * A link among static metadata is the one case where hover arrives too
-   * late: nothing but colour separates it from the dates beside it, and WCAG
-   * F73 fails a non-colour cue that appears only on hover. It rests on a
-   * hairline underline and strengthens to its own ink.
-   */
-  .meta .link-muted {
     text-decoration-color: var(--color-hairline-strong);
   }
 
   /*
-   * The heading inside a row-sized anchor. The row is the target but declines
-   * a fill, because a tinted band would make an editorial list read as a
-   * table; the title performs the link gesture on the row's hover instead.
+   * The heading inside a row-sized anchor. Not running text, and the row is
+   * the target, so it rests unmarked and meets the same destination on hover.
    * Keyed to the enclosing anchor rather than to a `group` utility, so the
    * class carries its own contract: put it in a link and it behaves.
-   * `PostRow` and `DocRow` had each spelled this recipe out, in different
-   * orders.
    */
   .row-title {
     font-size: var(--text-row-title);
@@ -635,74 +616,6 @@
     font-weight: var(--text-row-title--font-weight);
     color: var(--color-ink);
     text-decoration-color: transparent;
-  }
-
-  a:hover .row-title {
-    text-decoration-color: currentColor;
-  }
-
-  /*
-   * The control gesture.
-   *
-   * A control answers a pointer on two channels at once: its fill moves one
-   * step along its own ramp, and its edge moves to one step beyond that fill.
-   *
-   * Both, because one is not enough, and the measurement says which one is
-   * missing. A filled accent button changing shade alone carries the largest
-   * luminance step on the page, 9.2 in light and 10.9 in dark, and still
-   * reads as nothing: a large area quietly changing tint produces no event
-   * for the eye to catch, while every other control on the site either
-   * sharpens a hairline or materialises a pill. The edge is what is seen.
-   *
-   * A uniform translucent state layer, the obvious way to say this once, was
-   * measured and rejected: at any opacity it moves a mid-luminance accent
-   * fill by 2 to 5 while moving the near-canvas surfaces by 6 to 13. It is
-   * weakest exactly where the problem is. Each tone walks its own ramp
-   * instead, which lands every control within one unit of every other in
-   * both themes.
-   */
-  .control {
-    border: 1px solid var(--control-edge);
-    background-color: var(--control-fill);
-    transition-property: background-color, border-color;
-    transition-duration: var(--default-transition-duration);
-    transition-timing-function: var(--default-transition-timing-function);
-  }
-
-  .control:hover {
-    border-color: var(--control-edge-hover);
-    background-color: var(--control-fill-hover);
-  }
-
-  /* The one primary action in a view. Rests filled, hovers deeper and rimmed. */
-  .control-primary {
-    --control-fill: var(--color-accent);
-    --control-fill-hover: var(--color-accent-hover);
-    --control-edge: transparent;
-    --control-edge-hover: var(--color-accent-edge);
-    color: var(--color-on-accent);
-  }
-
-  /* Everything the reader may take but is not being urged to: tags, cards. */
-  .control-secondary {
-    --control-fill: var(--color-surface-1);
-    --control-fill-hover: var(--color-surface-2);
-    --control-edge: var(--color-hairline);
-    --control-edge-hover: var(--color-hairline-strong);
-    color: var(--color-ink);
-  }
-
-  /*
-   * A control that rests with no chrome at all, because a masthead of
-   * outlined pills is a toolbar. It performs the same two-channel gesture:
-   * the pill and its rim arrive together.
-   */
-  .control-quiet {
-    --control-fill: transparent;
-    --control-fill-hover: var(--color-surface-2);
-    --control-edge: transparent;
-    --control-edge-hover: var(--color-hairline);
-    color: var(--color-ink-subtle);
   }
 
   /*
@@ -721,6 +634,13 @@
     line-height: 0;
     margin-left: 0.15em;
     white-space: nowrap;
+    /*
+     * The one link that rests unmarked, and it can: superscript, mono, and
+     * smaller are three non-colour designators already, so the resting
+     * underline `.link-muted` carries would be a fourth on a marker two
+     * characters wide.
+     */
+    text-decoration-color: transparent;
   }
 
   /*

@@ -157,6 +157,21 @@ describe("recipe rules", () => {
   const rules = (source: string): readonly string[] =>
     anonymousValues(source).map(({ rule }) => rule);
 
+  /* The link families are closed; a retired or mistyped one must not pass. */
+  it("catches a link family that does not exist", () => {
+    assert.deepEqual(rules(astro("", '<a class="link-in-text">x</a>')), [
+      "unknown-link-family",
+    ]);
+    assert.deepEqual(rules(astro("", '<a class="link-mutd">x</a>')), [
+      "unknown-link-family",
+    ]);
+  });
+
+  it("leaves the two real families alone", () => {
+    assert.deepEqual(rules(astro("", '<a class="link">x</a>')), []);
+    assert.deepEqual(rules(astro("", '<a class="link-muted meta">x</a>')), []);
+  });
+
   it("catches a hand-rolled accent link", () => {
     const source = astro("", '<a class="text-accent hover:text-accent-hover">x</a>');
     assert.deepEqual(rules(source), ["inline-link-style"]);

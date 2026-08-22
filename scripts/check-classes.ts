@@ -41,6 +41,19 @@ const RULES: readonly Rule[] = [
     remedy: "declare a @custom-variant so the state has a name",
   },
   {
+    /*
+     * The link families are a closed set: `link` and `link-muted`. A third
+     * name is either a retired variant (`link-in-text`, folded into `link`
+     * when one underline rule replaced the choice between two) or a typo,
+     * and both render as unstyled prose rather than failing, which is the
+     * quiet kind of wrong. Anchored to the class-list position so it cannot
+     * fire on a word inside prose.
+     */
+    rule: "unknown-link-family",
+    pattern: /(?<=["'\s])link-(?!muted\b)[a-z][a-z0-9-]*/g,
+    remedy: "use link, or link-muted; those are the two families there are",
+  },
+  {
     rule: "inline-link-style",
     pattern: /hover:text-accent-hover/g,
     remedy: "use .link, or .link-in-text for a link inside a sentence",
