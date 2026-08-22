@@ -188,6 +188,13 @@
   );
   --color-on-accent: light-dark(var(--color-eggshell-50), var(--color-ink-black-950));
 
+  /*
+   * The rim a filled control draws on hover: one ramp step beyond the fill it
+   * is drawn on, in whichever direction that theme's ramp travels. Light
+   * darkens 500 -> 600 -> 700; dark lightens 300 -> 200 -> 100.
+   */
+  --color-accent-edge: light-dark(var(--color-ink-black-700), var(--color-ink-black-100));
+
   /* ---- Type ------------------------------------------------------------ */
 
   --font-sans:
@@ -635,22 +642,67 @@
   }
 
   /*
-   * The bordered form of the control gesture: fill and hairline rise together.
-   * Shared by the secondary button and the project card, two components
-   * wearing one interaction. The nav item performs the same rise without a
-   * border, because a bar of outlined pills is a toolbar, not a masthead.
+   * The control gesture.
+   *
+   * A control answers a pointer on two channels at once: its fill moves one
+   * step along its own ramp, and its edge moves to one step beyond that fill.
+   *
+   * Both, because one is not enough, and the measurement says which one is
+   * missing. A filled accent button changing shade alone carries the largest
+   * luminance step on the page, 9.2 in light and 10.9 in dark, and still
+   * reads as nothing: a large area quietly changing tint produces no event
+   * for the eye to catch, while every other control on the site either
+   * sharpens a hairline or materialises a pill. The edge is what is seen.
+   *
+   * A uniform translucent state layer, the obvious way to say this once, was
+   * measured and rejected: at any opacity it moves a mid-luminance accent
+   * fill by 2 to 5 while moving the near-canvas surfaces by 6 to 13. It is
+   * weakest exactly where the problem is. Each tone walks its own ramp
+   * instead, which lands every control within one unit of every other in
+   * both themes.
    */
-  .surface-interactive {
-    border: 1px solid var(--color-hairline);
-    background-color: var(--color-surface-1);
+  .control {
+    border: 1px solid var(--control-edge);
+    background-color: var(--control-fill);
     transition-property: background-color, border-color;
     transition-duration: var(--default-transition-duration);
     transition-timing-function: var(--default-transition-timing-function);
   }
 
-  .surface-interactive:hover {
-    border-color: var(--color-hairline-strong);
-    background-color: var(--color-surface-2);
+  .control:hover {
+    border-color: var(--control-edge-hover);
+    background-color: var(--control-fill-hover);
+  }
+
+  /* The one primary action in a view. Rests filled, hovers deeper and rimmed. */
+  .control-primary {
+    --control-fill: var(--color-accent);
+    --control-fill-hover: var(--color-accent-hover);
+    --control-edge: transparent;
+    --control-edge-hover: var(--color-accent-edge);
+    color: var(--color-on-accent);
+  }
+
+  /* Everything the reader may take but is not being urged to: tags, cards. */
+  .control-secondary {
+    --control-fill: var(--color-surface-1);
+    --control-fill-hover: var(--color-surface-2);
+    --control-edge: var(--color-hairline);
+    --control-edge-hover: var(--color-hairline-strong);
+    color: var(--color-ink);
+  }
+
+  /*
+   * A control that rests with no chrome at all, because a masthead of
+   * outlined pills is a toolbar. It performs the same two-channel gesture:
+   * the pill and its rim arrive together.
+   */
+  .control-quiet {
+    --control-fill: transparent;
+    --control-fill-hover: var(--color-surface-2);
+    --control-edge: transparent;
+    --control-edge-hover: var(--color-hairline);
+    color: var(--color-ink-subtle);
   }
 
   /*

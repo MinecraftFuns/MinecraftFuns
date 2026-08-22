@@ -1,4 +1,5 @@
 ---
+import Button from "./Button.astro";
 import { nav, site } from "../config/site.ts";
 import { isWithin, routeUrl } from "../lib/url.ts";
 
@@ -29,13 +30,14 @@ const items = nav.map((item) => ({
         {
           items.map((item) => (
             <li>
-              <a
-                class="text-body text-ink-subtle hover:bg-surface-2 current:text-ink flex min-h-control items-center rounded-md px-2xs no-underline transition-colors xs:px-xs"
+              <Button
                 href={item.target}
-                aria-current={isWithin(pathname, item.target) ? "page" : undefined}
+                tone="quiet"
+                size="nav"
+                current={isWithin(pathname, item.target)}
               >
                 {item.label}
-              </a>
+              </Button>
             </li>
           ))
         }
