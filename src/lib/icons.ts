@@ -1,6 +1,7 @@
 import sharp from "sharp";
 
 import markSource from "../assets/favicon.svg?raw";
+import { traverseNonEmpty } from "../prelude/adt.ts";
 import { once } from "../prelude/memo.ts";
 import { encodeIco, iconSizes, type IconSize } from "./ico.ts";
 
@@ -41,14 +42,14 @@ const render = async (
 };
 
 /** `/favicon.ico` payload. */
-export const faviconIco = once(async (): Promise<Uint8Array<ArrayBuffer>> => {
-  const images = await Promise.all(
-    ICO_SIZES.map(async (size) => ({ size, png: await render(size) })),
-  );
-
-  /* `Promise.all` preserves the non-empty mapped image list. */
-  return encodeIco(images as unknown as Parameters<typeof encodeIco>[0]);
-});
+export const faviconIco = once(async (): Promise<Uint8Array<ArrayBuffer>> =>
+  encodeIco(
+    await traverseNonEmpty(ICO_SIZES, async (size) => ({
+      size,
+      png: await render(size),
+    })),
+  ),
+);
 
 /** Opaque `/apple-touch-icon.png` payload. */
 export const appleTouchIcon = once((): Promise<Uint8Array<ArrayBuffer>> =>

@@ -22,7 +22,7 @@ import { standing } from "../src/config/about.ts";
 import { deployments } from "../src/config/deployments.ts";
 import { profiles } from "../src/lib/contact.ts";
 import { standingPhrase } from "../src/lib/identity.ts";
-import { each, report } from "./lib/gate.ts";
+import { each, isMain, report } from "./lib/gate.ts";
 
 /** A fact the README must state, and the string that proves it does. */
 export type Fact = {
@@ -71,7 +71,4 @@ const main = async () => {
   });
 };
 
-/* Run only as a program, so the tests can import the pure half. */
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

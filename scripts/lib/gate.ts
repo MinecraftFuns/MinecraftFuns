@@ -12,8 +12,8 @@ export type Report<P> = {
   readonly problems: readonly P[];
   /** Phrase completing "<name>: OK, …". */
   readonly passed: string;
-  /** Phrase completing "<name>: n problem(s) …". May be empty. */
-  readonly failed: string;
+  /** Phrase completing "<name>: n problem(s) …"; most gates need none. */
+  readonly failed?: string;
   readonly body: (problems: readonly P[]) => string;
 };
 
@@ -21,7 +21,7 @@ export const report = <P>({
   name,
   problems,
   passed,
-  failed,
+  failed = "",
   body,
 }: Report<P>): readonly P[] => {
   if (problems.length === 0) {
@@ -35,6 +35,12 @@ export const report = <P>({
   process.exitCode = 1;
   return problems;
 };
+
+/**
+ * Whether this module is the program Node was asked to run. Every gate keeps a
+ * pure half its tests import, so the effectful half runs only under this.
+ */
+export const isMain = (url: string): boolean => process.argv[1] === new URL(url).pathname;
 
 /** Report an unavailable gate as failure, not as an empty result. */
 export const cannotRun = (name: string, reason: string): void => {

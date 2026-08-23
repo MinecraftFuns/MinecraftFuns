@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 /** Source gate rejecting non-local loop jumps; AST parsing avoids text matches. */
 
-import { readFile } from "node:fs/promises";
-import { relative, resolve } from "node:path";
+import { resolve } from "node:path";
 
 import ts from "typescript";
 
-import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
 import { moduleBodyOnly } from "./lib/frontmatter.ts";
-import { each, report } from "./lib/gate.ts";
+import { each, isMain, report } from "./lib/gate.ts";
+import { scanFiles } from "./lib/scan.ts";
 
 /** Extension to how TypeScript should read the file. */
 const DIALECT: Readonly<Record<string, ts.ScriptKind>> = {
@@ -81,17 +80,12 @@ const main = async () => {
     resolve("astro.config.ts"),
   ];
 
-  const found = (
-    await mapConcurrent(files, READ_CONCURRENCY, async (path) =>
-      jumps(relative(process.cwd(), path), await readFile(path, "utf8")),
-    )
-  ).flat();
+  const found = await scanFiles(files, jumps);
 
   report({
     name: "check-control-flow",
     problems: found,
     passed: `${files.length} file(s) carry no break or continue`,
-    failed: "",
     body: each(
       ({ path, line, keyword }) =>
         `  ${path}:${line}\n    ${keyword} is forbidden\n    → ${REMEDY[keyword]}`,
@@ -99,7 +93,4 @@ const main = async () => {
   });
 };
 
-/* Run only as a program, so the tests can import the pure half. */
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

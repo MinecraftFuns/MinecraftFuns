@@ -9,7 +9,7 @@ import { languages } from "../src/config/languages.ts";
 import { captures } from "./lib/captures.ts";
 import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
-import { cannotRun, report } from "./lib/gate.ts";
+import { cannotRun, isMain, report } from "./lib/gate.ts";
 
 /** One thing wrong with the artifact, grouped by `check` when reported. */
 export type Violation = {
@@ -635,7 +635,4 @@ const main = async () => {
   });
 };
 
-// Run only when invoked directly; tests import the helpers.
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

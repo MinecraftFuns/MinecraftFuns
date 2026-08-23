@@ -1,25 +1,22 @@
 ---
+import ChipList from "./ChipList.astro";
 import { categoryHref, type DocCategory } from "../lib/docs.ts";
-import Button from "./Button.astro";
 
-/** Docs-only category controls; shared `Button` centralizes their styling. */
+/** The docs' categories as a named landmark; the row itself is a `ChipList`. */
 type Props = { readonly categories: readonly DocCategory[] };
 
 const { categories } = Astro.props;
+
+const chips = categories.map((category) => ({
+  label: category,
+  href: categoryHref(category),
+}));
 ---
 
 {
-  categories.length > 0 && (
+  chips.length > 0 && (
     <nav aria-label="Categories">
-      <ul class="flex flex-wrap items-center gap-2xs" role="list">
-        {categories.map((category) => (
-          <li>
-            <Button href={categoryHref(category)} tone="secondary" size="compact">
-              {category}
-            </Button>
-          </li>
-        ))}
-      </ul>
+      <ChipList chips={chips} />
     </nav>
   )
 }

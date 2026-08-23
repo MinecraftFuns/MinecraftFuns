@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 /** Gate hand-rolled link markers where a directive belongs. */
 
-import { readFile } from "node:fs/promises";
-import { relative } from "node:path";
-
-import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
-import { each, report } from "./lib/gate.ts";
+import { each, isMain, report } from "./lib/gate.ts";
+import { numberedLines, scanFiles } from "./lib/scan.ts";
 
 /** Content root; every rendition and document under it is prose. */
 const ROOT = "src/content";
@@ -33,10 +30,10 @@ export type Marker = {
 };
 
 export const markers = (path: string, source: string): readonly Marker[] =>
-  source.split("\n").flatMap((text, index) =>
+  numberedLines(source).flatMap(({ text, line }) =>
     [...text.matchAll(TYPESET_LABEL)].map((found) => ({
       path,
-      line: index + 1,
+      line,
       text: found[0],
       href: found[1] ?? "",
     })),
@@ -45,17 +42,12 @@ export const markers = (path: string, source: string): readonly Marker[] =>
 const main = async () => {
   const files = (await filesUnder(ROOT)).filter((path) => path.endsWith(".md"));
 
-  const found = (
-    await mapConcurrent(files, READ_CONCURRENCY, async (path) =>
-      markers(relative(process.cwd(), path), await readFile(path, "utf8")),
-    )
-  ).flat();
+  const found = await scanFiles(files, markers);
 
   report({
     name: "check-directives",
     problems: found,
     passed: `${files.length} file(s) mark archived links with a directive`,
-    failed: "",
     body: each(
       ({ path, line, text, href }) =>
         `  ${path}:${line}\n    ${text}\n    → write :backup[${href}], which reads in the rendition's own language`,
@@ -63,7 +55,4 @@ const main = async () => {
   });
 };
 
-/* Run only as a program, so the tests can import the pure half. */
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

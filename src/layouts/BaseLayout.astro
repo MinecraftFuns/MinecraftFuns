@@ -9,6 +9,7 @@ import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import { site } from "../config/site.ts";
 import { orThrow } from "../prelude/adt.ts";
+import type { Alternate } from "../lib/article.ts";
 import { activeTarget, canonicalHref, indexable } from "../lib/deployment.ts";
 import { siteDescription } from "../lib/identity.ts";
 import { bcp47Of, SITE_LANG } from "../lib/lang.ts";
@@ -17,12 +18,6 @@ import { prefetchRules, serialise } from "../lib/speculation.ts";
 import { assetUrl, currentBase, joinRoute } from "../lib/url.ts";
 import type { RootedPath } from "../schema.ts";
 import type { Chrome } from "./chrome.ts";
-
-/** Hreflang route shape used by the layout. */
-type Alternate = {
-  readonly hrefLang: string;
-  readonly route: RootedPath;
-};
 
 /* Explicit `undefined` preserves optional forwarding under `exactOptionalPropertyTypes`. */
 type Props = {

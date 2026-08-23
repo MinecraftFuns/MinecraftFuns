@@ -1,7 +1,7 @@
 ---
-import TagChips from "../../../components/TagChips.astro";
+import ChipList from "../../../components/ChipList.astro";
 import ListPage from "../../../layouts/ListPage.astro";
-import { postTags } from "../../../lib/posts.ts";
+import { postTags, tagHref } from "../../../lib/posts.ts";
 import { countedNoun } from "../../../lib/plural.ts";
 import { routeUrl } from "../../../lib/url.ts";
 
@@ -9,6 +9,12 @@ import { routeUrl } from "../../../lib/url.ts";
 const tags = await postTags();
 
 const total = countedNoun(tags.length, "tag");
+
+const chips = tags.map((taxon) => ({
+  label: taxon.label,
+  href: tagHref(taxon.label),
+  count: taxon.items.length,
+}));
 ---
 
 <ListPage
@@ -21,5 +27,5 @@ const total = countedNoun(tags.length, "tag");
   empty="No tags yet."
   back={{ href: routeUrl("/blog"), label: "All posts" }}
 >
-  <TagChips tags={tags} />
+  <ChipList chips={chips} />
 </ListPage>

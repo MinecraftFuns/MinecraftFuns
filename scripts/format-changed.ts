@@ -3,6 +3,8 @@
 
 import { execFileSync } from "node:child_process";
 
+import { isMain } from "./lib/gate.ts";
+
 const git = (...args: readonly string[]): string =>
   execFileSync("git", args, { encoding: "utf8" });
 
@@ -76,6 +78,4 @@ const main = () => {
   if (restage) git("add", "--", ...format);
 };
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  main();
-}
+if (isMain(import.meta.url)) main();

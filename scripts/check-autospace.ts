@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 /** Gate typed inter-script spaces in ideographic renditions. */
 
-import { readFile } from "node:fs/promises";
-import { basename, relative, resolve } from "node:path";
+import { basename, resolve } from "node:path";
 
 import { languages } from "../src/config/languages.ts";
-import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
-import { each, report } from "./lib/gate.ts";
+import { each, isMain, report } from "./lib/gate.ts";
+import { scanFiles } from "./lib/scan.ts";
 
 /** Content root; only ideographic renditions are scanned. */
 const ROOT = "src/content";
@@ -149,17 +148,12 @@ const main = async () => {
       ? requested.map((path) => resolve(path))
       : (await filesUnder(ROOT)).filter(isRendition);
 
-  const found = (
-    await mapConcurrent(files, READ_CONCURRENCY, async (path) =>
-      sites(relative(process.cwd(), path), await readFile(path, "utf8")),
-    )
-  ).flat();
+  const found = await scanFiles(files, sites);
 
   report({
     name: "check-autospace",
     problems: found,
     passed: `${files.length} file(s) leave inter-script spacing to the engine`,
-    failed: "",
     body: each(
       ({ path, line, column, context }) =>
         `  ${path}:${line}:${column}\n    ${context}\n    → delete the space; the engine inserts it`,
@@ -167,7 +161,4 @@ const main = async () => {
   });
 };
 
-/* Keep scanner importable by tests. */
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

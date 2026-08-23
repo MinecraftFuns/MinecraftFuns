@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 /** Gate barrel imports of the icon set, which defeat per-icon shaking. */
 
-import { readFile } from "node:fs/promises";
-import { relative } from "node:path";
-
-import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
-import { each, report } from "./lib/gate.ts";
+import { each, isMain, report } from "./lib/gate.ts";
+import { numberedLines, scanFiles } from "./lib/scan.ts";
 
 /** Authored trees that can import a package. */
 const ROOTS = ["src", "scripts"];
@@ -41,11 +38,11 @@ const specifier = (barrel: string): RegExp =>
 
 export const barrelImports = (path: string, source: string): readonly BarrelImport[] => {
   const pattern = specifier(DEEP_ONLY.barrel);
-  return source
-    .split("\n")
-    .map((text, index) => ({ text: text.trim(), line: index + 1 }))
+  /* Testing the untrimmed line is the same question: the lookbehind needs a
+     `from` before the quote, which no leading or trailing space can supply. */
+  return numberedLines(source)
     .filter(({ text }) => pattern.test(text))
-    .map(({ text, line }) => ({ path, line, text }));
+    .map(({ text, line }) => ({ path, line, text: text.trim() }));
 };
 
 const main = async () => {
@@ -56,17 +53,12 @@ const main = async () => {
       !path.endsWith(".test.ts"),
   );
 
-  const found = (
-    await mapConcurrent(files, READ_CONCURRENCY, async (path) =>
-      barrelImports(relative(process.cwd(), path), await readFile(path, "utf8")),
-    )
-  ).flat();
+  const found = await scanFiles(files, barrelImports);
 
   report({
     name: "check-imports",
     problems: found,
     passed: `${files.length} file(s) import icons one at a time`,
-    failed: "",
     body: each(
       ({ path, line, text }) =>
         `  ${path}:${line}\n    ${text}\n    → ${DEEP_ONLY.remedy}`,
@@ -74,7 +66,4 @@ const main = async () => {
   });
 };
 
-/* Run only as a program, so the tests can import the pure half. */
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

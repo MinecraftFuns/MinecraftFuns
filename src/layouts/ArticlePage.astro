@@ -3,6 +3,7 @@ import "katex/dist/katex.min.css";
 
 import BackLink from "../components/BackLink.astro";
 import BaseLayout from "./BaseLayout.astro";
+import type { Alternate } from "../lib/article.ts";
 import type { Href } from "../lib/url.ts";
 import type { RootedPath } from "../schema.ts";
 import type { Chrome } from "./chrome.ts";
@@ -16,8 +17,7 @@ type Props = {
   /* Forward head metadata untouched; this layout does not interpret language. */
   readonly lang?: string | undefined;
   readonly canonicalRoute?: RootedPath | undefined;
-  readonly alternates?:
-    readonly { readonly hrefLang: string; readonly route: RootedPath }[] | undefined;
+  readonly alternates?: readonly Alternate[] | undefined;
 };
 
 const { title, description, chrome, back, lang, canonicalRoute, alternates } =

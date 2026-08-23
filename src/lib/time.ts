@@ -1,5 +1,5 @@
 import { site } from "../config/site.ts";
-import { invalid, ok, orThrow, type Parsed } from "../prelude/adt.ts";
+import { demand, invalid, ok, orThrow, type Parsed } from "../prelude/adt.ts";
 import { memoiseBy } from "../prelude/memo.ts";
 import { dateLocaleOf, SITE_LANG } from "./lang.ts";
 
@@ -198,17 +198,9 @@ export const wallClockAt = (instant: Date, zone: TimeZone): WallClock => {
       .map((part) => [part.type, Number(part.value)] as const),
   );
 
-  const field = (type: Intl.DateTimeFormatPartTypes): number => {
-    const value = fields.get(type);
-    /* Unreachable: `wallClockFormatter` requests all six fields a few lines
-       above. It throws rather than defaulting because the only plausible
-       default is zero, and a year of zero is precisely the silently wrong date
-       this module exists to make impossible. */
-    if (value === undefined) {
-      throw new TypeError(`the formatter for ${zone} returned no ${type}`);
-    }
-    return value;
-  };
+  /* Unreachable: `wallClockFormatter` requests all six fields just above. */
+  const field = (type: Intl.DateTimeFormatPartTypes): number =>
+    demand(fields, type, `the ${zone} formatter`);
 
   return {
     year: field("year"),

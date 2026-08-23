@@ -8,6 +8,7 @@ import {
   targets,
   type DeploymentTarget,
 } from "../src/lib/deployment.ts";
+import { isMain } from "./lib/gate.ts";
 
 /** Exactly the fields consumed by CI; explicit projection prevents drift. */
 export type MatrixLeg = Pick<DeploymentTarget, "id" | "origin" | "base" | "role">;
@@ -37,6 +38,4 @@ const main = async () => {
   await appendFile(output, `${body}\n`);
 };
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

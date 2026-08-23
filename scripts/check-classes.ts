@@ -5,10 +5,10 @@ import { readFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { captures } from "./lib/captures.ts";
-import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
 import { frontmatter } from "./lib/frontmatter.ts";
-import { each, report } from "./lib/gate.ts";
+import { each, isMain, report } from "./lib/gate.ts";
+import { scanFiles } from "./lib/scan.ts";
 
 /** One thing a class list must not contain, and what to write instead. */
 type Rule = {
@@ -56,7 +56,7 @@ const RULES: readonly Rule[] = [
   {
     rule: "inline-link-style",
     pattern: /hover:text-accent-hover/g,
-    remedy: "use .link, or .link-in-text for a link inside a sentence",
+    remedy: "use .link, or .link-muted for a quiet one",
   },
   {
     rule: "inline-meta-style",
@@ -138,21 +138,16 @@ const main = async () => {
   );
 
   const roles = typeRoles(await readFile(join(root, "styles", "global.css"), "utf8"));
-  const pages = `${join(root, "pages")}/`;
+  /* Relative, because that is the form `scanFiles` reports; both sides pass
+     through the same transform, so the prefix test is the one it replaced. */
+  const pages = `${relative(process.cwd(), join(root, "pages"))}/`;
 
-  const found = (
-    await mapConcurrent(files, READ_CONCURRENCY, async (path) => {
-      const source = await readFile(path, "utf8");
-      const violations = [
-        ...anonymousValues(source),
-        ...(path.startsWith(pages) ? typeRolesSet(source, roles) : []),
-      ];
-      return violations.map((violation) => ({
-        ...violation,
-        path: relative(process.cwd(), path),
-      }));
-    })
-  ).flat();
+  const found = await scanFiles(files, (path, source) =>
+    [
+      ...anonymousValues(source),
+      ...(path.startsWith(pages) ? typeRolesSet(source, roles) : []),
+    ].map((violation) => ({ ...violation, path })),
+  );
 
   report({
     name: "check-classes",
@@ -160,7 +155,6 @@ const main = async () => {
     passed:
       `${files.length} file(s) carry no anonymous values` +
       `, and no page among them sets type (${roles.length} role(s))`,
-    failed: "",
     body: each(
       ({ path, rule, text, remedy }) =>
         `  ${path}\n    ${rule}: ${text}\n    → ${remedy}`,
@@ -168,7 +162,4 @@ const main = async () => {
   });
 };
 
-/* Run only as a program, so the tests can import the pure half. */
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

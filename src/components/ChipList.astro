@@ -1,0 +1,42 @@
+---
+import Button from "./Button.astro";
+import type { Href } from "../lib/url.ts";
+
+/**
+ * A row of compact controls: tags, categories, anything a reader browses by.
+ * Four components carried this markup between them, differing only in where
+ * the chips came from and whether a count trailed the label.
+ */
+type Props = {
+  readonly chips: readonly {
+    readonly label: string;
+    readonly href: Href;
+    /** Shown after the label where a row counts what sits behind each chip. */
+    readonly count?: number;
+  }[];
+};
+
+const { chips } = Astro.props;
+
+/* Rendered first, so a row with neither chips nor a tail renders nothing. */
+const trailing = Astro.slots.has("trailing") ? await Astro.slots.render("trailing") : "";
+const hasTrailing = trailing.trim() !== "";
+---
+
+{
+  (chips.length > 0 || hasTrailing) && (
+    <ul class="flex flex-wrap items-center gap-2xs" role="list">
+      {chips.map(({ label, href, count }) => (
+        <li>
+          <Button href={href} tone="secondary" size="compact">
+            {label}
+            {count !== undefined && (
+              <span class="text-ink-subtle ms-2xs tabular-nums">{count}</span>
+            )}
+          </Button>
+        </li>
+      ))}
+      {hasTrailing && <li set:html={trailing} />}
+    </ul>
+  )
+}

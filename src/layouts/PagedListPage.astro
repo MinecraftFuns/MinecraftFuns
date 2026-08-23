@@ -4,18 +4,14 @@ import PostRow from "../components/PostRow.astro";
 import ListPage from "./ListPage.astro";
 import type { Page } from "../lib/paging.ts";
 import type { PostSummary } from "../lib/posts.ts";
+import type { ListIntro } from "../lib/listings.ts";
 import type { Href } from "../lib/url.ts";
 import type { RootedPath } from "../schema.ts";
 
 /** Shared paginated listing; page one uses the base route, later pages `/page/N/`. */
-type Props = {
+type Props = ListIntro & {
   readonly title: string;
   readonly description: string;
-  readonly eyebrow: string;
-  readonly heading: string;
-  readonly lede: string;
-  readonly label: string;
-  readonly empty: string;
   /** Base route for every page address. */
   readonly base: RootedPath;
   readonly page: Page<PostSummary>;

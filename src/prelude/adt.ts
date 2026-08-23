@@ -29,6 +29,29 @@ export const nonEmpty = <T>(items: readonly T[]): NonEmpty<T> | undefined =>
   items.length === 0 ? undefined : (items as NonEmpty<T>);
 
 /**
+ * Functor. Head and tail rather than `map`, which hands back a plain array and
+ * loses the very property this type carries; recovering it would take an
+ * assertion, and an assertion is what having this function avoids.
+ */
+export const mapNonEmpty = <A, B>(items: NonEmpty<A>, f: (item: A) => B): NonEmpty<B> => {
+  const [head, ...rest] = items;
+  return [f(head), ...rest.map(f)];
+};
+
+/**
+ * The same, effectfully. Every task is started before the first is awaited, so
+ * this is `Promise.all`'s concurrency and failure behaviour exactly; the tuple
+ * form is what carries the non-emptiness through.
+ */
+export const traverseNonEmpty = <A, B>(
+  items: NonEmpty<A>,
+  f: (item: A) => Promise<B>,
+): Promise<NonEmpty<B>> => {
+  const [head, ...rest] = items;
+  return Promise.all([f(head), ...rest.map(f)]);
+};
+
+/**
  * The result of turning an untrusted representation into a trusted domain
  * value. A sum, not a nullable: the failure carries its reasons, so a caller
  * can report *why* rather than only *that* parsing failed.
@@ -55,6 +78,21 @@ export const invalid = <T = never>(...reasons: NonEmpty<string>): Parsed<T> => (
  */
 export const assertNever = (value: never): never => {
   throw new TypeError(`unexpected variant: ${String(value)}`);
+};
+
+/**
+ * Read a key the domain proves present: a table indexed by a closed union, or
+ * one built from the very rows being looked up. Throwing rather than defaulting
+ * is the point, since the only plausible default is a neighbouring key's value,
+ * which is the silent wrong answer a lookup table exists to prevent. `table`
+ * names where the missing entry should have been written.
+ */
+export const demand = <K, V>(map: ReadonlyMap<K, V>, key: K, table: string): V => {
+  const value = map.get(key);
+  if (value === undefined) {
+    throw new TypeError(`${table} has no entry for ${String(key)}`);
+  }
+  return value;
 };
 
 /** Functor: the value changes, a failure passes through untouched. */
@@ -127,12 +165,7 @@ export const both = <A, B>(a: Parsed<A>, b: Parsed<B>): Parsed<readonly [A, B]> 
  */
 export const inContext = <T>(parsed: Parsed<T>, context: string): Parsed<T> => {
   if (parsed.tag === "ok") return parsed;
-
-  /* Head and tail rather than `map`, which would hand back a plain array and
-     lose the very property this type is here to carry. */
-  const label = (reason: string): string => `${context}: ${reason}`;
-  const [first, ...rest] = parsed.reasons;
-  return invalid(label(first), ...rest.map(label));
+  return invalid(...mapNonEmpty(parsed.reasons, (reason) => `${context}: ${reason}`));
 };
 
 /** Every reason, one per line. A success has nothing to explain. */

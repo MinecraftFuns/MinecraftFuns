@@ -79,6 +79,15 @@ export type DeploymentsConfig = {
 // Languages
 // ---------------------------------------------------------------------------
 
+/** Wording around a number. A pair, so there is exactly one insertion point. */
+export type Affixed = { readonly before: string; readonly after: string };
+
+/** "4 min read" in a header; "4 min" where a row must not wrap. */
+export type ReadingTimeWording = {
+  readonly full: Affixed;
+  readonly compact: Affixed;
+};
+
 /**
  * One language the blog publishes in.
  *
@@ -92,15 +101,6 @@ export type DeploymentsConfig = {
  * varies independently of the code, which is how the content can be
  * announced as "zh-Hans" while living at `/zh/`.
  */
-/** Wording around a number. A pair, so there is exactly one insertion point. */
-export type Affixed = { readonly before: string; readonly after: string };
-
-/** "4 min read" in a header; "4 min" where a row must not wrap. */
-export type ReadingTimeWording = {
-  readonly full: Affixed;
-  readonly compact: Affixed;
-};
-
 export type LanguageConfig = {
   readonly code: Lowercase<string>;
   readonly bcp47: string;

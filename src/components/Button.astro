@@ -10,20 +10,27 @@ import {
 import type { Href } from "../lib/url.ts";
 
 /** Every control on the site; the tone and size vocabularies live in `control.ts`. */
-type Props = {
+type Control = {
   readonly href: Href;
-  readonly tone: ControlTone;
   /** Required rather than defaulted: a control's size is a decision. */
   readonly size: ControlSize;
-  /** Marks the control as the page the reader is already on. */
-  readonly current?: boolean;
   /** Which way the control carries the reader; supplies the arrow. */
   readonly direction?: Direction;
 };
 
-const { href, tone, size, current = false, direction } = Astro.props;
+/**
+ * `current` belongs to the quiet tone alone, because that is the only tone the
+ * stylesheet gives a current-page ink. As a field beside `tone` the pairing was
+ * writable and rendered a mark nobody would see; as a union it cannot be said.
+ */
+type Props =
+  | (Control & { readonly tone: "quiet"; readonly current?: boolean })
+  | (Control & { readonly tone: Exclude<ControlTone, "quiet"> });
 
-/* The quiet tone is the only one that can be a current page, and says so. */
+const props = Astro.props;
+const { href, tone, size, direction } = props;
+const current = props.tone === "quiet" && props.current === true;
+
 const currentInk = tone === "quiet" ? "current:text-ink" : "";
 
 /*

@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { TONES, toneClass } from "../src/components/control.ts";
-import { each, report } from "./lib/gate.ts";
+import { each, isMain, report } from "./lib/gate.ts";
 
 /** Where every component class the project owns is defined. */
 const STYLESHEET = "src/styles/global.css";
@@ -46,7 +46,6 @@ const main = async () => {
     name: "check-vocabulary",
     problems: missing,
     passed: `${STYLESHEET} defines all ${variants.length} declared variant(s)`,
-    failed: "",
     body: each(
       ({ name, selector }) =>
         `  ${name}\n    ${selector} is emitted into markup but defined nowhere\n    → define it in ${STYLESHEET}, or drop it from the vocabulary`,
@@ -54,7 +53,4 @@ const main = async () => {
   });
 };
 
-/* Keep the checker importable by tests. */
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

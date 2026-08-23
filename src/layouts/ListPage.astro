@@ -2,22 +2,16 @@
 import BackLink from "../components/BackLink.astro";
 import PageIntro from "../components/PageIntro.astro";
 import BaseLayout from "./BaseLayout.astro";
+import type { ListIntro } from "../lib/listings.ts";
 import type { Href } from "../lib/url.ts";
 import type { Chrome } from "./chrome.ts";
 
 /** Shared intro/list shell; slot output determines the empty state. */
-type Props = {
+type Props = ListIntro & {
   /** Document title, distinct from the page heading. */
   readonly title: string;
   readonly description: string;
   readonly chrome?: Chrome;
-  readonly eyebrow: string;
-  readonly heading: string;
-  readonly lede: string;
-  /** Accessible list name. */
-  readonly label: string;
-  /** Empty-list message. */
-  readonly empty: string;
   /** Back link for a slice of a larger index. */
   readonly back?: { readonly href: Href; readonly label: string } | undefined;
 };

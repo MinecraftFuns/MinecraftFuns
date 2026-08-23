@@ -1,3 +1,4 @@
+import type { ListIntro } from "./listings.ts";
 import { paginate, type Listing } from "./paging.ts";
 import { countedNoun } from "./plural.ts";
 import { PAGE_SIZE, tagBase, type PostSummary, type PostTag } from "./posts.ts";
@@ -20,13 +21,7 @@ export type TagListing = {
   readonly tag: PostTag;
   readonly base: RootedPath;
   readonly pages: Listing<PostSummary>;
-  readonly intro: {
-    readonly eyebrow: string;
-    readonly heading: string;
-    readonly lede: string;
-    readonly label: string;
-    readonly empty: string;
-  };
+  readonly intro: ListIntro;
   readonly title: string;
   readonly description: string;
 };

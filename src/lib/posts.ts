@@ -63,15 +63,10 @@ export type PostSummary = {
  * now O(P). Shared by the summary and the article page, so a row and the
  * header it leads to cannot disagree.
  */
-const minutesCache = memoiseBy(
+export const minutesOf = memoiseBy(
   (entry: CollectionEntry<"blog">) => entry.id,
-  /* Boxed because `memoiseBy` is sound only over objects: a cached number
-     could not be told from a miss. The box never escapes. */
-  (entry: CollectionEntry<"blog">) => ({ minutes: readingMinutes(entry.body ?? "") }),
+  (entry: CollectionEntry<"blog">) => readingMinutes(entry.body ?? ""),
 );
-
-export const minutesOf = (entry: CollectionEntry<"blog">): number =>
-  minutesCache(entry).minutes;
 
 /*
  * A summary is of the article's *primary* rendition: the text the bare URL

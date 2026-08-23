@@ -1,4 +1,5 @@
 import { invalid, nonEmpty, ok, type NonEmpty, type Parsed } from "../prelude/adt.ts";
+import { COLLATOR } from "./collate.ts";
 import type { Taxon } from "./taxonomy.ts";
 
 /**
@@ -37,11 +38,15 @@ export type Browse<T> = {
  * thirty-odd tags holding one to three posts each, so without the tiebreak
  * the six on show would depend on grouping order and could change from build
  * to build with no edit behind it.
+ *
+ * Which is why the tiebreak collates through `COLLATOR`: a bare
+ * `localeCompare` reads the build machine's locale, leaving which tags reach
+ * the strip a property of who ran the build, the very instability above.
  */
 export const byCoverage = <Label extends string, Item>(
   a: Taxon<Label, Item>,
   b: Taxon<Label, Item>,
-): number => b.items.length - a.items.length || a.label.localeCompare(b.label);
+): number => b.items.length - a.items.length || COLLATOR.compare(a.label, b.label);
 
 /**
  * The strip for a taxonomy, or nothing when there is no taxonomy to show.
@@ -57,9 +62,8 @@ export const browse = <Label extends string, Item>(
   taxa: readonly Taxon<Label, Item>[],
   keep: PreviewSize,
 ): Browse<Taxon<Label, Item>> | undefined => {
-  const ranked = [...taxa].sort(byCoverage);
+  const ranked = taxa.toSorted(byCoverage);
   const shown = nonEmpty(ranked.slice(0, keep));
-  return shown === undefined
-    ? undefined
-    : { shown, rest: Math.max(0, ranked.length - shown.length) };
+  /* `shown` is a prefix of `ranked`, so the remainder cannot be negative. */
+  return shown === undefined ? undefined : { shown, rest: ranked.length - shown.length };
 };

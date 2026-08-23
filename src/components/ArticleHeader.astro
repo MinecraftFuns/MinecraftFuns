@@ -1,10 +1,10 @@
 ---
 import { dateLocaleOf, type Lang, readingTimeIn } from "../lib/lang.ts";
-import type { PostTag } from "../lib/posts.ts";
+import { tagHref, type PostTag } from "../lib/posts.ts";
 import { formatDateIn, SITE_TIME_ZONE, type IsoDate } from "../lib/time.ts";
 import type { Href } from "../lib/url.ts";
+import ChipList from "./ChipList.astro";
 import { INTRO, INTRO_EXTRA, INTRO_LEDE } from "./intro.ts";
-import PostTags from "./PostTags.astro";
 
 /** Post header; shared intro styles keep publication metadata in the same block. */
 type Props = {
@@ -63,11 +63,10 @@ const displayDate = formatDateIn(date, SITE_TIME_ZONE, dateLocaleOf(lang));
   </p>
   <h1 class:list={["text-ink mt-xs", titleClass]}>{title}</h1>
   <p class:list={[INTRO_LEDE]}>{description}</p>
-  {/* Index reuses PostTags with different spacing. */}
   {
     tags.length > 0 && (
       <div class:list={[INTRO_EXTRA]}>
-        <PostTags tags={tags} />
+        <ChipList chips={tags.map((tag) => ({ label: tag, href: tagHref(tag) }))} />
       </div>
     )
   }

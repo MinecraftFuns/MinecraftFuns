@@ -1,7 +1,8 @@
 import { languages } from "../config/languages.ts";
-import { invalid, ok, okUnless, orThrow, type Parsed } from "../prelude/adt.ts";
+import { demand, invalid, ok, okUnless, orThrow, type Parsed } from "../prelude/adt.ts";
 import { clashesBy } from "../prelude/distinct.ts";
 import type { ReadingTimeWording } from "../schema.ts";
+import { parseSlug } from "./slug.ts";
 
 /**
  * The language vocabulary, derived from `config/languages.ts` and nothing
@@ -21,18 +22,14 @@ import type { ReadingTimeWording } from "../schema.ts";
  */
 export type Lang = (typeof languages)[number]["code"];
 
-/**
- * What a code must look like to be a filename, a URL segment, and an
- * alternation branch in `archive.ts`'s pattern: kebab-case, like a slug.
- * `Lowercase` in the schema already refuses casing at compile time; this is
- * the half a type cannot see, checked once at module load.
- */
-const CODE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
 const checked: Parsed<readonly Lang[]> = okUnless(
   [
+    /* A code is a filename, a URL segment, and an alternation branch in
+       `archive.ts`'s pattern, which is to say a slug: `parseSlug` holds that
+       grammar, and asking it is what keeps a second copy from drifting.
+       `Lowercase` in the schema already refuses casing at compile time. */
     ...languages
-      .filter(({ code }) => !CODE.test(code))
+      .filter(({ code }) => parseSlug(code).tag === "invalid")
       .map(({ code }) => `${JSON.stringify(code)} is not a kebab-case language code`),
     ...clashesBy(languages, ({ code }) => code).map(
       ([, later]) => `${JSON.stringify(later.code)} is declared twice`,
@@ -86,19 +83,9 @@ const preference = new Map<Lang, number>(
   languages.map(({ code }, index) => [code, index]),
 );
 
-/**
- * Unreachable: `Lang` is derived from the very rows the maps index, so a
- * member of the union cannot miss. It throws rather than defaulting, as in
- * `time.ts`, because the only plausible default is another language's
- * value, precisely the silent wrong answer a lookup table exists to avoid.
- */
-const found = <T>(map: ReadonlyMap<Lang, T>, lang: Lang): T => {
-  const value = map.get(lang);
-  if (value === undefined) {
-    throw new TypeError(`no language config for ${JSON.stringify(lang)}`);
-  }
-  return value;
-};
+/** Unreachable: `Lang` is derived from the very rows these maps index. */
+const found = <T>(map: ReadonlyMap<Lang, T>, lang: Lang): T =>
+  demand(map, lang, "src/config/languages.ts");
 
 /**
  * The BCP 47 tag a rendition declares to the platform: `<html lang>` and

@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 /** Gate literal em dashes in authored prose; entities and Chinese renditions are exempt. */
 
-import { readFile } from "node:fs/promises";
-import { relative, resolve } from "node:path";
+import { resolve } from "node:path";
 
-import { mapConcurrent, READ_CONCURRENCY } from "./lib/concurrent.ts";
 import { filesUnder } from "./lib/files.ts";
-import { each, report } from "./lib/gate.ts";
+import { each, isMain, report } from "./lib/gate.ts";
+import { numberedLines, scanFiles } from "./lib/scan.ts";
 
 const EM_DASH = String.fromCodePoint(0x2014);
 
@@ -24,9 +23,7 @@ export type EmDash = {
 
 /** Every occurrence in one file, with its line. */
 export const emDashes = (path: string, source: string): readonly EmDash[] =>
-  source
-    .split("\n")
-    .map((text, index) => ({ text, line: index + 1 }))
+  numberedLines(source)
     .filter(({ text }) => text.includes(EM_DASH))
     .map(({ text, line }) => ({ path, line, text: text.trim() }));
 
@@ -44,17 +41,12 @@ const main = async () => {
     ...LOOSE.map((path) => resolve(path)),
   ];
 
-  const found = (
-    await mapConcurrent(files, READ_CONCURRENCY, async (path) =>
-      emDashes(relative(process.cwd(), path), await readFile(path, "utf8")),
-    )
-  ).flat();
+  const found = await scanFiles(files, emDashes);
 
   report({
     name: "check-typography",
     problems: found,
     passed: `${files.length} file(s) carry no em dash`,
-    failed: "",
     body: each(
       ({ path, line, text }) =>
         `  ${path}:${line}\n    ${text}\n    → use a colon, a semicolon, or a full stop`,
@@ -62,7 +54,4 @@ const main = async () => {
   });
 };
 
-/* Run only as a program, so the tests can import the pure half. */
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  await main();
-}
+if (isMain(import.meta.url)) await main();

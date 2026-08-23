@@ -1,4 +1,11 @@
-import { invalid, ok, orThrow, type NonEmpty, type Parsed } from "../prelude/adt.ts";
+import {
+  invalid,
+  mapNonEmpty,
+  ok,
+  orThrow,
+  type NonEmpty,
+  type Parsed,
+} from "../prelude/adt.ts";
 
 /** Handwritten ICO encoder for the browser's implicit favicon request. */
 
@@ -13,9 +20,7 @@ export const parseIconSize = (size: number): Parsed<IconSize> =>
 
 /** Validate trusted module-level sizes. */
 export const iconSizes = (...sizes: NonEmpty<number>): NonEmpty<IconSize> =>
-  sizes.map((size) =>
-    orThrow(parseIconSize(size), "icon size"),
-  ) as unknown as NonEmpty<IconSize>;
+  mapNonEmpty(sizes, (size) => orThrow(parseIconSize(size), "icon size"));
 
 /** ICO image with PNG payload. */
 export type IconImage = {

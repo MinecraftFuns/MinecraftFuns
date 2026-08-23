@@ -60,11 +60,30 @@ type Scheme = "light" | "dark";
 const SCHEMES: readonly Scheme[] = ["light", "dark"];
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 const LINK_CONCURRENCY = 8;
+/** Pages share one context, so visiting several at once costs no extra browser. */
+const PAGE_CONCURRENCY = 4;
 const TOUCH_WIDTH = 768;
 
-const findings: Finding[] = [];
-const record = (finding: Finding): number => findings.push(finding);
-const recordAll = (entries: readonly Finding[]): void => entries.forEach(record);
+/**
+ * Where one pass puts what it saw. A module-global array made this channel
+ * invisible to the typechecker and would tie the report's order to whichever
+ * page finished first; a log per page is what lets routes be visited
+ * concurrently and still be drained in route order.
+ */
+type Log = {
+  readonly record: (finding: Finding) => void;
+  readonly recordAll: (entries: readonly Finding[]) => void;
+  readonly found: () => readonly Finding[];
+};
+
+const findingLog = (): Log => {
+  const found: Finding[] = [];
+  return {
+    record: (finding) => void found.push(finding),
+    recordAll: (entries) => entries.forEach((finding) => found.push(finding)),
+    found: () => found,
+  };
+};
 
 // ---------------------------------------------------------------------------
 // Rule tables
@@ -225,9 +244,9 @@ type Where = {
 
 /* Written out rather than tabulated: the two events carry different payloads,
    so a shared row type would have to widen both to `unknown`. */
-const attachRuntimeListeners = (page: Page, where: Where): void => {
+const attachRuntimeListeners = (page: Page, where: Where, log: Log): void => {
   page.on("pageerror", (error) =>
-    record({
+    log.record({
       ...where,
       category: "runtime",
       rule: "uncaught-exception",
@@ -237,7 +256,7 @@ const attachRuntimeListeners = (page: Page, where: Where): void => {
   );
 
   page.on("requestfailed", (request) =>
-    record({
+    log.record({
       ...where,
       category: "runtime",
       rule: "request-failed",
@@ -248,7 +267,7 @@ const attachRuntimeListeners = (page: Page, where: Where): void => {
 
   page.on("console", (message) =>
     message.type() === "error"
-      ? record({
+      ? log.record({
           ...where,
           category: "runtime",
           rule: "console-error",
@@ -260,7 +279,7 @@ const attachRuntimeListeners = (page: Page, where: Where): void => {
 
   page.on("response", (response) =>
     response.status() >= 400
-      ? record({
+      ? log.record({
           ...where,
           category: "runtime",
           rule: "http-error",
@@ -271,9 +290,9 @@ const attachRuntimeListeners = (page: Page, where: Where): void => {
   );
 };
 
-const auditAxe = async (page: Page, where: Where): Promise<void> => {
+const auditAxe = async (page: Page, where: Where, log: Log): Promise<void> => {
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
-  recordAll(
+  log.recordAll(
     violations.flatMap((violation) =>
       violation.nodes.slice(0, 5).map((node) => ({
         ...where,
@@ -292,10 +311,11 @@ const auditDocument = async (
   page: Page,
   where: Where,
   interactiveCount: number,
+  log: Log,
 ): Promise<DocumentFacts> => {
   const doc = await page.evaluate(documentProbe);
 
-  recordAll(
+  log.recordAll(
     DOCUMENT_RULES.filter(({ when }) => when(doc)).map(({ category, rule, impact, message }) => ({
       ...where,
       category,
@@ -308,7 +328,7 @@ const auditDocument = async (
   // Keyboard focus must be visible; a mouse user never sees this fail.
   const unmarked = interactiveCount > 0 ? await page.evaluate(focusProbe, INTERACTIVE_SELECTOR) : [];
   if (unmarked.length > 0) {
-    record({
+    log.record({
       ...where,
       category: "accessibility",
       rule: "focus-indicator-unclear",
@@ -320,16 +340,24 @@ const auditDocument = async (
   return doc;
 };
 
+/** One page, with everything it turned up; the caller decides where that goes. */
+type Visit = {
+  readonly route: string;
+  readonly doc: DocumentFacts | null;
+  readonly found: readonly Finding[];
+};
+
 const auditPage = async (
   context: BrowserContext,
   route: string,
   viewport: Viewport,
   scheme: Scheme,
-): Promise<DocumentFacts | null> => {
+): Promise<Visit> => {
+  const log = findingLog();
   const page = await context.newPage();
   const where = { page: route, viewport: viewport.name, colorScheme: scheme };
 
-  attachRuntimeListeners(page, where);
+  attachRuntimeListeners(page, where, log);
   await page.goto(urlFor(route), { waitUntil: "load" });
 
   // Geometry does not vary with colour scheme, so design is measured once.
@@ -339,7 +367,7 @@ const auditPage = async (
   );
 
   if (layout.documentScrollWidth > layout.viewportWidth + 1) {
-    record({
+    log.record({
       ...where,
       category: "readability",
       rule: "horizontal-overflow",
@@ -348,7 +376,7 @@ const auditPage = async (
     });
   }
 
-  recordAll(
+  log.recordAll(
     LAYOUT_RULES.filter(
       ({ touchOnly }) => !touchOnly || viewport.width <= TOUCH_WIDTH,
     ).flatMap(({ category, rule, impact, findings }) =>
@@ -364,13 +392,15 @@ const auditPage = async (
   );
 
   if (design !== null) {
-    recordAll(designFindings(design, { page: route, viewport: viewport.name }));
+    log.recordAll(designFindings(design, { page: route, viewport: viewport.name }));
   }
 
-  if (viewport.axe) await auditAxe(page, where);
+  if (viewport.axe) await auditAxe(page, where, log);
 
   const doc =
-    viewport.name === "desktop" ? await auditDocument(page, where, layout.interactiveCount) : null;
+    viewport.name === "desktop"
+      ? await auditDocument(page, where, layout.interactiveCount, log)
+      : null;
 
   // Reuse the loaded page rather than navigating again for a screenshot.
   if (viewport.capture) {
@@ -381,7 +411,7 @@ const auditPage = async (
   }
 
   await page.close();
-  return doc;
+  return { route, doc, found: log.found() };
 };
 
 // ---------------------------------------------------------------------------
@@ -422,13 +452,14 @@ const overRoutes = async (
 const checkSchemesDiffer = (
   route: string,
   byScheme: ReadonlyMap<Scheme, DocumentFacts>,
+  log: Log,
 ): void => {
   const light = byScheme.get("light");
   const dark = byScheme.get("dark");
   if (light === undefined || dark === undefined) return;
 
   if (light.backgroundColor === dark.backgroundColor) {
-    record({
+    log.record({
       category: "readability",
       rule: "schemes-identical",
       impact: "serious",
@@ -438,9 +469,12 @@ const checkSchemesDiffer = (
   }
 };
 
-const checkTitlesUnique = (titles: readonly (readonly [string, string])[]): void => {
+const checkTitlesUnique = (
+  titles: readonly (readonly [string, string])[],
+  log: Log,
+): void => {
   clashesBy(titles, ([, title]) => title).forEach(([[first], [route, title]]) =>
-    record({
+    log.record({
       category: "meta",
       rule: "duplicate-title",
       impact: "minor",
@@ -451,14 +485,18 @@ const checkTitlesUnique = (titles: readonly (readonly [string, string])[]): void
 };
 
 /** Static checks prove links resolve to files; this proves the server serves them. */
-const checkLinks = async (browser: Browser, links: readonly string[]): Promise<void> => {
+const checkLinks = async (
+  browser: Browser,
+  links: readonly string[],
+  log: Log,
+): Promise<void> => {
   if (links.length === 0) return;
 
   const context = await browser.newContext();
   await mapConcurrent(links, LINK_CONCURRENCY, async (href) => {
     const response = await context.request.get(`${ORIGIN}${href}`);
     if (!response.ok()) {
-      record({
+      log.record({
         category: "links",
         rule: "dead-internal-link",
         impact: "critical",
@@ -485,16 +523,20 @@ const launchBrowser = async () =>
     return chromium.launch();
   });
 
-const main = async () => {
+const main = async (): Promise<{
+  readonly routes: readonly string[];
+  readonly findings: readonly Finding[];
+}> => {
   await mkdir(join(OUT, "screenshots"), { recursive: true });
 
   const routes = await discoverRoutes(DIST);
   if (routes.length === 0) {
     console.error("audit: no built pages found; run the build first");
-    return [];
+    return { routes: [], findings: [] };
   }
   console.log(`audit: ${routes.length} route(s) at ${urlFor("/")}`);
 
+  const log = findingLog();
   const server = await startPreview();
   try {
     /* Acquired inside the bracket: a browser that fails to launch must not
@@ -526,23 +568,31 @@ const main = async () => {
             deviceScaleFactor: 1,
           });
 
-          for (const route of routes) {
-            const doc = await auditPage(context, route, viewport, scheme);
-            if (doc !== null) {
-              documentsFor(route).set(scheme, doc);
-              if (scheme === "light") {
-                titles.push([route, doc.title]);
-                doc.internalLinks.forEach((href) => links.add(href));
-              }
+          const visited = await mapConcurrent(routes, PAGE_CONCURRENCY, (route) =>
+            auditPage(context, route, viewport, scheme),
+          );
+
+          /* Drained in route order, so what each page found reaches the report
+             where it would have under a sequential visit. */
+          visited.forEach(({ route, doc, found }) => {
+            log.recordAll(found);
+            if (doc === null) return;
+
+            documentsFor(route).set(scheme, doc);
+            if (scheme === "light") {
+              titles.push([route, doc.title]);
+              doc.internalLinks.forEach((href) => links.add(href));
             }
-          }
+          });
 
           await context.close();
         }
       }
 
-      documentsByRoute.forEach((byScheme, route) => checkSchemesDiffer(route, byScheme));
-      checkTitlesUnique(titles);
+      documentsByRoute.forEach((byScheme, route) =>
+        checkSchemesDiffer(route, byScheme, log),
+      );
+      checkTitlesUnique(titles, log);
 
       await overRoutes(
         browser,
@@ -551,7 +601,7 @@ const main = async () => {
           visit: async (page, route) => {
             const { animated } = await page.evaluate(motionProbe);
             if (animated.length > 0) {
-              record({
+              log.record({
                 category: "accessibility",
                 rule: "reduced-motion-ignored",
                 impact: "moderate",
@@ -572,7 +622,7 @@ const main = async () => {
           prepare: (page) => page.emulateMedia({ media: "print" }),
           visit: async (page, route) => {
             if (await page.evaluate(overflowProbe)) {
-              record({
+              log.record({
                 category: "readability",
                 rule: "print-overflow",
                 impact: "minor",
@@ -589,8 +639,8 @@ const main = async () => {
         routes,
       );
 
-      await checkLinks(browser, [...links]);
-      return routes;
+      await checkLinks(browser, [...links], log);
+      return { routes, findings: log.found() };
     } finally {
       await browser.close();
     }
@@ -617,7 +667,7 @@ const write = async (
 // Findings are reported, never fatal; a crash in the audit is itself recorded
 // so the failure stays visible without reading as a broken site.
 try {
-  const routes = await main();
+  const { routes, findings } = await main();
   const deduped = dedupeFindings(findings);
   await write(deduped, routes);
 

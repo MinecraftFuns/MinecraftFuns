@@ -6,19 +6,28 @@ import { z } from "astro/zod";
 import { explain, type Parsed } from "./prelude/adt.ts";
 import { parseDocCategory, parsePostTag } from "./lib/labels.ts";
 import { TRANSLATORS } from "./lib/lang.ts";
-import { isoDate, parseIsoDate } from "./lib/time.ts";
+import { parseIsoDate } from "./lib/time.ts";
+
+/**
+ * A project parser as a Zod transform: one parse, and the value the schema
+ * yields is the one the parser built. The brand is therefore minted where every
+ * other brand here is, inside its own smart constructor, rather than by an
+ * assertion at this boundary; Zod's part is to attach the offending file to
+ * whatever reasons the parser gives.
+ */
+const parsedBy =
+  <T>(parse: (raw: string) => Parsed<T>) =>
+  (raw: string, ctx: z.RefinementCtx): T => {
+    const parsed = parse(raw);
+    if (parsed.tag === "ok") return parsed.value;
+
+    ctx.addIssue({ code: "custom", message: explain(parsed) });
+    return z.NEVER;
+  };
 
 /** Validate with Zod so errors retain the offending file. */
-const decoded = <T extends string>(parse: (raw: string) => Parsed<T>) =>
-  z
-    .string()
-    .min(1)
-    .superRefine((raw, ctx) => {
-      const parsed = parse(raw);
-      if (parsed.tag === "invalid")
-        ctx.addIssue({ code: "custom", message: explain(parsed) });
-    })
-    .transform((raw) => raw as T);
+const decoded = <T>(parse: (raw: string) => Parsed<T>) =>
+  z.string().min(1).transform(parsedBy(parse));
 
 /** Decode frontmatter at the build boundary; archive paths are reconciled later. */
 const blog = defineCollection({
@@ -31,21 +40,13 @@ const blog = defineCollection({
     translation: z.enum(TRANSLATORS).optional(),
     /* Decode tags as branded `PostTag` values before taxonomy grouping. */
     tags: z.array(decoded(parsePostTag)).default([]),
-    /* Separate refinement preserves file-aware parser errors. */
     date: z
       /* Keep YAML dates as strings; coercion would attach a timezone. */
       .custom<string>((value) => typeof value === "string", {
         message:
           'must be quoted, e.g. date: "2026-08-01"; an unquoted YAML date becomes a timestamp with a time zone attached',
       })
-      /* Preserve parser errors instead of replacing them with generic text. */
-      .superRefine((raw, ctx) => {
-        const parsed = parseIsoDate(raw);
-        if (parsed.tag === "invalid") {
-          ctx.addIssue({ code: "custom", message: explain(parsed) });
-        }
-      })
-      .transform((raw) => isoDate(raw)),
+      .transform(parsedBy(parseIsoDate)),
   }),
 });
 

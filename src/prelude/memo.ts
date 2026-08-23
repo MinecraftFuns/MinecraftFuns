@@ -7,24 +7,27 @@
  */
 
 /**
- * `T extends object` is what makes the `undefined` test a sound miss check
- * rather than a guess about the value: no object is `undefined`, so a miss and
- * a cached value can never be confused.
+ * One cached result per distinct key, $O(1)$ amortized.
+ *
+ * The entry is boxed so a miss and a cached `undefined` stay distinguishable in
+ * one probe. Boxing here rather than at the call site is what lets this hold
+ * any `T`: the alternative was an `extends object` constraint that callers
+ * satisfied by wrapping their own numbers.
  */
-export const memoiseBy = <A extends readonly unknown[], T extends object>(
+export const memoiseBy = <A extends readonly unknown[], T>(
   keyOf: (...args: A) => string,
   build: (...args: A) => T,
 ): ((...args: A) => T) => {
-  const cache = new Map<string, T>();
+  const cache = new Map<string, { readonly value: T }>();
 
   return (...args: A): T => {
     const key = keyOf(...args);
     const cached = cache.get(key);
-    if (cached !== undefined) return cached;
+    if (cached !== undefined) return cached.value;
 
-    const built = build(...args);
-    cache.set(key, built);
-    return built;
+    const value = build(...args);
+    cache.set(key, { value });
+    return value;
   };
 };
 
@@ -35,5 +38,4 @@ export const memoiseBy = <A extends readonly unknown[], T extends object>(
  * run rather than racing to start several. A rejection is cached too, which is
  * right here: the work is build-time, and a build that failed once fails.
  */
-export const once = <T extends object>(build: () => T): (() => T) =>
-  memoiseBy(() => "", build);
+export const once = <T>(build: () => T): (() => T) => memoiseBy(() => "", build);

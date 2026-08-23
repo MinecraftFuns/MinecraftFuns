@@ -7,7 +7,7 @@ import { satteri } from "@astrojs/markdown-satteri";
 import { explain } from "./src/prelude/adt.ts";
 import { developmentTarget, findTarget } from "./src/lib/deployment.ts";
 import { siteMarkup, siteRejections } from "./src/lib/directives.ts";
-import { katexRendering } from "./src/lib/math.ts";
+import { katexRendering } from "./src/lib/katex.ts";
 import { sitemapFilter } from "./src/lib/sitemap.ts";
 
 /**
@@ -162,7 +162,7 @@ export default defineConfig({
     /*
      * TeX math, `$…$` and `$$…$$`, parsed natively and rendered at build
      * time: the competitive programming archive is written in it. Sätteri
-     * only marks the spans; `lib/math.ts` compiles them with KaTeX, whose
+     * only marks the spans; `lib/katex.ts` compiles them with KaTeX, whose
      * stylesheet `ArticlePage` imports.
      *
      * `directive` adds the `:name[…]` grammar the site's own tags are written
