@@ -2,17 +2,17 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { browse, byCoverage, parsePreviewSize, type PreviewSize } from "./browse.ts";
-import { orThrow, type NonEmpty } from "../prelude/adt.ts";
+import { nonEmpty, orThrow } from "../prelude/adt.ts";
 import type { Taxon } from "./taxonomy.ts";
 
 const keep = (n: number): PreviewSize => orThrow(parsePreviewSize(n), "test");
 
 /** A taxon carrying only what ranking reads: its label and how many items. */
-const taxon = (label: string, count: number): Taxon<string, number> => ({
-  label,
-  slug: label.toLowerCase(),
-  items: Array.from({ length: count }, (_, i) => i) as unknown as NonEmpty<number>,
-});
+const taxon = (label: string, count: number): Taxon<string, number> => {
+  const items = nonEmpty(Array.from({ length: count }, (_, i) => i));
+  assert.ok(items, "test taxa carry at least one item");
+  return { label, slug: label.toLowerCase(), items };
+};
 
 /** The archive's real shape: a short head and a long flat tail. */
 const archive = [

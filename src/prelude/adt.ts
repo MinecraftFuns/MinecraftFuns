@@ -29,26 +29,27 @@ export const nonEmpty = <T>(items: readonly T[]): NonEmpty<T> | undefined =>
   items.length === 0 ? undefined : (items as NonEmpty<T>);
 
 /**
- * Functor. Head and tail rather than `map`, which hands back a plain array and
- * loses the very property this type carries; recovering it would take an
- * assertion, and an assertion is what having this function avoids.
+ * Functor. `Array.prototype.map` returns an array of its input's length by
+ * specification, so the cast discharges a law rather than an optimism: the
+ * same trusted-boundary move as `nonEmpty`'s own, made once here so no call
+ * site ever needs one. The arrow keeps `map`'s index out of `f`'s arguments.
  */
 export const mapNonEmpty = <A, B>(items: NonEmpty<A>, f: (item: A) => B): NonEmpty<B> => {
-  const [head, ...rest] = items;
-  return [f(head), ...rest.map(f)];
+  const mapped: readonly B[] = items.map((item) => f(item));
+  return mapped as NonEmpty<B>;
 };
 
 /**
- * The same, effectfully. Every task is started before the first is awaited, so
- * this is `Promise.all`'s concurrency and failure behaviour exactly; the tuple
- * form is what carries the non-emptiness through.
+ * The same, effectfully. `map` starts every task before `Promise.all` awaits
+ * any, and `Promise.all` resolves to an array of its input's length, so the
+ * same law discharges the same cast.
  */
-export const traverseNonEmpty = <A, B>(
+export const traverseNonEmpty = async <A, B>(
   items: NonEmpty<A>,
   f: (item: A) => Promise<B>,
 ): Promise<NonEmpty<B>> => {
-  const [head, ...rest] = items;
-  return Promise.all([f(head), ...rest.map(f)]);
+  const settled: readonly B[] = await Promise.all(items.map((item) => f(item)));
+  return settled as NonEmpty<B>;
 };
 
 /**
