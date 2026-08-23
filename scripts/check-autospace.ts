@@ -14,10 +14,16 @@ const ROOT = "src/content";
 /** Primary subtags using ideographic scripts. */
 const IDEOGRAPHIC = new Set(["zh", "ja", "ko"]);
 
+/** The subtag before the first hyphen, or the whole tag when it has none. */
+const primarySubtag = (tag: string): string => {
+  const hyphen = tag.indexOf("-");
+  return hyphen === -1 ? tag : tag.slice(0, hyphen);
+};
+
 /** Rendition filenames derived from the language table. */
 const RENDITIONS = new Set(
   languages
-    .filter(({ bcp47 }) => IDEOGRAPHIC.has(bcp47.split("-")[0] ?? ""))
+    .filter(({ bcp47 }) => IDEOGRAPHIC.has(primarySubtag(bcp47)))
     .map(({ code }) => `${code}.md`),
 );
 

@@ -159,11 +159,10 @@ const payloadOf = (site: Site, label: string): Payload | undefined => {
  */
 export const langOf = (fileURL: URL | undefined): Lang => {
   if (fileURL === undefined) return SITE_LANG;
-  const stem =
-    fileURL.pathname
-      .split("/")
-      .at(-1)
-      ?.replace(/\.[^.]+$/, "") ?? "";
+  /* Sliced rather than split: the last segment is the only one wanted, and
+     `lastIndexOf` returning -1 for a bare name lands on the whole string. */
+  const { pathname } = fileURL;
+  const stem = pathname.slice(pathname.lastIndexOf("/") + 1).replace(/\.[^.]+$/, "");
   const parsed = parseLang(stem);
   return parsed.tag === "ok" ? parsed.value : SITE_LANG;
 };

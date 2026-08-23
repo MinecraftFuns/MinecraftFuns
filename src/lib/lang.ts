@@ -1,5 +1,14 @@
 import { languages } from "../config/languages.ts";
-import { demand, invalid, ok, okUnless, orThrow, type Parsed } from "../prelude/adt.ts";
+import {
+  demand,
+  invalid,
+  mapNonEmpty,
+  ok,
+  okUnless,
+  orThrow,
+  type NonEmpty,
+  type Parsed,
+} from "../prelude/adt.ts";
 import { clashesBy } from "../prelude/distinct.ts";
 import type { ReadingTimeWording } from "../schema.ts";
 import { parseSlug } from "./slug.ts";
@@ -22,7 +31,27 @@ import { parseSlug } from "./slug.ts";
  */
 export type Lang = (typeof languages)[number]["code"];
 
-const checked: Parsed<readonly Lang[]> = okUnless(
+/**
+ * A row as *written*, literals intact. Emphatically not `LanguageConfig`,
+ * which is the shape a row must satisfy and types `code` as the whole of
+ * `Lowercase<string>`. That width is right for a schema and fatal here:
+ * `Lang` is derived from the values, so reading the rows back through the
+ * schema would hand every consumer an open string.
+ */
+type ConfiguredLanguage = (typeof languages)[number];
+
+/**
+ * The same rows, said to be a list of one type rather than a pair of two.
+ *
+ * `as const` is what closes `Lang`, and it gives every row its own literal
+ * types as a side effect, so the config's type is a tuple of distinct rows.
+ * Assigning it to a list of their union is the annotation `mapNonEmpty`
+ * cannot infer: inference reads a non-empty list's element from the head, and
+ * would take the first row's literals as the type of all of them.
+ */
+const rows: NonEmpty<ConfiguredLanguage> = languages;
+
+const checked: Parsed<NonEmpty<Lang>> = okUnless(
   [
     /* A code is a filename, a URL segment, and an alternation branch in
        `archive.ts`'s pattern, which is to say a slug: `parseSlug` holds that
@@ -35,15 +64,18 @@ const checked: Parsed<readonly Lang[]> = okUnless(
       ([, later]) => `${JSON.stringify(later.code)} is declared twice`,
     ),
   ],
-  languages.map(({ code }) => code),
+  mapNonEmpty(rows, ({ code }) => code),
 );
 
 /**
  * The configured codes, most preferred first. Eliminated with `orThrow`
  * because a malformed language config is a defect: the build fails at import
  * rather than minting routes from it.
+ *
+ * Non-empty because the config is, and carrying that through is what makes
+ * the head below a read rather than a second trip to `languages`.
  */
-export const LANGS: readonly Lang[] = orThrow(checked, "src/config/languages.ts");
+export const LANGS: NonEmpty<Lang> = orThrow(checked, "src/config/languages.ts");
 
 /**
  * The head of the preference order: the language the chrome is written in.
@@ -54,7 +86,7 @@ export const LANGS: readonly Lang[] = orThrow(checked, "src/config/languages.ts"
  * language keeps a suffixed address precisely because a better-preferred
  * rendition arriving later would displace it.
  */
-export const SITE_LANG: Lang = languages[0].code;
+export const SITE_LANG: Lang = LANGS[0];
 
 /** Alternation source for `archive.ts`'s id pattern, derived, never restated. */
 export const LANG_SOURCE: string = LANGS.join("|");
@@ -70,7 +102,7 @@ export const parseLang = (raw: string): Parsed<Lang> => {
 };
 
 /* Index lookups once at module load for O(1) access. */
-const indexed = <T>(field: (language: (typeof languages)[number]) => T) =>
+const indexed = <T>(field: (language: ConfiguredLanguage) => T) =>
   new Map<Lang, T>(languages.map((language) => [language.code, field(language)]));
 
 const bcp47 = indexed(({ bcp47: tag }) => tag);

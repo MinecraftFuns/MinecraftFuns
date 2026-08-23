@@ -1,4 +1,22 @@
-/** Key-based distinctness and collision reporting, both one pass. */
+import type { NonEmpty } from "./adt.ts";
+
+/** Key-based grouping, distinctness, and collision reporting, each one pass. */
+
+/**
+ * Items by key, in first-encounter order, every group non-empty.
+ *
+ * `Map.groupBy` does the work; the type is what this adds. A group exists
+ * because something was put in it, so the platform never produces an empty
+ * one, but `Map<K, T[]>` cannot say that and every caller then re-asks the
+ * question the grouping already answered.
+ */
+export const groupBy = <T, K>(
+  items: Iterable<T>,
+  keyOf: (item: T) => K,
+): ReadonlyMap<K, NonEmpty<T>> => {
+  const grouped: ReadonlyMap<K, readonly T[]> = Map.groupBy(items, keyOf);
+  return grouped as ReadonlyMap<K, NonEmpty<T>>;
+};
 
 /** The first item claiming each key, in encounter order. */
 export const distinctBy = <T, K>(

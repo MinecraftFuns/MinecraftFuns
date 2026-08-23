@@ -2,13 +2,14 @@ import type { RootedPath } from "../schema.ts";
 import {
   collect,
   inContext,
+  mapNonEmpty,
   mapParsed,
-  nonEmpty,
   okUnless,
+  sortNonEmpty,
   type NonEmpty,
   type Parsed,
 } from "../prelude/adt.ts";
-import { clashesBy } from "../prelude/distinct.ts";
+import { clashesBy, groupBy } from "../prelude/distinct.ts";
 import { hrefOf, langHrefOf, routeOf, type PostPath } from "./archive.ts";
 import { bcp47Of, byPreference, type Lang, type Translator } from "./lang.ts";
 import type { PostTag } from "./labels.ts";
@@ -116,17 +117,25 @@ export type RenditionRecord<E> = {
 const sameTags = (a: readonly PostTag[], b: readonly PostTag[]): boolean =>
   a.length === b.length && a.every((tag, index) => tag === b[index]);
 
-/** Validate one article's files, accumulating independent findings. */
-const article = <E>(records: readonly RenditionRecord<E>[]): Parsed<Article<E>[]> => {
+/**
+ * Validate one article's files, accumulating independent findings.
+ *
+ * Takes a `NonEmpty` because the caller's grouping already proved it: an
+ * article exists because a file claimed it. Saying so in the type is what
+ * makes the head total and leaves this function nothing to report about the
+ * article that has no files.
+ */
+const article = <E>(records: NonEmpty<RenditionRecord<E>>): Parsed<Article<E>> => {
   /* Duplicate paths are invalid; retain total handling for duplicate input. */
   const duplicated = clashesBy(records, (record) => record.lang).map(
     ([, later]) => `two files both claim the ${later.lang} rendition`,
   );
 
-  const [first, ...rest] = records;
-  if (first === undefined) return okUnless(duplicated, []);
+  const [first] = records;
 
-  const disagreements = rest.flatMap((record) => [
+  /* Every record, the head included: agreement is reflexive, so the head says
+     nothing about itself and no tail has to be cut to keep it quiet. */
+  const disagreements = records.flatMap((record) => [
     ...(record.date === first.date
       ? []
       : [
@@ -146,49 +155,28 @@ const article = <E>(records: readonly RenditionRecord<E>[]): Parsed<Article<E>[]
         "every rendition is marked translation:, so the original is missing; the rendition the others were translated from carries no translation: field",
       ];
 
-  /* Sort once; `toSorted` preserves input records. */
-  const renditions = nonEmpty(
-    records
-      .toSorted((a, b) => byPreference(a.lang, b.lang))
-      .map(({ lang, provenance, entry }) => ({ lang, provenance, entry })),
+  const renditions = mapNonEmpty(
+    sortNonEmpty(records, (a, b) => byPreference(a.lang, b.lang)),
+    ({ lang, provenance, entry }) => ({ lang, provenance, entry }),
   );
 
-  /* Keep the empty case explicit instead of asserting. */
-  return renditions === undefined
-    ? okUnless(duplicated, [])
-    : okUnless(
-        [...duplicated, ...disagreements, ...orphaned],
-        [
-          {
-            path: first.path,
-            date: first.date,
-            tags: first.tags,
-            renditions,
-          },
-        ],
-      );
+  return okUnless([...duplicated, ...disagreements, ...orphaned], {
+    path: first.path,
+    date: first.date,
+    tags: first.tags,
+    renditions,
+  });
 };
 
 /** Group, validate, and recency-sort articles in one collection pass. */
 export const assemble = <E>(
   records: readonly RenditionRecord<E>[],
 ): Parsed<readonly Article<E>[]> => {
-  const grouped = new Map<string, RenditionRecord<E>[]>();
-
-  for (const record of records) {
-    const key = routeOf(record.path);
-    const found = grouped.get(key);
-    if (found === undefined) grouped.set(key, [record]);
-    else found.push(record);
-  }
-
   const articles = collect(
-    [...grouped.entries()].map(([key, group]) =>
+    [...groupBy(records, (record) => routeOf(record.path))].map(([key, group]) =>
       inContext(article(group), `src/content/blog/${key}`),
     ),
   );
 
-  return mapParsed(articles, (groups) =>
-    byRecencyWith(groups.flat(), (item) => item.date),
-  );
+  return mapParsed(articles, (items) => byRecencyWith(items, (item) => item.date));
 };

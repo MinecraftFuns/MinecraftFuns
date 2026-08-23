@@ -1,11 +1,31 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { clashesBy, distinctBy } from "./distinct.ts";
+import { clashesBy, distinctBy, groupBy } from "./distinct.ts";
 
 type Row = { readonly id: string; readonly key: string };
 const row = (id: string, key: string): Row => ({ id, key });
 const ids = (rows: readonly Row[]) => rows.map((found) => found.id);
+
+describe("groupBy", () => {
+  it("collects every item claiming a key, in encounter order", () => {
+    const grouped = groupBy([row("a", "x"), row("b", "y"), row("c", "x")], (r) => r.key);
+
+    assert.deepEqual([...grouped.keys()], ["x", "y"]);
+    assert.deepEqual(ids(grouped.get("x") ?? []), ["a", "c"]);
+  });
+
+  /* The non-emptiness the type claims: a present key has a readable head. */
+  it("gives every group a head", () => {
+    const grouped = groupBy([row("a", "x"), row("b", "x")], (r) => r.key);
+
+    for (const group of grouped.values()) assert.ok(group[0]);
+  });
+
+  it("is total on an empty list", () => {
+    assert.equal(groupBy([], (r: Row) => r.key).size, 0);
+  });
+});
 
 describe("distinctBy", () => {
   it("keeps the first item claiming each key", () => {

@@ -9,10 +9,12 @@ import {
   explain,
   inContext,
   invalid,
+  mapNonEmpty,
   mapParsed,
   nonEmpty,
   ok,
   orThrow,
+  sortNonEmpty,
   type Parsed,
 } from "./adt.ts";
 
@@ -29,6 +31,38 @@ describe("nonEmpty", () => {
   it("returns the same list when it has elements", () => {
     const items = [1, 2];
     assert.equal(nonEmpty(items), items);
+  });
+});
+
+/* The length laws these combinators assert rather than reconstruct. */
+describe("mapNonEmpty", () => {
+  it("preserves length and order", () => {
+    assert.deepEqual(
+      mapNonEmpty([1, 2, 3], (n) => n * 2),
+      [2, 4, 6],
+    );
+  });
+
+  it("applies the function to the head as well as the tail", () => {
+    assert.deepEqual(
+      mapNonEmpty([1], (n) => n * 2),
+      [2],
+    );
+  });
+});
+
+describe("sortNonEmpty", () => {
+  it("orders without dropping or duplicating", () => {
+    assert.deepEqual(
+      sortNonEmpty([3, 1, 2], (a, b) => a - b),
+      [1, 2, 3],
+    );
+  });
+
+  it("leaves the input untouched", () => {
+    const items: readonly [number, ...number[]] = [3, 1, 2];
+    sortNonEmpty(items, (a, b) => a - b);
+    assert.deepEqual(items, [3, 1, 2]);
   });
 });
 

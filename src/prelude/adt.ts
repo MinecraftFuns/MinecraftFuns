@@ -40,6 +40,19 @@ export const mapNonEmpty = <A, B>(items: NonEmpty<A>, f: (item: A) => B): NonEmp
 };
 
 /**
+ * Reordering, which is length-preserving for the same reason `map` is:
+ * `toSorted` returns a permutation of its input. Sorting cannot empty a list,
+ * and this is where that sentence is written down.
+ */
+export const sortNonEmpty = <T>(
+  items: NonEmpty<T>,
+  compare: (a: T, b: T) => number,
+): NonEmpty<T> => {
+  const ordered: readonly T[] = items.toSorted(compare);
+  return ordered as NonEmpty<T>;
+};
+
+/**
  * The same, effectfully. `map` starts every task before `Promise.all` awaits
  * any, and `Promise.all` resolves to an array of its input's length, so the
  * same law discharges the same cast.
