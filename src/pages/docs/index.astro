@@ -2,24 +2,23 @@
 import DocCategories from "../../components/DocCategories.astro";
 import DocRow from "../../components/DocRow.astro";
 import ListPage from "../../layouts/ListPage.astro";
+import { docsPage } from "../../config/docs.ts";
+import { site } from "../../config/site.ts";
 import { docCategories, docSummaries } from "../../lib/docs.ts";
+import { affixed } from "../../lib/identity.ts";
 
-const docs = await docSummaries();
+const rows = await docSummaries();
 
 /* One collection supplies categories and rows, preventing orphaned links. */
 const categories = (await docCategories()).map((taxon) => taxon.label);
 ---
 
 <ListPage
+  {...docsPage.intro}
   title="Docs"
-  description="Reference and troubleshooting guides by Joe Fang."
+  description={affixed(docsPage.description, site.name)}
   chrome="document"
-  eyebrow="Docs"
-  heading="Guides worth writing down once."
-  lede="Reference pages and troubleshooting notes. They have no reading order; each exists to be looked up when something breaks."
-  label="All docs"
-  empty="No docs published yet."
 >
   <DocCategories slot="browse" categories={categories} />
-  {docs.map((doc) => <DocRow doc={doc} />)}
+  {rows.map((doc) => <DocRow doc={doc} />)}
 </ListPage>

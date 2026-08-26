@@ -1,6 +1,6 @@
 import { standing } from "../config/about.ts";
 import { site } from "../config/site.ts";
-import type { EducationEntry } from "../schema.ts";
+import type { Affixed, EducationEntry } from "../schema.ts";
 import { bcp47Of, SITE_LANG } from "./lang.ts";
 
 /** Derive identity phrases from `config/about.ts`. */
@@ -50,3 +50,10 @@ export const siteDescription: string = `${site.name}. ${site.tagline}`;
 
 /** The About page's own meta description. */
 export const aboutDescription: string = `${site.name}. ${majorsPhrase} at the ${standing.institution}.`;
+
+/** The location as chrome renders it; the separator lives here, not in config. */
+export const locationPhrase: string = site.location.join(", ");
+
+/** `Affixed`'s eliminator: the one insertion point, filled. */
+export const affixed = ({ before, after }: Affixed, value: string): string =>
+  `${before}${value}${after}`;

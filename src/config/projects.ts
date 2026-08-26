@@ -1,4 +1,4 @@
-import type { ProjectConfig, ProjectKindConfig } from "../schema.ts";
+import type { ProjectConfig, ProjectKindConfig, ProjectsPageConfig } from "../schema.ts";
 
 /**
  * Projects, and the sections they group into.
@@ -10,6 +10,18 @@ import type { ProjectConfig, ProjectKindConfig } from "../schema.ts";
  * array, so adding a kind here is the entire change, and a project naming a
  * kind that does not exist is a type error rather than an unlabelled group.
  */
+/** The projects page's copy; the description is worded around the site name. */
+export const projectsPage = {
+  copy: {
+    title: "Things I have built, studied, and contributed to.",
+    lede: "The actively maintained side projects serve real internet traffic every day, as part of my own infrastructure.",
+  },
+  description: {
+    before: "Side projects, research artifacts, and open-source contributions by ",
+    after: ".",
+  },
+} as const satisfies ProjectsPageConfig;
+
 export const projectKinds = [
   {
     kind: "side-project",

@@ -11,6 +11,7 @@ export const site = {
   name: "Joe Fang",
   /* Other identity facts live in their owning config modules. */
   tagline: "Projects, and notes on software, networks, cognitive science, and AI.",
+  location: ["Toronto", "Canada"],
   timeZone: "America/Toronto",
 } as const satisfies SiteConfig;
 

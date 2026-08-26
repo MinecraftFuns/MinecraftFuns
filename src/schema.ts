@@ -146,8 +146,69 @@ export type SiteConfig = {
    * still inviting an edit.
    */
   readonly tagline: string;
+  /**
+   * Where the author writes from, as place parts, narrowest first; the hero
+   * eyebrow shows them beside a globe. The author picks the granularity:
+   * ["Hong Kong"] is complete on its own, and no part is ever a forced
+   * political statement. Non-empty by type; the separator is rendering.
+   *
+   * Deliberately independent of `timeZone`: one is a fact about the author,
+   * the other about how dates render, and they can legitimately diverge.
+   * That they agree today is a decision, not a derivation.
+   */
+  readonly location: NonEmpty<string>;
   /** IANA zone. Every date the site renders is read in it. */
   readonly timeZone: string;
+};
+
+/** A page's authored opening: the title, and the line under it. */
+export type PageCopy = {
+  readonly title: string;
+  readonly lede: string;
+};
+
+/** A quotation with a verifiable source; `Epigraph.astro` renders it as given. */
+export type EpigraphConfig = {
+  readonly quote: string;
+  readonly author: string;
+  readonly source: { readonly href: HttpsUrl; readonly label: string };
+};
+
+/**
+ * The home page's authored copy. `hero.lede` holds only the sentences that
+ * follow the identity phrase; `lib/identity.ts` derives that phrase from
+ * `StandingConfig`, so neither states a fact the other owns.
+ */
+export type HomeConfig = {
+  readonly hero: PageCopy;
+  readonly epigraph: EpigraphConfig;
+};
+
+/**
+ * What every listing page carries above its rows. One value serves a
+ * listing's page one and its numbered pages, which are separate route files:
+ * any sentence written in both would be a sentence editable in one.
+ */
+export type ListIntroConfig = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly lede: string;
+  /** Accessible name for the list. */
+  readonly label: string;
+  /** Shown in place of rows when there are none. */
+  readonly empty: string;
+};
+
+/** A listing's copy plus its meta description, worded around the site name. */
+export type ListingPageConfig = {
+  readonly intro: ListIntroConfig;
+  readonly description: Affixed;
+};
+
+/** The projects page's copy; the description is worded around the site name. */
+export type ProjectsPageConfig = {
+  readonly copy: PageCopy;
+  readonly description: Affixed;
 };
 
 /**

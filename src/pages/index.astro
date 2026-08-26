@@ -1,5 +1,6 @@
 ---
 import Globe from "@lucide/astro/icons/globe";
+import { home } from "../config/home.ts";
 import Button from "../components/Button.astro";
 import Epigraph from "../components/Epigraph.astro";
 import PageIntro from "../components/PageIntro.astro";
@@ -8,7 +9,7 @@ import ProjectCard from "../components/ProjectCard.astro";
 import Section from "../components/Section.astro";
 import { standing } from "../config/about.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { majorsPhrase } from "../lib/identity.ts";
+import { locationPhrase, majorsPhrase } from "../lib/identity.ts";
 import { postSummaries } from "../lib/posts.ts";
 import { featuredProjects } from "../lib/projects.ts";
 import { routeUrl } from "../lib/url.ts";
@@ -22,10 +23,10 @@ const selected = featuredProjects();
   {/* The site's contents, traced to their origin; no claims, just inventory. */}
   <PageIntro
     kind="hero"
-    eyebrow="Toronto, Canada"
+    eyebrow={locationPhrase}
     icon={Globe}
-    title="Research, projects, and essays from shower thoughts."
-    lede={`${majorsPhrase} at the ${standing.institution}. I build private networks, self-hosted services, and privacy tooling. The blog is for findings, know-how, and the occasional rant.`}
+    title={home.hero.title}
+    lede={`${majorsPhrase} at the ${standing.institution}. ${home.hero.lede}`}
   >
     <div class="flex flex-wrap gap-xs">
       <Button href={routeUrl("/blog")} tone="primary" size="control">Read the blog</Button
@@ -36,14 +37,7 @@ const selected = featuredProjects();
     </div>
   </PageIntro>
 
-  <Epigraph
-    quote="Freedom is the freedom to say that two plus two make four. If that is granted, all else follows."
-    author="George Orwell"
-    source={{
-      href: "https://en.wikipedia.org/wiki/Nineteen_Eighty-Four",
-      label: "Nineteen Eighty-Four",
-    }}
-  />
+  <Epigraph {...home.epigraph} />
 
   <Section
     id="work-heading"

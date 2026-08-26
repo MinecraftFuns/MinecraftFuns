@@ -2,22 +2,21 @@
 import PageIntro from "../components/PageIntro.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import Section from "../components/Section.astro";
+import { projectsPage } from "../config/projects.ts";
 import { site } from "../config/site.ts";
+import { affixed } from "../lib/identity.ts";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { projectSections } from "../lib/projects.ts";
 
 const sections = projectSections();
 ---
 
-<BaseLayout
-  title="Projects"
-  description={`Side projects, research artifacts, and open-source contributions by ${site.name}.`}
->
+<BaseLayout title="Projects" description={affixed(projectsPage.description, site.name)}>
   <PageIntro
     kind="page"
     eyebrow="Projects"
-    title="Things I have built, studied, and contributed to."
-    lede="The actively maintained side projects serve real internet traffic every day, as part of my own infrastructure."
+    title={projectsPage.copy.title}
+    lede={projectsPage.copy.lede}
   />
 
   {
