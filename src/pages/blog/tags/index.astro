@@ -22,10 +22,13 @@ const chips = tags.map((taxon) => ({
   description="Every tag on the blog, with the number of posts behind each."
   eyebrow="Blog"
   heading="Tags"
-  lede={`${total} across the archive, alphabetically.`}
+  lede={`${total} across the archive, in alphabetical order.`}
   label="All tags"
   empty="No tags yet."
   back={{ href: routeUrl("/blog"), label: "All posts" }}
 >
-  <ChipList chips={chips} />
+  {/* Rows pad themselves off the shell's rule; a chip cloud must be given the same py-md. */}
+  <div class="py-md">
+    <ChipList chips={chips} />
+  </div>
 </ListPage>
