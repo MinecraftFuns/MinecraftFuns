@@ -44,7 +44,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Serval",
     description:
-      "Configuration and scripts served from a URL that never moves, filled in per caller. Every revision is kept and any of them can be restored, and unlike a Gist, an edit evicts the cache instead of serving stale content.",
+      "Configuration and scripts served from a URL that never moves, filled in per caller. Every revision is kept and any of them can be restored, and unlike a Gist, an edit stops the cache from serving the stale copy.",
     href: "https://s.joefang.org/serval",
     since: 2026,
     until: null,
@@ -55,7 +55,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Letterbox",
     description:
-      "An Android mail client that does not tell the sender you opened their email. Remote images are blocked by default, and the ones you allow are fetched through a WARP tunnel the app builds itself in Rust, so no proxy operator is doing the logging either.",
+      "An Android mail client that does not tell the sender you opened their email. Remote images are blocked by default; the ones you allow are fetched through a WARP tunnel the app builds itself in Rust, with no proxy operator logging the request either.",
     href: "https://s.joefang.org/letterbox",
     since: 2025,
     until: null,
@@ -66,7 +66,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Lynx",
     description:
-      "A self-hosted short-link service whose links outlive what they point at. Destinations are edited in place and every earlier one stays restorable; deletion is refused by a database trigger rather than by code that has to remember.",
+      "A self-hosted short-link service whose links outlive what they point at. Destinations are edited in place, every earlier one stays restorable, and a database trigger refuses deletion outright.",
     href: "https://s.joefang.org/lynx",
     since: 2025,
     until: null,
@@ -76,7 +76,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "h4ckath0n",
     description:
-      "A hackathon starter kit that begins past the login screen, so a weekend team does not spend its first hours on authentication. Passkeys by default, and roles the server decides rather than the token.",
+      "A hackathon starter kit that begins past the login screen: passkeys already work, the server decides roles, and a weekend team spends none of its first hours on authentication.",
     href: "https://s.joefang.org/h4ckath0n",
     since: 2025,
     until: null,
@@ -86,7 +86,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Dockerfiles",
     description:
-      "Container images for the software I self-host, rebuilt twice a day so nothing runs for months on whatever its dependencies were the day it was built. Workers steal jobs from their peers once they run dry, so nothing waits behind the slowest shard.",
+      "Container images for the software I self-host, rebuilt twice a day to keep every dependency current. The build fans out over workers that steal jobs from each other once their own queue runs dry; no image waits behind the slowest shard.",
     href: "https://s.joefang.org/dockerfiles",
     since: 2024,
     until: null,
@@ -96,7 +96,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "SKILLs",
     description:
-      "Reusable procedures for coding agents, written as Markdown that names no particular project, so the same file works in any repository. This site is one of the repositories that reads them.",
+      "Reusable procedures for coding agents, written as Markdown that names no particular project. Any repository can read them; this site is one that does.",
     href: "https://s.joefang.org/skills",
     since: 2026,
     until: null,
@@ -107,7 +107,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "safeTO",
     description:
-      "A safety lookup for Toronto addresses, built for CSC207. A Poisson fit over Toronto Police data reports the chance of an incident rather than a raw count, which mostly measures how many people live nearby.",
+      "A safety lookup for Toronto addresses, built for CSC207. It fits a Poisson model over Toronto Police data and reports the chance of an incident; a raw count mostly measures how many people live nearby.",
     href: "https://github.com/CSC207-2024/safeTO",
     since: 2024,
     until: 2025,
@@ -117,7 +117,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "PromptPipe",
     description:
-      "Messaging infrastructure for behavioral studies, reaching participants on WhatsApp rather than in an app they would have to install. Delivery is recorded separately from responses, so a prompt that never arrived is distinguishable from one nobody answered.",
+      "Messaging infrastructure for behavioral studies. Participants answer on WhatsApp with nothing to install, and delivery is recorded apart from responses: a prompt that never arrived stays distinguishable from one nobody answered.",
     href: "https://github.com/BTreeMap/PromptPipe",
     since: 2025,
     until: null,
@@ -138,7 +138,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Focus Flow",
     description:
-      "An Android wellbeing app that keeps choosing which nudge to show rather than settling on one. Prompts are weighted by how well they have worked, under a cooldown that stops an early winner from crowding out the ones not yet tried.",
+      "An Android wellbeing app that never settles on a single nudge. Prompts are weighted by how well they have worked so far, under a cooldown that keeps an early winner from crowding out the ones not yet tried.",
     href: "https://github.com/Jai0212/Focus-Flow",
     since: 2024,
     until: 2025,

@@ -18,12 +18,12 @@ const selected = featuredProjects();
 ---
 
 <BaseLayout>
-  {/* Opens on the work, not a résumé; the credential is one click away. */}
+  {/* Opens on the person; the work is one scroll away. */}
   <PageIntro
     kind="hero"
     eyebrow="Toronto"
-    title="I build infrastructure, and take apart what does not behave as advertised."
-    lede={`${majorsPhrase} at the ${standing.institution}. I build private networks, self-hosted services, and privacy tooling, mostly for myself. The blog is where the debugging ends up.`}
+    title="I like knowing how things work underneath."
+    lede={`${majorsPhrase} at the ${standing.institution}: the same curiosity pointed at machines and at minds. I build private networks, self-hosted services, and privacy tooling. The blog is for findings, know-how, and the occasional rant.`}
   >
     <div class="flex flex-wrap gap-xs">
       <Button href={routeUrl("/blog")} tone="primary" size="control">Read the blog</Button

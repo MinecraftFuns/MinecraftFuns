@@ -26,8 +26,8 @@ export type ListIntro = {
 /** The blog index, on every one of its pages. */
 export const BLOG_INTRO = {
   eyebrow: "Blog",
-  heading: "Notes I wrote down so I would not have to work them out twice.",
-  lede: "Mostly software and systems, some cognitive science, and a batch of older posts in Chinese from my competitive programming years. Written for whoever hits the same problem next, which is usually me.",
+  heading: "Findings, know-how, and the occasional rant.",
+  lede: "Mostly software and systems, some cognitive science, a few essays, and older posts in Chinese from my competitive programming years, going back to 2020.",
   label: "All posts",
   empty: "No posts published yet.",
 } as const satisfies ListIntro;
