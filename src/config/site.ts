@@ -10,7 +10,7 @@ import type { NavItem, RootedPath, SiteConfig } from "../schema.ts";
 export const site = {
   name: "Joe Fang",
   /* Other identity facts live in their owning config modules. */
-  tagline: "Projects, and notes on software, networks, and cognitive science.",
+  tagline: "Projects, and notes on software, networks, cognitive science, and AI.",
   timeZone: "America/Toronto",
 } as const satisfies SiteConfig;
 

@@ -138,7 +138,7 @@ export const authoredProjects: readonly Project[] = [
   {
     title: "Focus Flow",
     description:
-      "An Android wellbeing app that never settles on a single nudge. Prompts are weighted by how well they have worked so far, under a cooldown that keeps an early winner from crowding out the ones not yet tried.",
+      "An Android wellbeing app that never settles on a single nudge. Thompson sampling picks each prompt by how well it has worked so far, under a cooldown that keeps an early winner from crowding out the ones not yet tried.",
     href: "https://github.com/Jai0212/Focus-Flow",
     since: 2024,
     until: 2025,

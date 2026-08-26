@@ -1,4 +1,5 @@
 ---
+import Globe from "@lucide/astro/icons/globe";
 import Button from "../components/Button.astro";
 import Epigraph from "../components/Epigraph.astro";
 import PageIntro from "../components/PageIntro.astro";
@@ -18,12 +19,13 @@ const selected = featuredProjects();
 ---
 
 <BaseLayout>
-  {/* Opens on the person; the work is one scroll away. */}
+  {/* The site's contents, traced to their origin; no claims, just inventory. */}
   <PageIntro
     kind="hero"
-    eyebrow="Toronto"
-    title="I like knowing how things work underneath."
-    lede={`${majorsPhrase} at the ${standing.institution}: the same curiosity pointed at machines and at minds. I build private networks, self-hosted services, and privacy tooling. The blog is for findings, know-how, and the occasional rant.`}
+    eyebrow="Toronto, Canada"
+    icon={Globe}
+    title="Research, projects, and essays from shower thoughts."
+    lede={`${majorsPhrase} at the ${standing.institution}. I build private networks, self-hosted services, and privacy tooling. The blog is for findings, know-how, and the occasional rant.`}
   >
     <div class="flex flex-wrap gap-xs">
       <Button href={routeUrl("/blog")} tone="primary" size="control">Read the blog</Button

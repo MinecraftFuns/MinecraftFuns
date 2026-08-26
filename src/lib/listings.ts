@@ -26,11 +26,11 @@ export type ListIntro = {
 /** The blog index, on every one of its pages. */
 export const BLOG_INTRO = {
   eyebrow: "Blog",
-  heading: "Findings, know-how, and the occasional rant.",
-  lede: "Mostly software and systems, some cognitive science, a few essays, and older posts in Chinese from my competitive programming years, going back to 2020.",
+  heading: "Findings, know-how, essays, and the occasional rant.",
+  lede: "Software and systems, cognitive science and AI, and older posts in Chinese from my competitive programming years.",
   label: "All posts",
   empty: "No posts published yet.",
 } as const satisfies ListIntro;
 
 /** Interpolated rather than written out, so the name has one source. */
-export const BLOG_DESCRIPTION = `Notes on software, systems, and cognitive science by ${site.name}, in English and Chinese.`;
+export const BLOG_DESCRIPTION = `Notes and essays on software, systems, cognitive science, and AI by ${site.name}, in English and Chinese.`;
