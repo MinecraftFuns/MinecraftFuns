@@ -25,10 +25,7 @@ const numbers = Array.from({ length: page.total }, (_, index) => ({
 
 {
   page.total > 1 && (
-    <nav
-      class="border-hairline mt-xl flex items-center gap-xs border-t pt-lg"
-      aria-label={label}
-    >
+    <nav class="coda flex items-center gap-xs" aria-label={label}>
       {previous !== undefined && (
         <Button href={previous} tone="secondary" size="compact">
           Newer

@@ -33,7 +33,7 @@ const { title, description, chrome, back, lang, canonicalRoute, alternates } =
   canonicalRoute={canonicalRoute}
   alternates={alternates}
 >
-  <article class="pb-lg">
+  <article>
     <slot name="header" />
 
     {
@@ -41,7 +41,7 @@ const { title, description, chrome, back, lang, canonicalRoute, alternates } =
        * Layout owns the gap between sibling header and back link.
        */
     }
-    <div class="prose mt-lg mb-xl">
+    <div class="prose mt-lg mb-md">
       <slot />
     </div>
 

@@ -769,6 +769,20 @@
    * its own declaration limits to decoration; for a while this class wore it
    * anyway.
    */
+  /*
+   * `coda` is the closing passage under a list or an article: a back link,
+   * a paginator, anything that ends the body under a rule. The law: a
+   * frame rule sits `md` from the content on each side. The block above
+   * ends with `md` of its own padding (rows and shell blocks all do), and
+   * this class supplies the rule plus the `md` on both of its own sides,
+   * so any sequence of codas keeps every rule symmetric without a margin
+   * in sight.
+   */
+  .coda {
+    border-top: 1px solid var(--color-hairline);
+    padding-block: var(--spacing-md);
+  }
+
   .eyebrow {
     font-size: var(--text-eyebrow);
     line-height: var(--text-eyebrow--line-height);

@@ -12,12 +12,30 @@ type Props = ListIntro & {
   readonly title: string;
   readonly description: string;
   readonly chrome?: Chrome;
+  /**
+   * How the slot meets the frame's rules: `rows` pad and rule themselves,
+   * so the shell only opens the frame and suppresses the last row's rule;
+   * a `block` brings no spacing of its own, so the shell pads it `md` off
+   * the rules on both sides. Closed, so a third, unspaced way cannot be
+   * written.
+   */
+  readonly flow?: "rows" | "block";
   /** Back link for a slice of a larger index. */
   readonly back?: { readonly href: Href; readonly label: string } | undefined;
 };
 
-const { title, description, chrome, eyebrow, heading, lede, label, empty, back } =
-  Astro.props;
+const {
+  title,
+  description,
+  chrome,
+  eyebrow,
+  heading,
+  lede,
+  label,
+  empty,
+  flow = "rows",
+  back,
+} = Astro.props;
 
 /* Render slots before layout; empty slots leave no spacing. */
 const browse = Astro.slots.has("browse") ? await Astro.slots.render("browse") : "";
@@ -36,13 +54,18 @@ const hasAfter = after.trim() !== "";
 
   {hasBrowse && <div class="mb-lg" set:html={browse} />}
 
-  <section aria-label={label} class:list={[back !== undefined && "mb-xl"]}>
+  <section aria-label={label}>
     {
       isEmpty ? (
-        <p class="text-ink-subtle py-lg">{empty}</p>
+        <p class="text-ink-subtle py-md">{empty}</p>
       ) : (
-        /* List supplies top rule when no section heading exists. */
-        <div class="border-hairline border-t *:last:border-b-0">
+        /* List supplies the top rule; content meets it `md` per the frame law. */
+        <div
+          class:list={[
+            "border-hairline border-t",
+            flow === "rows" ? "*:last:border-b-0" : "py-md",
+          ]}
+        >
           <Fragment set:html={rows} />
         </div>
       )
