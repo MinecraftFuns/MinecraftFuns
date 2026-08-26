@@ -40,3 +40,10 @@ export const SIZE: Readonly<Record<ControlSize, string>> = {
 
 /** Shared geometry: every control is an inline box with the same corner. */
 export const CONTROL_BASE = "inline-flex items-center rounded-md no-underline";
+
+/**
+ * How an icon sits inside a line of text: sized in `em` so it tracks
+ * whichever label it accompanies, and never squeezed when the line wraps.
+ * One decision, spread at every inline-icon site rather than respelled.
+ */
+export const INLINE_ICON = { class: "shrink-0", size: "1em" } as const;

@@ -26,7 +26,7 @@ const fingerprint = await siteFingerprint();
     </div>
 
     <nav class="flex flex-col gap-2xs" aria-label="Elsewhere">
-      <h2 class="text-eyebrow text-ink-subtle uppercase">Elsewhere</h2>
+      <h2 class="eyebrow">Elsewhere</h2>
       <ul class="flex flex-col gap-3xs" role="list">
         {
           elsewhere().map((link) => (
@@ -46,7 +46,7 @@ const fingerprint = await siteFingerprint();
     </nav>
 
     <div class="flex flex-col gap-2xs">
-      <h2 class="text-eyebrow text-ink-subtle uppercase">PGP fingerprint</h2>
+      <h2 class="eyebrow">PGP fingerprint</h2>
       <p class="font-mono text-caption max-w-fingerprint wrap-anywhere">
         {fingerprint}
       </p>

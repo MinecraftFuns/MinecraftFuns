@@ -745,8 +745,12 @@
   }
 
   /*
-   * The two supporting roles, each of which was a type class and a colour
+   * The supporting roles, each of which was a type class and a colour
    * class written side by side in every component that needed it.
+   *
+   * `eyebrow` is the label above a title or a footer column: eyebrow type,
+   * the quietest ink, uppercase. Case is part of the role, so a lowercase
+   * eyebrow cannot be written.
    *
    * `meta` is what a thing is filed under: a date, a reading time, a category,
    * a status. Mono, small, and the quietest ink, because it is scaffolding
@@ -765,6 +769,15 @@
    * its own declaration limits to decoration; for a while this class wore it
    * anyway.
    */
+  .eyebrow {
+    font-size: var(--text-eyebrow);
+    line-height: var(--text-eyebrow--line-height);
+    letter-spacing: var(--text-eyebrow--letter-spacing);
+    font-weight: var(--text-eyebrow--font-weight);
+    color: var(--color-ink-subtle);
+    text-transform: uppercase;
+  }
+
   .meta {
     font-family: var(--font-mono);
     font-size: var(--text-caption);

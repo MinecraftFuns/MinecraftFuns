@@ -2,6 +2,7 @@
 import { ARROW, type Direction } from "./navigation.ts";
 import {
   CONTROL_BASE,
+  INLINE_ICON,
   SIZE,
   toneClass,
   type ControlSize,
@@ -54,11 +55,8 @@ const Trailing = arrow?.leads === false ? arrow.icon : undefined;
   href={href}
   aria-current={current ? "page" : undefined}
 >
-  {
-    /* Sized in `em`, so one arrow tracks whichever label it is given, and
-      coloured `currentColor` by the icon set, so it wears the tone's ink. */
-  }
-  {Leading !== undefined && <Leading class="shrink-0" size="1em" />}
+  {/* Coloured `currentColor` by the icon set, so it wears the tone's ink. */}
+  {Leading !== undefined && <Leading {...INLINE_ICON} />}
   <slot />
-  {Trailing !== undefined && <Trailing class="shrink-0" size="1em" />}
+  {Trailing !== undefined && <Trailing {...INLINE_ICON} />}
 </a>

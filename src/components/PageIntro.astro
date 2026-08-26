@@ -1,15 +1,23 @@
 ---
+import type Globe from "@lucide/astro/icons/globe";
+
+import { INLINE_ICON } from "./control.ts";
 import { INTRO, INTRO_EXTRA, INTRO_LEDE, type IntroKind } from "./intro.ts";
+
+/** The icon components are Astro factories; take the type from one of them. */
+type EyebrowIcon = typeof Globe;
 
 /** Shared page opening; closed kind maps spacing and title style from `INTRO`. */
 type Props = {
   readonly kind: IntroKind;
   readonly eyebrow: string;
+  /** Rendered before the eyebrow text, in the eyebrow's own ink. */
+  readonly icon?: EyebrowIcon;
   readonly title: string;
   readonly lede?: string;
 };
 
-const { kind, eyebrow, title, lede } = Astro.props;
+const { kind, eyebrow, icon: Icon, title, lede } = Astro.props;
 
 const { spacing, title: titleClass } = INTRO[kind];
 
@@ -19,7 +27,11 @@ const hasExtra = extra.trim() !== "";
 ---
 
 <section class:list={[spacing]}>
-  <p class="text-eyebrow text-ink-subtle uppercase">{eyebrow}</p>
+  {/* The icon row costs its utilities only when an icon is present. */}
+  <p class:list={["eyebrow", Icon !== undefined && "flex items-center gap-3xs"]}>
+    {Icon !== undefined && <Icon {...INLINE_ICON} aria-hidden="true" />}
+    {eyebrow}
+  </p>
   <h1 class:list={["mt-xs text-ink", titleClass]}>{title}</h1>
   {lede !== undefined && <p class:list={[INTRO_LEDE]}>{lede}</p>}
   {hasExtra && <div class:list={[INTRO_EXTRA]} set:html={extra} />}
