@@ -120,7 +120,7 @@ export const authoredProjects: readonly Project[] = [
     title: "safeTO",
     description:
       "A safety lookup for Toronto addresses, built for CSC207. It fits a Poisson model over Toronto Police data and reports the chance of an incident; a raw count mostly measures how many people live nearby.",
-    href: "https://github.com/CSC207-2024/safeTO",
+    href: "https://s.joefang.org/safeto",
     since: 2024,
     until: 2025,
     tags: ["Java", "React", "CSC207"],
@@ -130,7 +130,7 @@ export const authoredProjects: readonly Project[] = [
     title: "PromptPipe",
     description:
       "Messaging infrastructure for behavioral studies. Participants answer on WhatsApp with nothing to install, and delivery is recorded apart from responses: a prompt that never arrived stays distinguishable from one nobody answered.",
-    href: "https://github.com/BTreeMap/PromptPipe",
+    href: "https://s.joefang.org/promptpipe",
     since: 2025,
     until: null,
     tags: ["Go", "WhatsApp", "Study infrastructure"],
@@ -141,7 +141,7 @@ export const authoredProjects: readonly Project[] = [
     title: "ABScribeX",
     description:
       "A Chrome extension that carries the CHI 2024 ABScribe writing interface into Gmail, LinkedIn, and Reddit. Those editors strip any markup they did not author, so each variant carries its identity inside the text itself, as zero-width characters.",
-    href: "https://github.com/BTreeMap/ABScribeX",
+    href: "https://s.joefang.org/abscribex",
     since: 2024,
     until: null,
     tags: ["TypeScript", "Chrome extension", "Human-AI writing"],
