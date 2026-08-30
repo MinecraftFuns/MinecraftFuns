@@ -178,8 +178,8 @@ year's will be lower, which is a sentence the public will take.
 
 The mechanism is not speculative. The 1970 Clean Air Act
 [demanded 90 percent cuts in tailpipe hydrocarbons and carbon monoxide by 1975](https://faculty.lawrence.edu/gerardd/wp-content/uploads/sites/9/2014/02/18-TFSC-Gerard-Lave.pdf)
-Nobody knew how to build that car, and the penalty was $10,000 for every
-non-complying one sold, when the average car cost about $5,000. Lee Iacocca
+Nobody knew how to build that car, and the penalty was \$10,000 for every
+non-complying one sold, when the average car cost about \$5,000. Lee Iacocca
 told Congress the industry would simply stop building cars. Congress passed
 it, granted a one-year extension, and the catalytic converter shipped in
 1975.
