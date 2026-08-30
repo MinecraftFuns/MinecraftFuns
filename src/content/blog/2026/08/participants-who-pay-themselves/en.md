@@ -94,9 +94,7 @@ explains much more.
 
 Huber, Reinecke and Gajos had already measured how much the result itself
 drives the sharing, across
-[81,131 participants](https://kgajos.seas.harvard.edu/papers/huber17effect.pdf)
-
-of a feedback-driven platform. Higher performers shared significantly more,
+[81,131 participants](https://kgajos.seas.harvard.edu/papers/huber17effect.pdf) of a feedback-driven platform. Higher performers shared significantly more,
 the effect depended on whether people expected to do well, and among three
 ways of presenting the same result, the one emphasising relative success
 produced the most sharing. The result screen is the lever. What belongs on it
