@@ -1,6 +1,6 @@
 ---
 title: A calendar date is not an instant
-description: A one-line date format on this site shipped the wrong day, and the fix turned out to be a type rather than a patch.
+description: "This site printed Jul 13 for a post dated the fourteenth, with the right date sitting in the datetime attribute beside it. A calendar date and an instant are different things, and TypeScript was happy to call both of them Date."
 date: "2026-08-01"
 tags: ["TypeScript", "Time"]
 ---

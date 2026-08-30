@@ -1,6 +1,6 @@
 ---
 title: "Leasing the right not to be sued"
-description: "Ten kilometres of stopped traffic behind one lane closure in northern Ontario, and the question of how much road capacity human reaction time throws away. Getting it back turns out to be a liability problem."
+description: "Ten kilometres of stopped traffic behind one lane closure in northern Ontario, and the question of how much congestion is physical road capacity and how much is human driving. What autonomous vehicles could recover of the second, and why collecting it runs into liability law."
 date: "2025-07-26"
 tags: ["Notes", "Transportation", "Public Policy"]
 ---

@@ -1,6 +1,6 @@
 ---
 title: "Research participants who pay themselves"
-description: "A country quiz got fifteen minutes of careful answers and a referral out of me, for nothing. What it would take to make a study recruit for itself the same way, and what that buys."
+description: "A country quiz got fifteen minutes of careful answers and a referral out of me, for nothing. What it would take to build a research study that recruits itself the same way through social media, and what the free participants cost you in bias."
 date: "2026-08-29"
 tags: ["Notes", "Research Methods", "Social Computing"]
 ---

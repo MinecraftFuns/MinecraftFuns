@@ -1,6 +1,6 @@
 ---
 title: "Electronics Will Not Harm Contemporary Society"
-description: "A rebuttal to the view that electronics 'waste time' and harm society, argued from the diminishing returns of creative work and the trend toward social automation."
+description: "The model essays kept arguing that electronics tempt people and waste their time. Creative work has diminishing returns and society keeps automating itself, which is why I think the premise is wrong."
 date: "2021-05-30"
 tags: ["Essays"]
 translation: machine

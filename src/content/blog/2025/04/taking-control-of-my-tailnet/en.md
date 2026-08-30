@@ -1,6 +1,6 @@
 ---
 title: "Taking control of my tailnet: Tailscale ACLs and tags"
-description: "A tour of the policy file behind a one-person tailnet: role tags instead of machines, a three-tag setup for Android debugging, and the two places Taildrive keeps its permissions."
+description: "Tailscale puts every machine you own on one flat network where everything reaches everything. The policy file that narrows that back down: role tags instead of machine names, three tags to make Android debugging work, and the two places Taildrive keeps its permissions."
 date: "2025-04-28"
 tags: ["Tailscale", "Networking", "Security"]
 ---
