@@ -1,5 +1,5 @@
 ---
-title: "C++ | 对比：`const` 和 `constexpr`"
+title: "C++ | 对比：const 和 constexpr"
 description: "对比 C++ 中 const 和 constexpr 修饰对象与函数时的语义差异，并给出成员函数与 constexpr 函数的示例。"
 date: "2020-01-26"
 tags: ["C++"]

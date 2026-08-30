@@ -1,6 +1,6 @@
 ---
-title: "使用 `<template>` 标签来隐藏 Blogger 添加的内容"
-description: "记录一种用 `<template>` 标签包裹伪造 `</body>` 标记，从而绕过 Blogger 官方注释嵌套限制、隐藏其自动插入内容的方法。"
+title: "使用 <template> 标签来隐藏 Blogger 添加的内容"
+description: "记录一种用 <template> 标签包裹伪造 </body> 标记，从而绕过 Blogger 官方注释嵌套限制、隐藏其自动插入内容的方法。"
 date: "2020-12-27"
 tags: ["Blogger", "Guide"]
 ---

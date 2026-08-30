@@ -1,6 +1,6 @@
 ---
-title: "Mirroring a Web Page with `wget`"
-description: "How to mirror a static web page with a single `wget` command, walking through what the `--mirror`, `--convert-links`, `--adjust-extension`, `--page-requisites`, and `--no-parent` flags each do."
+title: "Mirroring a Web Page with wget"
+description: "How to mirror a static web page with a single wget command, walking through what the --mirror, --convert-links, --adjust-extension, --page-requisites, and --no-parent flags each do."
 date: "2021-08-06"
 tags: ["Tools", "Guide"]
 translation: machine

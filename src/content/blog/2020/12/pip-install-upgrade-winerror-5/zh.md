@@ -1,5 +1,5 @@
 ---
-title: "运行 `pip install --upgrade` 时出现 `[WinError 5]` 报错的可能原因"
+title: "运行 pip install --upgrade 时出现 [WinError 5] 报错的可能原因"
 description: "记录一次 pip install --upgrade cffi 时出现 WinError 5 拒绝访问的排查过程，根因是有 Python 脚本正占用待更新的文件。"
 date: "2020-12-25"
 tags: ["Python", "Windows"]

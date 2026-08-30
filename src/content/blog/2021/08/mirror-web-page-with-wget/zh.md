@@ -1,6 +1,6 @@
 ---
-title: "使用 `wget` 镜像一个网页"
-description: "介绍如何用一条 `wget` 命令镜像静态网页，并逐一解释 `--mirror`、`--convert-links`、`--adjust-extension`、`--page-requisites`、`--no-parent` 等参数的作用。"
+title: "使用 wget 镜像一个网页"
+description: "介绍如何用一条 wget 命令镜像静态网页，并逐一解释 --mirror、--convert-links、--adjust-extension、--page-requisites、--no-parent 等参数的作用。"
 date: "2021-08-06"
 tags: ["Tools", "Guide"]
 ---

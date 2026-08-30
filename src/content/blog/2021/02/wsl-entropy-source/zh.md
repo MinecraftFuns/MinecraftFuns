@@ -1,5 +1,5 @@
 ---
-title: "WSL 中 `/dev/random` 和 `/dev/urandom` 的熵是哪里来的"
+title: "WSL 中 /dev/random 和 /dev/urandom 的熵是哪里来的"
 description: "考证 WSL 中 getrandom、/dev/random 和 /dev/urandom 的熵来自 Windows 的 BCryptGenRandom，而非 Linux 内核收集。"
 date: "2021-02-10"
 tags: ["WSL", "Cryptography"]

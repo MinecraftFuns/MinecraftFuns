@@ -1,5 +1,5 @@
 ---
-title: "C++ | 如何安全地初始化 `std::mt19937`"
+title: "C++ | 如何安全地初始化 std::mt19937"
 description: "分析 std::random_device 和默认 std::seed_seq 播种 std::mt19937 时存在的随机性缺陷，并给出使用 /dev/urandom 正确初始化的方法。"
 date: "2021-02-21"
 tags: ["C++", "Cryptography"]

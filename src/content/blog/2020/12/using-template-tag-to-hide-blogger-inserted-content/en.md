@@ -1,6 +1,6 @@
 ---
-title: "Using the `<template>` Tag to Hide Content Blogger Inserts"
-description: "A method that wraps a fake `</body>` marker in a `<template>` tag to get around Blogger's block on nested comments, hiding its auto-inserted content."
+title: "Using the <template> Tag to Hide Content Blogger Inserts"
+description: "A method that wraps a fake </body> marker in a <template> tag to get around Blogger's block on nested comments, hiding its auto-inserted content."
 date: "2020-12-27"
 tags: ["Blogger", "Guide"]
 translation: machine
