@@ -44,12 +44,11 @@ splits the damage in two. Measurement error is when you asked badly or they
 answered badly. Representation error is when the people who answered are not
 the people you meant to describe.
 
-Germine and colleagues tested the first kind directly, comparing
-self-selected, uncompensated, unsupervised web participants against
-traditionally recruited lab samples on
-[mean performance, variance and internal reliability](https://lab.faceblind.org/papers/germine_12_pbr.pdf).
-No systematic difference, including on timed perceptual tasks, which are the
-hard case.
+[Germine and colleagues](https://lab.faceblind.org/papers/germine_12_pbr.pdf)
+tested the first kind directly, comparing self-selected, uncompensated,
+unsupervised web participants against traditionally recruited lab samples on
+mean performance, variance and internal reliability. No systematic
+difference, including on timed perceptual tasks, which are the hard case.
 
 So the answers survive. What is left is *who turns up*.
 
@@ -64,12 +63,14 @@ limits both the size and the variety of who turns up.
 
 More of them, too. LabintheWild drew roughly
 [3.5 million participants from more than 200 countries](https://www.eecs.harvard.edu/~kgajos/papers/2017/oliveira17labinthewild.pdf)
-in four years. [Moral Machine](https://www.nature.com/articles/s41586-018-0637-6)
-took 40 million decisions across 233 countries. The New York Times dialect
-quiz pulled
+in four years.
+[Moral Machine](https://www.nature.com/articles/s41586-018-0637-6) took 40
+million decisions across 233 countries. The New York Times dialect quiz
+pulled
 [350,000 responses](https://knightlab.northwestern.edu/2014/01/20/behind-the-dialect-map-interactive-how-an-intern-created-the-new-york-times-most-popular-piece-of-content-in-2013/)
-off the Harvard Dialect Survey inside two months. Von Ahn had the shape of it
-twenty years earlier in the games-with-a-purpose era: enjoyment as the
+off the Harvard Dialect Survey inside two months.
+[Von Ahn](https://dl.acm.org/doi/10.1145/1378704.1378719) had the shape of
+it twenty years earlier in the games-with-a-purpose era: enjoyment as the
 incentive, data as a byproduct. No grant I will ever hold buys a hundred
 countries.
 
@@ -92,13 +93,13 @@ rarity, humour, awe. Too shallow. A genre is only the vehicle; what moves it
 is the *reward* the sharer collects, and sorting by who collects that reward
 explains much more.
 
-Huber, Reinecke and Gajos had already measured how much the result itself
-drives the sharing, across
-[81,131 participants](https://kgajos.seas.harvard.edu/papers/huber17effect.pdf) of a feedback-driven platform. Higher performers shared significantly more,
-the effect depended on whether people expected to do well, and among three
-ways of presenting the same result, the one emphasising relative success
-produced the most sharing. The result screen is the lever. What belongs on it
-depends on which reward you are paying.
+[Huber, Reinecke and Gajos](https://kgajos.seas.harvard.edu/papers/huber17effect.pdf)
+had already measured how much the result itself drives the sharing, across
+81,131 participants of a feedback-driven platform. Higher performers shared
+significantly more, the effect depended on whether people expected to do
+well, and among three ways of presenting the same result, the one
+emphasising relative success produced the most sharing. The result screen is
+the lever. What belongs on it depends on which reward you are paying.
 
 Some rewards are about you. They only work in front of people who already know
 you, which is why messaging one close friend to say I came out Canadian and
@@ -118,9 +119,8 @@ I shared my three countries in a group chat.
 
 That is a reward about me, collected in a channel I had filed under private.
 The tidy version is wrong because I had run two separate things together:
-*how many* people see a share, and *how close* you are to them. Barasch and
-Berger's
-[broadcasting and narrowcasting](https://journals.sagepub.com/doi/10.1509/jmr.13.0238)
+*how many* people see a share, and *how close* you are to them.
+[Barasch and Berger's broadcasting and narrowcasting](https://journals.sagepub.com/doi/10.1509/jmr.13.0238)
 work is about the first; I had read it as though it were about the second.
 
 A group chat sits in the corner I had left empty. Several people, all of whom
@@ -167,11 +167,11 @@ continuous numbers, so keep the five numbers; the moment the animal becomes
 the thing you analyse, you have traded most of your measurement for a share
 card.
 
-Berger and Heath put two limits on the transcoding move, both from the same
-paper. They found people only bother to advertise being unusual
-[in things they treat as part of who they are](https://academic.oup.com/jcr/article/34/2/121/1793110):
-music and hairstyles qualify, backpacks do not. Values clear that bar easily,
-which is why a country quiz works at all.
+[Berger and Heath](https://academic.oup.com/jcr/article/34/2/121/1793110)
+put two limits on the transcoding move, both from the same paper. They found
+people only bother to advertise being unusual in things they treat as part
+of who they are: music and hairstyles qualify, backpacks do not. Values
+clear that bar easily, which is why a country quiz works at all.
 
 Their second point is that a signal stops being worth anything once everyone
 has it, so sharing depends on how many people around you have already seen it.
@@ -212,15 +212,15 @@ when the thing has no users and instrumenting it feels absurd.
 
 That first pilot will probably be your own lab, a tight group of people who
 already share the same references, where a planted joke lands and can still
-die everywhere else. Hinz and colleagues ran the seeding comparison
-directly, and starting a campaign with well-connected people
-[beat starting at random by 39 to 100 percent, and beat starting with poorly
-connected people by up to
-eightfold](https://www.marketing.uni-frankfurt.de/fileadmin/Publikationen/Hinz-Skiera-Barrot-Becker-2011-Seeding-Strategies_in_Journal-of-Marketing.pdf).
-Those numbers come from selling mobile phone contracts, so I take the
-direction and leave the magnitudes. The lab stage is still worth running for
-one thing that stops being possible the moment the study is loose: asking the
-people who finished and did not share why they did not.
+die everywhere else.
+[Hinz and colleagues](https://www.marketing.uni-frankfurt.de/fileadmin/Publikationen/Hinz-Skiera-Barrot-Becker-2011-Seeding-Strategies_in_Journal-of-Marketing.pdf)
+ran the seeding comparison directly, and starting a campaign with
+well-connected people beat starting at random by 39 to 100 percent, and beat
+starting with poorly connected people by up to eightfold. Those numbers come
+from selling mobile phone contracts, so I take the direction and leave the
+magnitudes. The lab stage is still worth running for one thing that stops
+being possible the moment the study is loose: asking the people who finished
+and did not share why they did not.
 
 ## What it still cannot tell you
 

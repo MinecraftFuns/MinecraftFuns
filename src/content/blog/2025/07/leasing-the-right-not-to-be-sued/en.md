@@ -52,48 +52,50 @@ been made since."
 
 ## Jams with nothing in the way
 
-Sugiyama and colleagues removed the trigger entirely. They put twenty-two cars
-on a circular track, asked the drivers to hold a steady speed, and filmed from
-the middle. Within about three minutes a jam of five cars had formed and was
-[travelling backwards around the circuit as a solitary wave](https://iopscience.iop.org/article/10.1088/1367-2630/10/3/033001),
-holding its size and its speed. No merge, no lane drop, no cones, nothing in
-the way. Their conclusion is that a bottleneck only ever triggers a jam, and
-the jam is what a dense line of human-controlled particles does on its own.
+[Sugiyama and colleagues](https://iopscience.iop.org/article/10.1088/1367-2630/10/3/033001)
+removed the trigger entirely. They put twenty-two cars on a circular track,
+asked the drivers to hold a steady speed, and filmed from the middle. Within
+about three minutes a jam of five cars had formed and was travelling
+backwards around the circuit as a solitary wave, holding its size and its
+speed. No merge, no lane drop, no cones, nothing in the way. Their
+conclusion is that a bottleneck only ever triggers a jam, and the jam is
+what a dense line of human-controlled particles does on its own.
 
 So my ten kilometres had a cause I could see and an amplifier I could not.
-Once a queue forms at a bottleneck, the rate at
-which it discharges cars drops below the rate it was managing minutes earlier,
-[by 5 to 18 percent](https://doi.org/10.1016/j.trb.2006.02.011) across the
-three bottlenecks Chung, Rudjanakanoknad and Cassidy measured. The road gets
-worse at the exact moment you need it most, because of how people drive out of
-a queue.
+Once a queue forms at a bottleneck, the rate at which it discharges cars
+drops below the rate it was managing minutes earlier, by 5 to 18 percent
+across the three bottlenecks
+[Chung, Rudjanakanoknad and Cassidy](https://doi.org/10.1016/j.trb.2006.02.011)
+measured. The road gets worse at the exact moment you need it most, because
+of how people drive out of a queue.
 
-The gaps have a floor for the same reason. Marc Green's
-[review of driver braking studies](https://www.tandfonline.com/doi/abs/10.1207/STHF0203_1)
-puts perception-brake time at 0.70 to 0.75 seconds when you know the signal is
-coming, about 1.25 seconds for something ordinary like the car ahead lighting
-its brakes, and roughly 1.5 seconds for a genuine surprise. At highway speed
-that is tens of metres of empty road per car. Training does not shorten it; it
-is how long the wetware takes.
+The gaps have a floor for the same reason.
+[Marc Green's review of driver braking studies](https://www.tandfonline.com/doi/abs/10.1207/STHF0203_1)
+puts perception-brake time at 0.70 to 0.75 seconds when you know the signal
+is coming, about 1.25 seconds for something ordinary like the car ahead
+lighting its brakes, and roughly 1.5 seconds for a genuine surprise. At
+highway speed that is tens of metres of empty road per car. Training does
+not shorten it; it is how long the wetware takes.
 
 ## What removing the driver buys
 
-Tientrakool, Ho and Maxemchuk modelled what happens when you shorten that gap.
-Vehicles using sensors alone raise highway capacity by about 43 percent.
-Vehicles that also talk to each other, and can therefore pull away together
-instead of one after another, raise it by
-[about 273 percent](https://ieeexplore.ieee.org/document/6093130/). Shladover,
-Su and Lu found the same shape from real driver gap data: plain adaptive
-cruise control
-[barely moves lane capacity](https://journals.sagepub.com/doi/10.3141/2324-08),
-and the cooperative version only pays once market penetration is high. Both
-are models rather than measurements, and I hold them loosely.
+[Tientrakool, Ho and Maxemchuk](https://ieeexplore.ieee.org/document/6093130/)
+modelled what happens when you shorten that gap. Vehicles using sensors
+alone raise highway capacity by about 43 percent. Vehicles that also talk to
+each other, and can therefore pull away together instead of one after
+another, raise it by about 273 percent.
+[Shladover, Su and Lu](https://journals.sagepub.com/doi/10.3141/2324-08)
+found the same shape from real driver gap data: plain adaptive cruise
+control barely moves lane capacity, and the cooperative version only pays
+once market penetration is high. Both are models rather than measurements,
+and I hold them loosely.
 
-The cheap part is already real. Stern and colleagues rebuilt Sugiyama's ring
-with one computer-controlled car among about twenty and found that
-[controlling that single vehicle damped the wave](https://arxiv.org/abs/1705.01693)
-for everyone behind it, cutting fuel use substantially. One car in twenty is a
-deployment target, and it kills precisely the thing I sat in.
+The cheap part is already real.
+[Stern and colleagues](https://arxiv.org/abs/1705.01693) rebuilt Sugiyama's
+ring with one computer-controlled car among about twenty and found that
+controlling that single vehicle damped the wave for everyone behind it,
+cutting fuel use substantially. One car in twenty is a deployment target,
+and it kills precisely the thing I sat in.
 
 Making a lane carry several times what it carries now needs near-universal
 adoption and cars that communicate, which means essentially nobody driving
@@ -102,13 +104,14 @@ manually. That is a ban, and a ban is a legal instrument.
 ## Paying more to fewer people
 
 Ban manual driving and every crash stops being a question about a person and
-becomes a question about a product. Marchant and Lindor set out the
-consequence in 2012: liability moves from the driver's negligence to the
-[manufacturer's design](https://digitalcommons.law.scu.edu/lawreview/vol52/iss4/6/),
-which is slower and dearer to prove and puts an ordinary plaintiff against a
-standing legal department. The obvious answer is to stop requiring proof of
-fault at all, pay out of a central fund financed by a levy on autonomous
-miles, and take away the right to sue. The United States already runs
+becomes a question about a product.
+[Marchant and Lindor](https://digitalcommons.law.scu.edu/lawreview/vol52/iss4/6/)
+set out the consequence in 2012: liability moves from the driver's
+negligence to the manufacturer's design, which is slower and dearer to prove
+and puts an ordinary plaintiff against a standing legal department. The
+obvious answer is to stop requiring proof of fault at all, pay out of a
+central fund financed by a levy on autonomous miles, and take away the right
+to sue. The United States already runs
 [that machinery for vaccine injuries](https://www.govinfo.gov/content/pkg/USCODE-2011-title42/html/USCODE-2011-title42-chap6A-subchapXIX.htm).
 
 Swiss Re compared Waymo's liability claims across 25.3 million driverless
@@ -124,35 +127,36 @@ would collect today, sooner, without hiring anyone.
 
 Uber's test fleet in Tempe was involved in
 [37 crashes and incidents in autonomous mode between September 2016 and March 2018](https://data.ntsb.gov/Docket/Document/docBLOB?ID=40477717&FileExtension=.PDF&FileName=Vehicle+Automation+Report-Master.PDF),
-by the company's own records given to the NTSB. In 33 of them another vehicle
-hit the Uber car, 25 of those from behind. Almost none of this reached anyone.
-Then one of those cars killed Elaine Herzberg, and that crash is what the
-technology means to most people who have heard of it. Penmetsa and colleagues
+by the company's own records given to the NTSB. In 33 of them another
+vehicle hit the Uber car, 25 of those from behind. Almost none of this
+reached anyone. Then one of those cars killed Elaine Herzberg, and that
+crash is what the technology means to most people who have heard of it.
+[Penmetsa and colleagues](https://doi.org/10.1016/j.iatssr.2021.04.003)
 tracked 1.7 million tweets around that March and a Tesla fatality the same
-month, and found negative sentiment toward self-driving technology
-[rising from 14 percent to 46 percent](https://doi.org/10.1016/j.iatssr.2021.04.003)
-in fifteen days.
+month, and found negative sentiment toward self-driving technology rising
+from 14 percent to 46 percent in fifteen days.
 
-That asymmetry is not a media failure to be corrected. Koehler and Gershoff
-gave people cases where the thing meant to protect you is the thing that harms
-you, an airbag that kills rather than a crash that kills, and across five
-studies people
-[punished the betrayal harder](https://www.sciencedirect.com/science/article/abs/pii/S0749597802005186)
-than identical harm carrying no promise of protection. They also chose safety
-devices with higher overall risk to avoid a 0.01 percent chance of being
-betrayed by one. Dietvorst, Simmons and Massey found the matching asymmetry in
-confidence: having watched a forecaster err, people
-[drop an algorithm faster than they drop a human](https://marketing.wharton.upenn.edu/wp-content/uploads/2016/10/Dietvorst-Simmons-Massey-2014.pdf)
-who made the same mistake, even after watching the algorithm win overall.
+That asymmetry is not a media failure to be corrected.
+[Koehler and Gershoff](https://www.sciencedirect.com/science/article/abs/pii/S0749597802005186)
+gave people cases where the thing meant to protect you is the thing that
+harms you, an airbag that kills rather than a crash that kills, and across
+five studies people punished the betrayal harder than identical harm
+carrying no promise of protection. They also chose safety devices with
+higher overall risk to avoid a 0.01 percent chance of being betrayed by one.
+[Dietvorst, Simmons and Massey](https://marketing.wharton.upenn.edu/wp-content/uploads/2016/10/Dietvorst-Simmons-Massey-2014.pdf)
+found the matching asymmetry in confidence: having watched a forecaster err,
+people drop an algorithm faster than they drop a human who made the same
+mistake, even after watching the algorithm win overall.
 
-So the bar sits well above parity. Liu, Yang and Xu asked 499 people and got
-[four to five times safer](https://onlinelibrary.wiley.com/doi/abs/10.1111/risa.13116)
-than a human driver before the risk read as acceptable. Nees found why it
-cannot be met by argument: most drivers rate themselves above average, and
-what they want is a car
-[safer than they believe themselves to be](https://doi.org/10.1016/j.jsr.2019.02.002),
-so a benchmark defined against the average human driver is one almost nobody
-applies to their own seat. The target moves as you approach it.
+So the bar sits well above parity.
+[Liu, Yang and Xu](https://onlinelibrary.wiley.com/doi/abs/10.1111/risa.13116)
+asked 499 people and got four to five times safer than a human driver before
+the risk read as acceptable.
+[Nees](https://doi.org/10.1016/j.jsr.2019.02.002) found why it cannot be met
+by argument: most drivers rate themselves above average, and what they want
+is a car safer than they believe themselves to be, so a benchmark defined
+against the average human driver is one almost nobody applies to their own
+seat. The target moves as you approach it.
 
 Money cannot buy past this, and a flat fund makes it worse. It pays a
 schedule, and a schedule underpays whoever loses the most, who are also
@@ -174,14 +178,13 @@ company. The moral complaint dissolves, because no firm under this rule can
 describe its current death rate as acceptable. The most it can say is that
 next year's will be lower, which is a sentence the public will take.
 
-The mechanism is not speculative. The 1970 Clean Air Act demanded 90 percent
-cuts in tailpipe hydrocarbons and carbon monoxide by 1975 against a standard
-nobody could then meet, and backed it with a $10,000 penalty per
-non-complying car sold when
-[the average car cost about $5,000](https://faculty.lawrence.edu/gerardd/wp-content/uploads/sites/9/2014/02/18-TFSC-Gerard-Lave.pdf).
+The mechanism is not speculative. The 1970 Clean Air Act
+[demanded 90 percent cuts in tailpipe hydrocarbons and carbon monoxide by 1975](https://faculty.lawrence.edu/gerardd/wp-content/uploads/sites/9/2014/02/18-TFSC-Gerard-Lave.pdf)
+against a standard nobody could then meet, and backed it with a $10,000
+penalty per non-complying car sold when the average car cost about $5,000.
 Lee Iacocca told Congress the industry would simply stop building cars.
-Congress passed it, granted a one-year extension, and the catalytic converter
-shipped in 1975.
+Congress passed it, granted a one-year extension, and the catalytic
+converter shipped in 1975.
 
 A compounding target cannot run forever. Cutting crashes by a fifth is
 straightforward while the failures are sensor bugs and brutal once they are
@@ -195,39 +198,41 @@ ratchet stops and the immunity becomes permanent.
 
 Parts of it.
 
-Conditional immunity is not new. Geistfeld's roadmap for autonomous vehicles
+Conditional immunity is not new.
+[Geistfeld's roadmap for autonomous vehicles](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2931168)
 has a manufacturer discharge its design obligation outright if premarket
-testing shows the fleet performs
-[at least twice as safely as conventional vehicles](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2931168),
-which is a safety threshold buying a safe harbour in one payment. Funkhouser
-had already argued for the
-[vaccine-court style fund](https://dc.law.utah.edu/ulr/vol2013/iss1/16/).
-Technology-forcing regulation backed by an existential penalty is the Clean
-Air Act, and in gentler form fuel economy standards. I could not find the
-combination: a shield whose renewal turns on a rate of improvement rather than
-on clearing a fixed line once. That is a gap in what I searched. Whether it is
-a gap in the literature, I do not know.
+testing shows the fleet performs at least twice as safely as conventional
+vehicles, which is a safety threshold buying a safe harbour in one payment.
+[Funkhouser](https://dc.law.utah.edu/ulr/vol2013/iss1/16/) had already
+argued for the vaccine-court style fund. Technology-forcing regulation
+backed by an existential penalty is the Clean Air Act, and in gentler form
+fuel economy standards. I could not find the combination: a shield whose
+renewal turns on a rate of improvement rather than on clearing a fixed line
+once. That is a gap in what I searched. Whether it is a gap in the
+literature, I do not know.
 
 Two things I believed at the start did not survive the reading. The first is
-that the entry bar should be high. Kalra and Groves ran hundreds of scenarios
-and found that deploying at 10 percent better than the average human driver
-[saves far more lives over thirty years](https://www.rand.org/pubs/research_reports/RR2150.html)
-than waiting for 75 or 90 percent better, because the waiting is itself
-lethal. Under a lease the entry threshold wants to be as low as the ratchet is
-steep. The second is the claim that the public needs a hundredfold
-improvement before it will surrender the right to sue. I went looking for the
-survey behind that number and could not find one.
+that the entry bar should be high.
+[Kalra and Groves](https://www.rand.org/pubs/research_reports/RR2150.html)
+ran hundreds of scenarios and found that deploying at 10 percent better than
+the average human driver saves far more lives over thirty years than waiting
+for 75 or 90 percent better, because the waiting is itself lethal. Under a
+lease the entry threshold wants to be as low as the ratchet is steep. The
+second is the claim that the public needs a hundredfold improvement before
+it will surrender the right to sue. I went looking for the survey behind
+that number and could not find one.
 
 ## What it does not fix
 
-Suppose all of it works. Duranton and Turner instrumented on the 1947
-interstate plan across 228 metropolitan areas and found vehicle kilometres
-travelled rise
-[roughly one for one with lane kilometres](https://www.aeaweb.org/articles?id=10.1257%2Faer.101.6.2616),
-concluding that building roads does not relieve congestion. Capacity recovered
-from shorter following distances is still capacity, and nothing exempts it
-from that finding. The extra trips are worth something, since somebody wanted
-each of them, but the queue at five o'clock stays about as long as it is now.
+Suppose all of it works.
+[Duranton and Turner](https://www.aeaweb.org/articles?id=10.1257%2Faer.101.6.2616)
+instrumented on the 1947 interstate plan across 228 metropolitan areas and
+found vehicle kilometres travelled rise roughly one for one with lane
+kilometres, concluding that building roads does not relieve congestion.
+Capacity recovered from shorter following distances is still capacity, and
+nothing exempts it from that finding. The extra trips are worth something,
+since somebody wanted each of them, but the queue at five o'clock stays
+about as long as it is now.
 
 A car with no driver also has nobody in it to help someone fold a wheelchair,
 find the door, or work out what is happening when the vehicle stops somewhere
