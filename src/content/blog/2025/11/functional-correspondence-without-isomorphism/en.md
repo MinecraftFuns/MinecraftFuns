@@ -85,14 +85,13 @@ shape of the brain's learning curves.
 ## Marr sorts the ledger
 
 [Marr's three levels](https://doi.org/10.7551/mitpress/9780262514620.001.0001)
-hold the two halves apart cleanly. The computational level asks what
-problem the system solves and under what constraints; the algorithmic level
-asks how information is represented and transformed; the implementational
-level asks what hardware does it.
-[Ku and colleagues](https://arxiv.org/abs/2503.13401) argue that LLMs,
-like the cognitive models before them, should be compared to minds
-primarily at the computational level, with the lower levels treated far
-more cautiously.
+hold the two halves apart cleanly. The computational level asks what problem
+the system solves and under what constraints; the algorithmic level asks how
+information is represented and transformed; the implementational level asks
+what hardware runs it. [Ku and colleagues](https://arxiv.org/abs/2503.13401)
+argue that LLMs, like the cognitive models before them, should be compared
+to minds primarily at the computational level, with the lower levels treated
+far more cautiously.
 
 Read the evidence through that frame and the ledger balances. The
 learning-rule mismatch lives at the algorithmic and implementational
@@ -112,9 +111,9 @@ what the learning-rule evidence says is happening.
 The brain does not run backpropagation, and no amount of benchmark
 performance makes it so. But a model does not need to share the brain's
 mechanisms to tell us something true about the problems the brain solves.
-Large networks are not replicas of nervous systems; they are working
-demonstrations that certain computational problems, integrating noisy
-findings into predictions, growing abrupt capabilities out of gradual
-experience, admit solutions at all, and demonstrations of what those
-solutions require. That is a real contribution, made at exactly one of
-Marr's levels, and it survives every difference in wiring.
+Large networks are not replicas of nervous systems. They are working
+demonstrations that certain computational problems admit solutions at all,
+and of what those solutions require: integrating noisy findings into
+predictions, growing abrupt capabilities out of gradual experience. That is
+a real contribution, made at exactly one of Marr's levels, and it survives
+every difference in wiring.

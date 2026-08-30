@@ -82,8 +82,8 @@ have been unaffordable country by country, and LabintheWild's experiments
 replicate findings from the lab. If the question is whether A beats B, a
 viral instrument is a very cheap way to ask it.
 
-The sharing decides who turns up, and nobody seems to have turned round and
-studied it.
+The sharing decides who turns up, and nobody seems to have gone and studied
+it.
 
 ## What people are being paid
 
@@ -198,11 +198,11 @@ be missing. The page I proposed to my collaborator is built to be
 screenshotted, which is to say built for the channel I cannot count.
 
 The fix is cheap, because the unattributed bucket is itself the measurement.
-Arrivals with no referrer and no campaign tag estimate how much went through
-closed channels, and comparing that ratio across design variants tests the
-whole channel story using a field you were already logging. Coarse
-geolocation gives country stratification and a platform's own click
-identifier gives clustering within a post.
+Arrivals with no referrer and no campaign tag give you an estimate of how
+much went through closed channels, and comparing that ratio across design
+variants tests the whole channel story using a field you were already
+logging. Coarse geolocation gives country stratification and a platform's
+own click identifier gives clustering within a post.
 
 None of this can be added afterwards. Referrer, campaign tag, coarse
 geolocation, arrival timestamp, a first-attempt flag, attention checks: if
@@ -227,8 +227,8 @@ and did not share why they did not.
 One class of claim stays out of reach: you cannot say how common something
 is in a population.
 
-The Great British Class Survey is the case. It drew 161,400 completed web
-surveys through the BBC by July 2011 and hit a
+The Great British Class Survey is the case study. It drew 161,400 completed
+web surveys through the BBC by July 2011 and hit a
 [strong selection bias](https://journals.sagepub.com/doi/full/10.1177/0038038513481128)
 toward well-educated groups, so the team commissioned a separate, properly
 representative survey of 1,026 people from GfK using identical questions.

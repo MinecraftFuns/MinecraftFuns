@@ -9,7 +9,7 @@ A friend drove us north through Ontario this summer, and somewhere up there
 we hit ten kilometres of stopped traffic. Twenty minutes of crawling later
 the cause turned out to be a short stretch of one lane closed for
 maintenance, with a crew working in it. We had spent the morning on badly
-maintained road, so no complaint about the cones.
+maintained roads, so no complaint about the cones.
 
 Whatever that closure physically took off the road, it was not ten
 kilometres of it.
@@ -17,9 +17,9 @@ kilometres of it.
 I was not driving, so I had nothing to do but watch the rest of it happen.
 People start late and then start slowly, so a green wave dies three cars in.
 They hold a gap far larger than they need, or sit close enough that they
-have to keep dabbing the brake. And one brake light halfway up the line puts
-a stop through everyone behind it, travelling backwards, long after whatever
-caused it has gone.
+have to keep dabbing the brake. And one brake light halfway up the line
+sends a stop back through everyone behind it, long after whatever caused it
+has gone.
 
 You get more cars past a point per hour in one of two ways. You can pour
 more road, which costs a fortune up front and then costs again every year
@@ -124,9 +124,9 @@ anyone.
 
 Uber's test fleet in Tempe was involved in
 [37 crashes and incidents in autonomous mode between September 2016 and March 2018](https://data.ntsb.gov/Docket/Document/docBLOB?ID=40477717&FileExtension=.PDF&FileName=Vehicle+Automation+Report-Master.PDF),
-by the company's own records given to the NTSB. In 33 of them another
-vehicle hit the Uber car, 25 of those from behind. Almost none of this
-reached anyone. Then one of those cars killed Elaine Herzberg, and that
+according to the company's own records, given to the NTSB. In 33 of them
+another vehicle hit the Uber car, 25 of those from behind. Almost none of
+this reached anyone. Then one of those cars killed Elaine Herzberg, and that
 crash is what the technology means to most people who have heard of it.
 [Penmetsa and colleagues](https://doi.org/10.1016/j.iatssr.2021.04.003)
 tracked 1.7 million tweets around that March and a Tesla fatality the same
@@ -147,21 +147,21 @@ mistake, even after watching the algorithm win overall.
 
 So the bar sits well above parity.
 [Liu, Yang and Xu](https://onlinelibrary.wiley.com/doi/abs/10.1111/risa.13116)
-asked 499 people and got four to five times safer than a human driver before
-the risk read as acceptable.
+asked 499 people where the line was, and got four to five times safer than a
+human driver before the risk read as acceptable.
 [Nees](https://doi.org/10.1016/j.jsr.2019.02.002) found why it cannot be met
 by argument: most drivers rate themselves above average, and they want a car
 safer than they believe themselves to be. A benchmark set against the
-average driver is therefore one almost nobody applies to their own seat. The
+average driver is therefore one almost nobody applies to themselves. The
 target moves as you approach it.
 
-Money cannot buy past this, and a flat fund makes it worse. It pays a
-schedule, and a schedule underpays the people who lose the most, who are
-also the people best equipped to campaign against it. Worse, a permanent
-shield priced by a fund turns a death rate into a line item. A company that
-has bought immunity outright can rationally decline to fix a known defect
-whenever the fix costs more than the payouts, and everyone can see that from
-outside.
+Money cannot buy its way past this, and a flat fund makes it worse. It pays
+by a fixed schedule, and a schedule underpays the people who lose the most,
+who are also the people best equipped to campaign against it. Worse, a
+permanent shield priced by a fund turns a death rate into a line item. A
+company that has bought immunity outright can rationally decline to fix a
+known defect whenever the fix costs more than the payouts, and everyone can
+see that from outside.
 
 ## Renting the shield
 
@@ -177,7 +177,7 @@ its current death rate as acceptable. The most it can say is that next
 year's will be lower, which is a sentence the public will take.
 
 The mechanism is not speculative. The 1970 Clean Air Act
-[demanded 90 percent cuts in tailpipe hydrocarbons and carbon monoxide by 1975](https://faculty.lawrence.edu/gerardd/wp-content/uploads/sites/9/2014/02/18-TFSC-Gerard-Lave.pdf)
+[demanded 90 percent cuts in tailpipe hydrocarbons and carbon monoxide by 1975](https://faculty.lawrence.edu/gerardd/wp-content/uploads/sites/9/2014/02/18-TFSC-Gerard-Lave.pdf).
 Nobody knew how to build that car, and the penalty was \$10,000 for every
 non-complying one sold, when the average car cost about \$5,000. Lee Iacocca
 told Congress the industry would simply stop building cars. Congress passed
@@ -200,14 +200,14 @@ Conditional immunity is not new.
 [Geistfeld's roadmap for autonomous vehicles](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2931168)
 lets a manufacturer discharge its design obligation outright if premarket
 testing shows the fleet performs at least twice as safely as conventional
-vehicles. That is a safety threshold buying a safe harbour, paid once.
+vehicles. That is a safe harbour bought outright, once.
 [Funkhouser](https://dc.law.utah.edu/ulr/vol2013/iss1/16/) had already
 argued for the vaccine-court style fund. Technology-forcing regulation
-backed by an existential penalty is the Clean Air Act, and in gentler form
-fuel economy standards. I could not find the combination: a shield whose
-renewal turns on a rate of improvement rather than on clearing a fixed line
-once. That is a gap in what I searched. Whether it is a gap in the
-literature, I do not know.
+backed by an existential penalty is what the Clean Air Act did, and what
+fuel economy standards do in gentler form. I could not find the combination:
+a shield whose renewal turns on a rate of improvement rather than on
+clearing a fixed line once. That is a gap in what I searched. Whether it is
+a gap in the literature, I do not know.
 
 Two things I believed at the start did not survive the reading. The first is
 that the entry bar should be high.

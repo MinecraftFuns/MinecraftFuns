@@ -29,8 +29,9 @@ a node with somebody else. What I wanted instead:
   should not need a new rule each time. It needs to be a `container`.
 
 Tags handle that last part. Each device is labeled by what it is (`server`,
-`container`, `exit-node`, `rdp-client`) and the rules talk about labels, so the
-policy tells you what a device may do without your knowing which device it is.
+`container`, `exit-node`, `rdp-client`) and the rules talk about labels, so
+the policy tells you what a device may do without you needing to know which
+device it is.
 
 One thing worth knowing before you start: once a device is tagged, it belongs
 to the tag rather than to your user account, and its key stops expiring. That
@@ -77,11 +78,11 @@ owns which tags, and a few static hostnames.
 }
 ```
 
-Three details in there are worth more than they look.
+Three details in there are worth more than they seem.
 
 The first is that both identities authenticate with passkeys rather than
 through an SSO provider, so there is no third party in the login path for a
-network whose entire purpose is not having third parties in paths.
+network whose entire purpose is not having third parties in the path.
 
 The second is that every address in `hosts` is IPv6. Tailscale hands out a
 100.x address and a ULA in `fd7a:115c:a1e0::/48` for every node, and pinning
@@ -347,15 +348,15 @@ ten without having left one with Tailscale support means the tailnet cannot be
 recovered. And if a signing node is compromised, `tailscale lock revoke-keys`
 invalidates its key, after which every node it signed needs a fresh signature.
 
-The honest boundary is worth stating plainly, because tailnet lock is easy to
-oversell. It governs node admission, not policy. The key authority records
-changes to lock state, meaning trusted keys added and removed, and nothing else;
+The honest boundary is worth stating plainly, because tailnet lock is easy
+to oversell. It governs node admission, not policy. The key authority
+records only changes to lock state, which is trusted keys added and removed;
 the policy file at the top of this post still reaches my nodes through the
 coordination server. So a compromised control plane could not smuggle a new
-machine onto my tailnet, but tailnet lock is not the thing that would stop it
-rewriting who may reach what among the machines already there. It is also trust
-on first use: you trust the coordination server once, at setup, to bootstrap the
-arrangement that means you need not trust it afterwards.
+machine onto my tailnet, but tailnet lock is not the thing that would stop
+it rewriting who may reach what among the machines already there. It is also
+trust on first use: you trust the coordination server once, at setup, to
+bootstrap the arrangement that means you need not trust it afterwards.
 
 ## Where this file is honest and where it is not
 

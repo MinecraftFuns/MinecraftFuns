@@ -41,7 +41,7 @@ biases attention and processing, but the effect is modulatory, not absolute.
 sharpened this into a neo-Whorfian position: lexical categories measurably
 shift memory and attention, yet speakers of different languages share one
 perceptual framework underneath. Language organizes cognitive material; it
-does not fence it.
+does not fence it in.
 
 The Language of Thought Hypothesis pulls the other way: cognition operates
 over an internal symbolic system, "Mentalese", independent of any spoken

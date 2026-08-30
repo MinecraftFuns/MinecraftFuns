@@ -12,12 +12,12 @@ tags: ["Essays", "Cognitive Science", "Artificial Intelligence"]
 > [available as a PDF](https://ragnarok.joefang.org/static/xuk34p6eh2hl8ehhpd8uadpv2ue0j45i6.pdf).
 
 Since [Turing's 1950 paper](https://doi.org/10.1093/mind/LIX.236.433), the
-field he helped start has made remarkable strides, and the benchmark he
-proposed, the imitation game, has aged badly. The test asks one question: can
-a machine hold up its end of a conversation well enough that a human judge
+field he helped start has come a long way, and the benchmark he proposed,
+the imitation game, has aged badly. The test asks one question: can a
+machine hold up its end of a conversation well enough that a human judge
 cannot tell it from a person? Language models now do this routinely while
-often lacking any deep grasp of the language they produce. My aim here is not
-to challenge frontier models like
+often lacking any deep grasp of the language they produce. My aim here is
+not to challenge frontier models like
 [OpenAI's o1](https://arxiv.org/abs/2409.18486); it is to propose a more
 rigorous evaluation that separates intelligence from imitation, especially
 for weaker models that nobody considers human-level and that pass the
@@ -30,7 +30,7 @@ nothing about the thinking behind it. It measures performance, not
 comprehension. Focusing on behavior instead of
 ["internal state"](https://doi.org/10.1007/s11023-022-09616-8) confuses
 imitation with mental capability, and a judgment built on surface-level
-interaction misses most of what makes human thinking deep in the first place.
+interaction misses most of what human thinking is actually doing.
 
 ## Fooling it is cheap
 
@@ -60,13 +60,13 @@ machine can appear human precisely by dodging the parts that would require
 thought.
 
 And through all of this, the test says nothing about how the system works
-inside. It sees outputs only. Two machines could pass identically, one by
+inside. It only sees outputs. Two machines could pass identically, one by
 lookup and one by reasoning, and the test could not tell them apart.
 
 ## Attention and activations
 
 If the failure is that we only watch behavior, the fix is to also watch the
-processing. For current models, two windows into that exist: attention and
+processing. For current models we have two windows into that: attention and
 activations.
 
 [Attention mechanisms](https://doi.org/10.1007/s00521-022-07366-3) let a
@@ -102,11 +102,11 @@ The core upgrade is internal analysis. Combine attention visualization with
 activation analysis and you can trace how information flows through the
 model and what logic supports its decisions. Interpretability tools like
 [LIME](https://arxiv.org/abs/1602.04938) and
-[SHAP](https://arxiv.org/abs/1705.07874) make the same processes legible per
-prediction, so we can check whether the path to an answer resembles
-reasoning or resembles pattern-matching that happens to land. A model passes
-this test not when its text sounds human, but when its processing holds up
-under inspection.
+[SHAP](https://arxiv.org/abs/1705.07874) make the same processes legible one
+prediction at a time, so we can check whether the path to an answer
+resembles reasoning or resembles pattern-matching that happens to land. A
+model passes this test not when its text sounds human, but when its
+processing holds up under inspection.
 
 ## Where this falls short
 
