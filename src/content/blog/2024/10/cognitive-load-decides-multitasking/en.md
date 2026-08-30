@@ -92,7 +92,7 @@ Driving is where the switch is easy to feel. Unexpected road conditions take
 the whole of attention, and everything else becomes something you come back
 to.
 
-## Where this lands
+## The missing term
 
 Multitasking is a balance between what the brain can hold at once and what
 the task costs it. The inputs really do arrive together and get handled

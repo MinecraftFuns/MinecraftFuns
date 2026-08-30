@@ -247,7 +247,7 @@ reach at all. So we swap one bias for a different one and buy a great deal
 more reach with the difference. That is usually a good deal, provided you
 say out loud which bias you bought and can show that you measured it.
 
-## Where this lands
+## How we settle up
 
 I started out thinking we could recruit for free. Participants pay
 themselves, in rewards they already wanted, and we settle up in bias instead

@@ -90,7 +90,7 @@ given angle should be about the same wherever that trial falls in the
 sequence. If they still drift downward across the session, learning is still
 in the measurement.
 
-## Where this lands
+## If the line holds
 
 The redesign asks what is left of the angle-to-time line once the practice
 has been spent in advance and the stimulus set is varied on purpose. If the

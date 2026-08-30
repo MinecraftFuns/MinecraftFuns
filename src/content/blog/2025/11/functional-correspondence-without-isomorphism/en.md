@@ -106,7 +106,7 @@ this honest: predictive accuracy alone never proves shared mechanism. A
 model can be right for reasons the brain does not use, which is exactly
 what the learning-rule evidence says is happening.
 
-## Where this lands
+## The level it earns
 
 The brain does not run backpropagation, and no amount of benchmark
 performance makes it so. But a model does not need to share the brain's

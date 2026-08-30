@@ -358,7 +358,7 @@ it rewriting who may reach what among the machines already there. It is also
 trust on first use: you trust the coordination server once, at setup, to
 bootstrap the arrangement that means you need not trust it afterwards.
 
-## Where this file is honest and where it is not
+## Keeping it honest
 
 Read the rules again and you will notice that `group:root` appears in the `src`
 of nearly every one of them, on top of the opening rule that already grants it
