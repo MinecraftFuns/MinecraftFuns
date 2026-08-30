@@ -40,17 +40,27 @@ $\therefore t'(x)$ 单调递增，$t'(x)\gt t'(0)=0$
 $\therefore t(x)$ 单调递增，$t(x)\gt t(0)=0$，$g'(x)\gt 0$  
 $\therefore g(x)\gt\lim_{x\to 0}g(x)$  
 
-$$\lim_{x\to 0}g(x)=\lim_{x\to 0}\frac{e^x-x-1}{x^2}$$
+$$
+\lim_{x\to 0}g(x)=\lim_{x\to 0}\frac{e^x-x-1}{x^2}
+$$
 
 由[洛必达法则](https://zh.wikipedia.org/wiki/%E6%B4%9B%E5%BF%85%E8%BE%BE%E6%B3%95%E5%88%99) :backup[https://archive.is/Oy8QT]  
 
-$$=\lim_{x\to 0}\frac{e^x-1}{2x}$$
+$$
+=\lim_{x\to 0}\frac{e^x-1}{2x}
+$$
 
-$$=\lim_{x\to 0}\frac{e^x}2$$
+$$
+=\lim_{x\to 0}\frac{e^x}2
+$$
 
-$$=\frac 1 2$$
+$$
+=\frac 1 2
+$$
 
-$$\therefore a\le\frac 1 2$$
+$$
+\therefore a\le\frac 1 2
+$$
 
 ### （二）
 
@@ -58,9 +68,13 @@ $$\therefore a\le\frac 1 2$$
 
 > 想法
 
-$$\because e^x=1+x+\frac{x^2}{2!}+\frac{x^3}{3!}+...$$
+$$
+\because e^x=1+x+\frac{x^2}{2!}+\frac{x^3}{3!}+...
+$$
 
-$$\therefore e^x\ge 1+x+ax^2\Rightarrow a\le \frac 1 2$$
+$$
+\therefore e^x\ge 1+x+ax^2\Rightarrow a\le \frac 1 2
+$$
 
 > 实现
 

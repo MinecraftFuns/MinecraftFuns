@@ -59,15 +59,21 @@ $|P_A|=12$。
 
 注意到 $S$ 的全排列大小为 $n!$，则有：
 
-$$\sum_{i=1}^k |P_{A_i}|\le n!$$
+$$
+\sum_{i=1}^k |P_{A_i}|\le n!
+$$
 
 即：
 
-$$\sum_{i=1}^k |A_i|!\times(n-|A_i|)!\le n!$$
+$$
+\sum_{i=1}^k |A_i|!\times(n-|A_i|)!\le n!
+$$
 
 两边同除以 $n!$，得：
 
-$$\sum_{i=1}^k \frac 1 {\binom n{|A_i|}} \le 1$$
+$$
+\sum_{i=1}^k \frac 1 {\binom n{|A_i|}} \le 1
+$$
 
 由于 $\binom n{|A_i|}\le \binom n{\lfloor\frac n 2\rfloor}$，$\frac 1{\binom n{|A_i|}} \ge \frac 1{\binom n{\lfloor\frac n 2\rfloor}}$，所以 $k\le\binom n{\lfloor\frac n 2\rfloor}$。原命题得证。
 

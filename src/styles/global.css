@@ -889,6 +889,16 @@
     overflow-x: auto;
   }
 
+  /* A display equation is wide content on the same terms. KaTeX sets no
+     overflow of its own, so a formula past the measure would widen the page
+     rather than itself; the block padding keeps a scrollbar, when one
+     appears, off the descenders. */
+  .prose .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: var(--spacing-3xs);
+  }
+
   .prose table {
     width: 100%;
     border-collapse: collapse;

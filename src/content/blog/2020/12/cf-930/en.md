@@ -90,11 +90,17 @@ Constraints have the form $(l_i,r_i)$. The first n constraints require at least 
 
 After discretizing the key points, consider a DP where $f[i][0/1]$ denotes, considering key point $i$ and onward, the suffix sum of the number of ways in which $disc[i] \sim disc[i + 1]$ contains a $0/1$. g[i] denotes the number of ways in which $disc[i] \sim disc[i + 1]$ contains both a 0 and a 1. $min[0/1][i]$ denotes, among constraints of type $0/1$, the nearest right endpoint to the right of $i$ whose corresponding left endpoint is not to the left of $i$.
 
-$$f[i][0]=f[i+1][0]+f[i+1][1]-f[min[1][i]][1]+g[i]\times(2^{disc[i+1]-disc[i]}-2)$$
+$$
+f[i][0]=f[i+1][0]+f[i+1][1]-f[min[1][i]][1]+g[i]\times(2^{disc[i+1]-disc[i]}-2)
+$$
 
-$$f[i][1]=f[i+1][1]+f[i+1][0]-f[min[0][i]][0]+g[i]\times(2^{disc[i+1]-disc[i]}-2)$$
+$$
+f[i][1]=f[i+1][1]+f[i+1][0]-f[min[0][i]][0]+g[i]\times(2^{disc[i+1]-disc[i]}-2)
+$$
 
-$$g[i]=f[i+1][0]-f[min[0][i]][0]+f[i+1][1]-f[min[1][i]][1]+g[i]\times(2^{disc[i+1]-disc[i]}-2)$$
+$$
+g[i]=f[i+1][0]-f[min[0][i]][0]+f[i+1][1]-f[min[1][i]][1]+g[i]\times(2^{disc[i+1]-disc[i]}-2)
+$$
 
 The answer is $g[0]$.
 

@@ -104,7 +104,9 @@ A.
 
 ### Definition of `pH`
 
-$$\operatorname{pH} = -\log_{10} \left[ \operatorname{H}^+ \right]= \log_{10} \frac{1}{\left[ \operatorname{H}^+ \right]}$$
+$$
+\operatorname{pH} = -\log_{10} \left[ \operatorname{H}^+ \right]= \log_{10} \frac{1}{\left[ \operatorname{H}^+ \right]}
+$$
 
 ### Other
 

@@ -14,7 +14,9 @@ tags: ["Notes", "Mathematics", "Calculus"]
 
 A function $f$ is differentiable at $x_0$ when some constant $k$ satisfies
 
-$$\lim_{\Delta x\to 0}\frac{f(x_0+\Delta x)-f(x_0)-k\,\Delta x}{\Delta x}=0.$$
+$$
+\lim_{\Delta x\to 0}\frac{f(x_0+\Delta x)-f(x_0)-k\,\Delta x}{\Delta x}=0.
+$$
 
 That $k$ is the derivative $f'(x_0)$. The definition says $f$ can be
 approximated near $x_0$ by an affine function whose error shrinks faster than
@@ -42,7 +44,9 @@ continuity constrains differentiability hardly at all.
 If $f$ is continuous on $[a,b]$ and differentiable on $(a,b)$, some
 $c\in(a,b)$ has
 
-$$f'(c)=\frac{f(b)-f(a)}{b-a}.$$
+$$
+f'(c)=\frac{f(b)-f(a)}{b-a}.
+$$
 
 The average rate of change across the interval is attained as an
 instantaneous rate somewhere inside it. Rolle's theorem is the case
@@ -55,14 +59,18 @@ $f(a)=f(b)$, and each implies the other in a line.
 Two infinitesimals $\alpha(x)$ and $\beta(x)$ as $x\to x_0$ are equivalent,
 written $\alpha\sim\beta$, when their ratio tends to one:
 
-$$\lim_{x\to x_0}\frac{\alpha(x)}{\beta(x)}=1.$$
+$$
+\lim_{x\to x_0}\frac{\alpha(x)}{\beta(x)}=1.
+$$
 
 Substituting equivalents is legitimate for factors of a product or quotient.
 Across a sum the leading terms can cancel, leaving the answer in the part
 that was discarded. With $\tan x\sim x$ and
 $\sin x\sim x$ as $x\to 0$, replacing both in
 
-$$\lim_{x\to 0}\frac{\tan x-\sin x}{x^3}$$
+$$
+\lim_{x\to 0}\frac{\tan x-\sin x}{x^3}
+$$
 
 gives $0$, while the limit is $\tfrac12$. Subtraction annihilates the linear
 terms and what survives is cubic.
@@ -78,7 +86,9 @@ It concludes only when $\lim f'/g'$ exists or is infinite. Where that limit
 does not exist, the rule yields no information about $f/g$, which may still
 be perfectly well behaved:
 
-$$\lim_{x\to\infty}\frac{x+\sin x}{x}=1,$$
+$$
+\lim_{x\to\infty}\frac{x+\sin x}{x}=1,
+$$
 
 whose ratio of derivatives is $1+\cos x$, oscillating in $[0,2]$ forever.
 
@@ -90,14 +100,18 @@ established.
 
 For $f$ with enough derivatives at $a$,
 
-$$f(x)=\sum_{k=0}^{n}\frac{f^{(k)}(a)}{k!}(x-a)^k+R_n(x).$$
+$$
+f(x)=\sum_{k=0}^{n}\frac{f^{(k)}(a)}{k!}(x-a)^k+R_n(x).
+$$
 
 Maclaurin's expansion is this with $a=0$.
 
 The two standard remainders answer different questions. The Peano remainder
 is qualitative,
 
-$$R_n(x)=o\big((x-a)^n\big)\quad (x\to a),$$
+$$
+R_n(x)=o\big((x-a)^n\big)\quad (x\to a),
+$$
 
 and needs only that $f$ be $n$ times differentiable at $a$. It says the error
 is of smaller order than the last term kept, which is enough to compute a
@@ -105,7 +119,9 @@ limit and gives no numerical bound anywhere.
 
 The Lagrange remainder is quantitative,
 
-$$R_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}$$
+$$
+R_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}
+$$
 
 for some $\xi$ between $a$ and $x$, and needs $n+1$ derivatives across the
 interval. Both the derivative order and the power are $n+1$.
@@ -143,21 +159,26 @@ The denominator of $\int\frac{\sin x}{\sin x+\cos x}\,\mathrm{d}x$ has
 derivative $\cos x-\sin x$, which surfaces once the integral is paired with
 its companion. Let
 
-$$I=\int\frac{\sin x}{\sin x+\cos x}\mathrm{d}x,\qquad
-J=\int\frac{\cos x}{\sin x+\cos x}\mathrm{d}x.$$
+$$
+I=\int\frac{\sin x}{\sin x+\cos x}\mathrm{d}x,\qquad J=\int\frac{\cos x}{\sin x+\cos x}\mathrm{d}x.
+$$
 
 Then $I+J=\int\mathrm{d}x=x$, while $J-I$ has numerator $\cos x-\sin x$,
 exactly the derivative of the denominator, so $J-I=\ln|\sin x+\cos x|$.
 Subtracting,
 
-$$I=\frac{x}{2}-\frac{1}{2}\ln|\sin x+\cos x|+C.$$
+$$
+I=\frac{x}{2}-\frac{1}{2}\ln|\sin x+\cos x|+C.
+$$
 
 For $\int\frac{x^3}{(x^2+1)^2}\mathrm{d}x$, put $u=x^2+1$, so
 $x\,\mathrm{d}x=\tfrac12\mathrm{d}u$ and $x^2=u-1$. The integral becomes
 $\frac12\int\frac{u-1}{u^2}\mathrm{d}u
 =\frac12\int\left(\frac1u-\frac1{u^2}\right)\mathrm{d}u$, giving
 
-$$\frac{1}{2}\ln(x^2+1)+\frac{1}{2(x^2+1)}+C.$$
+$$
+\frac{1}{2}\ln(x^2+1)+\frac{1}{2(x^2+1)}+C.
+$$
 
 For $\int\frac{\mathrm{d}x}{\sqrt{4-x^2}}$, put $x=2\sin t$ with
 $t\in[-\frac{\pi}{2},\frac{\pi}{2}]$, so $\mathrm{d}x=2\cos t\,\mathrm{d}t$
@@ -169,20 +190,25 @@ $\sec t\tan t\,\mathrm{d}t$ and the radical is $|\tan t|$, making the
 integrand $\sec t\tan^2 t=\sec^3 t-\sec t$. Integrating $\sec^3 t$ by parts
 and substituting back,
 
-$$\int\sqrt{x^2-1}\,\mathrm{d}x
-=\frac{x\sqrt{x^2-1}}{2}-\frac{1}{2}\ln\left|x+\sqrt{x^2-1}\right|+C.$$
+$$
+\int\sqrt{x^2-1}\,\mathrm{d}x=\frac{x\sqrt{x^2-1}}{2}-\frac{1}{2}\ln\left|x+\sqrt{x^2-1}\right|+C.
+$$
 
 ### Wallis integrals
 
 The [Wallis integrals](https://en.wikipedia.org/wiki/Wallis'_integrals) are
 
-$$W_n=\int_0^{\pi/2}\sin^n x\,\mathrm{d}x=\int_0^{\pi/2}\cos^n x\,\mathrm{d}x,$$
+$$
+W_n=\int_0^{\pi/2}\sin^n x\,\mathrm{d}x=\int_0^{\pi/2}\cos^n x\,\mathrm{d}x,
+$$
 
 the two forms agreeing under $x\mapsto\frac{\pi}{2}-x$. Integration by parts
 gives $W_n=\frac{n-1}{n}W_{n-2}$ for $n\geq 2$, with $W_0=\frac{\pi}{2}$ and
 $W_1=1$, so
 
-$$W_2=\frac{\pi}{4},\qquad W_3=\frac{2}{3},\qquad W_4=\frac{3\pi}{16}.$$
+$$
+W_2=\frac{\pi}{4},\qquad W_3=\frac{2}{3},\qquad W_4=\frac{3\pi}{16}.
+$$
 
 The sequence satisfies $nW_nW_{n-1}=\frac{\pi}{2}$ for every $n$, and
 decays as $W_n\sim\sqrt{\frac{\pi}{2n}}$. Even terms carry a $\pi$ and odd
@@ -191,8 +217,9 @@ of.
 
 ### Wallis's product
 
-$$\frac{\pi}{2}=\prod_{n=1}^{\infty}\frac{2n\cdot 2n}{(2n-1)(2n+1)}
-=\frac{2}{1}\cdot\frac{2}{3}\cdot\frac{4}{3}\cdot\frac{4}{5}\cdot\frac{6}{5}\cdot\frac{6}{7}\cdots$$
+$$
+\frac{\pi}{2}=\prod_{n=1}^{\infty}\frac{2n\cdot 2n}{(2n-1)(2n+1)}=\frac{2}{1}\cdot\frac{2}{3}\cdot\frac{4}{3}\cdot\frac{4}{5}\cdot\frac{6}{5}\cdot\frac{6}{7}\cdots
+$$
 
 John Wallis found this in 1655 and published it in
 [Arithmetica Infinitorum](https://www.maa.org/press/maa-reviews/the-arithmetic-of-infinitesimals-john-wallis-1656)
@@ -212,7 +239,9 @@ error falling like $1/n$.
 
 A related identity,
 
-$$\frac{\sin x}{x}=\cos\frac{x}{2}\cos\frac{x}{4}\cos\frac{x}{8}\cdots,$$
+$$
+\frac{\sin x}{x}=\cos\frac{x}{2}\cos\frac{x}{4}\cos\frac{x}{8}\cdots,
+$$
 
 yields Viète's product: at $x=\frac{\pi}{2}$ the left side is
 $\frac{2}{\pi}$.
@@ -243,7 +272,9 @@ $p<1$.
 
 For $y'=f(x)g(y)$,
 
-$$\int\frac{\mathrm{d}y}{g(y)}=\int f(x)\,\mathrm{d}x+C.$$
+$$
+\int\frac{\mathrm{d}y}{g(y)}=\int f(x)\,\mathrm{d}x+C.
+$$
 
 Dividing by $g(y)$ assumes it is nonzero. Each root of $g$ gives a constant
 solution, and those are read off separately.
@@ -252,7 +283,9 @@ solution, and those are read off separately.
 
 For $y'=f\!\left(\frac{y}{x}\right)$, substitute $y=vx$, so $y'=v+xv'$ and
 
-$$x\frac{\mathrm{d}v}{\mathrm{d}x}=f(v)-v,$$
+$$
+x\frac{\mathrm{d}v}{\mathrm{d}x}=f(v)-v,
+$$
 
 which separates, the substitution having promoted a ratio to a variable.
 
@@ -262,15 +295,18 @@ For $y'+p(x)y=q(x)$, the integrating factor is
 $\mu(x)=e^{\int p(x)\mathrm{d}x}$. It comes from asking for a $\mu$ that
 makes the left side a single derivative. Expanding,
 
-$$(\mu y)'=\mu y'+\mu' y,$$
+$$
+(\mu y)'=\mu y'+\mu' y,
+$$
 
 which should equal $\mu y'+\mu p y$. Matching forces $\mu'=\mu p$, itself
 separable, and $\mu=e^{\int p}$ follows.
 
 Then $(\mu y)'=\mu q$, so
 
-$$y=\frac{1}{\mu(x)}\left(\int\mu(x)q(x)\,\mathrm{d}x+C\right)
-=e^{-\int p}\left(\int qe^{\int p}\mathrm{d}x+C\right),$$
+$$
+y=\frac{1}{\mu(x)}\left(\int\mu(x)q(x)\,\mathrm{d}x+C\right)=e^{-\int p}\left(\int qe^{\int p}\mathrm{d}x+C\right),
+$$
 
 with the outer $e^{-\int p}$ multiplying both terms inside. For constant
 $p\neq 0$ and constant $q$ this collapses to $y=Ae^{-px}+\frac{q}{p}$.
@@ -319,8 +355,9 @@ For $y''+ay'+by=f(x)$ with homogeneous solutions $y_1,y_2$, the same move
 writes $y_p=u_1y_1+u_2y_2$, imposes $u_1'y_1+u_2'y_2=0$, and solves the
 resulting pair for $u_1'$ and $u_2'$:
 
-$$y_p=-y_1\int\frac{y_2f}{W}\,\mathrm{d}x+y_2\int\frac{y_1f}{W}\,\mathrm{d}x,
-\qquad W=y_1y_2'-y_1'y_2.$$
+$$
+y_p=-y_1\int\frac{y_2f}{W}\,\mathrm{d}x+y_2\int\frac{y_1f}{W}\,\mathrm{d}x,\qquad W=y_1y_2'-y_1'y_2.
+$$
 
 Variation of parameters asks only that $f$ be continuous, so it handles
 right-hand sides like $\tan x$ or $\frac1x$ that no trial form covers.
@@ -331,12 +368,16 @@ and cosines.
 
 A first-order system
 
-$$\frac{\mathrm{d}\mathbf{x}}{\mathrm{d}t}=A\mathbf{x}+\mathbf{f}(t)$$
+$$
+\frac{\mathrm{d}\mathbf{x}}{\mathrm{d}t}=A\mathbf{x}+\mathbf{f}(t)
+$$
 
 with $A$ a constant matrix has homogeneous solution
 $\mathbf{x}_h(t)=e^{At}\mathbf{c}$, and variation of parameters gives
 
-$$\mathbf{x}(t)=e^{At}\left(\mathbf{c}+\int_0^t e^{-As}\mathbf{f}(s)\,\mathrm{d}s\right).$$
+$$
+\mathbf{x}(t)=e^{At}\left(\mathbf{c}+\int_0^t e^{-As}\mathbf{f}(s)\,\mathrm{d}s\right).
+$$
 
 Diagonalizing $A$ turns $e^{At}$ into an exponential of each eigenvalue on
 its own and uncouples the system into independent scalar equations. A
@@ -347,7 +388,9 @@ the same phenomenon as the repeated root above.
 
 For a curve $\mathbf{r}(t)$,
 
-$$\kappa=\frac{|\mathbf{r}'(t)\times\mathbf{r}''(t)|}{|\mathbf{r}'(t)|^3}.$$
+$$
+\kappa=\frac{|\mathbf{r}'(t)\times\mathbf{r}''(t)|}{|\mathbf{r}'(t)|^3}.
+$$
 
 Parametrized by arc length instead,
 $\kappa=\left|\frac{\mathrm{d}\mathbf{T}}{\mathrm{d}s}\right|$ with
@@ -357,7 +400,9 @@ parametrization means.
 
 For an explicit curve $y=f(x)$ at the point $(x_0,f(x_0))$,
 
-$$\kappa=\frac{|f''(x_0)|}{\left(1+f'(x_0)^2\right)^{3/2}}.$$
+$$
+\kappa=\frac{|f''(x_0)|}{\left(1+f'(x_0)^2\right)^{3/2}}.
+$$
 
 At a critical point, where $f'(x_0)=0$, the denominator is $1$ and
 $\kappa=|f''(x_0)|$. Large $|f'|$ drives $\kappa$ down, and for

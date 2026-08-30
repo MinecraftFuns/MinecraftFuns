@@ -56,7 +56,9 @@ tags: ["Codeforces", "Editorial"]
 
 以此类推，注意到 $a_i$ 离 $+$ 距离相同时，乘上的组合数相同，可以把它们一起计算。于是有
 
-$$\sum_{i=1}^{n-k}10^{i-1}\times (\sum_{j=1}^{n-i}a_j\times \binom{n-1-i}{k-1}+a_{n-i+1}\times\binom{n-i}{k})$$
+$$
+\sum_{i=1}^{n-k}10^{i-1}\times (\sum_{j=1}^{n-i}a_j\times \binom{n-1-i}{k-1}+a_{n-i+1}\times\binom{n-i}{k})
+$$
 
 ## D
 

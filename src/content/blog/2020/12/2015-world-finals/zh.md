@@ -159,7 +159,9 @@ tags: ["ICPC", "Editorial"]
 
 平行四边形的面积等于外面矩形的面积减去四个小三角形的面积。
 
-$$(a+d)\cdot(b+c)-a\cdot b-c\cdot d=a\cdot c+b\cdot d$$
+$$
+(a+d)\cdot(b+c)-a\cdot b-c\cdot d=a\cdot c+b\cdot d
+$$
 
 设 $d(x)$ 表示 $x$ 的因数个数，$ans(x)$ 表示面积为 $x$ 的平行四边形的数量。则 $ans(x)=\sum\limits_{i+j=x}d(i)\cdot d(j)$。这显然是一个卷积的形式，直接上 `FFT`。
 

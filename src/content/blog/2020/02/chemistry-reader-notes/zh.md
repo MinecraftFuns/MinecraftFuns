@@ -103,7 +103,9 @@ A.
 
 ### `pH` 的定义
 
-$$\operatorname{pH} = -\log_{10} \left[ \operatorname{H}^+ \right]= \log_{10} \frac{1}{\left[ \operatorname{H}^+ \right]}$$
+$$
+\operatorname{pH} = -\log_{10} \left[ \operatorname{H}^+ \right]= \log_{10} \frac{1}{\left[ \operatorname{H}^+ \right]}
+$$
 
 ### 其它
 

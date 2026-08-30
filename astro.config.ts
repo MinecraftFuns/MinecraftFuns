@@ -162,8 +162,13 @@ export default defineConfig({
     /*
      * TeX math, `$…$` and `$$…$$`, parsed natively and rendered at build
      * time: the competitive programming archive is written in it. Sätteri
-     * only marks the spans; `lib/katex.ts` compiles them with KaTeX, whose
+     * only marks the nodes; `lib/katex.ts` compiles them with KaTeX, whose
      * stylesheet `ArticlePage` imports.
+     *
+     * That renderer belongs in `mdastPlugins` and not beside the hast ones.
+     * Astro puts Shiki ahead of user hast plugins, and a display block is a
+     * `<pre><code>` by the time hast is reached, so the highlighter claims it
+     * as plaintext first. `lib/katex.ts` documents what that cost.
      *
      * `directive` adds the `:name[…]` grammar the site's own tags are written
      * in. It is not safe on its own: an unhandled directive is *dropped*, and
@@ -173,8 +178,7 @@ export default defineConfig({
      */
     processor: satteri({
       features: { math: true, directive: true },
-      mdastPlugins: [siteMarkup],
-      hastPlugins: [katexRendering],
+      mdastPlugins: [siteMarkup, katexRendering],
     }),
     shikiConfig: {
       // Shiki themes are keyed to their own palettes; these two are the

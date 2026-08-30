@@ -160,7 +160,9 @@ On a rectangular grid sheet of a given length and width, pick four points on the
 
 The area of the parallelogram equals the area of the enclosing rectangle minus the areas of the four small triangles.
 
-$$(a+d)\cdot(b+c)-a\cdot b-c\cdot d=a\cdot c+b\cdot d$$
+$$
+(a+d)\cdot(b+c)-a\cdot b-c\cdot d=a\cdot c+b\cdot d
+$$
 
 Let $d(x)$ denote the number of divisors of $x$, and $ans(x)$ denote the number of parallelograms with area $x$. Then $ans(x)=\sum\limits_{i+j=x}d(i)\cdot d(j)$. This is clearly a convolution, so apply `FFT` directly.
 

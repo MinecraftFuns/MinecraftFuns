@@ -89,11 +89,17 @@ tags: ["Codeforces", "Editorial"]
 
 对关键点离散化后考虑DP，$f[i][0/1]$ 表示考虑第 $i$ 及之后的关键点，$disc[i] \sim disc[i + 1]$ 中含有 $0/1$ 的方案数的后缀和。g[i] 表示 $disc[i] \sim disc[i + 1]$ 中同时有0和1的方案数。$min[0/1][i]$ 表示限制条件为 $0/1$，$i$ 右侧最近的，对应左端点不在 $i$ 左侧的右端点。
 
-$$f[i][0]=f[i+1][0]+f[i+1][1]-f[min[1][i]][1]+g[i]\times(2^{disc[i+1]-disc[i]}-2)$$
+$$
+f[i][0]=f[i+1][0]+f[i+1][1]-f[min[1][i]][1]+g[i]\times(2^{disc[i+1]-disc[i]}-2)
+$$
 
-$$f[i][1]=f[i+1][1]+f[i+1][0]-f[min[0][i]][0]+g[i]\times(2^{disc[i+1]-disc[i]}-2)$$
+$$
+f[i][1]=f[i+1][1]+f[i+1][0]-f[min[0][i]][0]+g[i]\times(2^{disc[i+1]-disc[i]}-2)
+$$
 
-$$g[i]=f[i+1][0]-f[min[0][i]][0]+f[i+1][1]-f[min[1][i]][1]+g[i]\times(2^{disc[i+1]-disc[i]}-2)$$
+$$
+g[i]=f[i+1][0]-f[min[0][i]][0]+f[i+1][1]-f[min[1][i]][1]+g[i]\times(2^{disc[i+1]-disc[i]}-2)
+$$
 
 答案为 $g[0]$。
 

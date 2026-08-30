@@ -60,15 +60,21 @@ Therefore, the original problem is equivalent to choosing $k$ subsets $\{A_1,A_2
 
 Note that the set of all permutations of $S$ has size $n!$, so:
 
-$$\sum_{i=1}^k |P_{A_i}|\le n!$$
+$$
+\sum_{i=1}^k |P_{A_i}|\le n!
+$$
 
 That is:
 
-$$\sum_{i=1}^k |A_i|!\times(n-|A_i|)!\le n!$$
+$$
+\sum_{i=1}^k |A_i|!\times(n-|A_i|)!\le n!
+$$
 
 Dividing both sides by $n!$ gives:
 
-$$\sum_{i=1}^k \frac 1 {\binom n{|A_i|}} \le 1$$
+$$
+\sum_{i=1}^k \frac 1 {\binom n{|A_i|}} \le 1
+$$
 
 Since $\binom n{|A_i|}\le \binom n{\lfloor\frac n 2\rfloor}$, we have $\frac 1{\binom n{|A_i|}} \ge \frac 1{\binom n{\lfloor\frac n 2\rfloor}}$, so $k\le\binom n{\lfloor\frac n 2\rfloor}$. This proves the original proposition.
 

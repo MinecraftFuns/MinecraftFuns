@@ -87,7 +87,9 @@ k的值可以通过二分确定，但是二分太慢了。解方程 $N = 3 ^ {\f
 
 首先把询问 $(x, y, w)$ 差分成
 
-$$ans(1,x) \times ans(1,y) \times \mathrm{gcd}(w,val_{lca(x,y)})\over ans(w,lca_{x,y})^2$$
+$$
+ans(1,x) \times ans(1,y) \times \mathrm{gcd}(w,val_{lca(x,y)})\over ans(w,lca_{x,y})^2
+$$
 
 然后就是树上差分，把询问离线到树上，然后一遍 $\mathrm{dfs}$ 去解决。$\gcd$ 本质是把每个质因数的幂次取 $\min$。注意到 $10^7$ 以内的质数个数只有 $6\cdot 10^5$ 级别。可以给每个质数开个桶，$vec[p][i]$ 表示正在处理的部分里质因数分解后 $p$ 的次幂为 $i$ 的点的个数。
 

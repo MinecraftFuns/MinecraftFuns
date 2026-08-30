@@ -38,13 +38,16 @@ column space. Both describe the span without selecting from the inputs.
 Let $B=(b_1,\dots,b_n)$ and $B'=(b'_1,\dots,b'_n)$ be bases of a vector space
 $V$. Express each new basis vector in the old basis:
 
-$$b'_j=\sum_{i=1}^{n}p_{ij}\,b_i .$$
+$$
+b'_j=\sum_{i=1}^{n}p_{ij}\,b_i .
+$$
 
 The scalar $p_{ij}$ is the $i$-th coordinate of $b'_j$, so the $j$-th column
 of $P$ is the coordinate vector of $b'_j$ in the basis $B$. In matrix form,
 
-$$\begin{bmatrix}b'_1&\cdots&b'_n\end{bmatrix}
-=\begin{bmatrix}b_1&\cdots&b_n\end{bmatrix}P .$$
+$$
+\begin{bmatrix}b'_1&\cdots&b'_n\end{bmatrix}=\begin{bmatrix}b_1&\cdots&b_n\end{bmatrix}P .
+$$
 
 $P$ is invertible, both families being bases. A vector with coordinate column
 $y$ with respect to $B'$ has coordinates $Py$ with respect to $B$, and
@@ -88,11 +91,15 @@ Inside the domain $\mathbb{R}^n$, the null space and the row space are
 orthogonal complements, since $Ax=0$ says precisely that $x$ is orthogonal to
 every row. So
 
-$$\dim(\text{row space})+\dim(\text{null space})=n,$$
+$$
+\dim(\text{row space})+\dim(\text{null space})=n,
+$$
 
 while rank-nullity says
 
-$$\dim(\text{column space})+\dim(\text{null space})=n .$$
+$$
+\dim(\text{column space})+\dim(\text{null space})=n .
+$$
 
 Subtract to get the theorem. Geometrically, $A$ annihilates the null space
 and maps the row space isomorphically onto the column space. If $x$ lies in
@@ -115,11 +122,15 @@ The minor $M_{ij}$ is the determinant of the submatrix left after deleting
 row $i$ and column $j$. The cofactor attaches a sign depending on the parity
 of $i+j$:
 
-$$A_{ij}=(-1)^{i+j}M_{ij}.$$
+$$
+A_{ij}=(-1)^{i+j}M_{ij}.
+$$
 
 Expanding along any row,
 
-$$\det A=\sum_{j=1}^{n}a_{ij}A_{ij}.$$
+$$
+\det A=\sum_{j=1}^{n}a_{ij}A_{ij}.
+$$
 
 The diagonal rule, taking signed products along wrapped diagonals, is valid
 only for $n\leq 3$. The full expansion is a sum over all $n!$ permutations
@@ -134,11 +145,15 @@ with column $i$ replaced by the right-hand side.
 Collect the cofactors into a matrix $C$ with $C_{ij}=A_{ij}$ and transpose
 it, the sign going on once as the cofactor is formed:
 
-$$\operatorname{adj}(A)=C^{T},\qquad \operatorname{adj}(A)_{ij}=C_{ji}.$$
+$$
+\operatorname{adj}(A)=C^{T},\qquad \operatorname{adj}(A)_{ij}=C_{ji}.
+$$
 
 The defining property is
 
-$$A\operatorname{adj}(A)=\operatorname{adj}(A)A=\det(A)\,I,$$
+$$
+A\operatorname{adj}(A)=\operatorname{adj}(A)A=\det(A)\,I,
+$$
 
 from which $A^{-1}=\frac{1}{\det A}\operatorname{adj}(A)$ when
 $\det A\neq0$.
@@ -166,18 +181,23 @@ rows negates it. Scaling a row by $k$ multiplies it by $k$.
 Elimination without row swaps factors $A=LU$, with $L$ unit lower triangular
 holding the multipliers and $U$ upper triangular. Take
 
-$$A=\begin{bmatrix}2&1&1\\4&3&3\\8&7&9\end{bmatrix}.$$
+$$
+A=\begin{bmatrix}2&1&1\\4&3&3\\8&7&9\end{bmatrix}.
+$$
 
 Eliminating by $R_2-2R_1$, $R_3-4R_1$, then $R_3-3R_2$ leaves
 
-$$U=\begin{bmatrix}2&1&1\\0&1&1\\0&0&2\end{bmatrix},\qquad
-L=\begin{bmatrix}1&0&0\\2&1&0\\4&3&1\end{bmatrix},$$
+$$
+U=\begin{bmatrix}2&1&1\\0&1&1\\0&0&2\end{bmatrix},\qquad L=\begin{bmatrix}1&0&0\\2&1&0\\4&3&1\end{bmatrix},
+$$
 
 the multipliers $2$, $4$, $3$ sitting at the positions they cleared.
 
 Since $\det L=1$, $\det A=\det U=\prod_i U_{ii}$. For
 
-$$A=\begin{bmatrix}2&1&3\\4&7&7\\6&18&22\end{bmatrix}$$
+$$
+A=\begin{bmatrix}2&1&3\\4&7&7\\6&18&22\end{bmatrix}
+$$
 
 the multipliers are $2$, $3$, $3$, giving
 $U=\begin{bmatrix}2&1&3\\0&5&1\\0&0&10\end{bmatrix}$ and
@@ -199,7 +219,9 @@ The eigenvalues of an $n\times n$ matrix $A$ are the roots of the
 characteristic polynomial $\det(\lambda I-A)=0$, of degree $n$. For each
 $\lambda_i$, the eigenvectors are the nonzero solutions of
 
-$$(A-\lambda_i I)x=0 .$$
+$$
+(A-\lambda_i I)x=0 .
+$$
 
 That system always has nontrivial solutions, which is what being an
 eigenvalue means: $\det(A-\lambda_iI)=0$, so the matrix is singular and its
@@ -233,7 +255,9 @@ already diagonal.
 Failure requires a repeated eigenvalue whose eigenspace is too small. The
 smallest instance is
 
-$$\begin{bmatrix}2&1\\0&2\end{bmatrix},$$
+$$
+\begin{bmatrix}2&1\\0&2\end{bmatrix},
+$$
 
 with eigenvalue $2$ of algebraic multiplicity $2$ and a one-dimensional
 eigenspace. Such a matrix is similar to a Jordan form whose blocks exceed
@@ -244,7 +268,9 @@ $1\times 1$.
 Given linearly independent $a_1,\dots,a_k$, set $q_1=a_1/\lVert a_1\rVert$
 and, for each $j$ in turn,
 
-$$v_j=a_j-\sum_{i<j}(a_j\cdot q_i)\,q_i,\qquad q_j=\frac{v_j}{\lVert v_j\rVert}.$$
+$$
+v_j=a_j-\sum_{i<j}(a_j\cdot q_i)\,q_i,\qquad q_j=\frac{v_j}{\lVert v_j\rVert}.
+$$
 
 Each step strips from $a_j$ its projection onto everything already
 orthonormalized, leaving the part orthogonal to that span.
@@ -252,8 +278,9 @@ orthonormalized, leaving the part orthogonal to that span.
 Correctness is an induction. Suppose $q_1,\dots,q_{j-1}$ are orthonormal. For
 any $i<j$,
 
-$$q_i\cdot v_j=q_i\cdot a_j-\sum_{l<j}(a_j\cdot q_l)(q_i\cdot q_l)
-=q_i\cdot a_j-(a_j\cdot q_i)=0,$$
+$$
+q_i\cdot v_j=q_i\cdot a_j-\sum_{l<j}(a_j\cdot q_l)(q_i\cdot q_l)=q_i\cdot a_j-(a_j\cdot q_i)=0,
+$$
 
 since $q_i\cdot q_l$ vanishes unless $l=i$, where it is $1$. So $v_j$ is
 orthogonal to all its predecessors, and normalizing preserves that.
@@ -273,7 +300,9 @@ libraries use.
 
 A quadratic form in $n$ variables is a homogeneous polynomial of degree two,
 
-$$Q(x_1,\dots,x_n)=\sum_{i=1}^{n}\sum_{j=1}^{n}a_{ij}x_ix_j=x^{T}Ax .$$
+$$
+Q(x_1,\dots,x_n)=\sum_{i=1}^{n}\sum_{j=1}^{n}a_{ij}x_ix_j=x^{T}Ax .
+$$
 
 Take $A$ symmetric. Nothing is lost, since $x^{T}Ax$ and
 $x^{T}\!\left(\frac{A+A^{T}}{2}\right)\!x$ agree for every $x$, and symmetry
@@ -289,7 +318,9 @@ The standard form is what an orthogonal change of variables produces. By the
 spectral theorem a real symmetric $A$ factors as $A=PDP^{T}$ with $P$
 orthogonal, so $P^{T}AP=D$, and substituting $x=Py$ gives
 
-$$Q=\lambda_1y_1^2+\cdots+\lambda_ny_n^2$$
+$$
+Q=\lambda_1y_1^2+\cdots+\lambda_ny_n^2
+$$
 
 with the $\lambda_i$ the eigenvalues of $A$. The $y_i$ are the new
 coordinates; the eigenvectors are the columns of $P$.
@@ -297,7 +328,9 @@ coordinates; the eigenvectors are the columns of $P$.
 The normal form allows any nonsingular change of variables, which can rescale
 each coordinate and drive every nonzero coefficient to $\pm1$:
 
-$$Q=y_1^2+\cdots+y_p^2-y_{p+1}^2-\cdots-y_{p+q}^2 .$$
+$$
+Q=y_1^2+\cdots+y_p^2-y_{p+1}^2-\cdots-y_{p+q}^2 .
+$$
 
 Sylvester's law of inertia says $p$ and $q$ do not depend on the route taken.
 The standard form keeps the eigenvalues; the normal form keeps only their

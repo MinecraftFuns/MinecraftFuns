@@ -57,7 +57,9 @@ Consider the contribution of each $a_i$ to the answer, which depends on the posi
 
 And so on. Note that when $a_i$ is the same distance from the $+$, the multiplied binomial coefficient is the same, so they can be computed together. This gives
 
-$$\sum_{i=1}^{n-k}10^{i-1}\times (\sum_{j=1}^{n-i}a_j\times \binom{n-1-i}{k-1}+a_{n-i+1}\times\binom{n-i}{k})$$
+$$
+\sum_{i=1}^{n-k}10^{i-1}\times (\sum_{j=1}^{n-i}a_j\times \binom{n-1-i}{k-1}+a_{n-i+1}\times\binom{n-i}{k})
+$$
 
 ## D
 

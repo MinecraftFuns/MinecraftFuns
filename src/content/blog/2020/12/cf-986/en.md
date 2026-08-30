@@ -88,7 +88,9 @@ Given a tree where each vertex has a weight ($\le 10^7$), and m queries; each qu
 
 First, decompose the query $(x, y, w)$ into
 
-$$ans(1,x) \times ans(1,y) \times \mathrm{gcd}(w,val_{lca(x,y)})\over ans(w,lca_{x,y})^2$$
+$$
+ans(1,x) \times ans(1,y) \times \mathrm{gcd}(w,val_{lca(x,y)})\over ans(w,lca_{x,y})^2
+$$
 
 Then it's a tree difference: offline the queries onto the tree and resolve them with a single $\mathrm{dfs}$. $\gcd$ is essentially taking the $\min$ of each prime's exponent. Note there are only about $6\cdot 10^5$ primes below $10^7$. Give each prime a bucket, where $vec[p][i]$ denotes, within the part currently being processed, the number of vertices whose prime factorization has $p$ raised to the power $i$.
 
