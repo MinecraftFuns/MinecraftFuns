@@ -15,7 +15,8 @@ tags: ["Essays", "Philosophy", "Metaphysics"]
 > [Sider, "The Four-Dimensional Picture"](https://doi.org/10.1093/019924443x.003.0001),
 > from "Let us return to the question of whether the Ship of Theseus" to
 > "the remaining question is the merely conceptual one of which of these
-> spacetime worms counts as a ship."
+> spacetime worms counts as a ship." The copy I worked from is
+> [here](https://ragnarok.joefang.org/static/x6kfkuln5gkpb03b1e4p9i0drhr8cf0jq.pdf).
 
 On the four-dimensional view an object is a sequence of temporal stages,
 each made of spatial parts. The Ship of Theseus becomes a series of stages,
@@ -76,3 +77,24 @@ answered. Deciding which spacetime worm the planks trace is deciding which
 successive stages belong to one object, and that is the causal unity
 question in different notation. The four-dimensional picture does not
 resolve the puzzle. It relabels it.
+
+---
+
+## Where the objection came from
+
+Four days before the paper was due I put the idea to a friend in a group
+chat, and it came out roughly in the order it appears above. The
+four-dimensional view runs into the same trouble the traditional one does:
+the transition function is hard to define. The traditional view wants an
+object to be causally unified, so that the ship before a plank is replaced
+and the ship after it count as one thing, and the intuitive version of that
+is just that it looks like the same thing. Spelling out causal unity is the
+work nobody has done.
+
+Four-dimensionalism inherits the problem whole. Nothing in the picture says
+why the current stage goes to this next stage rather than to some other one.
+The reply I got was that defining the transition function is the question of
+how to understand the ship, asked in different words, so nothing has been
+solved. If causal unity could be defined, the three-dimensional view would
+work as well as the four-dimensional one, and then the extra apparatus is
+being added for nothing.

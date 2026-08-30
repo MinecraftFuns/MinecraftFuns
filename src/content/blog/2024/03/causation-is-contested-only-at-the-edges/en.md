@@ -15,7 +15,8 @@ tags: ["Essays", "Philosophy", "Metaphysics"]
 > [Godfrey-Smith, "Causal Pluralism"](https://doi.org/10.1093/oxfordhb/9780199279739.003.0017),
 > from "I suggest that something like this analysis might be applied to the
 > case of causation" to "of a shared purpose behind diverse uses prevent a
-> fragmentation into distinct concepts."
+> fragmentation into distinct concepts." The copy I worked from is
+> [here](https://ragnarok.joefang.org/static/x4jcsfigm7a06e1j3orhparonkuu3121v.pdf).
 
 Godfrey-Smith proposes that we treat causation as an essentially contested
 concept in [Gallie's](https://www.jstor.org/stable/4544562) sense. Gallie's
@@ -81,3 +82,19 @@ Its history, its ordinary use, and the shape of the arguments about it all
 point the other way. Reading the corner cases as the nature of the whole
 concept gives up on explaining the part that already works, which is most of
 it.
+
+---
+
+## Three messages the night before
+
+I tried the objection on a friend before writing any of it down.
+
+Causation has not changed much as a concept, and court judgments from
+ancient Greece still make sense, while other essentially contested concepts
+have moved much further; art is the clear case. The arguments about
+causation concentrate on corner cases, and settling the status of the whole
+concept on the strength of those is the wrong move. And causation is one of
+the main ways people attribute contribution, so calling it essentially
+contested leaves the consensus behind most court judgments unexplained.
+
+That is the second half of the paper, more or less as it was submitted.
