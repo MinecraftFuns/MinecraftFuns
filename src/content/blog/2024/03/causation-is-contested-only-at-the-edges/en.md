@@ -85,16 +85,25 @@ it.
 
 ---
 
-## Three messages the night before
+## How the idea was born
 
-I tried the objection on a friend before writing any of it down.
+My first reaction was agreement. The boundary really is vague: the
+air-traffic controller who fails to act, the bystander at the water, neither
+of them settled by any definition. Calling causation essentially contested
+looked promising.
 
-Causation has not changed much as a concept, and court judgments from
-ancient Greece still make sense, while other essentially contested concepts
-have moved much further; art is the clear case. The arguments about
-causation concentrate on corner cases, and settling the status of the whole
-concept on the strength of those is the wrong move. And causation is one of
-the main ways people attribute contribution, so calling it essentially
-contested leaves the consensus behind most court judgments unexplained.
+The doubt came from asking what the label buys. It absorbs the features of
+causation without simplifying any of them, and Gallie's own examples are not
+like this one. Art and achievement are human creations submitted for
+appraisal. Causation is an attempt to attribute contribution, and its
+ordinary use produces almost no argument at all.
 
-That is the second half of the paper, more or less as it was submitted.
+What settled it for me is the courtroom. Courts run mostly on consensus, and
+permanent reasonable disagreement is exactly what the label predicts. The
+historical check pointed the same way: judgments from ancient Greece about
+who is answerable still read as sensible, while art has moved far enough
+that a Renaissance painter would not recognize most of it.
+
+I said all of that to a friend the night before the paper was due, before
+writing any of it down. The second half of the paper is that conversation,
+more or less.

@@ -80,21 +80,23 @@ resolve the puzzle. It relabels it.
 
 ---
 
-## Where the objection came from
+## How formalizing gave it away
 
-Four days before the paper was due I put the idea to a friend in a group
-chat, and it came out roughly in the order it appears above. The
-four-dimensional view runs into the same trouble the traditional one does:
-the transition function is hard to define. The traditional view wants an
-object to be causally unified, so that the ship before a plank is replaced
-and the ship after it count as one thing, and the intuitive version of that
-is just that it looks like the same thing. Spelling out causal unity is the
-work nobody has done.
+I started by taking Sider at his word: the ship is a spacetime worm, which
+worm it is depends on what we mean by "ship", and the metaphysics has turned
+into a question about a word.
 
-Four-dimensionalism inherits the problem whole. Nothing in the picture says
-why the current stage goes to this next stage rather than to some other one.
-The reply I got was that defining the transition function is the question of
-how to understand the ship, asked in different words, so nothing has been
-solved. If causal unity could be defined, the three-dimensional view would
-work as well as the four-dimensional one, and then the extra apparatus is
-being added for nothing.
+To test whether that is really the best explanation I wrote his view out as
+a state and a transition function, and the difficulty concentrated there at
+once. Nothing in the four-dimensional picture says why one stage is followed
+by this next stage and not another.
+
+Then the thing the paper is built on. The three-dimensional view has
+something of the same shape in causal unity, and the two might be one
+problem in two notations. The interdefinability of the predicate and the
+function follows from that, and so does the answer to the complaint that one
+of them is stable while the other moves with time.
+
+Four days before the paper was due I put it to a friend in a group chat. The
+reply was that defining the transition function is the question of how to
+understand the ship, asked in different words, so nothing has been solved.

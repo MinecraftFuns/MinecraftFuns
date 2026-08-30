@@ -84,3 +84,30 @@ Field's case rests on a consistency claim that Gödel puts out of reach, and
 on treating the choice of axioms as free. The second is the more interesting
 failure. If mathematics were only a shortcut, any conservative system would
 do, and physics would not keep demanding particular ones.
+
+---
+
+## How I first misread Field
+
+I read conservativeness wrong at first, as ordinary truth preservation: use
+mathematics to get from P to Q, and if P is true then Q is true. That
+version leaves Platonism standing, since a tool that introduces no
+falsehoods can still be indispensable. Conservativeness is the stronger
+claim that the nominalistic conclusion was derivable without the mathematics
+in the first place. Only then is the mathematics a shortcut, and only a
+shortcut can be thrown away.
+
+With that straight, the first objection is Gödel: the consistency Field
+assumes is the one thing his system cannot establish about itself.
+
+The second took longer. I began from the observation that Science Without
+Numbers rebuilds Newtonian physics without mathematics while quantum theory
+has resisted the same treatment, and took that to be telling. It is not. It
+reports what Field managed, not what is necessary. Turning it into a claim
+about what a system must contain, real numbers before calculus and complex
+numbers before quantum mechanics, is what made it an argument.
+
+That left one distinction to draw. Judging a mathematical system by its
+conformity to the universe sounds like Field's usefulness, and it is a
+different standard, because conformity can be checked by observation and
+usefulness is judged by whoever is doing the deducing.

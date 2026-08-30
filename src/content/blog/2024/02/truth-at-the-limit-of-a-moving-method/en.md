@@ -88,3 +88,30 @@ The convergence Peirce needs is convergence of methods, and which procedures
 count as methods is decided by standards that themselves keep moving. A
 limit computed under a rule that changes while you compute it is not a
 limit. It is a sequence of different problems.
+
+---
+
+## How the objection narrowed
+
+I started out thinking Peirce fails for a simple reason: not every line of
+inquiry converges, and nothing guarantees it finishes in finite time. That
+is true and it is not much of an objection, since Peirce can always answer
+that we have not looked long enough.
+
+The sharper problem is that nobody can say what a scientific method is.
+Without an agreed set of principles, the convergence has nothing definite to
+be a convergence of. What Quine himself leans on is narrower still: a limit
+needs a distance, and no distance runs between a theory and the truth.
+
+For a while I thought that last one was answerable. Statistics does supply a
+nearness relation, in how well a measurement coheres with the body of
+measurements around it. Then it stopped being answerable, because two
+theories can fit the data equally well and be biased in opposite directions,
+which statistics reports as two acceptable answers that cannot both be
+right.
+
+What I ended up believing is the point about moving standards, and it only
+becomes an objection once it is aimed at a procedure. That scientific
+principles change is a platitude. That the eclipses of Jupiter's satellites
+might stop counting as a measurement of anything takes something away from
+Peirce.
