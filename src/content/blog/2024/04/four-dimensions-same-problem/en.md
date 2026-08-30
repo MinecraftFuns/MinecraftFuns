@@ -13,9 +13,9 @@ tags: ["Essays", "Philosophy", "Metaphysics"]
 > [available as a PDF](https://ragnarok.joefang.org/static/xqlb5bikhdhe7ok9jt1s0elsc9qiokj06.pdf).
 > The passage is
 > [Sider, "The Four-Dimensional Picture"](https://doi.org/10.1093/019924443x.003.0001),
-> from "Let us return to the question of whether the Ship of Theseus" to
-> "the remaining question is the merely conceptual one of which of these
-> spacetime worms counts as a ship." The copy I worked from is
+> from "Let us return to the question of whether The Ship of Theseus" to
+> "The only remaining question is the merely conceptual one of which of
+> these spacetime worms counts as a ship." The copy I worked from is
 > [here](https://ragnarok.joefang.org/static/x6kfkuln5gkpb03b1e4p9i0drhr8cf0jq.pdf).
 
 On the four-dimensional view an object is a sequence of temporal stages,

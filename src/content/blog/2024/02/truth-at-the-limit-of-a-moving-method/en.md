@@ -14,7 +14,7 @@ tags: ["Essays", "Philosophy", "Philosophy of Science"]
 > The passage is
 > [Quine, Word and Object](https://doi.org/10.7551/mitpress/9636.001.0001),
 > page 21, from "Peirce was tempted to define truth" to "Any so-called
-> pragmatic definition of truth is doomed to fail equally." The copy I
+> pragmatic definition of truth is doomed to failure equally." The copy I
 > worked from is
 > [here](https://ragnarok.joefang.org/static/xn91se2t2fq5070em0u2kakgrthoftomj.pdf).
 

@@ -14,7 +14,7 @@ tags: ["Essays", "Philosophy", "Philosophy of Mathematics"]
 > The passage is
 > [Field, Science Without Numbers](https://doi.org/10.1093/acprof:oso/9780198777915.001.0001),
 > from "This argument isn't conclusive" on page 13 to "they are not a priori
-> true, for they are not true at all" on page 15. The copy I worked from is
+> true, for they are not true at all" on page 16. The copy I worked from is
 > [here](https://ragnarok.joefang.org/static/x8o57jrmire38fkcjg3a9kpheupgnoade.pdf).
 
 Field starts from the presumption that standard mathematics is consistent.
