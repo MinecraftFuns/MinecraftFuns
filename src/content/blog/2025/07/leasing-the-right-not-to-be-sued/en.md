@@ -11,8 +11,8 @@ the cause turned out to be a short stretch of one lane closed for
 maintenance, with a crew working in it. We had spent the morning on badly
 maintained road, so no complaint about the cones.
 
-Whatever that closure physically took off the road, it was not ten kilometres
-of it.
+Whatever that closure physically took off the road, it was not ten
+kilometres of it.
 
 I was not driving, so I had nothing to do but watch the rest of it happen.
 People start late and then start slowly, so a green wave dies three cars in.
@@ -232,19 +232,28 @@ nothing exempts it from that finding. The extra trips are worth something,
 since somebody wanted each of them, but the queue at five o'clock stays
 about as long as it is now.
 
-A car with no driver also has nobody in it to help someone fold a wheelchair,
-find the door, or work out what is happening when the vehicle stops somewhere
-unfamiliar. That was a service nobody ever priced, because it came free with
-the person at the front.
+A car with no driver also has nobody in it to help someone fold a
+wheelchair, find the door, or work out what is happening when the vehicle
+stops somewhere unfamiliar. That was a service nobody ever priced, because
+it came free with the person at the front.
 
 ## Where this lands
 
-The ten kilometres were mostly us, and a fleet that reacts instantly and talks
-to itself recovers a large part of that. Induced demand then takes the
-congestion back, so I would not sell this on my own bad afternoon.
+I wanted a number for how much of that queue was the road and how much was
+us. Mostly us: the closure started the jam and the drivers behind it
+supplied the other nine and a half kilometres. A fleet that reacts instantly
+and talks to itself would take the larger part of that back, and induced
+demand would spend it again on trips somebody wanted. The jam comes back.
 
-What survives is the other number. Ninety percent fewer injury claims is worth
-having on its own terms, and the thing standing between here and there is a
-liability rule, which is cheaper to change than physics. Rent out the
-immunity, charge for it in annual percentage points, and let the meter run
-until the crashes are as rare as we insisted they had to be.
+The injury claims do not. Ninety percent fewer of them is worth having on
+its own terms, and the obstacle is a rule about who may be sued. Rules are
+cheaper to change than physics.
+
+So rent the immunity out instead of granting it. Price it in percentage
+points off last year's crash rate, strip it from anyone who misses three
+years running, and hand it over for good once a fleet has held the agreed
+multiple of the human rate long enough to be believed. The treadmill needs
+that ending, or it starts spending the capacity it was meant to buy.
+
+The crew in that lane closure will still be there. The ten kilometres behind
+them do not have to be.

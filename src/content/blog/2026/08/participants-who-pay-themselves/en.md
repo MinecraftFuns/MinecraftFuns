@@ -13,8 +13,8 @@ Fifteen minutes of questions, long for a social media pop quiz. It told me I
 was twenty percent Canadian, fourteen percent Latvian and nine percent
 Guatemalan, out of the ninety countries in the
 [World Values Survey](https://worldvaluessurvey.org/wvs.jsp) data behind the
-quiz. Under that, *Share with friends!*. I shared it in a group chat inside a
-minute.
+quiz. Under that, *Share with friends!*. I shared it in a group chat within
+a minute.
 
 ![Quiz result on a phone: Canada 20%, Latvia 14%, Guatemala 9%, above a line reading Share with friends!](https://ragnarok.joefang.org/static/xd9et2cacm8rfd7orfomb9t24og2ftm70.jpg)
 
@@ -30,11 +30,11 @@ share it to show off their *uniqueness*.
 Recruitment is the constraint on everything I would like to run. Screening,
 scheduling, no-shows, a panel provider's minimum order, an ethics amendment
 every time the protocol moves. A study needing two thousand people across a
-dozen countries does not get run at all. It does not fit a lab budget, and few
-labs are rich enough to make it fit. Build the same study so the result is
-worth showing someone and the recruiting is free. Hosting is almost nothing,
-the build is maybe a week of undergraduate work with a coding agent, and the
-hard part is making it spread without wrecking the data.
+dozen countries does not get run at all. It does not fit a lab budget, and
+few labs are rich enough to make it fit. Build the same study so the result
+is worth showing someone and the recruiting is free. Hosting is almost
+nothing, the build is maybe a week of undergraduate work with a coding
+agent, and the hard part is making it spread without wrecking the data.
 
 ## Does the packaging corrupt the answers?
 
@@ -69,19 +69,18 @@ in four years.
 million decisions across 233 countries. The New York Times dialect quiz
 pulled
 [350,000 responses](https://knightlab.northwestern.edu/2014/01/20/behind-the-dialect-map-interactive-how-an-intern-created-the-new-york-times-most-popular-piece-of-content-in-2013/)
-off the Harvard Dialect Survey inside two months.
+off the Harvard Dialect Survey in under two months.
 [Von Ahn](https://dl.acm.org/doi/10.1145/1378704.1378719) had the shape of
 it twenty years earlier in the games-with-a-purpose era: enjoyment as the
 incentive, data as a byproduct. No grant I will ever hold buys a hundred
 countries.
 
 Experiments then come almost free. Self-selection wrecks any claim about how
-common something is. It leaves a randomised comparison inside your own sample
-completely alone. Moral
-Machine ran a nine-factor design that would have been unaffordable country by
-country, and LabintheWild's experiments replicate findings from the lab. If
-the question is whether A beats B, a viral instrument is a very cheap way to
-ask it.
+common something is. It leaves a randomised comparison inside your own
+sample completely alone. Moral Machine ran a nine-factor design that would
+have been unaffordable country by country, and LabintheWild's experiments
+replicate findings from the lab. If the question is whether A beats B, a
+viral instrument is a very cheap way to ask it.
 
 The sharing decides who turns up, and nobody seems to have turned round and
 studied it.
@@ -102,9 +101,9 @@ well, and of three ways of presenting the same result, the one emphasising
 relative success produced the most sharing. The result screen is the lever.
 What belongs on it depends on which reward you are paying.
 
-Some rewards are about you. They only work in front of people who already know
-you, which is why messaging one close friend to say I came out Canadian and
-Latvian would have been pointless. He knows.
+Some rewards are about you. They only work in front of people who already
+know you, which is why messaging one close friend to say I came out Canadian
+and Latvian would have been pointless. He knows.
 
 Other rewards are about whoever you send it to. Insider jokes work this way,
 and the fact that outsiders will not get it is what makes one worth sending.
@@ -124,10 +123,10 @@ The tidy version is wrong because I had run two separate things together:
 [Barasch and Berger's broadcasting and narrowcasting](https://journals.sagepub.com/doi/10.1509/jmr.13.0238)
 work is about the first; I had read it as though it were about the second.
 
-A group chat sits in the corner I had left empty. Several people, all of whom
-know me, none of them strangers. You can collect a reward about yourself there
-without ever going public, and for a lot of people that is simply where things
-get shared.
+A group chat sits in the corner I had left empty. Several people, all of
+whom know me, none of them strangers. You can collect a reward about
+yourself there without ever going public, and for a lot of people that is
+simply where things get shared.
 
 It is also the box I can see least. Traffic through a closed group reaches
 people who already resemble each other. A study of half a million users
@@ -152,16 +151,16 @@ someone. The dialect map is pure extraction, since the model output was the
 shareable thing to begin with.
 
 You can transcode: say the same thing in a form worth showing off. The five
-animals are transcoding. The score is untouched and only the costume changes,
-and this is the only one of the three that lets you decide how flattering the
-answers feel without touching what you measure. Nobody posts a high
-neuroticism score. Everybody posts a capybara, and the number underneath is
-the same number.
+animals are transcoding. The score is untouched and only the costume
+changes, and this is the only one of the three that lets you decide how
+flattering the answers feel without touching what you measure. Nobody posts
+a high neuroticism score. Everybody posts a capybara, and the number
+underneath is the same number.
 
 Or you can plant: attach something fun that says nothing about the person at
-all, generated from their answers but making no claim about them. That is what
-is left when the study itself has nothing worth showing off in it, and it
-means a reaction-time task is not shut out of any of this.
+all, generated from their answers but making no claim about them. That is
+what is left when the study itself has nothing worth showing off in it, and
+it means a reaction-time task is not shut out of any of this.
 
 Dress up the display, never the data. The animal is just the highest of five
 continuous numbers, so keep the five numbers; the moment the animal becomes
@@ -175,12 +174,13 @@ of who they are: music and hairstyles qualify, backpacks do not. Values
 clear that bar easily, which is why a country quiz works at all.
 
 Their second point is that a signal stops being worth anything once everyone
-has it, so sharing depends on how many people around you have already seen it.
-With five animals, the sixth person in a group chat to announce they are a fox
-gets nothing. A ranked handful drawn from ninety countries has an enormous
-number of possible outcomes, so almost everyone's result is new to their
-friends and the reward lasts much longer. Give people more possible answers if
-you want it to keep moving; that matters more than which animals you pick.
+has it, so sharing depends on how many people around you have already seen
+it. With five animals, the sixth person in a group chat to announce they are
+a fox gets nothing. A ranked handful drawn from ninety countries has an
+enormous number of possible outcomes, so almost everyone's result is new to
+their friends and the reward lasts much longer. Give people more possible
+answers if you want it to keep moving; that matters more than which animals
+you pick.
 
 ## The half of the traffic you cannot see
 
@@ -199,11 +199,10 @@ screenshotted, which is to say built for the channel I cannot count.
 
 The fix is cheap, because the unattributed bucket is itself the measurement.
 Arrivals with no referrer and no campaign tag estimate how much went through
-closed
-channels, and comparing that ratio across design variants tests the whole
-channel story using a field you were already logging. Coarse geolocation gives
-country stratification and a platform's own click identifier gives clustering
-within a post.
+closed channels, and comparing that ratio across design variants tests the
+whole channel story using a field you were already logging. Coarse
+geolocation gives country stratification and a platform's own click
+identifier gives clustering within a post.
 
 None of this can be added afterwards. Referrer, campaign tag, coarse
 geolocation, arrival timestamp, a first-attempt flag, attention checks: if
@@ -225,8 +224,8 @@ and did not share why they did not.
 
 ## What it still cannot tell you
 
-One class of claim stays out of reach: you cannot say how common something is
-in a population.
+One class of claim stays out of reach: you cannot say how common something
+is in a population.
 
 The Great British Class Survey is the case. It drew 161,400 completed web
 surveys through the BBC by July 2011 and hit a
@@ -234,33 +233,39 @@ surveys through the BBC by July 2011 and hit a
 toward well-educated groups, so the team commissioned a separate, properly
 representative survey of 1,026 people from GfK using identical questions.
 Critics argued that almost every claim in the paper rests on those thousand
-people, not on the hundred and sixty thousand. Scale is no rescue either: once
-data quality is accounted for, the effective sample size of a very large
-biased dataset
+people, not on the hundred and sixty thousand. Scale is no rescue either:
+once data quality is accounted for, the effective sample size of a very
+large biased dataset
 [can be vanishingly small](https://statistics.fas.harvard.edu/sites/g/files/omnuum10116/files/statistics-2/files/statistical_paradises_and_paradoxes.pdf),
 and [an R package](https://github.com/kuriwaki/ddi) will compute how small.
 
 The comparison that matters, though, is with what a lab actually has. A lab
 that could afford a national panel would already be using it. The real
-alternative is
-twenty-four undergraduates from the same department, in the same building, in
-one language, which has plenty of bias of its own and no reach at all. So we
-swap one bias for a different one and buy a great deal more reach with the
-difference. That is usually a good deal, provided you say out loud which bias
-you bought and can show that you measured it.
+alternative is twenty-four undergraduates from the same department, in the
+same building, in one language, which has plenty of bias of its own and no
+reach at all. So we swap one bias for a different one and buy a great deal
+more reach with the difference. That is usually a good deal, provided you
+say out loud which bias you bought and can show that you measured it.
 
 ## Where this lands
 
-I started out thinking we could recruit for free. Now I would say participants
-pay themselves, in rewards they already wanted, and we settle up in bias
-rather than money. Nobody hands us that bias: we pick it when we pick
-the reward, because the reward decides the channel and the channel decides who
-shows up.
+I started out thinking we could recruit for free. Participants pay
+themselves, in rewards they already wanted, and we settle up in bias instead
+of money.
+
+The answers survive the packaging, so the only thing at risk is who turns
+up. The reward decides which channel a share can travel through, and the
+channel decides who arrives. Pick the reward and you have picked the sample.
+
+That buys a randomised comparison at a scale no lab budget reaches. It never
+buys a prevalence estimate; scale is no rescue there.
 
 The next step is small enough to do this month. Run the reward audit on an
-instrument I already have, transcode one of its outputs, and find out whether
-anyone in the lab next door shares it without being asked.
+instrument I already have, transcode one of its outputs, and log the
+referrer, campaign tag and coarse geolocation before the first pilot
+participant. Then find out whether anyone in the lab next door shares it
+without being asked.
 
-Fifteen minutes of questions did not stop me finishing the country quiz, so I
-have given up on the idea that the instrument has to be short. I am fairly
+Fifteen minutes of questions did not stop me finishing the country quiz, so
+I have given up on the idea that the instrument has to be short. I am fairly
 sure the result has to be worth showing someone.
