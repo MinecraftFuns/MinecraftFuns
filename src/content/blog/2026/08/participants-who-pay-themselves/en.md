@@ -6,8 +6,8 @@ tags: ["Notes", "Research Methods", "Social Computing"]
 ---
 
 Someone sent me a screenshot from an online quiz: a few countries with a
-percentage beside each, the ones it said they most resembled. I asked for
-[the link](https://www.culturacompass.com/) and did the quiz myself.
+percentage beside each, the ones the quiz said they most resembled. I asked
+for [the link](https://www.culturacompass.com/) and did the quiz myself.
 
 Fifteen minutes of questions, long for a social media pop quiz. It told me I
 was twenty percent Canadian, fourteen percent Latvian and nine percent
@@ -45,21 +45,22 @@ answered badly. Representation error is when the people who answered are not
 the people you meant to describe.
 
 [Germine and colleagues](https://lab.faceblind.org/papers/germine_12_pbr.pdf)
-tested the first kind directly, comparing self-selected, uncompensated,
-unsupervised web participants against traditionally recruited lab samples on
-mean performance, variance and internal reliability. No systematic
-difference, including on timed perceptual tasks, which are the hard case.
+tested the first kind directly. They compared web participants who were
+self-selected, uncompensated and unsupervised against traditionally
+recruited lab samples, on mean performance, variance and internal
+reliability. No systematic difference, including on timed perceptual tasks,
+which are the hard case.
 
 So the answers survive. What is left is *who turns up*.
 
 ## What it buys
 
 A wider range of people than a lab gets. A lab sample is narrow by
-construction, being undergraduates on one campus in one language, while
-self-selected web samples come out wider in age, education and geography.
-[LabintheWild](https://dl.acm.org/doi/10.1145/2675133.2675246)'s stated reason
-for paying in personalised feedback instead of money is exactly this: money
-limits both the size and the variety of who turns up.
+construction: undergraduates on one campus in one language. Self-selected
+web samples come out wider in age, education and geography.
+[LabintheWild](https://dl.acm.org/doi/10.1145/2675133.2675246)'s stated
+reason for paying in personalised feedback instead of money is exactly this:
+money limits both the size and the variety of who turns up.
 
 More of them, too. LabintheWild drew roughly
 [3.5 million participants from more than 200 countries](https://www.eecs.harvard.edu/~kgajos/papers/2017/oliveira17labinthewild.pdf)
@@ -97,9 +98,9 @@ explains much more.
 had already measured how much the result itself drives the sharing, across
 81,131 participants of a feedback-driven platform. Higher performers shared
 significantly more, the effect depended on whether people expected to do
-well, and among three ways of presenting the same result, the one
-emphasising relative success produced the most sharing. The result screen is
-the lever. What belongs on it depends on which reward you are paying.
+well, and of three ways of presenting the same result, the one emphasising
+relative success produced the most sharing. The result screen is the lever.
+What belongs on it depends on which reward you are paying.
 
 Some rewards are about you. They only work in front of people who already know
 you, which is why messaging one close friend to say I came out Canadian and
@@ -109,8 +110,8 @@ Other rewards are about whoever you send it to. Insider jokes work this way,
 and the fact that outsiders will not get it is what makes one worth sending.
 Post one of those in public and it dies.
 
-From which I concluded, very tidily, that the first kind gets posted publicly
-and the second kind gets sent privately, so the shape of the sample was
+So I concluded, very tidily, that the first kind gets posted publicly and
+the second kind gets sent privately, and that the shape of the sample was
 predictable before writing any code.
 
 ## Then I looked at what I had done myself
@@ -129,8 +130,8 @@ without ever going public, and for a lot of people that is simply where things
 get shared.
 
 It is also the box I can see least. Traffic through a closed group reaches
-people who already resemble each other, though a study of half a million users
-found direct messages carry
+people who already resemble each other. A study of half a million users
+complicates that: direct messages carry
 [more genuinely new information than public posts](https://arxiv.org/html/2408.03579)
 despite going to closer friends, and the old story about weak ties spreading
 furthest shows up only in public posting. Neither box is the bad one. They
@@ -138,17 +139,17 @@ fail differently.
 
 So my two-box version dies and the claim underneath survives: the reward
 decides where a share can go, and where it goes decides who ends up in the
-study. Three boxes, and I suspect the middle one carries most of the traffic.
-Which leaves the design question: what reward can a given study actually
-offer?
+study. Three boxes, and I suspect the middle one carries most of the
+traffic. That leaves the design question: what reward can a given study
+actually offer?
 
 ## Extract, transcode, plant
 
 Take a study design already roughly in shape. Three things you can do to it.
 
-You can extract: surface an output it already produces that is already worth
-showing someone. The dialect map is pure extraction, since the model output
-was the shareable thing to begin with.
+You can extract: surface an output it already produces that is worth showing
+someone. The dialect map is pure extraction, since the model output was the
+shareable thing to begin with.
 
 You can transcode: say the same thing in a form worth showing off. The five
 animals are transcoding. The score is untouched and only the costume changes,
@@ -204,11 +205,11 @@ channel story using a field you were already logging. Coarse geolocation gives
 country stratification and a platform's own click identifier gives clustering
 within a post.
 
-None of which can be added afterwards. Referrer, campaign tag, coarse
+None of this can be added afterwards. Referrer, campaign tag, coarse
 geolocation, arrival timestamp, a first-attempt flag, attention checks: if
 those are missing before the first pilot participant, the spread is
-unanalysable. This is the part I would have skipped, because it has to happen
-when the thing has no users and instrumenting it feels absurd.
+unanalysable. This is the part I would have skipped, because it has to
+happen when the thing has no users and instrumenting it feels absurd.
 
 That first pilot will probably be your own lab, a tight group of people who
 already share the same references, where a planted joke lands and can still
