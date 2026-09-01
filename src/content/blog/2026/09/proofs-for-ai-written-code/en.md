@@ -38,6 +38,29 @@ whether it says what the business meant.
 If that reading is sound, the product does not pass tests against the spec. It
 conforms to it.
 
+## What this is for
+
+Bugs come from two places. Somebody built the thing wrong, which is sloppiness
+inside the development cycle and most of what we ship. Or somebody decided the
+wrong thing, which no amount of engineering touches.
+
+A proof over every input eliminates the first kind by construction. Write code
+as proof, cheaply enough that every component in a codebase can afford it, and
+every bug that remains came in with the requirement.
+
+This displaces the test suite. Tests sample inputs and check one property at
+each; a proof covers all of them. Tests are also flaky, because running code
+under a scheduler and a clock is flaky, and checking a proof is not. We wrote
+them anyway, for decades, because proving things cost four hundred dollars a
+line.
+
+Prove every stated property across a codebase and the unit tests, integration
+tests and BDD suites covering those properties have nothing left to do. Two
+things still sit outside the proof. One is the trusted base: the kernel, the
+compiler, the boundary where verified code meets a system you never modelled,
+and the axioms you agreed to accept. The other is the product decision nobody
+thought hard enough about, and that one is interesting.
+
 ## Most of that already runs
 
 [Zhe Ye and colleagues](https://arxiv.org/abs/2608.13522) released Vero in
@@ -45,14 +68,13 @@ August: 43 multi-module instances curated from real repositories and translated
 into Lean 4, 743 scored APIs, 2,705 specifications, and no Lean solution to any
 of them published anywhere, so nothing in it was in anybody's training data.
 GPT-5.5 at its highest reasoning setting passes 87.3 percent of those
-specifications. A machine wrote implementations and proofs against
-human-curated specs, at repository scale, and cleared seven in eight.
+specifications, writing implementations and proofs against human-curated specs
+at repository scale.
 
 The setting matters more than the model. Instances fully solved, out of 43.
 GPT-5.5 at high reasoning effort: twenty-seven. Claude Opus 4.8: eight. Claude
-Sonnet 5: two. GPT-5.5 at medium effort: two. The gap between one model and
-itself is wider than the gap between flagships from different labs, so the
-largest improvement available to you today is a configuration flag.
+Sonnet 5: two. GPT-5.5 at medium effort: two. One model against itself beats
+one lab against another, so your largest available gain today is a flag.
 
 The authors go further and check how a proof got accepted, not only whether it
 was. I would not have thought to. 368 specification outcomes get
@@ -118,6 +140,12 @@ on more than two and a half billion active devices. The verification caught a
 defect in ML-DSA polynomial arithmetic, an unchecked carry that random testing
 rarely hit.
 
+Apple also says the proofs were expensive enough that they limited the scope to
+the post-quantum work, and that they still rely on conventional cryptographic
+testing everywhere else. So a company holding machine-checked proofs on two and
+a half billion devices keeps its test suite, and the limit it names is the
+price of the proofs.
+
 Billions of devices buys twenty person years of proof engineering. A device
 management product cannot, and that is the arithmetic that is moving.
 
@@ -151,12 +179,12 @@ anyone calling it formal methods. Lean and its libraries are there. The agents
 are there, at 87.3 percent per specification. Vero's grader and axiom allowlist
 are published.
 
-What is missing for any given company is the entity layer for its own domain,
-the glue between the structured requirement and the formalisation, and a review
-surface for the human. A month with coding agents gets you a working loop over
-one bounded domain, which I think is an honest estimate. What that month buys
-is a demonstration that the loop closes on real requirements, and nobody has
-shown that yet.
+Any given company still has to build three things: the entity layer for its own
+domain, the glue between the structured requirement and the formalisation, and
+a review surface for the human. A month with coding agents gets you a working
+loop over one bounded domain, and I think that estimate is honest. You end the
+month able to show that the loop closes on real requirements, which nobody has
+shown yet.
 
 ## Where the seam is
 
@@ -169,22 +197,37 @@ the same thing in a different formalism: every one of the six specifications
 that failed on its smart contract instance quantifies over a chain state or an
 execution trace, and none of the seventeen that passed does.
 
-That is the sequencing layer, and it carries "mark the device stale if it has
-not been seen within a reasonable window." Worth noting the TLA+ study ran
-proprietary models under few-shot prompting only, not agentically with a model
-checker in the loop, which is the configuration that moved Vero's numbers by an
-order of magnitude. Entities and invariants are ready today. Sequencing has
-not been measured under the setup that works.
+This one is about expressive power, so sort the requirements by the logic each
+needs. Invariants over entity relations are first-order over a single state,
+and models handle them. A Gherkin scenario is a two-state transition, a state
+before and an event and a state after, which is an Event-B event with a guard
+and an action. Still first-order, and models handle those too. That covers most
+of what a product manager writes.
 
-Two smaller things I owe the idea. Curry-Howard, the correspondence making a
-proof and a program the same kind of object, is what lets Lean do this at all,
-but extracting a program from a proof is a different tradition and not this
-pipeline; here the agent writes ordinary code and separately discharges
-Hoare-style obligations, and what ships is the code. And proofs do not delete
-your tests. Apple, holding real proofs on two and a half billion devices, says
-cost limited their scope to the post-quantum work and that they still rely on
-conventional cryptographic testing. A proof retires the tests for a property
-somebody stated; the rest are still working.
+The requirements that carry "eventually", "until", "within", "never again
+after" quantify over traces, and no amount of first-order logic over a single
+state says them. "Mark the device stale if it has not been seen within a
+reasonable window" is one. Those need temporal logic or explicit trace
+quantification, and that is precisely the 8.6 percent and precisely Vero's
+chain states. It also explains a result I had filed away without understanding:
+Gupte and Ramesh formalise requirements into propositional Lean, and
+propositional logic cannot express a Gherkin scenario either. Same wall, one
+level down.
+
+The TLA+ study ran its proprietary models under few-shot prompting only, never
+agentically with a model checker in the loop, which is the
+configuration that moved Vero's numbers by an order of magnitude. So you can
+build on entities, invariants and single transitions today, which is a large
+fraction of an enterprise product. Liveness waits until somebody measures it
+properly.
+
+A word on the strong form, since I keep using it. Writing code as proof, where
+the program and the proof are the same object, is Curry-Howard, and Lean rests
+on it. This pipeline does not do that yet. The agent writes ordinary code and
+discharges Hoare-style obligations about it separately, and what ships is the
+code rather than the proof term. Extracting the program from the proof is an
+older tradition with its own tooling, and it is where this ends up if it goes
+all the way.
 
 ## The experiment I want someone to run
 
