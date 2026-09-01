@@ -1,6 +1,6 @@
 ---
 title: "Pruning the LLM context beats the maximalist approach"
-description: "An agent I built for an HCI study in March could search a chunked psychology textbook, carry memory across tool calls, reach a few MCP servers and run a web search, on every question. Calling all of them every time turned out to be the wrong default: in my own runs a pair of specialists beat all four, at lower cost and higher accuracy."
+description: "An agent I built for an HCI study in March could search a chunked psychology textbook, carry memory across tool calls, reach a few MCP servers and run a web search, on every question. Calling all of them every time turned out to be the wrong default."
 date: "2026-06-27"
 tags: ["Essays", "Artificial Intelligence", "Research Methods"]
 ---
