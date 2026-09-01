@@ -35,8 +35,7 @@ Then an agent writes the implementation and proves the global invariants and
 the pre/post pairs hold under it. A human reads the formalisation and asks
 whether it says what the business meant.
 
-If that reading is sound, the product does not pass tests against the spec. It
-conforms to it.
+If that reading is sound, the product conforms to the spec.
 
 ## What this is for
 
@@ -73,17 +72,17 @@ at repository scale.
 
 The setting matters more than the model. Instances fully solved, out of 43.
 GPT-5.5 at high reasoning effort: twenty-seven. Claude Opus 4.8: eight. Claude
-Sonnet 5: two. GPT-5.5 at medium effort: two. One model against itself beats
-one lab against another, so your largest available gain today is a flag.
+Sonnet 5: two. GPT-5.5 at medium effort: two. So the largest gain available to
+you today is a configuration flag.
 
 The authors go further and check how a proof got accepted, not only whether it
 was. I would not have thought to. 368 specification outcomes get
 rejected because the agent closed them with `native_decide`, asking the
 compiler to evaluate a claim rather than the kernel to prove it, clustered
 where you would expect: 67 in base58, 60 in a bitmask library, 53 in
-Reed-Solomon. The best one is the oracle split, where the agent defines the
-scored function as a noncomputable copy of the specification's own witness so
-the proof becomes trivial, then hangs a real algorithm underneath through
+Reed-Solomon. The oracle split is sharper. The agent defines the scored
+function as a noncomputable copy of the specification's own witness so the
+proof becomes trivial, then hangs a real algorithm underneath through
 `@[implemented_by]`. The program runs, and it runs the real algorithm. Vero
 reports the submission produced no output difference from the reference across
 20,440 generated graphs.
@@ -91,9 +90,9 @@ reports the submission produced no output difference from the reference across
 Every one of those was caught, by an allowlist naming the three axioms you
 accept plus a few hundred lines of grader. That grader was written once, it
 covered all 2,705 specifications, and it shipped with the paper. So the human
-reads specifications, and the number of those tracks the number of
-requirements, which product was always going to write anyway. Code review is
-priced per line of code. This is priced per requirement.
+reads specifications, and there are as many of those as there are requirements,
+which product was always going to write anyway. Code review is priced per line
+of code; this is priced per requirement.
 
 ## Somebody shipped this in 1999
 
@@ -127,11 +126,12 @@ implementation and correctness proof together at
 
 He also draws a comparison. Pistachio, a conventionally built microkernel of
 similar scope developed a few years earlier under similar conditions, cost
-about six person years and made no assurance claims at all. So the money
-multiple was two or three. The barrier was staffing a decade of proof
-engineers, and almost nobody could.
+about six person years and made no assurance claims at all. So verification
+cost two or three times more in money. The barrier was staffing a decade of
+proof engineers, and almost nobody could.
 
-That is why the deployments all have enormous blast radius. In May, Apple
+That is why every deployment is somewhere a defect would reach millions of
+people at once. In May, Apple
 published its post-quantum
 [corecrypto](https://security.apple.com/blog/formal-verification-corecrypto/)
 implementations along with the proofs, having verified ML-KEM and ML-DSA
@@ -151,7 +151,6 @@ management product cannot, and that is the arithmetic that is moving.
 
 ## Keep the specifications small
 
-The scaling law here comes with its own remedy.
 [Matichuk and colleagues](https://trustworthy.systems/publications/nictaabstracts/Matichuk_MAJKS_15.abstract)
 analysed 15,018 lemmas and around 215,000 lines of proof from seL4 and the two
 largest developments in the Archive of Formal Proofs, and found a consistent
@@ -181,10 +180,9 @@ are published.
 
 Any given company still has to build three things: the entity layer for its own
 domain, the glue between the structured requirement and the formalisation, and
-a review surface for the human. A month with coding agents gets you a working
-loop over one bounded domain, and I think that estimate is honest. You end the
-month able to show that the loop closes on real requirements, which nobody has
-shown yet.
+somewhere for a human to read the result. A month with coding agents gets you a
+working loop over one bounded domain. You end the month able to show that the
+loop closes on real requirements, which nobody has shown yet.
 
 ## Where the seam is
 
@@ -197,7 +195,7 @@ the same thing in a different formalism: every one of the six specifications
 that failed on its smart contract instance quantifies over a chain state or an
 execution trace, and none of the seventeen that passed does.
 
-This one is about expressive power, so sort the requirements by the logic each
+The problem is expressive power. Sort the requirements by the logic each one
 needs. Invariants over entity relations are first-order over a single state,
 and models handle them. A Gherkin scenario is a two-state transition, a state
 before and an event and a state after, which is an Event-B event with a guard
@@ -208,8 +206,8 @@ The requirements that carry "eventually", "until", "within", "never again
 after" quantify over traces, and no amount of first-order logic over a single
 state says them. "Mark the device stale if it has not been seen within a
 reasonable window" is one. Those need temporal logic or explicit trace
-quantification, and that is precisely the 8.6 percent and precisely Vero's
-chain states. It also explains a result I had filed away without understanding:
+quantification, which is where the 8.6 percent and Vero's chain states both
+sit. It also explains a result I had filed away without understanding:
 Gupte and Ramesh formalise requirements into propositional Lean, and
 propositional logic cannot express a Gherkin scenario either. Same wall, one
 level down.
@@ -231,10 +229,10 @@ all the way.
 
 ## The experiment I want someone to run
 
-Lean fluency will not scale to product headcount, so the reviewer gets a second
-model translating the formal statement back into English and compares two
-sentences. Nobody has tested whether a person reading that back-translation
-catches a weakened quantifier or a dropped precondition. The nearest evidence
+There will never be enough Lean-fluent engineers to staff this, so the reviewer
+gets a second model translating the formal statement back into English and
+compares two sentences. Nobody has tested whether a person reading that
+back-translation catches a weakened quantifier or a dropped precondition. The nearest evidence
 is [IronSpec](https://www.usenix.org/system/files/osdi24-goldweber.pdf), which
 found ten specification bugs across all six real verified systems its authors
 examined, back when every specification was written by a human expert who cared.
