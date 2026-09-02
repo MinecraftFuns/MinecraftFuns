@@ -16,12 +16,11 @@ field he helped start has come a long way, and the benchmark he proposed,
 the imitation game, has aged badly. The test asks one question: can a
 machine hold up its end of a conversation well enough that a human judge
 cannot tell it from a person? Language models now do this routinely while
-often lacking any deep grasp of the language they produce. My aim here is
-not to challenge frontier models like
-[OpenAI's o1](https://arxiv.org/abs/2409.18486); it is to propose a more
-rigorous evaluation that separates intelligence from imitation, especially
-for weaker models that nobody considers human-level and that pass the
-original test anyway.
+often lacking any deep grasp of the language they produce. The models that
+make this urgent are the weaker ones, the systems nobody considers
+human-level that pass the original test anyway; frontier work like
+[OpenAI's o1](https://arxiv.org/abs/2409.18486) is a separate question. I want
+an evaluation that separates intelligence from imitation.
 
 ## What the test actually measures
 
@@ -36,7 +35,7 @@ interaction misses most of what human thinking is actually doing.
 
 Today's models produce human-like responses by leveraging statistical
 patterns in text; whether they understand those patterns is exactly the open
-question. There is even evidence that the two abilities pull apart:
+question. Measurements even show the two abilities pulling apart:
 [Ye and colleagues](https://arxiv.org/abs/2303.10420) found that tuning GPT
 models on [human feedback](https://arxiv.org/abs/1706.03741) makes their
 responses more human-like while compromising their performance on some
@@ -46,7 +45,7 @@ Turing Test only checks the first.
 The test was being gamed before large language models existed. In a
 [2014 experiment at the Royal Society](https://doi.org/10.1080/0952813X.2015.1055826),
 a chatbot called Eugene Goostman convinced more than 30% of its human judges
-that it was human. Its trick was persona, not intelligence: it played
+that it was human. Its trick was persona: it played
 [a 13-year-old Ukrainian boy writing in his second language](https://www.npr.org/2014/06/09/320375613/in-a-landmark-first-an-ai-program-fools-the-turing-test),
 which lowered expectations enough that evasions and jokes read as
 personality. Scott Aaronson
@@ -105,12 +104,11 @@ model and what logic supports its decisions. Interpretability tools like
 [SHAP](https://arxiv.org/abs/1705.07874) make the same processes legible one
 prediction at a time, so we can check whether the path to an answer
 resembles reasoning or resembles pattern-matching that happens to land. A
-model passes this test not when its text sounds human, but when its
-processing holds up under inspection.
+model passes this test only when its processing holds up under inspection.
 
 ## Where this falls short
 
-The honest limitation: I cannot say whether
+I cannot say whether
 [GPT-4o](https://arxiv.org/abs/2410.21276) or
 [o1](https://arxiv.org/abs/2409.19924) would pass the upgraded test. These
 models still stumble on trivially simple questions, the persistent

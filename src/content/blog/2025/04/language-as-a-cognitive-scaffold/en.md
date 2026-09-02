@@ -14,8 +14,8 @@ tags: ["Essays", "Cognitive Science", "Artificial Intelligence"]
 > [topic proposal](https://ragnarok.joefang.org/static/xeseeg1qn3nql1eagou954qptqp307vbh.pdf)
 > are available as PDFs.
 
-Language is not merely a tool for communication;
-[it structures cognition itself](https://doi.org/10.1016/j.actpsy.2025.104803).
+Beyond carrying messages between people,
+[language structures cognition itself](https://doi.org/10.1016/j.actpsy.2025.104803).
 The Sapir-Whorf hypothesis holds that
 [linguistic categories shape thought](https://doi.org/10.1006/cogp.2001.0748);
 the Language of Thought Hypothesis replies that
@@ -24,8 +24,8 @@ Large language models have quietly recontextualized this old debate.
 [Chain-of-thought prompting](https://arxiv.org/abs/2201.11903) makes a model
 reason step by step in words, and the technique looks suspiciously like
 [inner speech](https://doi.org/10.1037/bul0000021), the silent verbalization
-humans use to manage complex reasoning. I argue the resemblance is not
-cosmetic: in both humans and LLMs, language works as a cognitive scaffold
+humans use to manage complex reasoning. I argue the resemblance is
+structural: in both humans and LLMs, language works as a cognitive scaffold
 that breaks complex problems into sequential, manageable steps, and the
 differences between the two are mostly about who erects the scaffold.
 
@@ -36,12 +36,11 @@ and categorize the world. The strongest evidence is more modest.
 [Boroditsky](https://doi.org/10.1006/cogp.2001.0748) showed that English
 speakers reach for horizontal metaphors when thinking about time ("ahead",
 "behind") while Mandarin speakers use vertical ones more often: language
-biases attention and processing, but the effect is modulatory, not absolute.
+biases attention and processing, and the effect is modulatory.
 [Later cross-linguistic work](https://doi.org/10.1371/journal.pone.0158725)
 sharpened this into a neo-Whorfian position: lexical categories measurably
 shift memory and attention, yet speakers of different languages share one
-perceptual framework underneath. Language organizes cognitive material; it
-does not fence it in.
+perceptual framework underneath. Language organizes cognitive material.
 
 The Language of Thought Hypothesis pulls the other way: cognition operates
 over an internal symbolic system, "Mentalese", independent of any spoken
@@ -68,7 +67,7 @@ verbal labels
 [improve discrimination and categorization](https://doi.org/10.1016/j.plrev.2018.12.001),
 and disrupting language areas with TMS
 [impairs verbal reasoning while sparing nonverbal problem-solving](https://doi.org/10.3390/brainsci13010067).
-Thought does not need language; language organizes and amplifies it. That is
+Thought runs without language; language organizes and amplifies it. That is
 what a scaffold does.
 
 ## Inner speech
@@ -127,7 +126,7 @@ explanation: humans already run inner speech. An external prompt telling a
 person to think step by step is redundant scaffolding on top of scaffolding
 they generate themselves, while a model, which has no spontaneous inner
 dialogue, gets its entire scaffold from the prompt. Read this way, the
-finding is not evidence against the parallel. It is the parallel.
+finding is the parallel showing up in the data.
 
 The positive case is that both systems lean on language for the same
 operation: decomposition.
@@ -143,8 +142,8 @@ function is the same.
 ## What follows
 
 If language is the scaffold, some things follow. For education, explicit
-verbal strategy, thinking aloud and structured self-talk, is not a crutch
-but the mechanism working as designed. For AI,
+verbal strategy, thinking aloud and structured self-talk, is the mechanism
+working as designed. For AI,
 [reasoning-in-language is also a window into the system](https://doi.org/10.1016/j.tics.2024.07.007),
 and architectures that
 [borrow the developmental role of inner speech](https://philsci-archive.pitt.edu/24473/)
@@ -158,6 +157,6 @@ it is shared, then
 has to reckon with the fact that human understanding leans on the same
 linguistic machinery it wants to reserve for itself.
 
-The differences the critics measure are real, but they are differences in
+The differences the critics measure are real, and they are differences in
 how the scaffold gets built: humans grow their own, and models need it
-handed to them in the prompt. What is shared is the scaffold.
+handed to them in the prompt. The scaffold itself is shared.

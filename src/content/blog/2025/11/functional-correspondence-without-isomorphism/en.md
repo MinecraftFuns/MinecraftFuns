@@ -23,8 +23,7 @@ structure-preserving mapping in which a model's parts and operations
 correspond one-to-one with identifiable biological mechanisms. My position:
 the evidence rejects isomorphism at the implementation level, and still
 supports a restricted, genuinely explanatory correspondence at the
-computational level. The two halves of that sentence are not in tension,
-and sorting out why they are not is the point of this essay.
+computational level.
 
 ## The learning rules do not match
 
@@ -109,9 +108,9 @@ what the learning-rule evidence says is happening.
 ## The level it earns
 
 The brain does not run backpropagation, and no amount of benchmark
-performance makes it so. But a model does not need to share the brain's
-mechanisms to tell us something true about the problems the brain solves.
-Large networks are not replicas of nervous systems. They are working
+performance makes it so. But a model can tell us something true about the
+problems the brain solves while sharing none of its mechanisms.
+Large networks are working
 demonstrations that certain computational problems admit solutions at all,
 and of what those solutions require: integrating noisy findings into
 predictions, growing abrupt capabilities out of gradual experience. That is
