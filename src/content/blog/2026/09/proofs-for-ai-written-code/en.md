@@ -229,13 +229,15 @@ all the way.
 
 ## The experiment I want someone to run
 
-There will never be enough Lean-fluent engineers to staff this, so the reviewer
-gets a second model translating the formal statement back into English and
-compares two sentences. Nobody has tested whether a person reading that
-back-translation catches a weakened quantifier or a dropped precondition.
-The nearest evidence is [IronSpec](https://www.usenix.org/system/files/osdi24-goldweber.pdf), which
-found ten specification bugs across all six real verified systems its authors
-examined, back when every specification was written by a human expert who cared.
+There will never be enough Lean-fluent engineers to staff this, so the
+reviewer gets a second model translating the formal statement back into
+English and compares two sentences. Nobody has tested whether a person
+reading that back-translation catches a weakened quantifier or a dropped
+precondition. The nearest evidence is
+[IronSpec](https://www.usenix.org/system/files/osdi24-goldweber.pdf), which
+found ten specification bugs across all six real verified systems its
+authors examined, back when every specification was written by a human
+expert who cared.
 
 A cheaper version of the same question: how often do two specifications that
 differ in meaning back-translate into the same English? A week answers it, and

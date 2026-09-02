@@ -14,20 +14,20 @@ tags: ["Essays", "Cognitive Science", "Artificial Intelligence"]
 > [topic proposal](https://ragnarok.joefang.org/static/xeseeg1qn3nql1eagou954qptqp307vbh.pdf)
 > are available as PDFs.
 
-Beyond carrying messages between people,
-[language structures cognition itself](https://doi.org/10.1016/j.actpsy.2025.104803).
-The Sapir-Whorf hypothesis holds that
-[linguistic categories shape thought](https://doi.org/10.1006/cogp.2001.0748);
-the Language of Thought Hypothesis replies that
-[cognition runs on something deeper than any natural language](https://doi.org/10.1098/rstb.2012.0111).
-Large language models have quietly recontextualized this old debate.
-[Chain-of-thought prompting](https://arxiv.org/abs/2201.11903) makes a model
-reason step by step in words, and the technique looks suspiciously like
-[inner speech](https://doi.org/10.1037/bul0000021), the silent verbalization
-humans use to manage complex reasoning. I argue the resemblance is
-structural: in both humans and LLMs, language works as a cognitive scaffold
-that breaks complex problems into sequential, manageable steps, and the
-differences between the two are mostly about who erects the scaffold.
+Beyond carrying messages between people, [language structures cognition
+itself](https://doi.org/10.1016/j.actpsy.2025.104803). The Sapir-Whorf
+hypothesis holds that [linguistic categories shape
+thought](https://doi.org/10.1006/cogp.2001.0748); the Language of Thought
+Hypothesis replies that [cognition runs on something deeper than any natural
+language](https://doi.org/10.1098/rstb.2012.0111). Large language models
+have quietly recontextualized this old debate. [Chain-of-thought
+prompting](https://arxiv.org/abs/2201.11903) makes a model reason step by
+step in words, and the technique looks suspiciously like [inner
+speech](https://doi.org/10.1037/bul0000021), the silent verbalization humans
+use to manage complex reasoning. I argue the resemblance is structural: in
+both humans and LLMs, language works as a cognitive scaffold that breaks
+complex problems into sequential, manageable steps, and the differences
+between the two are mostly about who erects the scaffold.
 
 ## Shaper and medium of thought
 
@@ -36,8 +36,8 @@ and categorize the world. The strongest evidence is more modest.
 [Boroditsky](https://doi.org/10.1006/cogp.2001.0748) showed that English
 speakers reach for horizontal metaphors when thinking about time ("ahead",
 "behind") while Mandarin speakers use vertical ones more often: language
-biases attention and processing, and the effect is modulatory.
-[Later cross-linguistic work](https://doi.org/10.1371/journal.pone.0158725)
+biases attention and processing, and the effect is modulatory. [Later
+cross-linguistic work](https://doi.org/10.1371/journal.pone.0158725)
 sharpened this into a neo-Whorfian position: lexical categories measurably
 shift memory and attention, yet speakers of different languages share one
 perceptual framework underneath. Language organizes cognitive material.
@@ -55,20 +55,20 @@ the property a scaffold has.
 ## What the brain shows
 
 People with aphasia, whose language production is severely impaired, keep
-[mathematical reasoning and spatial navigation largely intact](https://doi.org/10.1111/nyas.13046):
-core cognition survives without language. Neuroimaging agrees, up to a
-point. Classical language areas engage selectively for linguistic tasks
-while abstract reasoning recruits frontal and parietal circuits, but during
-complex tasks the language regions
-[co-activate with the circuits for executive control and working memory](https://doi.org/10.1093/scan/nsv094).
-Language-based rehearsal
+[mathematical reasoning and spatial navigation largely
+intact](https://doi.org/10.1111/nyas.13046): core cognition survives without
+language. Neuroimaging agrees, up to a point. Classical language areas
+engage selectively for linguistic tasks while abstract reasoning recruits
+frontal and parietal circuits, but during complex tasks the language regions
+[co-activate with the circuits for executive control and working
+memory](https://doi.org/10.1093/scan/nsv094). Language-based rehearsal
 [helps memory retrieval](https://doi.org/10.1016/j.concog.2019.03.005),
-verbal labels
-[improve discrimination and categorization](https://doi.org/10.1016/j.plrev.2018.12.001),
-and disrupting language areas with TMS
-[impairs verbal reasoning while sparing nonverbal problem-solving](https://doi.org/10.3390/brainsci13010067).
-Thought runs without language; language organizes and amplifies it. That is
-what a scaffold does.
+verbal labels [improve discrimination and
+categorization](https://doi.org/10.1016/j.plrev.2018.12.001), and disrupting
+language areas with TMS [impairs verbal reasoning while sparing nonverbal
+problem-solving](https://doi.org/10.3390/brainsci13010067). Thought runs
+without language; language organizes and amplifies it. That is what a
+scaffold does.
 
 ## Inner speech
 
@@ -114,19 +114,19 @@ Chain-of-thought prompting markedly improved the models; analogous prompts
 did not much improve the humans. They read this asymmetry as a difference
 between human and machine reasoning. I think the study shows something else.
 
-First, the human sample was psychology students, a population
-[already known to be unrepresentative](https://doi.org/10.1016/j.jecp.2017.04.017)
-of human cognition at large; participants trained in formal logic might have
+First, the human sample was psychology students, a population [already known
+to be unrepresentative](https://doi.org/10.1016/j.jecp.2017.04.017) of human
+cognition at large; participants trained in formal logic might have
 responded to structured prompts quite differently. Second, the test items
-were rewritten to avoid training-data contamination but
-[never validated for difficulty](https://doi.org/10.3389/fpubh.2018.00149),
-so nobody knows whether the human and model versions of the task were even
-comparable. Third, and most importantly, the asymmetry has a simpler
-explanation: humans already run inner speech. An external prompt telling a
-person to think step by step is redundant scaffolding on top of scaffolding
-they generate themselves, while a model, which has no spontaneous inner
-dialogue, gets its entire scaffold from the prompt. Read this way, the
-finding is the parallel showing up in the data.
+were rewritten to avoid training-data contamination but [never validated for
+difficulty](https://doi.org/10.3389/fpubh.2018.00149), so nobody knows
+whether the human and model versions of the task were even comparable.
+Third, and most importantly, the asymmetry has a simpler explanation: humans
+already run inner speech. An external prompt telling a person to think step
+by step is redundant scaffolding on top of scaffolding they generate
+themselves, while a model, which has no spontaneous inner dialogue, gets its
+entire scaffold from the prompt. Read this way, the finding is the parallel
+showing up in the data.
 
 The positive case is that both systems lean on language for the same
 operation: decomposition.
@@ -143,19 +143,20 @@ function is the same.
 
 If language is the scaffold, some things follow. For education, explicit
 verbal strategy, thinking aloud and structured self-talk, is the mechanism
-working as designed. For AI,
-[reasoning-in-language is also a window into the system](https://doi.org/10.1016/j.tics.2024.07.007),
-and architectures that
-[borrow the developmental role of inner speech](https://philsci-archive.pitt.edu/24473/)
-are a live research direction, with
-[language treated as a cognitive and social tool for machines too](https://doi.org/10.1007/s41809-024-00152-8).
-The parallel even predicts failures: chain-of-thought
-[hurts model performance on exactly the kinds of tasks where deliberation hurts humans](https://arxiv.org/abs/2410.21333),
-which is a strange coincidence unless the scaffold really is shared. And if
-it is shared, then
-[the debate about whether these systems understand anything](https://doi.org/10.1073/pnas.2215907120)
-has to reckon with the fact that human understanding leans on the same
-linguistic machinery it wants to reserve for itself.
+working as designed. For AI, [reasoning-in-language is also a window into
+the system](https://doi.org/10.1016/j.tics.2024.07.007), and architectures
+that [borrow the developmental role of inner
+speech](https://philsci-archive.pitt.edu/24473/) are a live research
+direction, with [language treated as a cognitive and social tool for
+machines too](https://doi.org/10.1007/s41809-024-00152-8). The parallel even
+predicts failures: chain-of-thought [hurts model performance on exactly the
+kinds of tasks where deliberation hurts
+humans](https://arxiv.org/abs/2410.21333), which is a strange coincidence
+unless the scaffold really is shared. And if it is shared, then [the debate
+about whether these systems understand
+anything](https://doi.org/10.1073/pnas.2215907120) has to reckon with the
+fact that human understanding leans on the same linguistic machinery it
+wants to reserve for itself.
 
 The differences the critics measure are real, and they are differences in
 how the scaffold gets built: humans grow their own, and models need it

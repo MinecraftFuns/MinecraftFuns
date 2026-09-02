@@ -13,12 +13,11 @@ tags: ["Essays", "Cognitive Science", "Artificial Intelligence"]
 
 Large neural networks and the human brain now turn in strikingly similar
 behavioral performances on object recognition and language understanding,
-and the tempting conclusion, that they are
-[the same kind of system](https://doi.org/10.1016/j.neuron.2017.06.011),
-[gets voiced regularly](https://www.theverge.com/2017/7/19/15998610/ai-neuroscience-machine-learning-deepmind-demis-hassabis-interview).
+and the tempting conclusion, that they are [the same kind of
+system](https://doi.org/10.1016/j.neuron.2017.06.011), [gets voiced
+regularly](https://www.theverge.com/2017/7/19/15998610/ai-neuroscience-machine-learning-deepmind-demis-hassabis-interview).
 Behavioural neuroscience has a precise word for the strong version of that
-claim:
-[isomorphism](https://doi.org/10.1016/j.nlm.2013.10.021), a
+claim: [isomorphism](https://doi.org/10.1016/j.nlm.2013.10.021), a
 structure-preserving mapping in which a model's parts and operations
 correspond one-to-one with identifiable biological mechanisms. My position:
 the evidence rejects isomorphism at the implementation level, and still
@@ -109,10 +108,9 @@ what the learning-rule evidence says is happening.
 
 The brain does not run backpropagation, and no amount of benchmark
 performance makes it so. But a model can tell us something true about the
-problems the brain solves while sharing none of its mechanisms.
-Large networks are working
-demonstrations that certain computational problems admit solutions at all,
-and of what those solutions require: integrating noisy findings into
-predictions, growing abrupt capabilities out of gradual experience. That is
-a real contribution, made at exactly one of Marr's levels, and it survives
-every difference in wiring.
+problems the brain solves while sharing none of its mechanisms. Large
+networks are working demonstrations that certain computational problems
+admit solutions at all, and of what those solutions require: integrating
+noisy findings into predictions, growing abrupt capabilities out of gradual
+experience. That is a real contribution, made at exactly one of Marr's
+levels, and it survives every difference in wiring.

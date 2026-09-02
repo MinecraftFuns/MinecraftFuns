@@ -18,9 +18,9 @@ machine hold up its end of a conversation well enough that a human judge
 cannot tell it from a person? Language models now do this routinely while
 often lacking any deep grasp of the language they produce. The models that
 make this urgent are the weaker ones, the systems nobody considers
-human-level that pass the original test anyway; frontier work like
-[OpenAI's o1](https://arxiv.org/abs/2409.18486) is a separate question. I want
-an evaluation that separates intelligence from imitation.
+human-level that pass the original test anyway; frontier work like [OpenAI's
+o1](https://arxiv.org/abs/2409.18486) is a separate question. I want an
+evaluation that separates intelligence from imitation.
 
 ## What the test actually measures
 
@@ -35,24 +35,26 @@ interaction misses most of what human thinking is actually doing.
 
 Today's models produce human-like responses by leveraging statistical
 patterns in text; whether they understand those patterns is exactly the open
-question. Measurements even show the two abilities pulling apart:
-[Ye and colleagues](https://arxiv.org/abs/2303.10420) found that tuning GPT
-models on [human feedback](https://arxiv.org/abs/1706.03741) makes their
-responses more human-like while compromising their performance on some
-tasks. Sounding human and solving problems are not the same skill, and the
-Turing Test only checks the first.
+question. Measurements even show the two abilities pulling apart: [Ye and
+colleagues](https://arxiv.org/abs/2303.10420) found that tuning GPT models
+on [human feedback](https://arxiv.org/abs/1706.03741) makes their responses
+more human-like while compromising their performance on some tasks. Sounding
+human and solving problems are not the same skill, and the Turing Test only
+checks the first.
 
-The test was being gamed before large language models existed. In a
-[2014 experiment at the Royal Society](https://doi.org/10.1080/0952813X.2015.1055826),
-a chatbot called Eugene Goostman convinced more than 30% of its human judges
-that it was human. Its trick was persona: it played
-[a 13-year-old Ukrainian boy writing in his second language](https://www.npr.org/2014/06/09/320375613/in-a-landmark-first-an-ai-program-fools-the-turing-test),
+The test was being gamed before large language models existed. In a [2014
+experiment at the Royal
+Society](https://doi.org/10.1080/0952813X.2015.1055826), a chatbot called
+Eugene Goostman convinced more than 30% of its human judges that it was
+human. Its trick was persona: it played [a 13-year-old Ukrainian boy writing
+in his second
+language](https://www.npr.org/2014/06/09/320375613/in-a-landmark-first-an-ai-program-fools-the-turing-test),
 which lowered expectations enough that evasions and jokes read as
-personality. Scott Aaronson
-[published his conversation with it](https://scottaaronson.blog/?p=1858), and
-the responses are nonsense the moment the questions have answers. Warwick
-and Shah, who ran the experiment, later wrote plainly that
-["passing the Turing Test has no relationship with human-like intelligence"](https://doi.org/10.1007/s12559-015-9372-6).
+personality. Scott Aaronson [published his conversation with
+it](https://scottaaronson.blog/?p=1858), and the responses are nonsense the
+moment the questions have answers. Warwick and Shah, who ran the experiment,
+later wrote plainly that ["passing the Turing Test has no relationship with
+human-like intelligence"](https://doi.org/10.1007/s12559-015-9372-6).
 Turing's own claim, that passing implies thinking, is just as debatable:
 human conversation tolerates indirect answers, jokes, and tricks, so a
 machine can appear human precisely by dodging the parts that would require
@@ -108,14 +110,13 @@ model passes this test only when its processing holds up under inspection.
 
 ## Where this falls short
 
-I cannot say whether
-[GPT-4o](https://arxiv.org/abs/2410.21276) or
+I cannot say whether [GPT-4o](https://arxiv.org/abs/2410.21276) or
 [o1](https://arxiv.org/abs/2409.19924) would pass the upgraded test. These
-models still stumble on trivially simple questions, the persistent
-"9.11 > 9.8" comparison being the canonical example, which suggests their
-grasp of fundamental concepts is thinner than their fluency implies. And the
-specific tools named here will age; LIME and SHAP will be superseded by
-better interpretability methods. But the diagnosis does not depend on the
-tools. A test that only watches behavior cannot tell imitation from
-understanding, and any evaluation that wants to measure machine
-intelligence, rather than machine theater, has to open the machine.
+models still stumble on trivially simple questions, the persistent "9.11 >
+9.8" comparison being the canonical example, which suggests their grasp of
+fundamental concepts is thinner than their fluency implies. And the specific
+tools named here will age; LIME and SHAP will be superseded by better
+interpretability methods. But the diagnosis does not depend on the tools. A
+test that only watches behavior cannot tell imitation from understanding,
+and any evaluation that wants to measure machine intelligence, rather than
+machine theater, has to open the machine.
