@@ -8,8 +8,9 @@ tags: ["Essays", "Artificial Intelligence", "Software Engineering"]
 Someone in a group chat this morning was going after a course on generative
 software engineering. The objection was that a professor who spent years in
 formal methods should know which parts of a system you cannot vibe your way
-through. I replied with the line I had been sitting on since July: this year's
-frontier models can write Lean.
+through. I replied with the line I had been sitting on since July: this
+year's [frontier models](https://arxiv.org/abs/2606.05632) can write
+[Lean](https://lean-lang.org/).
 
 The rest came out over four more messages. I had been chewing on it since July
 and had never written any of it down.
@@ -27,7 +28,8 @@ enrolled and an administrator holding revoke permission, when revocation runs,
 then the device holds no active session.
 
 An agent takes it from there and turns the English into something machine
-checkable over those entity relations. Parts of it need temporal logic, since
+checkable over those entity relations. Parts of it need
+[temporal logic](https://plato.stanford.edu/entries/logic-temporal/), since
 the requirements that matter are about sequences: what stays true while a
 multi-step action is in flight, and what becomes true once it lands.
 
@@ -96,7 +98,8 @@ of code; this is priced per requirement.
 
 ## Somebody shipped this in 1999
 
-The four layers I typed into that chat are Event-B, and I did not know it.
+The four layers I typed into that chat are
+[Event-B](https://wiki.event-b.org/), and I did not know it.
 
 Event-B splits a model in two. A context holds carrier sets, constants and
 axioms, which is the entity layer. A machine holds invariants and events, each
@@ -118,10 +121,11 @@ railways was the cost of writing the models.
 
 ## What it used to cost
 
-seL4 is the number everyone quotes. 8,700 lines of C, around twenty person
-years of proof, roughly 200,000 lines of Isabelle, more than twenty lines of
-proof for every line of implementation. Gernot Heiser puts design,
-implementation and correctness proof together at
+[seL4](https://sel4.systems/) is the number everyone quotes. 8,700 lines of
+C, around twenty person years of proof, roughly 200,000 lines of
+[Isabelle](https://isabelle.in.tum.de/), more than twenty lines of proof for
+every line of implementation. Gernot Heiser puts design, implementation and
+correctness proof together at
 [under four hundred dollars a line](https://microkerneldude.org/2016/06/16/verified-software-can-and-will-be-cheaper-than-buggy-stuff/).
 
 He also draws a comparison. Pistachio, a conventionally built microkernel of
@@ -172,11 +176,13 @@ obligation to close at once.
 ## A month of work, roughly
 
 Most of the parts are off the shelf. Structured requirements have a whole
-tooling ecosystem now, since spec-driven development got product organisations
-writing preconditions and postconditions in EARS or Gherkin shape without
-anyone calling it formal methods. Lean and its libraries are there. The agents
-are there, at 87.3 percent per specification. Vero's grader and axiom allowlist
-are published.
+tooling ecosystem now, since spec-driven development got product
+organisations writing preconditions and postconditions in
+[EARS](https://alistairmavin.com/ears/) or
+[Gherkin](https://cucumber.io/docs/gherkin/) shape without anyone calling it
+formal methods. Lean and its libraries are there. The agents are there, at
+87.3 percent per specification. Vero's grader and axiom allowlist are
+published.
 
 Any given company still has to build three things: the entity layer for its own
 domain, the glue between the structured requirement and the formalisation, and
@@ -188,12 +194,14 @@ loop closes on real requirements, which nobody has shown yet.
 
 The layer I put in without checking is the least ready of the four.
 [Bisharat and colleagues](https://arxiv.org/abs/2606.05792) ran 30 models
-across eight families over 205 TLA+ specifications and got 26.6 percent
-syntactic correctness from the parser and 8.6 percent semantic correctness from
-the model checker, with successes confined to progressive prompting. Vero says
-the same thing in a different formalism: every one of the six specifications
-that failed on its smart contract instance quantifies over a chain state or an
-execution trace, and none of the seventeen that passed does.
+across eight families over 205
+[TLA+](https://lamport.azurewebsites.net/tla/tla.html) specifications and
+got 26.6 percent syntactic correctness from the parser and 8.6 percent
+semantic correctness from the model checker, with successes confined to
+progressive prompting. Vero says the same thing in a different formalism:
+every one of the six specifications that failed on its smart contract
+instance quantifies over a chain state or an execution trace, and none of
+the seventeen that passed does.
 
 The problem is expressive power. Sort the requirements by the logic each one
 needs. Invariants over entity relations are first-order over a single state,
@@ -219,13 +227,15 @@ build on entities, invariants and single transitions today, which is a large
 fraction of an enterprise product. Liveness waits until somebody measures it
 properly.
 
-A word on the strong form, since I keep using it. Writing code as proof, where
-the program and the proof are the same object, is Curry-Howard, and Lean rests
-on it. This pipeline does not do that yet. The agent writes ordinary code and
-discharges Hoare-style obligations about it separately, and what ships is the
-code rather than the proof term. Extracting the program from the proof is an
-older tradition with its own tooling, and it is where this ends up if it goes
-all the way.
+A word on the strong form, since I keep using it. Writing code as proof,
+where the program and the proof are the same object, is
+[Curry-Howard](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence),
+and Lean rests on it. This pipeline does not do that yet. The agent writes
+ordinary code and discharges
+[Hoare-style](https://en.wikipedia.org/wiki/Hoare_logic) obligations about
+it separately, and what ships is the code rather than the proof term.
+Extracting the program from the proof is an older tradition with its own
+tooling, and it is where this ends up if it goes all the way.
 
 ## The experiment I want someone to run
 

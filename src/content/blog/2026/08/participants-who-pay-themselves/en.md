@@ -132,9 +132,10 @@ It is also the box I can see least. Traffic through a closed group reaches
 people who already resemble each other. A study of half a million users
 complicates that: direct messages carry
 [more genuinely new information than public posts](https://arxiv.org/html/2408.03579)
-despite going to closer friends, and the old story about weak ties spreading
-furthest shows up only in public posting. Neither box is the bad one. They
-fail differently.
+despite going to closer friends, and the old story about
+[weak ties](https://www.jstor.org/stable/2776392) spreading furthest shows
+up only in public posting. Neither box is the bad one. They fail
+differently.
 
 So my two-box version dies and the claim underneath survives: the reward
 decides where a share can go, and where it goes decides who ends up in the

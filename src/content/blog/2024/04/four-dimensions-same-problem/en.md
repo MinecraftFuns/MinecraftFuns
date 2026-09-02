@@ -19,15 +19,18 @@ tags: ["Essays", "Philosophy", "Metaphysics"]
 > [here](https://ragnarok.joefang.org/static/x6kfkuln5gkpb03b1e4p9i0drhr8cf0jq.pdf).
 
 On the four-dimensional view an object is a sequence of temporal stages,
-each made of spatial parts. The Ship of Theseus becomes a series of stages,
-each one the planks standing in the harbor at some moment.
+each made of spatial parts. The
+[Ship of Theseus](https://en.wikipedia.org/wiki/Ship_of_Theseus) becomes a
+series of stages, each one the planks standing in the harbor at some moment.
 
-Several sequences of stages, several spacetime worms, can be drawn through
-the same planks, and they end in different places. Sider's move is that
-choosing among them is a matter of what we mean by "ship". He works through
-two candidate meanings, the Replacement Worm and the Same Plank worm, each
-picking out its own final stage, and allows a third answer where the
-question is Indeterminate because more than one worm is equally good.
+Several sequences of stages, several
+[spacetime worms](https://plato.stanford.edu/entries/temporal-parts/), can
+be drawn through the same planks, and they end in different places. Sider's
+move is that choosing among them is a matter of what we mean by "ship". He
+works through two candidate meanings, the Replacement Worm and the Same
+Plank worm, each picking out its own final stage, and allows a third answer
+where the question is Indeterminate because more than one worm is equally
+good.
 
 The metaphysical question, which one is the Ship of Theseus, has become a
 conceptual question about what a ship is. Sider grants that this does not
@@ -37,8 +40,9 @@ the metaphysical difficulty is gone.
 ## Restating the view
 
 There is not much here that is deductively valid, so the passage is best
-read as an inference to the best explanation. That is the claim I want to
-test.
+read as an
+[inference to the best explanation](https://plato.stanford.edu/entries/abduction/).
+That is the claim I want to test.
 
 Take an object to be an initial state $S$, a set whose elements are the
 temporal parts that constitute it, together with a transition function $F:

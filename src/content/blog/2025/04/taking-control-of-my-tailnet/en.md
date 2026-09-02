@@ -6,11 +6,12 @@ tags: ["Tailscale", "Networking", "Security"]
 ---
 
 [Tailscale](https://tailscale.com/) is very good at the thing it advertises.
-Every machine I own (laptops, servers, Raspberry Pis, containers, exit nodes)
-turns up on one flat private network and can reach every other one. That is the
-whole appeal, and it is also the problem: past a handful of devices, "anything
-can reach anything" stopped being a convenience and became a thing I could no
-longer hold in my head.
+Every machine I own (laptops, servers, Raspberry Pis, containers,
+[exit nodes](https://tailscale.com/kb/1103/exit-nodes)) turns up on one flat
+private network and can reach every other one. That is the whole appeal, and
+it is also the problem: past a handful of devices, "anything can reach
+anything" stopped being a convenience and became a thing I could no longer
+hold in my head.
 
 So I wrote a policy file, using Tailscale's [Access Control
 Lists](https://tailscale.com/kb/1018/acls) (ACLs) and
@@ -85,9 +86,9 @@ through an SSO provider, so there is no third party in the login path for a
 network whose entire purpose is not having third parties in the path.
 
 The second is that every address in `hosts` is IPv6. Tailscale hands out a
-100.x address and a ULA in `fd7a:115c:a1e0::/48` for every node, and pinning
-the names to the latter means the rules keep working on the machines here that
-have no IPv4 at all.
+100.x address and a [ULA](https://datatracker.ietf.org/doc/html/rfc4193) in
+`fd7a:115c:a1e0::/48` for every node, and pinning the names to the latter
+means the rules keep working on the machines here that have no IPv4 at all.
 
 The third is `group:dns-server`. Almost everything on this tailnet is a tag,
 but the DNS servers are a *group*, which means they log in as a dedicated
@@ -180,15 +181,18 @@ untagged personal machine.
 - **Exit node users** reach `autogroup:internet` through an exit node.
 - **DNS clients** reach the resolver on 53. Plaintext DNS, but only in the
   sense that the payload is not itself encrypted: Tailscale is carrying it
-  inside WireGuard either way.
-- **DoH and DoT clients** reach the resolver on the ports their own protocol
-  uses, including the high-numbered alternates I run alongside 443 and 853.
+  inside [WireGuard](https://www.wireguard.com/) either way.
+- **[DoH](https://datatracker.ietf.org/doc/html/rfc8484) and
+  [DoT](https://datatracker.ietf.org/doc/html/rfc7858) clients** reach the
+  resolver on the ports their own protocol uses, including the high-numbered
+  alternates I run alongside 443 and 853.
 
 Nextcloud and Seafile get one rule each in the same shape, though theirs are
 `tag:*-server:*`: scoped by role, not by port.
 
-The trailing commas are legal: the policy file is HuJSON, whatever your
-editor's JSON linter thinks about it.
+The trailing commas are legal: the policy file is
+[HuJSON](https://github.com/tailscale/hujson), whatever your editor's JSON
+linter thinks about it.
 
 ## Android debugging, split across three tags
 
@@ -208,13 +212,16 @@ This is the rule pair I like most.
 },
 ```
 
-`adb` is three parts that normally share a machine: client, server, and the
-daemon on the phone. Across a network they want three tags.
+[`adb`](https://developer.android.com/tools/adb) is three parts that
+normally share a machine: client, server, and the daemon on the phone.
+Across a network they want three tags.
 
-Clients reach the server on 5037 and need nothing else. The server reaches the
-phones on two ranges: 5500 to 5600 for classic `adb tcpip`, and 30000 to 50000
-for Android 11 wireless debugging, which picks a fresh high port on every start
-and does not ask your opinion about which one.
+Clients reach the server on 5037 and need nothing else. The server reaches
+the phones on two ranges: 5500 to 5600 for classic `adb tcpip`, and 30000 to
+50000 for
+[Android 11 wireless debugging](https://developer.android.com/tools/adb#wireless-adb-android-11),
+which picks a fresh high port on every start and does not ask your opinion
+about which one.
 
 The payoff is that a phone is debuggable from any machine on the tailnet while
 being reachable from none of them. The phones accept only the node holding
@@ -268,7 +275,8 @@ internet, so it is gated behind a tag that precisely one machine holds.
 
 ## SSH without keys
 
-Tailscale SSH means I am not maintaining `authorized_keys` by hand anywhere:
+[Tailscale SSH](https://tailscale.com/kb/1193/tailscale-ssh) means I am not
+maintaining `authorized_keys` by hand anywhere:
 
 ```json
 "ssh": [
@@ -355,8 +363,9 @@ the policy file at the top of this post still reaches my nodes through the
 coordination server. So a compromised control plane could not smuggle a new
 machine onto my tailnet, but tailnet lock is not the thing that would stop
 it rewriting who may reach what among the machines already there. It is also
-trust on first use: you trust the coordination server once, at setup, to
-bootstrap the arrangement that means you need not trust it afterwards.
+[trust on first use](https://en.wikipedia.org/wiki/Trust_on_first_use): you
+trust the coordination server once, at setup, to bootstrap the arrangement
+that means you need not trust it afterwards.
 
 ## Keeping it honest
 

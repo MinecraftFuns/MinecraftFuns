@@ -20,18 +20,21 @@ tags: ["Essays", "Philosophy", "Philosophy of Mathematics"]
 Field starts from the presumption that standard mathematics is consistent.
 It yields no self-contradictions, and if it did we would revise it. From
 there he argues that standard mathematics is conservative: if you use
-mathematical machinery to get from nominalistically statable premises to a
-nominalistically statable conclusion, the same conclusion was already
-derivable from those premises nominalistically, without the machinery.
-Mathematics is a shortcut through a deduction that could have been walked.
+mathematical machinery to get from
+[nominalistically statable](https://plato.stanford.edu/entries/nominalism-mathematics/)
+premises to a nominalistically statable conclusion, the same conclusion was
+already derivable from those premises nominalistically, without the
+machinery. Mathematics is a shortcut through a deduction that could have
+been walked.
 
 The consequence is that whether a mathematical system is true does not
 matter to its use in science, so long as it is conservative. Nobody has to
 assume mathematics is true before applying it; systems can be picked for how
-useful they are. That is aimed at the Platonist who argues mathematical
-entities must be real because mathematics works so well in describing the
-world. On Field's account they need only be conservative, and a shortcut is
-not the sort of thing that is true.
+useful they are. That is aimed at the
+[Platonist](https://plato.stanford.edu/entries/platonism-mathematics/) who
+argues mathematical entities must be real because mathematics works so well
+in describing the world. On Field's account they need only be conservative,
+and a shortcut is not the sort of thing that is true.
 
 ## Consistency he cannot prove
 
@@ -43,11 +46,12 @@ be surprising to lose. Mathematics does not run on that kind of expectation.
 says a formal system meeting certain conditions cannot prove its own
 consistency, so there is no proving standard mathematics consistent with the
 tools of standard mathematics. We will not find out. Contradictions could
-sit inside any axiom system that currently looks consistent, ZFC included,
-which is presumably what Field has in mind by standard mathematics, and we
-cannot settle ZFC's consistency inside ZFC. An inconsistent system is
-certainly not a conservative one, so the assumption carrying the whole
-argument is the one part of it nobody can check.
+sit inside any axiom system that currently looks consistent,
+[ZFC](https://en.wikipedia.org/wiki/Zermelo%E2%80%93Fraenkel_set_theory)
+included, which is presumably what Field has in mind by standard
+mathematics, and we cannot settle ZFC's consistency inside ZFC. An
+inconsistent system is certainly not a conservative one, so the assumption
+carrying the whole argument is the one part of it nobody can check.
 
 ## Some mathematics is not optional
 

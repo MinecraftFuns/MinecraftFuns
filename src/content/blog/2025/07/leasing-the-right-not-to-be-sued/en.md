@@ -53,10 +53,11 @@ concludes that "no confirmation or additional study has been made since."
 removed the trigger entirely. They put twenty-two cars on a circular track,
 asked the drivers to hold a steady speed, and filmed from the middle. Within
 about three minutes a jam of five cars had formed and was travelling
-backwards around the circuit as a solitary wave, holding its size and its
-speed. No merge, no lane drop, no cones, nothing in the way. They conclude
-that a bottleneck only ever triggers a jam, and that the jam is what a dense
-line of human-controlled particles does on its own.
+backwards around the circuit as a
+[solitary wave](https://en.wikipedia.org/wiki/Soliton), holding its size and
+its speed. No merge, no lane drop, no cones, nothing in the way. They
+conclude that a bottleneck only ever triggers a jam, and that the jam is
+what a dense line of human-controlled particles does on its own.
 
 So my ten kilometres had a cause I could see and an amplifier I could not.
 Once a queue forms at a bottleneck, it discharges cars more slowly than it
@@ -124,11 +125,13 @@ anyone.
 
 Uber's test fleet in Tempe was involved in
 [37 crashes and incidents in autonomous mode between September 2016 and March 2018](https://data.ntsb.gov/Docket/Document/docBLOB?ID=40477717&FileExtension=.PDF&FileName=Vehicle+Automation+Report-Master.PDF),
-according to the company's own records, given to the NTSB. In 33 of them
-another vehicle hit the Uber car, 25 of those from behind. Almost none of
-this reached anyone. Then one of those cars killed Elaine Herzberg, and that
-crash is what the technology means to most people who have heard of it.
-[Penmetsa and colleagues](https://doi.org/10.1016/j.iatssr.2021.04.003)
+according to the company's own records, given to the
+[NTSB](https://www.ntsb.gov/). In 33 of them another vehicle hit the Uber
+car, 25 of those from behind. Almost none of this reached anyone. Then one
+of those cars killed
+[Elaine Herzberg](https://en.wikipedia.org/wiki/Death_of_Elaine_Herzberg),
+and that crash is what the technology means to most people who have heard of
+it. [Penmetsa and colleagues](https://doi.org/10.1016/j.iatssr.2021.04.003)
 tracked 1.7 million tweets around that March and a Tesla fatality the same
 month, and found negative sentiment toward self-driving technology rising
 from 14 percent to 46 percent in fifteen days.
@@ -171,18 +174,20 @@ be paid in safety.
 A manufacturer holds immunity from ordinary product liability only while it
 keeps cutting its own crash rate against a published baseline every year.
 Miss three years running and the immunity lapses, the fleet drops back into
-the tort system, and the accumulated exposure is enough to end the company.
-The moral complaint dissolves, because no firm under this rule can describe
-its current death rate as acceptable. The most it can say is that next
-year's will be lower, which is a sentence the public will take.
+the [tort system](https://en.wikipedia.org/wiki/Tort), and the accumulated
+exposure is enough to end the company. The moral complaint dissolves,
+because no firm under this rule can describe its current death rate as
+acceptable. The most it can say is that next year's will be lower, which is
+a sentence the public will take.
 
 The mechanism is not speculative. The 1970 Clean Air Act
 [demanded 90 percent cuts in tailpipe hydrocarbons and carbon monoxide by 1975](https://faculty.lawrence.edu/gerardd/wp-content/uploads/sites/9/2014/02/18-TFSC-Gerard-Lave.pdf).
-Nobody knew how to build that car, and the penalty was \$10,000 for every
-non-complying one sold, when the average car cost about \$5,000. Lee Iacocca
-told Congress the industry would simply stop building cars. Congress passed
-it, granted a one-year extension, and the catalytic converter shipped in
-1975.
+Nobody knew how to build that car, and the penalty was
+\$10,000 for every
+non-complying one sold, when the average car cost about \$5,000.
+[Lee Iacocca](https://en.wikipedia.org/wiki/Lee_Iacocca) told Congress the
+industry would simply stop building cars. Congress passed it, granted a
+one-year extension, and the catalytic converter shipped in 1975.
 
 A compounding target cannot run forever. Cutting crashes by a fifth is
 straightforward while the failures are sensor bugs, and brutal once they are
@@ -203,7 +208,8 @@ testing shows the fleet performs at least twice as safely as conventional
 vehicles. That is a safe harbour bought outright, once.
 [Funkhouser](https://dc.law.utah.edu/ulr/vol2013/iss1/16/) had already
 argued for the vaccine-court style fund. Technology-forcing regulation
-backed by an existential penalty is what the Clean Air Act did, and what
+backed by an existential penalty is what the
+[Clean Air Act](https://www.epa.gov/clean-air-act-overview) did, and what
 fuel economy standards do in gentler form. I could not find the combination:
 a shield whose renewal turns on a rate of improvement rather than on
 clearing a fixed line once. That is a gap in what I searched. Whether it is
@@ -242,8 +248,9 @@ it came free with the person at the front.
 I wanted a number for how much of that queue was the road and how much was
 us. Mostly us: the closure started the jam and the drivers behind it
 supplied the other nine and a half kilometres. A fleet that reacts instantly
-and talks to itself would take the larger part of that back, and induced
-demand would spend it again on trips somebody wanted. The jam comes back.
+and talks to itself would take the larger part of that back, and
+[induced demand](https://en.wikipedia.org/wiki/Induced_demand) would spend
+it again on trips somebody wanted. The jam comes back.
 
 The injury claims do not. Ninety percent fewer of them is worth having on
 its own terms, and the obstacle is a rule about who may be sued. Rules are

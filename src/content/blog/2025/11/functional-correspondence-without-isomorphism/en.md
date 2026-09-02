@@ -26,9 +26,11 @@ computational level.
 
 ## The learning rules do not match
 
-Biological synaptic plasticity is local and activity-dependent. Hebbian
-learning and spike-timing-dependent plasticity update a synapse from the
-activity of the two neurons it connects, and decades of work on
+Biological synaptic plasticity is local and activity-dependent.
+[Hebbian learning](https://en.wikipedia.org/wiki/Hebbian_theory) and
+[spike-timing-dependent plasticity](https://en.wikipedia.org/wiki/Spike-timing-dependent_plasticity)
+update a synapse from the activity of the two neurons it connects, and
+decades of work on
 [long-term potentiation and depression](https://doi.org/10.1016/j.neuron.2004.09.012)
 show neuromodulators like dopamine
 [gating that plasticity by behavioral significance](https://doi.org/10.1038/s41583-020-0277-3),
@@ -59,13 +61,15 @@ The natural next step would be dismissing deep networks as engineering
 tricks with nothing to say about brains. The recent evidence refuses to
 cooperate. [BrainBench](https://doi.org/10.1038/s41562-024-02046-9) is a
 forward-looking benchmark: given two versions of a neuroscience abstract,
-the original and one with a subtly altered result, decide which one
-reports what the experiment actually found. Across two hundred such cases,
-large language models scored about 81 percent; human neuroscience experts
-averaged about 63. BrainGPT, a Mistral-7B tuned further on the neuroscience
-literature, did better still, and the models' confidence tracked their
-correctness, which suggests they had internalized real regularities about
-methods and plausible outcomes rather than guessing fluently.
+the original and one with a subtly altered result, decide which one reports
+what the experiment actually found. Across two hundred such cases, large
+language models scored about 81 percent; human neuroscience experts averaged
+about 63. BrainGPT, a
+[Mistral-7B](https://mistral.ai/news/announcing-mistral-7b/) tuned further
+on the neuroscience literature, did better still, and the models' confidence
+tracked their correctness, which suggests they had internalized real
+regularities about methods and plausible outcomes rather than guessing
+fluently.
 
 Whatever is happening there, both the experts and the models face the same
 abstract problem: from partial descriptions of methods and prior findings,

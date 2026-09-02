@@ -18,12 +18,13 @@ tags: ["Essays", "Philosophy", "Philosophy of Science"]
 > worked from is
 > [here](https://ragnarok.joefang.org/static/xn91se2t2fq5070em0u2kakgrthoftomj.pdf).
 
-Peirce wanted to define truth through scientific method. Keep investigating
-under some set of scientific principles, the sort that tells you a simpler
-theory beats a more complicated one, and the answers converge. His example
-is the velocity of light, measured through the transit of Venus, through
-stars, through oppositions of Mars, with the estimates moving steadily
-together toward one value. That value is the truth.
+[Peirce](https://plato.stanford.edu/entries/peirce/) wanted to define truth
+through scientific method. Keep investigating under some set of scientific
+principles, the sort that tells you a simpler theory beats a more
+complicated one, and the answers converge. His example is the velocity of
+light, measured through the transit of Venus, through stars, through
+oppositions of Mars, with the estimates moving steadily together toward one
+value. That value is the truth.
 
 ## What Quine takes away
 
@@ -75,11 +76,11 @@ those principles to certify that a given method is scientific at all, or to
 license its predictions as input to any statistical model of truth.
 
 Take the velocity of light again. We cannot be certain that timing the
-eclipses of Jupiter's satellites counts as a scientific method for measuring
-it. Future discoveries can change the principles we hold, and a method that
-qualifies today may not qualify afterwards. The principles have changed
-before and will change again, so the current set is neither flawless nor
-fixed.
+[eclipses of Jupiter's satellites](https://en.wikipedia.org/wiki/R%C3%B8mer%27s_determination_of_the_speed_of_light)
+counts as a scientific method for measuring it. Future discoveries can
+change the principles we hold, and a method that qualifies today may not
+qualify afterwards. The principles have changed before and will change
+again, so the current set is neither flawless nor fixed.
 
 ## A limit under a shifting standard
 

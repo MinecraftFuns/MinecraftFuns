@@ -21,12 +21,13 @@ new Date(post.date).toLocaleDateString("en-CA", { /* ... */ });
 `"2026-07-14"` names a box on a wall calendar, not a moment: the fourteenth
 begins at different instants in Auckland and in Toronto.
 
-`new Date("2026-07-14")` throws that distinction away. The ECMAScript spec
-parses a date-only ISO string as **UTC midnight**, which is a specific point on
-the timeline. `toLocaleDateString` then puts that point back onto a calendar,
-and with no `timeZone` option it uses whichever calendar the host happens to be
-on. Toronto runs four hours behind UTC in July, so UTC midnight is still eight
-in the evening on the thirteenth.
+`new Date("2026-07-14")` throws that distinction away. The
+[ECMAScript spec](https://tc39.es/ecma262/#sec-date-time-string-format)
+parses a date-only ISO string as **UTC midnight**, which is a specific point
+on the timeline. `toLocaleDateString` then puts that point back onto a
+calendar, and with no `timeZone` option it uses whichever calendar the host
+happens to be on. Toronto runs four hours behind UTC in July, so UTC
+midnight is still eight in the evening on the thirteenth.
 
 ## Why CI never caught it
 

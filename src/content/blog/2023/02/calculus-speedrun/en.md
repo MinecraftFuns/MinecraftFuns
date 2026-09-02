@@ -49,8 +49,9 @@ f'(c)=\frac{f(b)-f(a)}{b-a}.
 $$
 
 The average rate of change across the interval is attained as an
-instantaneous rate somewhere inside it. Rolle's theorem is the case
-$f(a)=f(b)$, and each implies the other in a line.
+instantaneous rate somewhere inside it.
+[Rolle's theorem](https://en.wikipedia.org/wiki/Rolle%27s_theorem) is the
+case $f(a)=f(b)$, and each implies the other in a line.
 
 ## Limits
 
@@ -104,7 +105,8 @@ $$
 f(x)=\sum_{k=0}^{n}\frac{f^{(k)}(a)}{k!}(x-a)^k+R_n(x).
 $$
 
-Maclaurin's expansion is this with $a=0$.
+[Maclaurin's expansion](https://en.wikipedia.org/wiki/Taylor_series) is this
+with $a=0$.
 
 The two standard remainders answer different questions. The Peano remainder
 is qualitative,
@@ -243,8 +245,9 @@ $$
 \frac{\sin x}{x}=\cos\frac{x}{2}\cos\frac{x}{4}\cos\frac{x}{8}\cdots,
 $$
 
-yields Viète's product: at $x=\frac{\pi}{2}$ the left side is
-$\frac{2}{\pi}$.
+yields
+[Viète's product](https://en.wikipedia.org/wiki/Vi%C3%A8te%27s_formula): at
+$x=\frac{\pi}{2}$ the left side is $\frac{2}{\pi}$.
 
 ### Improper integrals
 
@@ -381,8 +384,9 @@ $$
 
 Diagonalizing $A$ turns $e^{At}$ into an exponential of each eigenvalue on
 its own and uncouples the system into independent scalar equations. A
-defective $A$ needs the Jordan form and produces polynomial factors in $t$,
-the same phenomenon as the repeated root above.
+defective $A$ needs the
+[Jordan form](https://en.wikipedia.org/wiki/Jordan_normal_form) and produces
+polynomial factors in $t$, the same phenomenon as the repeated root above.
 
 ## Curvature
 

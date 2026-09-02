@@ -56,19 +56,24 @@ the property a scaffold has.
 
 People with aphasia, whose language production is severely impaired, keep
 [mathematical reasoning and spatial navigation largely
-intact](https://doi.org/10.1111/nyas.13046): core cognition survives without
-language. Neuroimaging agrees, up to a point. Classical language areas
-engage selectively for linguistic tasks while abstract reasoning recruits
-frontal and parietal circuits, but during complex tasks the language regions
+intact](https://doi.org/10.1111/nyas.13046):
+core cognition survives without language. Neuroimaging agrees, up to a
+point. Classical language areas engage selectively for linguistic tasks
+while abstract reasoning recruits frontal and parietal circuits, but during
+complex tasks the language regions
 [co-activate with the circuits for executive control and working
-memory](https://doi.org/10.1093/scan/nsv094). Language-based rehearsal
+memory](https://doi.org/10.1093/scan/nsv094).
+Language-based rehearsal
 [helps memory retrieval](https://doi.org/10.1016/j.concog.2019.03.005),
-verbal labels [improve discrimination and
-categorization](https://doi.org/10.1016/j.plrev.2018.12.001), and disrupting
-language areas with TMS [impairs verbal reasoning while sparing nonverbal
-problem-solving](https://doi.org/10.3390/brainsci13010067). Thought runs
-without language; language organizes and amplifies it. That is what a
-scaffold does.
+verbal labels
+[improve discrimination and
+categorization](https://doi.org/10.1016/j.plrev.2018.12.001),
+and disrupting language areas with
+[TMS](https://en.wikipedia.org/wiki/Transcranial_magnetic_stimulation)
+[impairs verbal reasoning while sparing nonverbal
+problem-solving](https://doi.org/10.3390/brainsci13010067).
+Thought runs without language; language organizes and amplifies it. That is
+what a scaffold does.
 
 ## Inner speech
 

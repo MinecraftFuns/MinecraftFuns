@@ -17,9 +17,10 @@ linearly independent. A basis of the span could be assembled from
 combinations; here the answer must be drawn from the given vectors
 themselves.
 
-Put the vectors in as the columns of a matrix $A$, row-reduce to reduced row
-echelon form, and note which columns hold pivots. The original columns in
-those positions are a maximal linearly independent subset, and there are
+Put the vectors in as the columns of a matrix $A$, row-reduce to
+[reduced row echelon form](https://en.wikipedia.org/wiki/Row_echelon_form),
+and note which columns hold pivots. The original columns in those positions
+are a maximal linearly independent subset, and there are
 $\operatorname{rank}(A)$ of them.
 
 This works because row operations preserve every linear dependence among the
@@ -27,11 +28,12 @@ columns. A relation $\sum c_ja_j=0$ is a vector in the null space, row
 operations leave the null space untouched, and so the dependencies visible in
 the echelon form are the dependencies in the original.
 
-Row-reducing a matrix whose rows are the vectors returns a basis for the span
-built out of combinations of the inputs. The singular value decomposition
+Row-reducing a matrix whose rows are the vectors returns a basis for the
+span built out of combinations of the inputs. The
+[singular value decomposition](https://en.wikipedia.org/wiki/Singular_value_decomposition)
 $A=U\Sigma V^{T}$ gives $\operatorname{rank}(A)$ as the number of nonzero
-singular values, with the leading columns of $U$ an orthonormal basis for the
-column space. Both describe the span without selecting from the inputs.
+singular values, with the leading columns of $U$ an orthonormal basis for
+the column space. Both describe the span without selecting from the inputs.
 
 ### The change of basis matrix
 
@@ -95,7 +97,9 @@ $$
 \dim(\text{row space})+\dim(\text{null space})=n,
 $$
 
-while rank-nullity says
+while
+[rank-nullity](https://en.wikipedia.org/wiki/Rank%E2%80%93nullity_theorem)
+says
 
 $$
 \dim(\text{column space})+\dim(\text{null space})=n .
@@ -136,9 +140,10 @@ The diagonal rule, taking signed products along wrapped diagonals, is valid
 only for $n\leq 3$. The full expansion is a sum over all $n!$ permutations
 signed by parity, and wrapped diagonals supply just $2n$ of them.
 
-Cramer's rule runs in the other direction, solving a linear system from
-determinants already in hand: $x_i=\det(A_i)/\det(A)$, where $A_i$ is $A$
-with column $i$ replaced by the right-hand side.
+[Cramer's rule](https://en.wikipedia.org/wiki/Cramer%27s_rule) runs in the
+other direction, solving a linear system from determinants already in hand:
+$x_i=\det(A_i)/\det(A)$, where $A_i$ is $A$ with column $i$ replaced by the
+right-hand side.
 
 ### The adjugate
 
@@ -205,8 +210,9 @@ $\det A=2\cdot5\cdot10=100$, which cofactor expansion confirms.
 
 Not every matrix factors this way. A zero pivot forces a row swap, and the
 general statement is $PA=LU$ with $P$ a permutation matrix, whence
-$\det A=(-1)^{s}\prod_iU_{ii}$ for $s$ swaps. Numerical work uses partial
-pivoting regardless, for stability.
+$\det A=(-1)^{s}\prod_iU_{ii}$ for $s$ swaps. Numerical work uses
+[partial pivoting](https://en.wikipedia.org/wiki/Pivot_element) regardless,
+for stability.
 
 Cofactor expansion is $O(n!)$ and elimination is $O(n^3)$, which is the
 difference between infeasible and routine somewhere around $n=20$.
@@ -260,8 +266,9 @@ $$
 $$
 
 with eigenvalue $2$ of algebraic multiplicity $2$ and a one-dimensional
-eigenspace. Such a matrix is similar to a Jordan form whose blocks exceed
-$1\times 1$.
+eigenspace. Such a matrix is similar to a
+[Jordan form](https://en.wikipedia.org/wiki/Jordan_normal_form) whose blocks
+exceed $1\times 1$.
 
 ## Gram-Schmidt
 
@@ -291,8 +298,9 @@ dependence.
 
 Collecting the $q_j$ as columns of $Q$ gives $A=QR$ with $R$ upper
 triangular. In floating point, classical Gram-Schmidt loses orthogonality
-badly; modified Gram-Schmidt and Householder reflections are what numerical
-libraries use.
+badly; modified Gram-Schmidt and
+[Householder reflections](https://en.wikipedia.org/wiki/Householder_transformation)
+are what numerical libraries use.
 
 ## Quadratic forms
 
@@ -315,8 +323,9 @@ what diagonalization clears.
 ### Standard form and normal form
 
 The standard form is what an orthogonal change of variables produces. By the
-spectral theorem a real symmetric $A$ factors as $A=PDP^{T}$ with $P$
-orthogonal, so $P^{T}AP=D$, and substituting $x=Py$ gives
+[spectral theorem](https://en.wikipedia.org/wiki/Spectral_theorem) a real
+symmetric $A$ factors as $A=PDP^{T}$ with $P$ orthogonal, so $P^{T}AP=D$,
+and substituting $x=Py$ gives
 
 $$
 Q=\lambda_1y_1^2+\cdots+\lambda_ny_n^2
@@ -332,9 +341,9 @@ $$
 Q=y_1^2+\cdots+y_p^2-y_{p+1}^2-\cdots-y_{p+q}^2 .
 $$
 
-Sylvester's law of inertia says $p$ and $q$ do not depend on the route taken.
-The standard form keeps the eigenvalues; the normal form keeps only their
-signs.
+[Sylvester's law of inertia](https://en.wikipedia.org/wiki/Sylvester%27s_law_of_inertia)
+says $p$ and $q$ do not depend on the route taken. The standard form keeps
+the eigenvalues; the normal form keeps only their signs.
 
 Eigenvectors for distinct eigenvalues of a symmetric matrix are automatically
 orthogonal, so normalizing is enough for them. Within a repeated eigenvalue
