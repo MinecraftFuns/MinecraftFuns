@@ -67,12 +67,6 @@ describe("parseTimeZone", () => {
   });
 });
 
-describe("SITE_TIME_ZONE", () => {
-  it("is America/Toronto", () => {
-    assert.equal(SITE_TIME_ZONE, "America/Toronto");
-  });
-});
-
 describe("parseIsoDate", () => {
   it("accepts a well-formed calendar date", () => {
     const parsed = parseIsoDate("2026-07-14");

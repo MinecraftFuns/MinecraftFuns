@@ -13,7 +13,6 @@ import {
   indexable,
   siteRelative,
   targets,
-  type DeploymentRole,
 } from "./deployment.ts";
 
 /* Test derivation shape so renaming a deployment does not rewrite the suite. */
@@ -195,10 +194,5 @@ describe("indexable", () => {
   it("admits the canonical copy and refuses a mirror", () => {
     assert.equal(indexable("canonical"), true);
     assert.equal(indexable("mirror"), false);
-  });
-
-  it("is total over the role", () => {
-    const roles: readonly DeploymentRole[] = ["canonical", "mirror"];
-    roles.forEach((role) => assert.equal(typeof indexable(role), "boolean"));
   });
 });

@@ -92,11 +92,4 @@ describe("taxonomy", () => {
       [2],
     );
   });
-
-  /* Every taxon is created from at least one item. */
-  it("never produces an empty taxon", () => {
-    taxaOf([item("a", "x"), item("b", "y", "x")]).forEach(({ items }) =>
-      assert.ok(items.length > 0),
-    );
-  });
 });

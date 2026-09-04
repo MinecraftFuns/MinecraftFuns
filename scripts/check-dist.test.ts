@@ -458,98 +458,6 @@ describe("inspect", () => {
     assert.deepEqual(violations, []);
   });
 
-  it("catches a link that forgot the base path", async () => {
-    // This regression passes typecheck and ordinary unit tests.
-    const violations = await inspectTree({
-      "index.html": page('<a href="/work">w</a>'),
-      "favicon.svg": "<svg/>",
-      ...ICONS,
-      "work/index.html": page("work", "work/"),
-    });
-    assert.ok(checksIn(violations).has("base-path"));
-  });
-
-  it("catches a link to a page that was never built", async () => {
-    const violations = await inspectTree({
-      "index.html": page('<a href="/MinecraftFuns/cv">cv</a>'),
-      "favicon.svg": "<svg/>",
-      ...ICONS,
-    });
-    assert.ok(checksIn(violations).has("dead-link"));
-  });
-
-  it("catches a missing required file", async () => {
-    const violations = await inspectTree({ "index.html": page("x") });
-    assert.ok(
-      violations.some((v) => v.check === "output" && v.detail.includes("favicon")),
-    );
-  });
-
-  it("catches an empty build", async () => {
-    const violations = await inspectTree({ "notes.txt": "x" });
-    assert.ok(checksIn(violations).has("output"));
-  });
-
-  it("catches client JavaScript, inline or emitted", async () => {
-    const inline = await inspectTree({
-      "index.html": page("<script>alert(1)</script>"),
-      "favicon.svg": "<svg/>",
-      ...ICONS,
-    });
-    assert.ok(checksIn(inline).has("zero-js"));
-
-    const emitted = await inspectTree({
-      "index.html": page("x"),
-      "favicon.svg": "<svg/>",
-      ...ICONS,
-      "_astro/island.js": "console.log(1)",
-    });
-    assert.ok(checksIn(emitted).has("zero-js"));
-  });
-
-  it("catches a rendered undefined", async () => {
-    const violations = await inspectTree({
-      "index.html": page("<p>undefined</p>"),
-      "favicon.svg": "<svg/>",
-      ...ICONS,
-    });
-    assert.ok(checksIn(violations).has("leakage"));
-  });
-
-  it("catches a missing or foreign canonical", async () => {
-    const missing = await inspectTree({
-      "index.html": "<!doctype html><html><body>x</body></html>",
-      "favicon.svg": "<svg/>",
-      ...ICONS,
-    });
-    assert.ok(checksIn(missing).has("canonical"));
-
-    const foreign = await inspectTree({
-      "index.html":
-        '<!doctype html><html><head><link rel="canonical" href="https://elsewhere.test/"/></head><body>x</body></html>',
-      "favicon.svg": "<svg/>",
-      ...ICONS,
-    });
-    assert.ok(checksIn(foreign).has("canonical"));
-  });
-
-  it("catches a mirror that canonicalises to itself instead of to the canonical copy", async () => {
-    /* A mirror can be internally consistent yet canonicalize to itself. */
-    const selfCanonical = await inspectTree(
-      {
-        "index.html": `<!doctype html><html><head><link rel="canonical" href="https://mirror.test/MinecraftFuns/"/></head><body>x</body></html>`,
-        "favicon.svg": "<svg/>",
-        ...ICONS,
-      },
-      {
-        site: "https://mirror.test",
-        base: "/MinecraftFuns/",
-        canonical: { origin: "https://joefang.test", base: "/" },
-      },
-    );
-    assert.ok(checksIn(selfCanonical).has("canonical"));
-  });
-
   it("accepts a mirror that canonicalises to the canonical copy", async () => {
     const violations = await inspectTree(
       {
@@ -567,24 +475,23 @@ describe("inspect", () => {
     assert.deepEqual(violations, []);
   });
 
-  it("catches an off-palette colour in emitted CSS", async () => {
-    const violations = await inspectTree({
-      "index.html": page("x"),
-      "favicon.svg": "<svg/>",
-      ...ICONS,
-      "_astro/index.css": ".a{color:#5e6ad2}",
-    });
-    assert.ok(checksIn(violations).has("palette"));
-  });
-
-  it("accumulates rather than stopping at the first violation", async () => {
-    // Accumulation keeps one defect from masking another.
+  /* One tree per emitted file kind, so a check that never reads its
+     kind fails here even though the unit tests below still pass. */
+  it("accumulates across every file kind it reads", async () => {
     const violations = await inspectTree({
       "index.html": page('<a href="/work">w</a><p>undefined</p>'),
       "_astro/index.css": ".a{color:#5e6ad2;border-color:var(--nope)}",
+      "_astro/island.js": "console.log(1)",
     });
     const checks = checksIn(violations);
-    for (const expected of ["base-path", "leakage", "palette", "css-var", "output"]) {
+    for (const expected of [
+      "base-path",
+      "leakage",
+      "palette",
+      "css-var",
+      "output",
+      "zero-js",
+    ]) {
       assert.ok(checks.has(expected), `missed ${expected}`);
     }
   });

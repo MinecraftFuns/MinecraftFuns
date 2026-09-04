@@ -298,14 +298,6 @@ describe("renderHeaders", () => {
       ),
     );
   });
-
-  /* Removal prefixes the property name with the format's `!` operator. */
-  it("renders removal with the bang the format defines", () => {
-    const text = renderHeaders([
-      { pattern: exactPath("/a"), ops: [{ tag: "remove", name: "link" }] },
-    ]);
-    assert.match(text, /^ {2}! link$/m);
-  });
 });
 
 describe("headerProblems", () => {

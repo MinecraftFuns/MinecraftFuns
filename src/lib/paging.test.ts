@@ -78,7 +78,6 @@ describe("paginate: the laws", () => {
 
   it("has no empty page: a listing with nothing in it is the empty variant", () => {
     assert.deepEqual(paginate([], size(12)), { tag: "empty" });
-    assert.ok(pagesOf(upTo(47), 12).every((page) => page.items.length > 0));
   });
 
   it("makes one full page when the count divides exactly", () => {

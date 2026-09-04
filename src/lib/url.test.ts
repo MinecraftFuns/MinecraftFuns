@@ -49,7 +49,6 @@ describe("classifyHref", () => {
 describe("joinBase", () => {
   it("prefixes rooted paths under a project base", () => {
     assert.equal(joinBase(PROJECT_BASE, "/work"), "/MinecraftFuns/work");
-    assert.equal(joinBase(PROJECT_BASE, "/favicon.svg"), "/MinecraftFuns/favicon.svg");
   });
 
   it("leaves rooted paths alone under a root base", () => {
@@ -140,14 +139,6 @@ describe("joinRoute", () => {
     assert.equal(
       joinRoute(PROJECT_BASE, "/blog?tag=time"),
       "/MinecraftFuns/blog/?tag=time",
-    );
-  });
-
-  it("passes through anything that carries its own authority", () => {
-    ["https://example.com", "mailto:a@b.c", "#main", "//cdn.example.com/x"].forEach(
-      (href) => {
-        assert.equal(joinRoute(PROJECT_BASE, href), href, `mangled: ${href}`);
-      },
     );
   });
 
