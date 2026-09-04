@@ -18,6 +18,29 @@ export const groupBy = <T, K>(
   return grouped as ReadonlyMap<K, NonEmpty<T>>;
 };
 
+/**
+ * Items by every key they claim, in first-encounter order.
+ *
+ * `Map.groupBy` admits one key per item, and a label set fans out. The
+ * accumulator is local, so the `NonEmpty` it builds holds by construction.
+ */
+export const groupByEach = <T, K>(
+  items: Iterable<T>,
+  keysOf: (item: T) => readonly K[],
+): ReadonlyMap<K, NonEmpty<T>> => {
+  const grouped = new Map<K, [T, ...T[]]>();
+
+  for (const item of items) {
+    for (const key of keysOf(item)) {
+      const found = grouped.get(key);
+      if (found === undefined) grouped.set(key, [item]);
+      else found.push(item);
+    }
+  }
+
+  return grouped;
+};
+
 /** The first item claiming each key, in encounter order. */
 export const distinctBy = <T, K>(
   items: readonly T[],

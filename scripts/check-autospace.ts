@@ -6,7 +6,7 @@ import { basename, resolve } from "node:path";
 import { languages } from "../src/config/languages.ts";
 import { filesUnder } from "./lib/files.ts";
 import { each, isMain, report } from "./lib/gate.ts";
-import { scanFiles } from "./lib/scan.ts";
+import { numberedLines, scanFiles } from "./lib/scan.ts";
 
 /** Content root; only ideographic renditions are scanned. */
 const ROOT = "src/content";
@@ -98,15 +98,15 @@ const WINDOW = 24;
 
 /** Find boundaries in one pass while tracking frontmatter and code fences. */
 export const sites = (path: string, source: string): readonly Site[] => {
-  const lines = source.split("\n");
+  const lines = numberedLines(source);
   const found: Site[] = [];
 
   let openFence: string | undefined = undefined;
-  let inFrontMatter = lines[0] === FRONT_MATTER;
+  let inFrontMatter = lines[0]?.text === FRONT_MATTER;
 
-  lines.forEach((line, index) => {
+  lines.forEach(({ text: line, line: lineNumber }) => {
     if (inFrontMatter) {
-      inFrontMatter = !(index > 0 && line === FRONT_MATTER);
+      inFrontMatter = !(lineNumber > 1 && line === FRONT_MATTER);
       return;
     }
 
@@ -133,7 +133,7 @@ export const sites = (path: string, source: string): readonly Site[] => {
         .filter(({ index: at }) => balanced(masked, at))
         .map(({ index: at }) => ({
           path,
-          line: index + 1,
+          line: lineNumber,
           column: at + 1,
           context: line.slice(Math.max(0, at - WINDOW), at + WINDOW + 1),
         })),

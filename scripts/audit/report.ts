@@ -6,6 +6,7 @@
  * JSON for parsing. Neither is derived from the other's formatting.
  */
 
+import { groupBy } from "../../src/prelude/distinct.ts";
 import {
   IMPACT_ORDER,
   summarise,
@@ -93,14 +94,14 @@ export const toMarkdown = (findings: readonly MergedFinding[], meta: Meta): stri
   lines.push("");
 
   // -- Detail, grouped by page -------------------------------------------
-  const byPage = Object.groupBy(findings, (finding) => finding.page);
+  const byPage = groupBy(findings, (finding) => finding.page);
 
-  for (const [page, entries] of Object.entries(byPage)) {
-    lines.push(`### \`${page}\`: ${entries?.length ?? 0} finding(s)`);
+  for (const [page, entries] of byPage) {
+    lines.push(`### \`${page}\`: ${entries.length} finding(s)`);
     lines.push("");
     lines.push("| Impact | Category | Rule | Where | Detail |");
     lines.push("| --- | --- | --- | --- | --- |");
-    for (const finding of entries ?? []) {
+    for (const finding of entries) {
       const where = finding.contexts.length > 0 ? finding.contexts.join(", ") : "all";
       const selector = finding.selector
         ? ` \`${escapePipes(truncate(finding.selector, 60))}\``

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { clashesBy, distinctBy, groupBy } from "./distinct.ts";
+import { clashesBy, distinctBy, groupBy, groupByEach } from "./distinct.ts";
 
 type Row = { readonly id: string; readonly key: string };
 const row = (id: string, key: string): Row => ({ id, key });
@@ -24,6 +24,33 @@ describe("groupBy", () => {
 
   it("is total on an empty list", () => {
     assert.equal(groupBy([], (r: Row) => r.key).size, 0);
+  });
+});
+
+describe("groupByEach", () => {
+  /* The fan-out `Map.groupBy` cannot do: one item, several groups. */
+  it("files an item under every key it claims", () => {
+    const grouped = groupByEach([row("a", "")], () => ["x", "y"]);
+
+    assert.deepEqual([...grouped.keys()], ["x", "y"]);
+    assert.deepEqual(ids(grouped.get("y") ?? []), ["a"]);
+  });
+
+  it("drops an item claiming no key", () => {
+    assert.equal(groupByEach([row("a", "")], () => []).size, 0);
+  });
+
+  it("orders keys and items by first encounter", () => {
+    const grouped = groupByEach([row("a", "z"), row("b", "x"), row("c", "z")], (r) => [
+      r.key,
+    ]);
+
+    assert.deepEqual([...grouped.keys()], ["z", "x"]);
+    assert.deepEqual(ids(grouped.get("z") ?? []), ["a", "c"]);
+  });
+
+  it("is total on an empty list", () => {
+    assert.equal(groupByEach([], (r: Row) => [r.key]).size, 0);
   });
 });
 

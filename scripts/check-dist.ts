@@ -4,6 +4,7 @@ import { readFile, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { assertNever } from "../src/prelude/adt.ts";
+import { groupBy } from "../src/prelude/distinct.ts";
 import { deployments } from "../src/config/deployments.ts";
 import { languages } from "../src/config/languages.ts";
 import { captures } from "./lib/captures.ts";
@@ -153,10 +154,6 @@ export const hostDirectiveViolations = ({
   readonly headerPatterns: readonly string[];
   readonly resolves: Resolves;
 }): readonly string[] => {
-  // A destination carrying its own authority cannot be checked from here.
-  const internal = ({ to }: ShippedRedirect): boolean =>
-    to.startsWith("/") && !to.startsWith("//");
-
   const unmatched = (pattern: string): boolean => {
     const wildcard = pattern.endsWith("*");
     return !resolves(wildcard ? pattern.slice(0, -1) : pattern, wildcard);
@@ -164,7 +161,7 @@ export const hostDirectiveViolations = ({
 
   return [
     ...redirects
-      .filter((redirect) => internal(redirect) && !resolves(redirect.to))
+      .filter((redirect) => isInternal(redirect.to) && !resolves(redirect.to))
       .map(
         ({ from, to }) => `_redirects: ${from} points at ${to}, which no file satisfies`,
       ),
@@ -625,9 +622,9 @@ const main = async () => {
     failed: `for ${site}${base}`,
     /* Group repeated violations by check. */
     body: (violations: readonly Violation[]): string =>
-      Object.entries(Object.groupBy(violations, (entry) => entry.check))
+      [...groupBy(violations, (entry) => entry.check)]
         .map(
-          ([check, entries = []]) =>
+          ([check, entries]) =>
             `  ${check} (${entries.length})\n` +
             entries.map((entry) => `    - ${entry.detail}`).join("\n"),
         )

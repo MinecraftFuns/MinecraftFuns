@@ -15,6 +15,7 @@
 
 import type { NonEmpty } from "../prelude/adt.ts";
 import type { Eagerness } from "../schema.ts";
+import { slashTerminated } from "./url.ts";
 
 /**
  * A document rule: the engine reads the links out of the page itself and keeps
@@ -31,8 +32,7 @@ export type DocumentRule = {
 export type Rules = { readonly prefetch: NonEmpty<DocumentRule> };
 
 /** Every same-origin route under this deployment, and nothing above it. */
-export const hrefPattern = (base: string): string =>
-  `${base.endsWith("/") ? base : `${base}/`}*`;
+export const hrefPattern = (base: string): string => `${slashTerminated(base)}*`;
 
 export const prefetchRules = (base: string, eagerness: Eagerness): Rules => ({
   prefetch: [
