@@ -11,17 +11,17 @@ const ROOT = "src/content";
 /**
  * A link whose visible text is a math span.
  *
- * The archive was written before `:backup[url]` existed, and marked archived
- * links by typesetting the English word: `[$^\mathrm{Backup}$](url)`. It
- * renders, so nothing complained, and it says "Backup" in a Chinese article
- * because a math span has no language. The directive is what knows the
- * rendition it sits in, so the hand-rolled form has to stay gone.
+ * Older prose marked archived links by typesetting the English word as math:
+ * `[$^\mathrm{Backup}$](url)`. It renders, so nothing complained, but it says
+ * "Backup" in a Chinese article because a math span has no language. The
+ * directive knows the rendition it sits in, so the hand-rolled form must not
+ * return.
  *
  * Real mathematics is never a whole link text, so this cannot fire on it.
  */
 const TYPESET_LABEL = /\[\$[^\]\n]*\$\]\((\S*?)\)/g;
 
-/** One hand-rolled marker, and the link it was standing in for. */
+/** One hand-rolled marker, and the link it stands for. */
 export type Marker = {
   readonly path: string;
   readonly line: number;

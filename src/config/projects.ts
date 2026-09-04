@@ -4,11 +4,9 @@ import type { ProjectConfig, ProjectKindConfig, ProjectsPageConfig } from "../sc
  * Projects, and the sections they group into.
  *
  * `projectKinds` is the single source for the order sections appear in *and*
- * their headings and blurbs. Those used to be three parallel declarations: an
- * order array that had to list exactly the keys of two separate records, which
- * is three knobs describing one thing. `ProjectKind` is derived from this
- * array, so adding a kind here is the entire change, and a project naming a
- * kind that does not exist is a type error rather than an unlabelled group.
+ * their headings and blurbs. `ProjectKind` is derived from this array, so
+ * adding a kind here is the entire change, and a project naming a kind that
+ * does not exist is a type error rather than an unlabelled group.
  */
 /** The projects page's copy; the description is worded around the site name. */
 export const projectsPage = {

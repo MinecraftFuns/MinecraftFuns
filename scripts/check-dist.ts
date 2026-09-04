@@ -71,8 +71,6 @@ export type Options = {
 // Pure helpers
 // ---------------------------------------------------------------------------
 
-/* Keep URL validation independent from link construction. */
-
 /** Local copy keeps validation independent from production URL logic. */
 const slashTerminated = (path: string): string =>
   path.endsWith("/") ? path : `${path}/`;
@@ -131,7 +129,6 @@ export const parseRedirects = (text: string): readonly ShippedRedirect[] =>
     .map((line) => line.trim())
     .filter((line) => line !== "" && !line.startsWith("#"))
     .map((line) => line.split(/\s+/))
-    /* Destructuring narrows both required redirect fields for the result. */
     .map(([from, to, status]) =>
       from === undefined || to === undefined ? undefined : { from, to, status },
     )
@@ -171,7 +168,7 @@ export const hostDirectiveViolations = ({
   ];
 };
 
-/** Z-Base-32, RFC 6189 section 5.1.6. Deliberately not RFC 4648's alphabet. */
+/** Z-Base-32, RFC 6189 section 5.1.6, not RFC 4648's alphabet. */
 const ZBASE32_NAME = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{32}$/;
 
 /** What is wrong with an entry's name, or nothing. */
@@ -264,9 +261,8 @@ const isMissing = (error: unknown): boolean =>
 /**
  * Absence, distinguished from inaccessibility.
  *
- * A bare `catch` would tell the reader to "run the build first" when the
- * artifact is there but unreadable, which is the one instruction that cannot
- * help. Permission and I/O errors propagate instead.
+ * A bare `catch` would report "run the build first" when the artifact exists
+ * but is unreadable. Permission and I/O errors propagate instead.
  */
 const exists = async (path: string): Promise<boolean> => {
   try {
@@ -376,19 +372,19 @@ export const firstPageAliases = ({
 ];
 
 /*
- * What HTML does with a `<script>`, decided the way the standard decides it.
+ * What HTML does with a `<script>`, per the standard's own classification.
  *
- * "No client JavaScript" is a claim about what the engine will execute, and a
+ * "No client JavaScript" is a claim about what the engine executes, and a
  * `<script>` tag is not that claim's subject: the `type` attribute is. HTML's
- * "prepare the script element" sorts an element into exactly four outcomes,
- * and only two of them run author code. The rest are data blocks, which the
+ * "prepare the script element" sorts an element into exactly four outcomes, and
+ * only two of them run author code. The rest are data blocks, which the
  * standard says are "not processed by the user agent, but instead by author
  * script or other tools" - inert markup carrying JSON, no different in kind
  * from a `<meta>` tag.
  *
- * Reading every `<script>` as JavaScript would therefore reject a speculation
- * rules block, which is the shape this site uses to hint at the next page and
- * which no engine executes.
+ * Reading every `<script>` as JavaScript would reject a speculation rules
+ * block: inert markup this site uses to hint at the next page, which no engine
+ * executes.
  */
 
 /** The MIME essences the standard counts as JavaScript. */
@@ -425,9 +421,8 @@ const SURROUNDING_SPACE = /^[\t\n\f\r ]+|[\t\n\f\r ]+$/g;
  * Classify one element by its `type`, per "prepare the script element".
  *
  * Absent, empty, or a JavaScript MIME *essence* match is a classic script.
- * Essence is the bare `type/subtype`, so a parameter makes it no longer a
- * match and the standard calls the result a data block; this follows the
- * standard rather than second-guessing it. Total on every string.
+ * Essence is the bare `type/subtype`, so a parameter makes it no longer a match
+ * and the standard calls the result a data block. Total on every string.
  */
 export const scriptKind = (type: string | undefined): ScriptKind => {
   if (type === undefined) return { tag: "classic" };
@@ -620,7 +615,6 @@ const main = async () => {
     problems: await inspect({ dist, base, canonical, tokensCss }),
     passed: `${dist} passes all ${CHECKS.length} checks for ${site}${base}`,
     failed: `for ${site}${base}`,
-    /* Group repeated violations by check. */
     body: (violations: readonly Violation[]): string =>
       [...groupBy(violations, (entry) => entry.check)]
         .map(

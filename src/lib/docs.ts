@@ -15,10 +15,10 @@ import { routeUrl, type Href } from "./url.ts";
 export type { DocCategory } from "./labels.ts";
 
 /**
- * The docs read model, the flat counterpart to `lib/posts.ts`. Both
- * differences follow from a doc having no date: no archive folders to
- * reconcile, so the slug is the whole of its identity, and no recency to sort
- * by, so the order is alphabetical.
+ * The docs read model, the flat counterpart to `lib/posts.ts`. Both differences
+ * follow from a doc having no date: no archive folders to reconcile, so the
+ * slug is its identity, and no recency to sort by, so the order is
+ * alphabetical.
  */
 
 /**

@@ -18,8 +18,6 @@ export const INTRO: Readonly<
  * The lede under any page title, and the block after it. One ladder for
  * every opening: `xs` binds the small line to the title, `md` sets the lede
  * apart, `lg` marks the trailing block (buttons, tags) as a new group.
- * `ArticleHeader` and `DocHeader` had drifted to `mt-sm`, so the same lede
- * sat closer to the title on an article than on the index that linked to it.
  */
 export const INTRO_LEDE = "mt-md max-w-measure text-body-lg text-ink-muted";
 export const INTRO_EXTRA = "mt-lg";

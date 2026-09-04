@@ -21,16 +21,13 @@ import { defineMdastPlugin } from "satteri";
  *
  * The mdast placement is load-bearing. Astro orders its syntax highlighter
  * ahead of user hast plugins, and by hast a `math` node has already become
- * `<pre><code>`, which Shiki claims as plaintext before a hast plugin runs.
- * The previous version of this plugin ran on hast and recovered the display
- * flag from class names, which meant it never saw a display block at all and
- * rendered every formula inline. On mdast the node arrives ahead of the
- * highlighter and its type carries the distinction outright.
+ * `<pre><code>`, which Shiki claims as plaintext before a hast plugin runs. On
+ * mdast the node arrives ahead of the highlighter and its type carries the
+ * distinction outright.
  *
- * `throwOnError` is deliberate, and nothing here catches: malformed TeX
- * fails the build with KaTeX's own message rather than shipping a paragraph
- * with a red hole in it. The archive is maths-heavy enough that a silent
- * fallback would eventually be exercised.
+ * `throwOnError` is set and nothing here catches, so malformed TeX fails the
+ * build with KaTeX's own message rather than shipping a paragraph with a red
+ * hole in it.
  */
 
 const render = (displayMode: boolean) => (node: { readonly value: string }) => ({

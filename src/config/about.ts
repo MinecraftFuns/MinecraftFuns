@@ -8,10 +8,10 @@ import type { StandingConfig } from "../schema.ts";
  * surface that states it; the README, which no build step renders, is
  * checked against these values by `scripts/check-readme.ts` instead.
  *
- * Experience, skills and awards are deliberately absent rather than filled
- * with plausible placeholder text: an invented internship that ships to a
- * live CV is worse than a short one. The About page keeps a commented
- * template for the day there is something true to add.
+ * Experience, skills and awards are absent rather than filled with plausible
+ * placeholder text: an invented internship that ships to a live CV is worse
+ * than a short one. The About page keeps a commented template for the day there
+ * is something true to add.
  */
 export const standing = {
   /* Scheduled fact: update once each September. */

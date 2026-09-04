@@ -65,10 +65,9 @@ const PAGE_CONCURRENCY = 4;
 const TOUCH_WIDTH = 768;
 
 /**
- * Where one pass puts what it saw. A module-global array made this channel
- * invisible to the typechecker and would tie the report's order to whichever
- * page finished first; a log per page is what lets routes be visited
- * concurrently and still be drained in route order.
+ * Where one pass puts what it saw. A log per page lets routes be visited
+ * concurrently and still be drained in route order; a module-global array would
+ * race unpredictably and stay invisible to the typechecker.
  */
 type Log = {
   readonly record: (finding: Finding) => void;
@@ -544,9 +543,8 @@ const main = async (): Promise<{
     const browser = await launchBrowser();
     try {
       /* Seeded from `routes`, so every lookup below has a value. Read through a
-         helper rather than asserting one: the map and the loop are built from the
-         same list, and a helper that inserts on miss keeps that a fact rather
-         than a claim. */
+         helper rather than asserting one, since the map and the loop are built
+         from the same list. */
       const documentsByRoute = new Map<string, Map<Scheme, DocumentFacts>>(
         routes.map((route) => [route, new Map()]),
       );

@@ -9,8 +9,8 @@ import { invalid, ok, type Parsed } from "../prelude/adt.ts";
  * address is case-mapped, hashed with SHA-1, and the 160-bit digest encoded
  * with Z-Base-32 (RFC 6189 section 5.1.6) into a fixed 32-character string. A
  * key is then published at `/.well-known/openpgpkey/hu/<hash>` on the address's
- * own domain, the "direct" method. The domain is deliberately excluded from
- * the hash, so an internationalised domain name cannot perturb it.
+ * own domain, the "direct" method. The domain is excluded from the hash, so an
+ * internationalised domain name cannot perturb it.
  *
  * SHA-1 is a *naming* function here, not a security one: it derives a stable
  * filename, nothing is authenticated by it, and the key served at that path
@@ -44,12 +44,12 @@ const ASCII_UPPER = /[A-Z]/g;
  * "All upper-case ASCII characters in a User ID are mapped to lowercase.
  * Non-ASCII characters are not changed."
  *
- * Emphatically not `String.prototype.toLowerCase`, which is Unicode-aware and
- * would map U+0130 (LATIN CAPITAL LETTER I WITH DOT ABOVE) to "i" followed by a
- * combining dot: two code points where there was one, a different byte
- * sequence to hash, and therefore a key published at a path no client will ever
- * request. Restricting the pattern to A-Z makes the per-character `toLowerCase`
- * exact, because over that domain the Unicode mapping and the ASCII one agree.
+ * Not `String.prototype.toLowerCase`, which is Unicode-aware and would map
+ * U+0130 (LATIN CAPITAL LETTER I WITH DOT ABOVE) to "i" followed by a combining
+ * dot: two code points where there was one, a different byte sequence to hash,
+ * and therefore a key published at a path no client will ever request.
+ * Restricting the pattern to A-Z makes the per-character `toLowerCase` exact,
+ * because over that domain the Unicode mapping and the ASCII one agree.
  */
 export const mapLocalPart = (local: string): string =>
   local.replace(ASCII_UPPER, (letter) => letter.toLowerCase());
@@ -93,9 +93,9 @@ export const wkdHash = (local: string): WkdHash =>
 /**
  * A mail address split at its domain boundary.
  *
- * Deliberately not an RFC 5322 parser. The only question this project asks of
- * an address is "which domain, and what precedes it", and the addresses come
- * from a signed key the site owner controls rather than from user input.
+ * Not an RFC 5322 parser. The only question this project asks of an address is
+ * "which domain, and what precedes it", and the addresses come from a signed
+ * key the site owner controls rather than from user input.
  */
 export type MailAddress = {
   readonly local: string;

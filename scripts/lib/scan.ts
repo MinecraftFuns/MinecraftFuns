@@ -1,9 +1,7 @@
 /**
- * How a gate reads its input.
- *
- * Six gates had written the same three steps: read every file under a bounded
- * concurrency, hand the scanner a path relative to the working directory
- * because that is what a report cites, and flatten. Only the scanner differed.
+ * How a gate reads its input: read every file under bounded concurrency, and
+ * hand the scanner a path relative to the working directory, since that is what
+ * a report cites.
  */
 
 import { readFile } from "node:fs/promises";

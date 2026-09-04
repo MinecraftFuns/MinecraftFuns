@@ -100,9 +100,9 @@ export const summarise = memoiseBy(
  * plausible wrong URL everywhere it is listed; and article assembly, which
  * checks what no single file can carry.
  *
- * Drafting is per rendition on purpose: an unfinished translation stays off
- * the site while the original publishes, and the article simply presents as
- * monolingual until the draft flag comes off.
+ * Drafting is per rendition: an unfinished translation stays off the site while
+ * the original publishes, and the article simply presents as monolingual until
+ * the draft flag comes off.
  */
 export const publishedArticles = once(async (): Promise<readonly PublishedArticle[]> => {
   const entries = await getCollection("blog", ({ data }) => !data.draft);

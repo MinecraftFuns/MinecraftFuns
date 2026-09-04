@@ -32,11 +32,11 @@ import { parseSlug } from "./slug.ts";
 export type Lang = (typeof languages)[number]["code"];
 
 /**
- * A row as *written*, literals intact. Emphatically not `LanguageConfig`,
- * which is the shape a row must satisfy and types `code` as the whole of
- * `Lowercase<string>`. That width is right for a schema and fatal here:
- * `Lang` is derived from the values, so reading the rows back through the
- * schema would hand every consumer an open string.
+ * A row as *written*, literals intact. Not `LanguageConfig`, which is the shape
+ * a row must satisfy and types `code` as `Lowercase<string>`. That width is
+ * right for a schema and fatal here: `Lang` is derived from the values, so
+ * reading the rows back through the schema would hand every consumer an open
+ * string.
  */
 type ConfiguredLanguage = (typeof languages)[number];
 

@@ -14,10 +14,10 @@ const STYLESHEET = "src/styles/global.css";
  * A variant the type declares, and the selector that would realise it.
  *
  * The union and the stylesheet are two halves of one sum type living in two
- * languages, and only one half is typechecked. Nothing in CSS fails when a
- * rule is deleted from under a class that markup still emits: the page builds,
- * the gates pass, and the control renders as bare text. That is not
- * hypothetical here, it is how the control block was lost once.
+ * languages, and only one half is typechecked. Nothing in CSS fails when a rule
+ * is deleted from under a class that markup still emits: the page builds, the
+ * gates pass, and the control renders as bare text. This isn't hypothetical:
+ * the control block was lost this way once.
  */
 export type Variant = {
   readonly name: string;

@@ -1,4 +1,4 @@
-/** English counted nouns, which three call sites had each spelled out. */
+/** English counted nouns. */
 
 /**
  * A count and its noun, agreeing in number: `3 posts`, `1 post`.

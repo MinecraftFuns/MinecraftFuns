@@ -121,10 +121,10 @@ export const isoDate = (raw: string): IsoDate =>
 /**
  * Calendar components, read lexically off the fixed-width representation.
  *
- * No zone appears here, and that is the point: a calendar date *has* a year
- * and a month by construction. Recovering them by converting to an instant and
- * asking a clock is what rendered "Jul 13" for a post dated the fourteenth:
- * the conversion is the bug, so the correct implementation refuses to make it.
+ * No zone appears here: a calendar date *has* a year and a month by
+ * construction. Recovering them by converting to an instant and asking a clock
+ * is what rendered "Jul 13" for a post dated the fourteenth: the conversion is
+ * the bug, so the correct implementation refuses to make it.
  */
 export const yearOf = (date: IsoDate): string => date.slice(0, 4);
 export const monthOf = (date: IsoDate): string => date.slice(5, 7);

@@ -6,8 +6,7 @@
  * repository: the one identity surface no Astro build step can derive from
  * `src/config`. Every other surface now interpolates its facts
  * (`lib/identity.ts`), so the README is the last place a stale year or a
- * renamed account can survive unnoticed; it is where "second-year" outlived
- * the truth once already.
+ * renamed account can survive unnoticed.
  *
  * Redundancy is safe exactly when one copy is authoritative and something
  * checks the other against it. Config is authoritative; this is the check.

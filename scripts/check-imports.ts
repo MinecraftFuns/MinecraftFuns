@@ -15,9 +15,8 @@ const EXTENSIONS = [".ts", ".astro"];
  * `@lucide/astro` re-exports every icon it has from `.`, so one import of the
  * root pulls the whole set into the module graph. Nothing ships today, because
  * the icons compile to inline SVG and the bundle carries no JavaScript at all,
- * so a regression here costs build time and dependency graph rather than
- * bytes, which is the kind that goes unnoticed. Deep imports keep the cost
- * proportional to the two arrows actually drawn.
+ * so a regression here costs build time and dependency graph rather than bytes.
+ * Deep imports keep the cost proportional to the two arrows actually drawn.
  */
 const DEEP_ONLY = {
   barrel: "@lucide/astro",

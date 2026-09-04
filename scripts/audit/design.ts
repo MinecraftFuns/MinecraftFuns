@@ -115,7 +115,6 @@ const SCALES = [
   { key: "fontSizes", tokenKey: "text", label: "font size" },
 ];
 
-/* Map probe keys to measured edges. */
 const EDGES = [
   { key: "lefts", edge: "left" },
   { key: "rights", edge: "right" },

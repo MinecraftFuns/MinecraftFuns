@@ -11,8 +11,8 @@ import { renderHeaders } from "../lib/hosting.ts";
  * `_headers`.
  *
  * Decoding fails the build rather than emitting a file known to be unsound.
- * `assetUrl` is passed in rather than reached for inside the library, which is
- * what keeps the decoder pure and testable without a bundler.
+ * `assetUrl` is passed in rather than reached for inside the library, keeping
+ * the decoder pure and testable without a bundler.
  */
 export const GET: APIRoute = () => {
   const { headers } = hostPolicy();

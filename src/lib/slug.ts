@@ -19,8 +19,8 @@ export const parseSlug = (raw: string): Parsed<string> =>
     : invalid(`expected a kebab-case slug, got ${JSON.stringify(raw)}`);
 
 /**
- * The URL segment for a human-readable label. Lossy on purpose, and therefore
- * not a parser: "Cloudflare WARP" and "Cloudflare  --  WARP" both become
+ * The URL segment for a human-readable label. Lossy, and therefore not a
+ * parser: "Cloudflare WARP" and "Cloudflare -- WARP" both become
  * `cloudflare-warp`. Being many-to-one, it leaves the caller to decide what
  * happens when two labels meet; `lib/taxonomy.ts` fails the build, since the
  * alternative is two pages at one URL.

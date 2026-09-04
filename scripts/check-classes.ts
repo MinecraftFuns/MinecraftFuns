@@ -42,12 +42,10 @@ const RULES: readonly Rule[] = [
   },
   {
     /*
-     * The link families are a closed set: `link` and `link-muted`. A third
-     * name is either a retired variant (`link-in-text`, folded into `link`
-     * when one underline rule replaced the choice between two) or a typo,
-     * and both render as unstyled prose rather than failing, which is the
-     * quiet kind of wrong. Anchored to the class-list position so it cannot
-     * fire on a word inside prose.
+     * The link families are a closed set: `link` and `link-muted`. A third name
+     * is a retired variant or a typo; both render as unstyled prose rather than
+     * failing. Anchored to the class-list position so it cannot fire on a word
+     * inside prose.
      */
     rule: "unknown-link-family",
     pattern: /(?<=["'\s])link-(?!muted\b)[a-z][a-z0-9-]*/g,
@@ -105,7 +103,7 @@ export const typeRoles = (css: string): readonly string[] =>
 /**
  * Every `text-*` utility, capturing the whole role name.
  *
- * Maximal munch is what keeps a short role from matching inside a long one:
+ * Maximal munch keeps a short role from matching inside a long one:
  * `text-body-sm` yields `body-sm`, never `body`, so membership alone decides.
  */
 const TYPE_UTILITY = /\btext-([a-z0-9]+(?:-[a-z0-9]+)*)/g;
@@ -139,7 +137,7 @@ const main = async () => {
 
   const roles = typeRoles(await readFile(join(root, "styles", "global.css"), "utf8"));
   /* Relative, because that is the form `scanFiles` reports; both sides pass
-     through the same transform, so the prefix test is the one it replaced. */
+     through the same transform, so the prefix test compares like with like. */
   const pages = `${relative(process.cwd(), join(root, "pages"))}/`;
 
   const found = await scanFiles(files, (path, source) =>

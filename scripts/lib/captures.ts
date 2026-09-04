@@ -2,9 +2,7 @@
  * Reading capture groups off a batch of matches.
  *
  * `RegExp` is typed without reference to its pattern, so a group the pattern
- * guarantees reads as optional at every site that touches one. Five places
- * here were each dropping that impossible case, and three had written out the
- * same paragraph explaining why.
+ * guarantees reads as optional at every site that touches one.
  */
 export const captures = (
   matches: Iterable<RegExpExecArray>,

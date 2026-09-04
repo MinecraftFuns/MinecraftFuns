@@ -101,10 +101,10 @@ export type DocumentFacts = {
 /** Caps keep one pathological page from flooding the report. */
 const LIMITS: Limits = { findings: 10, containers: 60, children: 12, sampled: 150, asymmetric: 5 };
 
-/* CSS spelling, because these are read with `getPropertyValue`, which is the
-   only accessor that takes a name computed at runtime. Indexing the style
-   declaration with a variable reaches its numeric index signature instead, and
-   answers a typo with `undefined` rather than with an error. */
+/* CSS spelling, because these are read with `getPropertyValue`, the only
+   accessor that takes a name computed at runtime. Indexing the style
+   declaration with a variable reaches its numeric index signature instead,
+   and answers a typo with `undefined` rather than an error. */
 const SPACING_PROPERTIES = [
   "padding-top",
   "padding-bottom",
@@ -301,8 +301,8 @@ export const pageProbe = ({
     .filter(
       allOf(
         ({ children }) => children.length >= 3,
-        // Like compared with like: a heading followed by paragraphs is not a
-        // repeated structure and owes no uniform rhythm.
+        // A heading followed by paragraphs is not a repeated structure and
+        // owes no uniform rhythm.
         ({ children, first }) =>
           children.every(({ element }) => signature(element) === signature(first.element)),
         // Vertically stacked only; a horizontal row has no vertical rhythm.
@@ -393,7 +393,7 @@ export const pageProbe = ({
         ),
         byPropertyValue,
       ),
-      // Uniform corners only; a deliberately shaped corner is not a scale error.
+      // Uniform corners only; a non-uniform corner is a shape choice, not a scale error.
       radii: measure(
         sampled
           .filter(({ style }) => style.borderTopLeftRadius === style.borderBottomRightRadius)
@@ -479,7 +479,7 @@ export const motionProbe = () => {
 
 /**
  * Tag names whose focus draws no visible ring. Programmatic focus does not
- * always satisfy `:focus-visible`, so this informs rather than accuses.
+ * always satisfy `:focus-visible`, so results are advisory.
  */
 export const focusProbe = (selector: string): readonly string[] => [
   ...new Set(
