@@ -1,38 +1,30 @@
 /**
  * The small algebraic vocabulary shared by the site's domain modules.
  *
- * Deliberately not a library: erased types and a handful of total functions.
- * An fp-ts-shaped dependency would add runtime wrappers and allocation for
- * names we can spell ourselves.
+ * Erased types and a handful of total functions. An fp-ts-shaped dependency
+ * would add runtime wrappers and allocation for names we can spell ourselves.
  */
 
 /**
  * A list with at least one element.
  *
- * `readonly [T, ...T[]]` is the whole of the definition, but spelled out at
- * every use it reads as a tuple trick, and each reader has to re-derive what
- * the head is doing there. The name says the concept once.
- *
- * Two things follow from having it. Destructuring gives a head typed `T`
- * rather than `T | undefined`, so consumers lose the empty case outright; and
- * `nonEmpty` below becomes the one place the emptiness question is asked, at
- * the boundary where an ordinary array is admitted.
+ * Destructuring gives a head typed `T`, never `T | undefined`, so consumers
+ * lose the empty case outright, and `nonEmpty` below is the one place the
+ * emptiness question gets asked.
  */
 export type NonEmpty<T> = readonly [T, ...T[]];
 
 /**
- * The sole narrowing from an array. `undefined` for the empty case rather than
- * a `Parsed`: emptiness has no reason to report, and every caller here already
- * has a better sentence of its own to supply.
+ * The sole narrowing from an array. `undefined` for the empty case, not a
+ * `Parsed`: emptiness has no reason to report, and every caller has a better
+ * sentence of its own.
  */
 export const nonEmpty = <T>(items: readonly T[]): NonEmpty<T> | undefined =>
   items.length === 0 ? undefined : (items as NonEmpty<T>);
 
 /**
- * Functor. `Array.prototype.map` returns an array of its input's length by
- * specification, so the cast discharges a law rather than an optimism: the
- * same trusted-boundary move as `nonEmpty`'s own, made once here so no call
- * site ever needs one. The arrow keeps `map`'s index out of `f`'s arguments.
+ * Functor. `map` preserves length by specification, so the cast is proven.
+ * The arrow keeps `map`'s index out of `f`'s arguments.
  */
 export const mapNonEmpty = <A, B>(items: NonEmpty<A>, f: (item: A) => B): NonEmpty<B> => {
   const mapped: readonly B[] = items.map((item) => f(item));
@@ -40,9 +32,7 @@ export const mapNonEmpty = <A, B>(items: NonEmpty<A>, f: (item: A) => B): NonEmp
 };
 
 /**
- * Reordering, which is length-preserving for the same reason `map` is:
- * `toSorted` returns a permutation of its input. Sorting cannot empty a list,
- * and this is where that sentence is written down.
+ * Reordering. `toSorted` returns a permutation, so this cannot empty a list.
  */
 export const sortNonEmpty = <T>(
   items: NonEmpty<T>,
@@ -54,8 +44,7 @@ export const sortNonEmpty = <T>(
 
 /**
  * The same, effectfully. `map` starts every task before `Promise.all` awaits
- * any, and `Promise.all` resolves to an array of its input's length, so the
- * same law discharges the same cast.
+ * any, and `Promise.all` preserves length, so the same law discharges the cast.
  */
 export const traverseNonEmpty = async <A, B>(
   items: NonEmpty<A>,
@@ -68,11 +57,11 @@ export const traverseNonEmpty = async <A, B>(
 /**
  * The result of turning an untrusted representation into a trusted domain
  * value. A sum, not a nullable: the failure carries its reasons, so a caller
- * can report *why* rather than only *that* parsing failed.
+ * can report *why* parsing failed and not only *that* it did.
  *
- * Reasons are a non-empty list because a failure with nothing to say is not a
- * state worth having; `collect` and `both` below are what produce more than
- * one, and rendering them is `orThrow`'s job rather than each producer's.
+ * Reasons are non-empty because a failure with nothing to say is not a state
+ * worth having. `collect` and `both` produce more than one; `orThrow` renders
+ * them.
  */
 export type Parsed<T> =
   | { readonly tag: "ok"; readonly value: T }
@@ -96,9 +85,8 @@ export const assertNever = (value: never): never => {
 
 /**
  * Read a key the domain proves present: a table indexed by a closed union, or
- * one built from the very rows being looked up. Throwing rather than defaulting
- * is the point, since the only plausible default is a neighbouring key's value,
- * which is the silent wrong answer a lookup table exists to prevent. `table`
+ * one built from the rows being looked up. It throws instead of defaulting,
+ * since the only plausible default is a neighbouring key's value. `table`
  * names where the missing entry should have been written.
  */
 export const demand = <K, V>(map: ReadonlyMap<K, V>, key: K, table: string): V => {
@@ -114,10 +102,9 @@ export const mapParsed = <A, B>(parsed: Parsed<A>, f: (value: A) => B): Parsed<B
   parsed.tag === "ok" ? ok(f(parsed.value)) : parsed;
 
 /**
- * Monad. Fail-fast of necessity rather than by choice: `f` needs a value that
- * a failure never produced, so there is nothing to run it on and nothing
- * further to learn. Reach for it only when the second step genuinely depends
- * on the first; when the steps are independent, `both` reports both.
+ * Monad. Fail-fast of necessity: `f` needs a value a failure never produced,
+ * so there is nothing to run it on. Use it only when the second step depends
+ * on the first; for independent steps `both` reports both.
  */
 export const andThen = <A, B>(
   parsed: Parsed<A>,
@@ -125,11 +112,8 @@ export const andThen = <A, B>(
 ): Parsed<B> => (parsed.tag === "ok" ? f(parsed.value) : parsed);
 
 /**
- * `ok`, unless there were reasons not to be.
- *
- * The shape every accumulating check in this project ends in: a list of
- * problems, empty meaning success. Written out at four sites before this, each
- * repeating the same `undefined` dance around `nonEmpty`.
+ * `ok`, unless there were reasons not to be. Every accumulating check in this
+ * project ends here: a list of problems, empty meaning success.
  */
 export const okUnless = <T>(reasons: readonly string[], value: T): Parsed<T> => {
   const failures = nonEmpty(reasons);
@@ -139,13 +123,10 @@ export const okUnless = <T>(reasons: readonly string[], value: T): Parsed<T> => 
 /**
  * Applicative traverse: every element parsed, every failure kept.
  *
- * Emphatically not `andThen` in a loop, and it cannot be built from one.
- * `andThen`'s continuation runs only after a success, so once the first
- * element fails there is no second error in existence to accumulate. A type
- * whose accumulation is lawful is an Applicative and *not* a Monad, which is
- * why this is a separate function rather than a fold over the one above.
- *
- * One pass, building both outcomes and returning whichever the input decided.
+ * This cannot be built from `andThen`, whose continuation runs only after a
+ * success: once the first element fails there is no second error in existence
+ * to accumulate. Lawful accumulation is Applicative, and Applicative is not
+ * Monad. One pass, building both outcomes.
  */
 export const collect = <A>(items: readonly Parsed<A>[]): Parsed<readonly A[]> => {
   const values: A[] = [];
@@ -174,8 +155,7 @@ export const both = <A, B>(a: Parsed<A>, b: Parsed<B>): Parsed<readonly [A, B]> 
 
 /**
  * Label every reason with where it came from. Applied while the failure is
- * still a value, so an accumulated one says which file each reason belongs to
- * rather than naming the batch once.
+ * still a value, so each reason names its own file.
  */
 export const inContext = <T>(parsed: Parsed<T>, context: string): Parsed<T> => {
   if (parsed.tag === "ok") return parsed;
@@ -187,9 +167,9 @@ export const explain = (parsed: Parsed<unknown>): string =>
   parsed.tag === "invalid" ? parsed.reasons.join("\n  ") : "";
 
 /**
- * Eliminates `Parsed` at a boundary where failure is a *defect* rather than an
- * expected outcome, authored site data. Throwing fails the build loudly: a
- * malformed date should never reach a reader.
+ * Eliminates `Parsed` where failure is a *defect*, not an expected outcome:
+ * authored site data. Throwing fails the build, and a malformed date never
+ * reaches a reader.
  *
  * Untrusted input (Markdown frontmatter, an API) should eliminate `Parsed` by
  * matching both variants instead of calling this.

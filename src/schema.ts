@@ -3,10 +3,9 @@ import type { NonEmpty } from "./prelude/adt.ts";
 /**
  * What may be written in `src/config`, and nothing else.
  *
- * Outside that directory on purpose. `config/` is the surface somebody edits,
- * so it holds values and no declarations; this file is the contract those
- * values are checked against, which is read when you want to know what is
- * allowed rather than what is set.
+ * `config/` is the surface somebody edits, so it holds values and no
+ * declarations. This file is the contract those values are checked against:
+ * read it to learn what is allowed, and `config/` to learn what is set.
  *
  * Every config export is written `as const satisfies` one of these: `satisfies`
  * reports a missing or misspelled field, while `as const` keeps the literal
@@ -44,15 +43,14 @@ export type RedirectTarget = RootedPath | HttpsUrl;
  *
  * Two alternatives, because the root is the case a single pattern gets wrong.
  * `` `/${string}/` `` needs two characters and rejects `"/"`; `` `/${string}` ``
- * accepts `"/MinecraftFuns"` without its trailing slash, which is exactly the
- * value that mounts every link one segment too high.
+ * accepts `"/MinecraftFuns"`, which mounts every link one segment too high.
  */
 export type BasePath = "/" | `/${string}/`;
 
 /**
- * One place the site is published. No separate "provider" field: a deployment
- * has one name, and a second identifier for the same thing is how a pipeline
- * and a config come to disagree about which deployment they mean.
+ * One place the site is published. No separate "provider" field: a second
+ * identifier for one deployment is how a pipeline and a config come to
+ * disagree about which deployment they mean.
  */
 export type DeploymentTargetConfig = {
   /** Must match the GitHub environment of the same name, which is what makes
@@ -66,9 +64,9 @@ export type DeploymentTargetConfig = {
  * Every place this site is published, and which one is authoritative.
  *
  * The canonical target is a *field*, not a flagged member of a list, so
- * "exactly one deployment is authoritative" is a property of the type rather
- * than an invariant a validator defends. A list of `{ canonical: boolean }`
- * would admit both zero and two, and could only report a mistake already made.
+ * "exactly one deployment is authoritative" is a property of the type. A list
+ * of `{ canonical: boolean }` would admit both zero and two, and could only
+ * report a mistake already made.
  */
 export type DeploymentsConfig = {
   readonly canonical: DeploymentTargetConfig;
@@ -121,9 +119,8 @@ export type LanguageConfig = {
  * The order *is* the configuration: earlier is more preferred, and an
  * article's bare URL serves its best-preferred rendition. The head is the
  * site's own language, the one the chrome is written in. `NonEmpty`, so "a
- * site with no language" is unrepresentable rather than a runtime surprise;
- * there is deliberately no separate "default language" field to disagree
- * with the order.
+ * site with no language" is unrepresentable, and no separate "default
+ * language" field exists to disagree with the order.
  */
 export type LanguagesConfig = NonEmpty<LanguageConfig>;
 
@@ -135,15 +132,13 @@ export type SiteConfig = {
   /** Shown as the brand, and used as the document title. */
   readonly name: string;
   /**
-   * The editorial tail of the site description. The description's first
-   * half, what is studied and where, is derived from `StandingConfig` in
-   * `lib/identity.ts`, so this holds only the words no other config states.
+   * The editorial tail of the site description. Its first half, what is
+   * studied and where, is derived from `StandingConfig` in `lib/identity.ts`,
+   * so this holds only the words no other config states.
    *
-   * There is deliberately no `handle` and no `dateLocale` here: the GitHub
-   * account lives once, in `ContactConfig.profiles`, and date locales are
-   * per-language in `LanguageConfig`. Each was a second declaration of a
-   * fact declared elsewhere; the first had already fallen out of use while
-   * still inviting an edit.
+   * No `handle` and no `dateLocale` here: the GitHub account lives once, in
+   * `ContactConfig.profiles`, and date locales are per-language in
+   * `LanguageConfig`.
    */
   readonly tagline: string;
   /**
@@ -152,9 +147,8 @@ export type SiteConfig = {
    * ["Hong Kong"] is complete on its own, and no part is ever a forced
    * political statement. Non-empty by type; the separator is rendering.
    *
-   * Deliberately independent of `timeZone`: one is a fact about the author,
-   * the other about how dates render, and they can legitimately diverge.
-   * That they agree today is a decision, not a derivation.
+   * Independent of `timeZone`: one is a fact about the author, the other
+   * about how dates render, and they can legitimately diverge.
    */
   readonly location: NonEmpty<string>;
   /** IANA zone. Every date the site renders is read in it. */
@@ -268,15 +262,13 @@ export type ContactConfig = {
 // ---------------------------------------------------------------------------
 
 /**
- * Academic standing, as atoms rather than sentences.
+ * Academic standing, as atoms, so no sentence about it is authored twice.
  *
- * These facts render in at least three surfaces with three phrasings: the
- * About page prose, the education table, and the GitHub profile README. The
- * sentences had already drifted once, "second-year" against "third-year"
- * against the truth; the fix is that no sentence is authored twice. The
- * Astro-rendered surfaces derive their copy from this record in
- * `lib/identity.ts`, and the README, which GitHub renders from the repo
- * without a build step, is reconciled against it by `scripts/check-readme.ts`.
+ * Three surfaces phrase these facts three ways: the About page prose, the
+ * education table, and the GitHub profile README. The first two derive their
+ * copy from this record through `lib/identity.ts`. GitHub renders the README
+ * from the repo with no build step, so `scripts/check-readme.ts` reconciles
+ * it against this record instead.
  */
 export type StandingConfig = {
   /** "fourth", as in "fourth-year". The value that actually drifts. */
@@ -308,10 +300,9 @@ export type ProjectKindConfig = {
 };
 
 /**
- * A project, generic in the kind so that the shape can live here while the set
- * of kinds stays derived from the data. Naming the union here instead would be
- * a second place to add a section, which is the drift `projectKinds` exists to
- * prevent; instantiating it beside the data costs one line.
+ * A project, generic in the kind, so the shape lives here while the set of
+ * kinds stays derived from the data. Naming the union here would add a second
+ * place to declare a section, the drift `projectKinds` exists to prevent.
  */
 export type ProjectConfig<Kind extends string> = {
   readonly title: string;
@@ -323,10 +314,10 @@ export type ProjectConfig<Kind extends string> = {
   /**
    * The year work stopped, or `null` while it continues.
    *
-   * One field for two facts that were separately authored and could disagree:
-   * a range ending in the past said the work had stopped while a status field
-   * said it had not. It also removes the annual edit, since a live project's
-   * span runs to whatever year it is read in.
+   * One field for two facts that could disagree: a range ending in the past
+   * said the work had stopped while a status field said it had not. It also
+   * removes the annual edit, since a live project's span runs to whatever
+   * year it is read in.
    */
   readonly until: number | null;
   /** Non-empty, because an empty list renders an empty element. No ceiling:
@@ -363,13 +354,13 @@ export type RedirectConfig = {
  * A header rule as written in config.
  *
  * `set` is a record, so a repeated header name is unrepresentable in the
- * common case; names differing only in case remain expressible, so the decoder
- * still checks. The union is what requires a rule to *do* something: as two
+ * common case; names differing only in case stay expressible, so the decoder
+ * still checks. The union requires a rule to *do* something: as two
  * independent optionals, `{ path }` alone typechecked and did nothing.
  * `remove` is non-empty for the same reason.
  *
- * A type cannot say that a `set` record has any keys, so `{ path, set: {} }`
- * stays expressible and the decoder keeps its check for exactly that case.
+ * A type cannot say a `set` record has any keys, so `{ path, set: {} }` stays
+ * expressible and the decoder keeps its check for that case.
  */
 export type HeaderConfig = { readonly path: RootedPath } & (
   | {
