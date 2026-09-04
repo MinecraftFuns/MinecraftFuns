@@ -155,7 +155,7 @@ jobs:
       # No `actions/checkout` of this repository: this job publishes an
       # artifact that has already been built and checked, and giving it the
       # source would only widen what a compromised step could reach.
-      - name: Download the joefang-org build
+      - name: Download joefang-org build
         uses: actions/download-artifact@v7
         with:
           name: joefang-org
@@ -176,7 +176,7 @@ jobs:
       # deployment's". A plain grep for the mirror's base path is deliberately
       # not among them: a migrated post links a gist under `/MinecraftFuns/`,
       # so that string appears in the correct artifact too.
-      - name: Verify the artifact is the joefang-org build
+      - name: Verify artifact is joefang-org build
         run: |
           set -euo pipefail
 
@@ -218,7 +218,7 @@ jobs:
       # entire key directory and both Matrix delegation documents passed
       # cleanly. `check:dist` cannot see this either, since it runs on `dist/`,
       # before the artifact hop that does the damage.
-      - name: Verify the artifact serves what it declares
+      - name: Verify artifact serves what it declares
         run: |
           set -euo pipefail
 
@@ -266,9 +266,8 @@ jobs:
       # `ssh-key` puts the deploy key in this checkout's git config, which is
       # what lets the push below authenticate. `persist-credentials` therefore
       # stays at its default of true here, unlike every other checkout in this
-      # workflow: the credential *is* the point of the step. Full history,
-      # because a shallow clone is an awkward base to rebase onto, and this
-      # repository holds nothing but small static files.
+      # workflow. Full history, because a shallow clone is an awkward base to
+      # rebase onto and this repository holds only small static files.
       #
       # JOEFANG_ORG_DEPLOY_KEY is the *private* half, in OpenSSH format,
       # pasted with its real line breaks intact:
@@ -296,7 +295,7 @@ jobs:
       # git@github.com:McFuns/joefang.org.git and writes `core.sshCommand` into
       # `deploy/.git/config`, which is why the commit-and-push step below runs
       # with `working-directory: deploy` and never names a URL of its own.
-      - name: Check out the deployment repository
+      - name: Check out deployment repository
         uses: actions/checkout@v7
         with:
           repository: McFuns/joefang.org
@@ -305,11 +304,9 @@ jobs:
           fetch-depth: 0
           show-progress: false
 
-      # Replace the working tree wholesale rather than copying over it, so a
-      # page deleted from the source is deleted from the site. Copying alone
-      # would leave a removed route live and reachable forever, which is the
-      # classic failure of publish-by-copy.
-      - name: Stage the build
+      # Replace the working tree wholesale. Copying over it would leave a
+      # route deleted from the source live and reachable forever.
+      - name: Stage build
         run: |
           find deploy -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp -R build/. deploy/

@@ -2,18 +2,14 @@ name: Audit site
 
 # Browser audit. Reports, never blocks.
 #
-# A separate workflow rather than a job in deploy.yml, and the separation is
-# load-bearing: deploy.yml serializes whole runs through its `pages`
-# concurrency group (deliberately, so an older build can never overwrite a
-# newer deployment), which means every job it contains extends the lock every
-# subsequent push must wait on. Nothing here holds that lock; no deployment
-# ever waits for an audit.
+# A separate workflow, not a job in deploy.yml: deploy.yml serializes whole
+# runs through its `pages` concurrency group, so an older build can never
+# overwrite a newer deployment, and every job it contains extends the lock the
+# next push waits on. Nothing here holds that lock.
 #
-# Separate flow, shared pipeline: the build comes from the same workflow
-# deploy.yml builds through, so the tree the browser examines is produced and
-# checked exactly as the tree production receives. Findings land in the job
-# summary and in a downloadable artifact; the point is to learn about
-# problems, not to hold the site hostage to a slow browser.
+# The build still comes from the workflow deploy.yml builds through, so the
+# browser examines the tree production receives. Findings land in the job
+# summary and in a downloadable artifact.
 on:
   push:
     branches: [main]
@@ -40,7 +36,7 @@ jobs:
       targets: canonical
 
   audit:
-    name: Audit standalone build (non-blocking)
+    name: Audit standalone build
     needs: build
     runs-on: ubuntu-latest
     # Generous, because the failure this guards against is a hang, not slowness:
@@ -73,12 +69,12 @@ jobs:
       # rendering engine tracks what readers actually run. One engine only;
       # three would triple the runtime for findings that are, at this level,
       # almost entirely engine-independent.
-      - name: Install the latest stable Chrome
+      - name: Install latest stable Chrome
         run: npx playwright install --with-deps chrome
 
       # Byte-for-byte the artifact the build workflow checked, not a second
       # build of the same commit that could quietly diverge from it.
-      - name: Download the canonical build
+      - name: Download canonical build
         uses: actions/download-artifact@v7
         with:
           name: ${{ fromJSON(needs.build.outputs.canonical).id }}
@@ -90,7 +86,7 @@ jobs:
           SITE_BASE: ${{ fromJSON(needs.build.outputs.canonical).base }}
         run: npm run audit
 
-      - name: Publish report to the job summary
+      - name: Publish report to job summary
         if: always()
         run: cat audit/report.md >> "$GITHUB_STEP_SUMMARY" || true
 
