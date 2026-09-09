@@ -63,10 +63,10 @@ A tolerance is a per-step fraction of a rank's gradient bytes, and applies only
 to the gradient
 [all-reduce](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html).
 ASTRA-sim simulates communication and compute times, not the model, so Accordion
-has no gradient norms to read. Steps 1, 2, 3 and 20 of
-twenty are pinned critical at 0.005, the rest at 0.4. The literature puts a
-model's sensitivity to lost gradients early in training, where three of those
-four sit.
+has no gradient norms to read. Steps 1, 2, 3 and 20 of twenty are pinned
+critical, so $p_{\text{low}}$ covers those and $p_{\text{high}}$ the rest. The
+literature puts a model's sensitivity to lost gradients early in training, where
+three of those four sit.
 
 ## The budget
 
@@ -154,11 +154,11 @@ criterion, the rate of change in gradient norms, puts the step inside or outside
 the critical learning regime, and that verdict picks the budget. No list
 of critical steps exists in the protocol.
 
-Two loss tolerances:
+Two loss tolerances, under the names DBLP and Accordion use:
 
-- `kToleranceCritical: float`. The fraction of a flow's gradient bytes that may
-  be lost on a critical step. `0.005` here.
-- `kToleranceOther: float`. The same on every other step. `0.4` here.
+- `p_low: float`. The fraction of a flow's gradient bytes that may be lost on a
+  critical step. `0.005` here.
+- `p_high: float`. The same on every other step. `0.4` here.
 
 State per flow, at the receiver:
 
@@ -175,8 +175,7 @@ State per flow, at the sender:
 
 State per training step, at each receiving rank. No rank reads another's.
 
-- `tolerance: float`. `kToleranceCritical` or `kToleranceOther`, by the
-  detector's verdict on this step.
+- `p: float`. `p_low` or `p_high`, by the detector's verdict on this step.
 - `budget: int`. Bytes this rank may lose on this step, fixed when the step
   opens.
 - `forgiven: int`. Bytes the receiver acknowledged without receiving.
@@ -210,8 +209,8 @@ Receiver::OnStepBegin(step, gradients):
   critical = InCriticalRegime(gradients)
   entry = steps[step]
   // A critical step can afford less loss.
-  entry.tolerance = critical ? kToleranceCritical : kToleranceOther
-  entry.budget = Floor(entry.tolerance * ExpectedGradientBytes(step))
+  entry.p = critical ? p_low : p_high
+  entry.budget = Floor(entry.p * ExpectedGradientBytes(step))
   entry.forgiven = 0
   entry.open = true
 
@@ -310,8 +309,9 @@ I ran the worst fabric with three seeds and four policy variants each. All four
 drew from one random stream, so the sender-side baseline suppresses the same
 messages the receiver-side policy may forgive.
 
-Against a baseline holding 0.005 on every step, forgiveness with exemption cut
-the 20-step training time by 12.9, 13.1 and 13.5 percent. The all-reduce span on
+Against a tight baseline, $p_{\text{low}} = p_{\text{high}} = 0.005$,
+forgiveness with exemption cut the 20-step training time by 12.9, 13.1 and 13.5
+percent. The all-reduce span on
 non-critical steps fell from 36 ms to 21 ms, while the critical-step span stayed
 at 37 ms, within 0.9 ms of the baseline in every seed.
 
@@ -332,17 +332,20 @@ The burst paid for it, draining 5 to 22 percent slower.
 
 ## Forgiveness spends the budget only under congestion
 
-I ran DBLP's sender-side shedding at the same per-step tolerances.
+Forgiveness and DBLP's sender-side shedding run the same schedule at the same
+$p_{\text{low}}$ and $p_{\text{high}}$. What separates them is where the
+allowance goes.
 
-Shedding spends whether or not the network is congested. Forgiveness spends only
-on bytes the network trimmed, a much smaller set. On the worst fabric FORGIVE
-gave up about 9 percent of its gradient bytes against shedding's 32 percent, and
-still finished sooner in every seed.
+Shedding spends it whether or not the network is congested. Forgiveness spends
+it only on bytes the network trimmed, a much smaller set. On the worst fabric
+the receiver-side arm gave up about 9 percent of its gradient bytes and the
+sender-side arm 32 percent, and the receiver-side arm finished sooner in every
+seed.
 
-A baseline that sheds 40 percent on every step does match FORGIVE on time: 1,433
-to 1,466 ms against 1,459 to 1,468 ms, a tie inside the seed spread of both. It
-gets there by shedding through the critical steps too, which is what the
-critical learning regime says not to do.
+A loose baseline, $p_{\text{low}} = p_{\text{high}} = 0.4$, does match
+forgiveness on time: 1,433 to 1,466 ms against 1,459 to 1,468 ms, a tie inside
+the seed spread of both. It gets there by shedding through the critical steps
+too, which is what the critical learning regime says not to do.
 
 ## Limits
 
