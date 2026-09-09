@@ -144,79 +144,58 @@ header change.
 The receiver keeps a scoreboard per flow, the sender keeps one mode bit, and
 every flow arriving at a rank shares that rank's loss budget for the step.
 
-```
-Constants of interest
+Constants:
 
-kCriticalSteps:  The training steps the schedule treats as critical. In
-                 these runs, {1, 2, 3, 20}.
-kBudgetCritical: Fraction of a rank's eligible gradient bytes that may be
-                 lost on a critical step. 0.005 here.
-kBudgetOther:    The same fraction on every other step. 0.4 here.
+- `kCriticalSteps: set[Step]`. The steps the schedule treats as critical,
+  `{1, 2, 3, 20}` in these runs.
+- `kBudgetCritical: float`. The fraction of a rank's eligible gradient bytes
+  that may be lost on a critical step, `0.005` here.
+- `kBudgetOther: float`. The same fraction on every other step, `0.4` here.
 
-Variables of interest, per flow
+State per flow, at the receiver:
 
-rcv_nxt:         The lowest sequence number not yet settled, whether by
-                 arrival or by forgiveness.
-scoreboard:      The ranges above rcv_nxt, each one Requested, Forgiven,
-                 or Received.
-cc_mode:         Exempt or Obeying. Set when the flow is created and
-                 cleared by the first retransmission request it receives.
+- `rcv_nxt: Seq`. The lowest sequence number not yet settled, whether it was
+  settled by arrival or by forgiveness.
+- `scoreboard: dict[Range, State]`. The ranges above `rcv_nxt`, each one
+  `Requested`, `Forgiven` or `Received`.
+- `cc_mode: Mode`. `Exempt` or `Obeying`, set when the flow is created and
+  cleared by the first retransmission request the receiver sends it.
 
-Variables of interest, per receiving rank and training step
+State per receiving rank and training step, shared by every flow to that rank:
 
-eligible:        Gradient bytes registered for this rank and step.
-forgiven:        Bytes the receiver acknowledged without receiving.
-suppressed:      Bytes the sender shed before sending.
-budget_open:     True until this rank's all-reduce for the step completes.
-```
+- `eligible: int`. Gradient bytes registered for this rank and step.
+- `forgiven: int`. Bytes the receiver acknowledged without receiving.
+- `suppressed: int`. Bytes the sender shed before sending.
+- `budget_open: bool`. `True` until this rank's all-reduce for the step
+  completes.
 
 For every rank and step, at all times, `forgiven + suppressed` is at most
 `Budget(step) * eligible`, where `Budget` returns `kBudgetCritical` on a step in
 `kCriticalSteps` and `kBudgetOther` otherwise.
 
-Figure 1 shows the states of one range on the scoreboard.
+A range on the scoreboard never leaves the state it reaches, so no range is
+charged twice. A range that arrives without ever being trimmed becomes
+`Received` directly.
 
-```
-                     o
-                     | Trimmed header reports the range
-                     v
-               +-----------+
-               | Unsettled |
-               +-----------+
-                |         |
-      Forgive   |         |   Request
-                v         v
-         +----------+  +-----------+
-         | Forgiven |  | Requested |
-         +----------+  +-----------+
-                             |
-                             | Retransmission arrives
-                             v
-                       +----------+
-                       | Received |
-                       +----------+
+| scoreboard value | trimmed header reports the range | data packet arrives |
+| --- | --- | --- |
+| absent | run `OnTrimmedHeader` below | `Received`, ACK |
+| `Requested` | resend the request at its priority | `Received`, ACK |
+| `Forgiven` | ACK, no charge | discard the payload, no credit back |
+| `Received` | duplicate ACK, no charge | `Received`, ACK |
 
-              Figure 1: States for a scoreboard range
-```
+A retransmission can be re-segmented, so a reported range may overlap bytes the
+receiver already has.
 
-A range that arrives without ever being trimmed enters Received directly.
-Forgiven is terminal: a retransmission that arrives for a forgiven range is
-discarded, and the budget is not credited back. No range is charged twice,
-because no range leaves the state it reaches.
-
-Pseudocode for UnsettledBytes follows. A retransmission can be re-segmented, so
-a reported range may overlap bytes the receiver already has.
-
-```
+```cpp
 UnsettledBytes(flow, range):
   return the bytes of range that are >= flow.rcv_nxt and are marked
     neither Received nor Forgiven on flow.scoreboard
 ```
 
-OnTrimmedHeader is called when a trimming switch reports a missing range.
-Pseudocode follows.
+`OnTrimmedHeader` runs when a trimming switch reports a missing range.
 
-```
+```cpp
 OnTrimmedHeader(flow, range):
   n = UnsettledBytes(flow, range)
   if (n == 0):
@@ -228,7 +207,7 @@ OnTrimmedHeader(flow, range):
     return
 
   (rank, step) = Coordinates(flow)
-  if (step not in schedule):
+  if (step not in kSchedule):
     SendRetransmissionRequest(range, kNormal)
     return
 
@@ -253,9 +232,9 @@ or charges the budget once. No new packet type and no header change. The ACK
 carries the ECN echo, so forgiving a range does not hide from the sender the
 congestion that caused the trim.
 
-At the sender, pseudocode for the two congestion signals follows.
+At the sender, the two congestion signals:
 
-```
+```cpp
 OnCongestionNotification(flow):
   if (flow.cc_mode == Exempt):
     cnp_ignored++
@@ -269,9 +248,9 @@ OnRetransmissionRequest(flow, range):
 ```
 
 Re-arming comes before the staleness check, so a stale request still counts as a
-refusal. A flow that reaches Obeying stays there until it finishes.
+refusal. A flow that reaches `Obeying` stays there until it finishes.
 
-Only the charge in OnTrimmedHeader writes the budget, `forgiven` and
+Only the charge in `OnTrimmedHeader` writes the budget, `forgiven` and
 `suppressed` never fall, and a closed budget never reopens. The bound therefore
 holds throughout a run, not only when a step ends, and the telemetry can check
 it while the run is going.
