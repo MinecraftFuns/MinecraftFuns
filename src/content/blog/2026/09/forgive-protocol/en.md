@@ -141,97 +141,140 @@ header change.
 
 ## State and decision
 
-FORGIVE adds three pieces of state. Each flow gets a scoreboard of the byte
-ranges still outstanding, and a congestion mode. Each (rank, step) gets a loss
-budget, which every flow arriving at that rank shares.
+The receiver keeps a scoreboard per flow, the sender keeps one mode bit, and
+every flow arriving at a rank shares that rank's loss budget for the step.
 
-```python
-Seq = Bytes = Rank = Step = int
-Range = tuple[Seq, Seq]                     # half-open, [start, end)
-Priority = Literal["normal", "escalated"]
-Mode = Literal["exempt", "obey"]
-RangeState = Literal["received", "forgiven"] | tuple[Literal["requested"], Priority]
+```
+Constants of interest
 
-@dataclass
-class Flow:                                 # one per queue pair, at the receiver
-    rcv_nxt: Seq                            # next sequence expected; RFC 9293's RCV.NXT
-    scoreboard: dict[Range, RangeState]     # outstanding ranges above rcv_nxt
-    mode: Mode                              # set when the flow starts, cleared by a NACK
+kCriticalSteps:  The training steps the schedule treats as critical. In
+                 these runs, {1, 2, 3, 20}.
+kBudgetCritical: Fraction of a rank's eligible gradient bytes that may be
+                 lost on a critical step. 0.005 here.
+kBudgetOther:    The same fraction on every other step. 0.4 here.
 
-@dataclass
-class LossBudget:                           # one per (rank, step)
-    eligible: Bytes                         # counted when a gradient message is sent
-    forgiven: Bytes                         # charged by the receiver
-    suppressed: Bytes                       # shed at the sender, before sending
-    open: bool                              # True until that rank's all-reduce finishes
+Variables of interest, per flow
 
-ledger: dict[tuple[Rank, Step], LossBudget] # every flow to a rank shares its entry
-mask: set[Step]                             # the steps the loss schedule covers
+rcv_nxt:         The lowest sequence number not yet settled, whether by
+                 arrival or by forgiveness.
+scoreboard:      The ranges above rcv_nxt, each one Requested, Forgiven,
+                 or Received.
+cc_mode:         Exempt or Obeying. Set when the flow is created and
+                 cleared by the first retransmission request it receives.
 
-def budget(s: Step) -> float: ...           # 0.005 on a critical step, 0.4 otherwise
-def priority(s: Step) -> Priority: ...      # escalated on a critical step, else normal
+Variables of interest, per receiving rank and training step
+
+eligible:        Gradient bytes registered for this rank and step.
+forgiven:        Bytes the receiver acknowledged without receiving.
+suppressed:      Bytes the sender shed before sending.
+budget_open:     True until this rank's all-reduce for the step completes.
 ```
 
-The invariant, for every `(r, s)` and at every moment of the run:
+For every rank and step, at all times, `forgiven + suppressed` is at most
+`Budget(step) * eligible`, where `Budget` returns `kBudgetCritical` on a step in
+`kCriticalSteps` and `kBudgetOther` otherwise.
 
-```python
-b = ledger[r, s]
-assert b.forgiven + b.suppressed <= budget(s) * b.eligible
+Figure 1 shows the states of one range on the scoreboard.
+
+```
+                     o
+                     | Trimmed header reports the range
+                     v
+               +-----------+
+               | Unsettled |
+               +-----------+
+                |         |
+      Forgive   |         |   Request
+                v         v
+         +----------+  +-----------+
+         | Forgiven |  | Requested |
+         +----------+  +-----------+
+                             |
+                             | Retransmission arrives
+                             v
+                       +----------+
+                       | Received |
+                       +----------+
+
+              Figure 1: States for a scoreboard range
 ```
 
-A trimmed header names a byte range. A retransmission can be re-segmented, so
-that range may overlap bytes the receiver already has. It charges only what is
-still missing:
+A range that arrives without ever being trimmed enters Received directly.
+Forgiven is terminal: a retransmission that arrives for a forgiven range is
+discarded, and the budget is not credited back. No range is charged twice,
+because no range leaves the state it reaches.
 
-```python
-def unsettled(flow: Flow, rng: Range) -> Bytes:
-    """Bytes of rng at or above flow.rcv_nxt that flow.scoreboard marks
-    neither "received" nor "forgiven"."""
+Pseudocode for UnsettledBytes follows. A retransmission can be re-segmented, so
+a reported range may overlap bytes the receiver already has.
+
+```
+UnsettledBytes(flow, range):
+  return the bytes of range that are >= flow.rcv_nxt and are marked
+    neither Received nor Forgiven on flow.scoreboard
 ```
 
-Write `n = unsettled(flow, rng)` and `b = ledger[r, s]`. The receiver takes the
-first row that matches.
+OnTrimmedHeader is called when a trimming switch reports a missing range.
+Pseudocode follows.
 
-| | condition | response | budget |
-| --- | --- | --- | --- |
-| 1 | `n == 0` | ACK | unchanged |
-| 2 | flow is not gradient all-reduce | NACK, normal | unchanged |
-| 3 | `s not in mask` | NACK, normal | unchanged |
-| 4 | `not b.open` | NACK, `priority(s)` | unchanged |
-| 5 | `b.forgiven + b.suppressed + n > budget(s) * b.eligible` | NACK, `priority(s)` | unchanged |
-| 6 | otherwise | ACK past the hole | `b.forgiven += n` |
+```
+OnTrimmedHeader(flow, range):
+  n = UnsettledBytes(flow, range)
+  if (n == 0):
+    SendAck(flow.rcv_nxt)
+    return
 
-Rows 2 to 5 are the refusals, and each sends the NACK a
-selective-retransmission transport already sends. No new packet type, no header
-change.
+  if (!IsGradientAllReduce(flow)):
+    SendRetransmissionRequest(range, kNormal)
+    return
 
-A range never leaves the state it reaches, so no range is charged twice.
+  (rank, step) = Coordinates(flow)
+  if (step not in schedule):
+    SendRetransmissionRequest(range, kNormal)
+    return
 
-| `flow.scoreboard` value | trimmed packet arrives | data packet arrives |
-| --- | --- | --- |
-| absent | run the table above | `"received"`, ACK |
-| `"received"` | duplicate ACK, no charge | `"received"`, ACK |
-| `("requested", p)` | resend the NACK at `p` | `"received"`, ACK |
-| `"forgiven"` | ACK, no charge | drop the payload, no credit back |
+  entry = ledger[rank][step]
+  if (!entry.budget_open):
+    SendRetransmissionRequest(range, Priority(step))
+    return
 
-The sender's mode falls once and does not rise again.
+  if (entry.forgiven + entry.suppressed + n >
+      Budget(step) * entry.eligible):
+    SendRetransmissionRequest(range, Priority(step))
+    return
 
-| `flow.mode` | CNP arrives | NACK arrives | ACK arrives |
-| --- | --- | --- | --- |
-| `"exempt"` | ignore it, count it | becomes `"obey"`, cut the rate, retransmit | advance |
-| `"obey"` | cut the rate | cut the rate, retransmit | advance |
+  entry.forgiven += n
+  flow.scoreboard[range] = Forgiven
+  flow.rcv_nxt = Advance(flow.rcv_nxt, flow.scoreboard)
+  SendAck(flow.rcv_nxt, ecn_echo)
+```
 
-The six rows are ordered and cover every trim, so each trim takes exactly one of
-them. A step the schedule does not cover reaches row 3 and is repaired the
-ordinary way, so a gap in the schedule costs nothing.
+Every path either sends the retransmission request the transport already sends,
+or charges the budget once. No new packet type and no header change. The ACK
+carries the ECN echo, so forgiving a range does not hide from the sender the
+congestion that caused the trim.
 
-Only row 6 writes the budget, and its condition is the invariant tested against
-the values that write will produce. `forgiven` and `suppressed` never fall, and
-a closed budget never reopens. The invariant therefore holds throughout a run,
-not only when a step ends, and the telemetry can check it while the run is
-going.
+At the sender, pseudocode for the two congestion signals follows.
 
-A flow that falls back to `"obey"` stays there until it finishes.
+```
+OnCongestionNotification(flow):
+  if (flow.cc_mode == Exempt):
+    cnp_ignored++
+    return
+  ReduceRate(flow)
+
+OnRetransmissionRequest(flow, range):
+  flow.cc_mode = Obeying
+  ReduceRate(flow)
+  Retransmit(range)
+```
+
+Re-arming comes before the staleness check, so a stale request still counts as a
+refusal. A flow that reaches Obeying stays there until it finishes.
+
+Only the charge in OnTrimmedHeader writes the budget, `forgiven` and
+`suppressed` never fall, and a closed budget never reopens. The bound therefore
+holds throughout a run, not only when a step ends, and the telemetry can check
+it while the run is going.
 
 ## Results
 
