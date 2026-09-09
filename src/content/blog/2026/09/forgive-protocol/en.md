@@ -59,8 +59,8 @@ uniformly at random for 1.17 percent worse
 [perplexity](https://huggingface.co/docs/transformers/perplexity), and 40 percent
 for 6.65 percent worse.
 
-A budget is a per-step fraction of a rank's gradient bytes, charged only against
-the gradient
+A loss fraction is a per-step allowance on a rank's gradient bytes, and applies
+only to the gradient
 [all-reduce](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html).
 Tensor-parallel and pipeline traffic, control packets and the background burst
 are ineligible. ASTRA-sim simulates communication and compute times, not the
@@ -69,18 +69,17 @@ twenty are pinned critical at 0.005, the rest at 0.4. The literature puts a
 model's sensitivity to lost gradients early in training, where three of those
 four sit.
 
-## Accounting
+## The budget
 
 A per-model bound holds for the whole run and cannot follow a phase. FORGIVE
 keeps one entry per receiving
 [rank](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html)
-and training step, the grain the phase varies at. Sender suppression and
-receiver forgiveness charge the same entry, so the two compare at one budget.
+and training step, the grain the phase varies at.
 
-Each eligible flow registers its bytes with its rank and step's entry when it
-starts. Forgiven plus suppressed bytes never exceed the step's budget times its
-eligible bytes, and both counters only grow. An entry closes when that rank's
-all-reduce completes, and a closed entry takes no charge.
+Each eligible flow adds its share to that entry when it starts: the step's loss
+fraction of its own bytes. Forgiven bytes never exceed the budget so accrued,
+and the counter only grows. An entry closes when that rank's all-reduce
+completes, and a closed entry takes no charge.
 
 A trimmed packet carries its original sequence number and length, so the
 receiver can work out how many bytes it still lacks. A re-segmented
@@ -148,11 +147,11 @@ criterion, the rate of change in gradient norms, puts the step inside or outside
 the critical learning regime, and that verdict picks the entry's budget. No list
 of critical steps exists in the protocol.
 
-Two budgets:
+Two loss tolerances:
 
-- `kBudgetCritical: float`. The fraction of a rank's eligible gradient bytes
-  that may be lost on a critical step. `0.005` here.
-- `kBudgetOther: float`. The same fraction on every other step. `0.4` here.
+- `kToleranceCritical: float`. The fraction of a flow's gradient bytes that may
+  be lost on a critical step. `0.005` here.
+- `kToleranceOther: float`. The same on every other step. `0.4` here.
 
 State per flow, at the receiver:
 
@@ -170,16 +169,16 @@ State per flow, at the sender:
 State per receiving rank and training step, opened when the step begins and
 shared by every flow to that rank:
 
-- `budget: float`. Set to `kBudgetCritical` or `kBudgetOther` by the detector's
-  verdict on this step.
-- `eligible: int`. Gradient bytes registered so far. Each eligible flow
-  registers its own when it starts, so the denominator grows through the step.
+- `tolerance: float`. `kToleranceCritical` or `kToleranceOther`, by the
+  detector's verdict on this step.
+- `budget: int`. Bytes this rank may lose on this step. Each eligible flow adds
+  `tolerance` of its own bytes when it starts, so the budget grows through the
+  step.
 - `forgiven: int`. Bytes the receiver acknowledged without receiving.
-- `suppressed: int`. Bytes the sender shed before sending.
 - `open: bool`. `True` until this rank's all-reduce for the step completes.
 
-At all times, `forgiven + suppressed` is at most `budget * eligible`. Since
-`eligible` grows through the step, the bound is tightest at its start. An entry
+At all times, `forgiven` is at most `budget`. Since the budget grows as flows
+register, it is tightest at the start of a step. An entry
 that was never opened forgives nothing, so a step the detector has not
 classified must be repaired the ordinary way.
 
@@ -189,9 +188,9 @@ OnStepBegin(rank, step, gradients):
   // in advance.
   critical = InCriticalRegime(gradients)
   entry = ledger[rank][step]
-  // Critical steps get the tight budget, every other step the loose one.
-  entry.budget = critical ? kBudgetCritical : kBudgetOther
-  entry.eligible = entry.forgiven = entry.suppressed = 0
+  // Critical steps tolerate less loss than every other step.
+  entry.tolerance = critical ? kToleranceCritical : kToleranceOther
+  entry.budget = entry.forgiven = 0
   // Open before the step's first gradient byte, or those bytes go
   // uncounted.
   entry.open = true
@@ -245,8 +244,7 @@ OnTrimmedHeader(flow, range):
 
   // The budget will not cover these bytes, so ask for them. That request
   // also puts the sender back under congestion control.
-  if (entry.forgiven + entry.suppressed + Count(missing) >
-      entry.budget * entry.eligible):
+  if (entry.forgiven + Count(missing) > entry.budget):
     Repair(flow, range)
     return
 
@@ -269,7 +267,6 @@ OnCongestionNotification(flow):
   // An exempt sender ignores ECN marks as well as trims. Most of the
   // slowing down DCQCN imposes comes from marks.
   if (flow.cc_mode == Exempt):
-    cnp_ignored++
     return
   ReduceRate(flow)
 
@@ -283,9 +280,9 @@ OnRetransmissionRequest(flow, range):
 
 A flow that reaches `Obeying` never returns to `Exempt`.
 
-Only `OnTrimmedHeader` charges against the budget, `forgiven` and `suppressed`
-never fall, and a closed entry never reopens. The bound therefore holds at every
-instant, not only when a step ends, so telemetry can check it live.
+Only `OnTrimmedHeader` charges against the budget, `forgiven` never falls, and a
+closed entry never reopens. The bound therefore holds at every instant, not only
+when a step ends.
 
 ## Results
 
@@ -317,7 +314,7 @@ The burst paid for it, draining 5 to 22 percent slower.
 ## Forgiveness spends the budget only under congestion
 
 DBLP sheds at the sender by a random draw whose probability depends on the
-training step.
+training step. I ran it at the same per-step loss fractions.
 
 Shedding spends whether or not the network is congested. Forgiveness spends only
 on bytes the network trimmed, a much smaller set. On the worst fabric FORGIVE
