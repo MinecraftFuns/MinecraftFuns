@@ -142,12 +142,7 @@ step is beginning and what its gradient norms say, how many gradient bytes the
 step will bring this rank, which flows carry them, and which step a given flow
 belongs to. That is a host-local interface between NCCL and the network
 interface card, not a packet, which is why FORGIVE adds no packet type and
-changes no header. Two of the four already reach a transport today: a
-communicator's
-[traffic class](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/communicators.html)
-becomes an IP type of service on RoCE, so a gradient all-reduce is identifiable
-by its DSCP, and a receiving net plugin is given the size of every message
-posted to it.
+changes no header.
 
 The switch trims, reports the missing range, and decides nothing about it. The
 scoreboard and the verdict live at the receiver, the mode bit at the sender.
@@ -188,8 +183,28 @@ State per training step, at each receiving rank. No rank reads another's.
 At all times, `forgiven` is at most `budget`. A step the detector never
 classified has no budget, and must be repaired the ordinary way.
 
+Handlers below are named for the machine that runs them. Nothing runs at the
+switch. Four calls reach outside the transport for the four facts above:
+
+- `InCriticalRegime(gradients)`. Accordion's criterion, at the receiving rank,
+  over the gradients that rank holds. Nothing ships it, and it is the one hard
+  piece here.
+- `ExpectedGradientBytes(step)`. What this step will deliver to this rank. A
+  receiving net plugin is already handed the size of every message posted to it,
+  so this is a sum it can keep.
+- `StepOf(flow)`. Which step a flow belongs to. Carried nowhere today.
+- `IsGradientAllReduce(flow)`. Whether a flow is gradient traffic. A
+  communicator's
+  [traffic class](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/communicators.html)
+  already becomes an IP type of service on RoCE, so the DSCP can answer.
+
+Everything else is the transport's own. `Mark` and `Advance` write the
+scoreboard, `SendAck` and `SendRetransmissionRequest` are packets it already
+sends, and `ReduceRate` and `Retransmit` are what congestion control already
+does.
+
 ```cpp
-OnStepBegin(step, gradients):
+Receiver::OnStepBegin(step, gradients):
   critical = InCriticalRegime(gradients)
   entry = steps[step]
   // A critical step can afford less loss.
@@ -198,7 +213,7 @@ OnStepBegin(step, gradients):
   entry.forgiven = 0
   entry.open = true
 
-OnAllReduceComplete(step):
+Receiver::OnAllReduceComplete(step):
   // The step is over. Any later trim on it is repaired.
   steps[step].open = false
 ```
@@ -214,12 +229,12 @@ that arrives without ever being trimmed becomes `Received` directly.
 | `Received` | duplicate ACK, no charge | `Received`, ACK |
 
 ```cpp
-Unsettled(flow, range):
+Receiver::Unsettled(flow, range):
   // Only the bytes the receiver still lacks.
   return the bytes of range at or above flow.rcv_nxt that are marked
     neither Received nor Forgiven on flow.scoreboard
 
-Repair(flow, range):
+Receiver::Repair(flow, range):
   // Every refusal takes this path. Mark only the unsettled subranges, so
   // a range that is partly Received keeps what it has.
   Mark(flow.scoreboard, Unsettled(flow, range), Requested)
@@ -227,7 +242,7 @@ Repair(flow, range):
 ```
 
 ```cpp
-OnTrimmedHeader(flow, range):
+Receiver::OnTrimmedHeader(flow, range):
   missing = Unsettled(flow, range)
   // Nothing missing after all. Acknowledge and spend nothing.
   if (missing is empty):
@@ -263,21 +278,19 @@ OnTrimmedHeader(flow, range):
 Every path either sends the retransmission request the transport already sends,
 or charges the budget once.
 
-At the sender:
-
 ```cpp
-OnFlowStart(flow):
+Sender::OnFlowStart(flow):
   // A local decision at the sender. Nothing is signalled.
   flow.cc_mode = IsGradientAllReduce(flow) ? Exempt : Obeying
 
-OnCongestionNotification(flow):
+Sender::OnCongestionNotification(flow):
   // An exempt sender ignores ECN marks as well as trims. Most of
   // DCQCN's slowdown comes from marks.
   if (flow.cc_mode == Exempt):
     return
   ReduceRate(flow)
 
-OnRetransmissionRequest(flow, range):
+Sender::OnRetransmissionRequest(flow, range):
   // The receiver refused to forgive, so the exemption ends here and the
   // sender slows down like any other.
   flow.cc_mode = Obeying
@@ -346,8 +359,8 @@ ordinary step critical only forfeits the gain. Nothing here measures either, and
 the cheapest check needs no network: replay a detector over the gradient norms
 of a real training run and count the steps it misses.
 
-The other two facts, the step index and the gradient norms, are carried nowhere
-today. Neither needs a wire change. The decision does: forgiving a range writes
+The two facts nobody carries today need no wire change. The decision does:
+forgiving a range writes
 the transport's own reliability state, which on an RDMA fabric lives in the
 network interface card rather than in a plugin above it. MLT hit that wall and
 retreated to UDP in user space, and FORGIVE asks more of the card than MLT did.
