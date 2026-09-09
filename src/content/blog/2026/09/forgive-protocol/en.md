@@ -26,8 +26,8 @@ the receiver cannot forgive puts the flow back under congestion control.
 
 ## A trim reports a missing range
 
-When a queue fills, a switch with packet trimming drops the payload and forwards
-the header on a high-priority queue. The receiver learns which bytes are missing
+When a queue fills, a switch with packet trimming trims the packet to its header
+and forwards that header on a high-priority queue. The receiver learns which bytes are missing
 at once, not from a timeout a millisecond later. A drop leaves nothing to
 decide; a trim leaves a range.
 
@@ -79,9 +79,9 @@ receiver can size that budget before the first byte arrives: the step's
 tolerance times those bytes. Forgiven bytes never exceed it.
 
 A trimmed packet carries its original sequence number and length, so the
-receiver can work out how many bytes it still lacks. A re-segmented
-retransmission can straddle the cumulative acknowledgement, and charging the
-full length would spend budget on bytes in hand. The receiver then either
+receiver can compute how many of those bytes are still outstanding. A
+re-segmented retransmission can straddle the cumulative acknowledgement, and
+charging the full length would spend budget on bytes already delivered. The receiver then either
 forgives the range and acknowledges past the hole, or requests it with the
 transport's existing NACK.
 
@@ -130,11 +130,10 @@ the transport already sends carries the refusal and the revocation.
 
 FORGIVE assumes two things.
 
-From the fabric: an RDMA network with packet trimming and selective repeat,
-where the data queue loses packets and the high-priority queue carrying trimmed
-headers does not, a rate-based congestion control underneath, and a receiver
-that already takes out-of-order arrival because the fabric sprays packets across
-paths.
+From the network: a lossy RDMA fabric with packet trimming and selective repeat,
+where trimmed headers ride a lossless high-priority queue, a rate-based
+congestion control underneath, and a receiver that already reassembles out of
+order because the fabric sprays packets across paths.
 
 From the software above the transport: four facts the wire cannot show. Which
 step is beginning and what its gradient norms say, how many gradient bytes the
@@ -182,7 +181,7 @@ State per training step, at each receiving rank. No rank reads another's.
 At all times, `forgiven` is at most `budget`. A step the detector never
 classified has no budget, and must be repaired the ordinary way.
 
-Handlers below are named for the machine that runs them. Nothing runs at the
+Handlers below are named for where they run. Nothing runs at the
 switch. Four calls reach outside the transport for the four facts above:
 
 - `InCriticalRegime(gradients)`. Accordion's criterion, at the receiving rank,
@@ -195,7 +194,7 @@ switch. Four calls reach outside the transport for the four facts above:
 - `IsGradientAllReduce(flow)`. Whether a flow is gradient traffic. A
   communicator's
   [traffic class](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/communicators.html)
-  already becomes an IP type of service on RoCE, so the DSCP can answer.
+  already becomes an IP type of service on RoCE, so the DSCP carries it.
 
 Everything else is the transport's own. `Mark` and `Advance` write the
 scoreboard, `SendAck` and `SendRetransmissionRequest` are packets it already
