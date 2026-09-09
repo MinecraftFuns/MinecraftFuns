@@ -6,19 +6,17 @@ tags: ["Essays", "Networking", "Artificial Intelligence", "Performance"]
 ---
 
 Distributed ML training sends gradient updates between machines on every step.
-With congestion control off, the most congested of eight configurations I
-simulated with [ASTRA-sim](https://astra-sim.github.io/) trimmed one byte in
-four of the offered load and carried those bytes again. With
-[DCQCN](https://doi.org/10.1145/2785956.2787484) on, that configuration took 24
-percent longer to complete: its senders took millions of rate cuts, and the trim
-rate fell sevenfold. The training job pays one of those costs on every step.
+With packet trimming on and congestion control off, the most congested fabric I
+simulated with [ASTRA-sim](https://astra-sim.github.io/) retransmitted a quarter
+of the offered load. Turning [DCQCN](https://doi.org/10.1145/2785956.2787484) on
+cut its trim rate sevenfold and cost it 24 percent of its completion time. The
+training job pays one of those costs on every step.
 
 [Gradient descent](https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent)
 can tolerate losing some gradient bytes, though neither at every step nor at any
 rate. I call the protocol **F**abric-**O**verload
 **R**elief: **G**radients under **I**teration-**V**arying **E**xemption. It
-uses that tolerance when a switch trims a packet. It forgives only gradient
-payload and only after a trim, so
+forgives only gradient payload and only after a trim, so
 [tensor-parallel](https://arxiv.org/abs/1909.08053) and
 [pipeline-parallel](https://arxiv.org/abs/1811.06965) traffic is never eligible.
 The budget tightens during the
@@ -28,11 +26,11 @@ receiver cannot forgive puts the flow back under congestion control.
 
 ## A trim reports a missing range
 
-When a queue fills, a switch that supports packet trimming does not drop the
-packet. It trims the packet to its header and forwards the header on a
-high-priority queue, so the receiver learns which bytes went missing as it
-happens rather than from a timeout a millisecond later. A dropped packet leaves
-the receiver nothing to decide about. A trimmed one leaves it a range.
+When a queue fills, a switch that supports packet trimming truncates the packet
+to its header instead of dropping it, and forwards that header on a
+high-priority queue. The receiver learns which bytes went missing as it happens
+rather than from a timeout a millisecond later. A drop would have left it
+nothing to decide about; a trim leaves it a range.
 
 [NDP](https://doi.org/10.1145/3098822.3098825) introduced packet trimming in
 2017, and the Ultra Ethernet Consortium made it an optional switch behaviour in
@@ -75,9 +73,8 @@ information early in training.
 
 ## Accounting
 
-A bound has to be scoped to something, and the scope decides what the bound can
-follow. A bound stated per model holds for the whole run and cannot follow a
-phase. FORGIVE keeps one accounting entry for each receiving
+A bound stated per model holds for the whole run and cannot follow a phase.
+FORGIVE keeps one accounting entry for each receiving
 [rank](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html)
 and training step, which is the grain the phase varies at. Sender-side
 suppression and receiver-side forgiveness charge the same entry, so the two
@@ -106,17 +103,16 @@ the wire for every byte the policy removed. I had measured the transport's
 amplification rather than the policy.
 
 So I went looking for the time the burst was supposed to be costing. I swept
-eight configurations of the fabric, 64 ranks at 400 Gbps, varying congestion
-control, the number of senders per all-reduce, and the oversubscription at the
-spine switches. There was nothing there to save. The congestion episode cost
-under 1 percent of the 20-step window in every one, and forgiveness that only
-skips a repair round saves at most a round trip per flow, under 0.2 percent of
-an all-reduce.
+eight fabrics at 64 ranks and 400 Gbps, varying congestion control, fan-in, and
+oversubscription between 2:1 and 4:1. There was nothing there to save. The burst
+cost under 1 percent of the 20-step training time in every one, and forgiveness
+that only skips a repair round saves at most a round trip per flow, under 0.2
+percent of an all-reduce.
 
-The time was going somewhere else. With DCQCN on, the trim rate fell by a factor
-of seven to ten and the 20-step window grew 18 to 24 percent, paid for in
-millions of rate cuts per run. A loss budget can pay for the trims DCQCN spends
-that time avoiding.
+The time was going somewhere else. With DCQCN on, millions of rate cuts per run
+bought a trim rate seven to ten times lower and cost 18 to 24 percent of the
+20-step training time. A loss budget can pay for the trims DCQCN spends that
+time avoiding.
 
 ## Rate-control exemption
 
@@ -300,8 +296,8 @@ sender-side baseline suppresses the same messages that the receiver-side policy
 may forgive.
 
 Against a baseline with a 0.005 loss budget on every step, forgiveness with
-exemption shortened the total time for 20 training steps by 12.9, 13.1 and 13.5
-percent across the three seeds. It acted where it was aimed. The all-reduce span
+exemption cut the 20-step training time by 12.9, 13.1 and 13.5 percent across
+the three seeds. It acted where it was aimed. The all-reduce span
 on non-critical steps fell from 36 ms to 21 ms, and the critical-step span
 stayed at 37 ms, within 0.9 ms of the baseline.
 
@@ -318,14 +314,13 @@ revocation is not dead code. The budget rule held in every accounting entry.
 The exemption even moves a fabric with almost nothing to forgive. A lightly
 congested configuration barely trims, but DCQCN still cuts rates there 3.3
 million times on ECN marks alone, and marks are most of what the exemption
-ignores. Its 20-step window fell 4 percent and its trims doubled, every extra
-one forgiven, at the price of a burst that drained 5 to 22 percent slower.
+ignores. Its 20-step training time fell 4 percent and its trims doubled, every
+extra one forgiven, at the price of a burst that drained 5 to 22 percent slower.
 
 ## Forgiveness uses the budget at congestion
 
 DBLP uses phase-aware sender-side shedding: it suppresses gradient messages by a
-random draw based on the training step. Run at the same budget, the two policies
-answer a question about where a loss allowance should be spent.
+random draw based on the training step.
 
 Shedding spends whether or not the network is congested. Forgiveness spends only
 on bytes the network trimmed, which is a much smaller set. In the most congested
@@ -347,15 +342,14 @@ non-critical steps is assumed, not tested. DBLP tested
 loss on Llama 2 7B without phase dependence. My search turned up no published
 work on phase-gated gradient loss at
 [Transformer](https://arxiv.org/abs/1706.03762) scale, and none measuring loss
-that is bursty and correlated, which packet trimming produces. The budget is an
-assumed tolerance until a training run tests it.
+that is bursty and correlated, which packet trimming produces.
 
-A deployment has to run the detector these runs did without, and a detector
-makes two kinds of mistake. Calling a critical step ordinary puts a loose budget
-on the step least able to afford it. Calling an ordinary step critical only
-forfeits the gain. Nothing here measures either, and the first test does not
-need the network at all: replay a detector over the gradient norms of a real
-training run and count the steps it misses.
+A deployment has to run the detector these runs did without. Calling a critical
+step ordinary spends 40 percent of its gradient bytes where the schedule allows
+0.5 percent. Calling an ordinary step critical only forfeits the gain. Nothing
+here measures either, and the first test does not need the network at all:
+replay a detector over the gradient norms of a real training run and count the
+steps it misses.
 
 The congestion control is DCQCN, because that is what the simulator models.
 Meta runs its 400 Gbps ML training networks
@@ -402,12 +396,11 @@ That paper's future work asks for a congestion control that deliberately
 over-sends and lets the switch trim the excess. The exemption has that behaviour
 within a budget.
 
-FORGIVE decides per missing range from the switch's trim report on a network
-with selective repeat. The lost bytes are the ones the network could not carry
-rather than the ones that arrived last. Its budget is per receiving rank and
-training step. Sender suppression and receiver forgiveness both charge it. The
-congestion-control exemption applies per flow, stays within that budget, and the
-receiver's first refusal revokes it.
+FORGIVE decides per missing range from the switch's trim report, so the bytes it
+gives up are the ones the network could not carry rather than the ones that
+arrived last. Its budget is per receiving rank and training step rather than per
+model. Its exemption applies per flow, stays inside that budget, and ends at the
+receiver's first refusal.
 
 On a network that trims packets and runs selective repeat, the long repair tail
 that MLT, LTP and OptiReduce were built to reduce does not exist. Those systems
