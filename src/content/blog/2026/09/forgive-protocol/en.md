@@ -27,9 +27,9 @@ the receiver cannot forgive puts the flow back under congestion control.
 ## A trim reports a missing range
 
 When a queue fills, a switch with packet trimming trims the packet to its header
-and forwards that header on a high-priority queue. The receiver learns which bytes are missing
-at once, not from a timeout a millisecond later. A drop leaves nothing to
-decide; a trim leaves a range.
+and forwards that header on a high-priority queue. The receiver learns which
+bytes are missing at once, not from a timeout a millisecond later. A drop leaves
+nothing to decide; a trim leaves a range.
 
 [NDP](https://doi.org/10.1145/3098822.3098825) introduced packet trimming in
 2017. Ultra Ethernet made it optional switch behaviour in
@@ -81,9 +81,9 @@ tolerance times those bytes. Forgiven bytes never exceed it.
 A trimmed packet carries its original sequence number and length, so the
 receiver can compute how many of those bytes are still outstanding. A
 re-segmented retransmission can straddle the cumulative acknowledgement, and
-charging the full length would spend budget on bytes already delivered. The receiver then either
-forgives the range and acknowledges past the hole, or requests it with the
-transport's existing NACK.
+charging the full length would spend budget on bytes already delivered. The
+receiver then either forgives the range and acknowledges past the hole, or
+requests it with the transport's existing NACK.
 
 ## Selective repeat removes the repair saving
 
@@ -128,19 +128,23 @@ the transport already sends carries the refusal and the revocation.
 
 ## State and decision
 
-FORGIVE assumes two things.
+FORGIVE assumes a fabric and an interface. From the fabric:
 
-From the network: a lossy RDMA fabric with packet trimming and selective repeat,
-where trimmed headers ride a lossless high-priority queue, a rate-based
-congestion control underneath, and a receiver that already reassembles out of
-order because the fabric sprays packets across paths.
+- Packet trimming, on a lossy RDMA network.
+- A lossless high-priority queue for the trimmed headers.
+- Selective repeat, and a receiver that already reassembles out of order because
+  the fabric sprays packets across paths.
+- A rate-based congestion control underneath.
 
-From the software above the transport: four facts the wire cannot show. Which
-step is beginning and what its gradient norms say, how many gradient bytes the
-step will bring this rank, which flows carry them, and which step a given flow
-belongs to. That is a host-local interface between NCCL and the network
-interface card, not a packet, which is why FORGIVE adds no packet type and
-changes no header.
+From the software above the transport, four facts the wire cannot show:
+
+- Which step is beginning, and what its gradient norms say.
+- How many gradient bytes the step will bring this rank.
+- Which flows carry them.
+- Which step a given flow belongs to.
+
+That is a host-local interface between NCCL and the network interface card, not
+a packet, which is why FORGIVE adds no packet type and changes no header.
 
 The switch trims, reports the missing range, and decides nothing about it. The
 scoreboard and the verdict live at the receiver, the mode bit at the sender.
@@ -387,25 +391,30 @@ off this network.
 
 ## Prior work
 
-Before training, MLT has the sender and receiver agree on a tolerated fraction
-per tensor. Once enough of a tensor arrives, the receiver stops requesting
-retransmissions, so the bytes it gives up are whichever arrive last. Its bound
-is per model and constant over training. It weakens congestion control for every
-flow with no way back, and its transport is
-[UDP](https://www.rfc-editor.org/rfc/rfc768) in user space, which the authors
-say [RDMA](https://www.rfc-editor.org/rfc/rfc5040) network interface cards
-cannot host.
-[LTP](https://arxiv.org/abs/2305.04279) closes a round early on network
-conditions.
-[OptiReduce](https://www.usenix.org/conference/nsdi25/presentation/warraich)
-bounds each round by an adaptive timeout and spreads the resulting loss over the
-whole gradient with a randomised Hadamard transform.
-[Trimmable gradients](https://doi.org/10.1145/3696348.3696880) lay out each
-packet so its trimmed prefix is already a quantised gradient, which removes
-retransmission entirely and any bound with it: whatever the switch trims is
-accepted. That paper's future work asks for a congestion control that
-deliberately over-sends and lets the switch trim the excess. The exemption does
-exactly that, within a budget.
+Four systems give up gradient bytes on purpose, and each picks which bytes a
+different way.
+
+- MLT has the sender and receiver agree on a tolerated fraction per tensor
+  before training. Once enough of a tensor arrives the receiver stops requesting
+  retransmissions, so the bytes it gives up are whichever arrive last. Its bound
+  is per model and constant over training, it weakens congestion control for
+  every flow with no way back, and its transport is
+  [UDP](https://www.rfc-editor.org/rfc/rfc768) in user space, which the authors
+  say [RDMA](https://www.rfc-editor.org/rfc/rfc5040) network interface cards
+  cannot host.
+- [LTP](https://arxiv.org/abs/2305.04279) closes a round early on network
+  conditions.
+- [OptiReduce](https://www.usenix.org/conference/nsdi25/presentation/warraich)
+  bounds each round by an adaptive timeout and spreads the resulting loss over
+  the whole gradient with a randomised Hadamard transform.
+- [Trimmable gradients](https://doi.org/10.1145/3696348.3696880) lay out each
+  packet so its trimmed prefix is already a quantised gradient, which removes
+  retransmission entirely and any bound with it: whatever the switch trims is
+  accepted.
+
+That last paper's future work asks for a congestion control that deliberately
+over-sends and lets the switch trim the excess. The exemption does exactly that,
+within a budget.
 
 FORGIVE decides per missing range from the switch's trim report, so the bytes it
 gives up are the ones the network could not carry rather than the ones that
