@@ -62,9 +62,8 @@ for 6.65 percent worse.
 A tolerance is a per-step fraction of a rank's gradient bytes, and applies only
 to the gradient
 [all-reduce](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html).
-Tensor-parallel and pipeline traffic, control packets and the background burst
-are ineligible. ASTRA-sim simulates communication and compute times, not the
-model, so Accordion has no gradient norms to read. Steps 1, 2, 3 and 20 of
+ASTRA-sim simulates communication and compute times, not the model, so Accordion
+has no gradient norms to read. Steps 1, 2, 3 and 20 of
 twenty are pinned critical at 0.005, the rest at 0.4. The literature puts a
 model's sensitivity to lost gradients early in training, where three of those
 four sit.
@@ -133,9 +132,9 @@ FORGIVE assumes two things.
 
 From the fabric: an RDMA network with packet trimming and selective repeat,
 where the data queue loses packets and the high-priority queue carrying trimmed
-headers does not, a rate-based congestion control underneath, DCQCN in every run
-below, and a receiver that already takes out-of-order arrival because the fabric
-sprays packets across paths.
+headers does not, a rate-based congestion control underneath, and a receiver
+that already takes out-of-order arrival because the fabric sprays packets across
+paths.
 
 From the software above the transport: four facts the wire cannot show. Which
 step is beginning and what its gradient norms say, how many gradient bytes the
