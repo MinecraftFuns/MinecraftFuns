@@ -18,11 +18,12 @@ Gradient descent can tolerate losing some gradient bytes, though neither at
 every step nor at any rate. I call the protocol **F**abric-**O**verload
 **R**elief: **G**radients under **I**teration-**V**arying **E**xemption. It
 uses that tolerance when a trimming switch reports congestion. It can forgive
-only gradient payload and only after a trim, leaving tensor-parallel and
-pipeline traffic, which split a model's calculation across machines, alone. The
-budget tightens during the critical learning regime, so a flow eligible on step
-12 may be ineligible on step 2. The first trim the receiver cannot forgive puts
-the flow back under congestion control.
+only gradient payload and only after a trim, leaving
+[tensor-parallel](https://arxiv.org/abs/1909.08053) and
+[pipeline-parallel](https://arxiv.org/abs/1811.06965) traffic alone. The budget
+tightens during the critical learning regime, so a flow eligible on step 12 may
+be ineligible on step 2. The first trim the receiver cannot forgive puts the flow
+back under congestion control.
 
 ## A trim reports a missing range
 
@@ -62,19 +63,20 @@ worse perplexity, and 40 percent for 6.65 percent worse.
 
 My budget is a per-step probability. In my runs, critical steps 1, 2, 3 and 20
 have a budget of 0.005; every other step has a budget of 0.4. Only messages from
-the gradient all-reduce, the operation that combines updates across the training
-job, are eligible. Tensor-parallel traffic, pipeline traffic, control packets and
-the background burst are ineligible.
+the gradient
+[all-reduce](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html)
+are eligible. Tensor-parallel traffic, pipeline traffic, control packets and the
+background burst are ineligible.
 
 ## Accounting
 
-FORGIVE keeps one accounting entry for each receiving rank, a participating
-process in the training job, and training step. Every eligible network flow
-records its byte count when it is sent. Forgiven bytes plus suppressed bytes for
-a (rank, step) entry never exceed that step's probability times the eligible
-bytes in the entry. Both counters grow and neither refunds bytes. An entry closes
-when that rank's all-reduce for the step completes. Closed entries forgive
-nothing.
+FORGIVE keeps one accounting entry for each receiving
+[rank](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html)
+and training step. Every eligible network flow records its byte count when it is
+sent. Forgiven bytes plus suppressed bytes for a (rank, step) entry never exceed
+that step's probability times the eligible bytes in the entry. Both counters grow
+and neither refunds bytes. An entry closes when that rank's all-reduce for the
+step completes. Closed entries forgive nothing.
 
 Sender-side suppression and receiver-side forgiveness charge the same entry. I
 compare them at equal budget.
@@ -84,9 +86,8 @@ calculates how many of its bytes it does not already hold. A re-segmented
 retransmission can straddle the cumulative acknowledgement point, so charging the
 full length would spend budget on bytes already in hand. The receiver either
 forgives the missing range and acknowledges past the hole as if the bytes
-arrived, or requests it with the negative acknowledgement (NACK) that the
-transport already sends. It sends an acknowledgement (ACK) when it forgives and
-a trim NACK when it does not.
+arrived, or requests it with the transport's existing trim NACK. It sends an ACK
+when it forgives and a trim NACK when it does not.
 
 ## Selective retransmission removes the repair saving
 
@@ -199,18 +200,19 @@ Signal-based Congestion Control, a window-based controller with a trim-triggered
 fast adaptation that I have not modelled. The idea may transfer to controls that
 react to marks and trims. I have not measured that transfer.
 
-The simulation has one tenant: one training job. Exempt flows shared the network
-with their own job's tensor-parallel traffic and a single background burst, never
-with another job's flows obeying congestion control. The cost of the exemption
-would fall on such a neighbour. The budget bounds that cost, and the refusal
-revokes the exemption. A flow that ignores every congestion signal offers neither
+The simulation has one training job. Exempt flows shared the network with their
+own job's tensor-parallel traffic and a single background burst, never with
+another job's flows obeying congestion control. The cost of the exemption would
+fall on such a neighbour. The budget bounds that cost, and the refusal revokes
+the exemption. A flow that ignores every congestion signal offers neither
 measure. Neither proves the cost is acceptable to a neighbour.
 
 The simulation has 64 ranks with tensor parallelism on the network, so eligible
 gradient traffic is only 24 percent of the bytes. The mechanism can therefore
 reach at most a quarter of the traffic available on a network carrying data and
-pipeline parallelism alone. Tensor parallelism over NVLink, the high-speed link
-between GPUs, keeps its own traffic off this network.
+pipeline parallelism alone. Tensor parallelism over
+[NVLink](https://www.nvidia.com/en-us/data-center/nvlink/) keeps its own traffic
+off this network.
 
 ## Prior work
 
@@ -220,7 +222,8 @@ retransmissions, so the bytes it gives up are whichever arrive last. Its bound i
 per model and constant over training. It weakens congestion control globally for
 every flow with no way back, and its transport is
 [UDP](https://www.rfc-editor.org/rfc/rfc768) in user space; the authors say
-remote direct memory access (RDMA) network interface cards cannot host it.
+[RDMA](https://www.rfc-editor.org/rfc/rfc5040) network interface cards cannot
+host it.
 [LTP](https://arxiv.org/abs/2305.04279) closes a round early based on network
 conditions.
 [OptiReduce](https://www.usenix.org/conference/nsdi25/presentation/warraich)
