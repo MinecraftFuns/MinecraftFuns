@@ -144,7 +144,12 @@ step is beginning and what its gradient norms say, how many gradient bytes the
 step will bring this rank, which flows carry them, and which step a given flow
 belongs to. That is a host-local interface between NCCL and the network
 interface card, not a packet, which is why FORGIVE adds no packet type and
-changes no header.
+changes no header. Two of the four already reach a transport today: a
+communicator's
+[traffic class](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/communicators.html)
+becomes an IP type of service on RoCE, so a gradient all-reduce is identifiable
+by its DSCP, and a receiving net plugin is given the size of every message
+posted to it.
 
 The switch trims, reports the missing range, and decides nothing about it. Each
 rank runs the detector on the gradients it holds and opens its own budget. The
@@ -353,28 +358,20 @@ ordinary step critical only forfeits the gain. Nothing here measures either, and
 the cheapest check needs no network: replay a detector over the gradient norms
 of a real training run and count the steps it misses.
 
-Two of the four facts the transport needs already reach it. A communicator's
-[traffic class](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/communicators.html)
-becomes an IP type of service on RoCE, so a gradient all-reduce is identifiable
-by its DSCP, and a receiving net plugin is already given the size of every
-message posted to it. The step index and the gradient norms are carried nowhere,
-though both are host-local and neither needs a wire change.
-
-The decision is the hard part. Forgiving a range means writing the transport's
-own reliability state, which on an RDMA fabric lives in the network interface
-card rather than in a plugin above it. MLT hit that wall and retreated to UDP in
-user space, and FORGIVE asks more of the card than MLT did. Ultra Ethernet is
-where it looks plausible, since trimming, the trimmed-header NACK and selective
-retransmission are already transport-layer functions going into silicon.
+The other two facts, the step index and the gradient norms, are carried nowhere
+today. Neither needs a wire change. The decision does: forgiving a range writes
+the transport's own reliability state, which on an RDMA fabric lives in the
+network interface card rather than in a plugin above it. MLT hit that wall and
+retreated to UDP in user space, and FORGIVE asks more of the card than MLT did.
+Ultra Ethernet is putting trimming, the trimmed-header NACK and selective repeat
+into silicon, which is where such a card would come from.
 
 The congestion control is DCQCN because that is what the simulator models. Meta
 runs its 400 Gbps ML training networks
 [with DCQCN off](https://engineering.fb.com/wp-content/uploads/2024/08/sigcomm24-final246.pdf),
 where the exemption has nothing to act on. Ultra Ethernet's default is
 [Network Signal-based Congestion Control](https://ultraethernet.org/wp-content/uploads/sites/20/2025/06/UE-Specification-6.11.25.pdf#page=377),
-which I have not modelled: a window-based controller that adjusts on round-trip
-time, ECN marks and optionally packet trimming. The idea may transfer to any
-control that reacts to marks and trims. Nothing here tests that.
+which I have not modelled, so nothing here says whether the idea carries to it.
 
 The simulation has one training job. Exempt flows shared the fabric with their
 own job's tensor-parallel traffic and one background burst, never with another
