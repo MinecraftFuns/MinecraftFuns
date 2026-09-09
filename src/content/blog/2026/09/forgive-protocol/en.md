@@ -9,7 +9,7 @@ Distributed ML training sends gradient updates between machines on every step.
 Congestion control and packet loss impose different costs on the network that
 carries those updates. With congestion control off, the most congested of eight
 network configurations I simulated with [ASTRA-sim](https://astra-sim.github.io/)
-trimmed one offered byte in four and carried it again. With
+trimmed one byte in four of the offered load and carried it again. With
 [DCQCN](https://doi.org/10.1145/2785956.2787484) on, that configuration took 24
 percent longer to complete. Its senders took millions of rate cuts, and the trim
 rate fell sevenfold. The training job pays one of those costs on every step.
@@ -18,8 +18,8 @@ rate fell sevenfold. The training job pays one of those costs on every step.
 can tolerate losing some gradient bytes, though neither at every step nor at any
 rate. I call the protocol **F**abric-**O**verload
 **R**elief: **G**radients under **I**teration-**V**arying **E**xemption. It
-uses that tolerance when a trimming switch reports congestion. It can forgive
-only gradient payload and only after a trim, leaving
+uses that tolerance when a switch trims a packet. It can forgive only gradient
+payload and only after a trim, leaving
 [tensor-parallel](https://arxiv.org/abs/1909.08053) and
 [pipeline-parallel](https://arxiv.org/abs/1811.06965) traffic alone. The budget
 tightens during the
@@ -29,19 +29,20 @@ receiver cannot forgive puts the flow back under congestion control.
 
 ## A trim reports a missing range
 
-When a queue fills, a trimming switch does not drop the packet. It truncates the
-packet to its header and forwards the header on a lossless control queue, so the
-receiver learns which bytes went missing at the moment they went missing rather
-than inferring it from a timeout a millisecond later.
+When a queue fills, a switch that supports packet trimming does not drop the
+packet. It trims the packet to its header and forwards the header on a
+high-priority queue, so the receiver learns which bytes went missing at the
+moment they went missing rather than inferring it from a timeout a millisecond
+later.
 [NDP](https://doi.org/10.1145/3098822.3098825) introduced this in 2017, and the
 Ultra Ethernet Consortium made it an optional switch behaviour in
 [specification 1.0](https://ultraethernet.org/ultra-ethernet-consortium-uec-launches-specification-1-0-transforming-ethernet-for-ai-and-hpc-at-scale/),
 released in June 2025, alongside a
 [default bulk mode](https://arxiv.org/abs/2508.08906) that sprays packets across
-paths and reassembles out of order at the receiver.
+paths.
 
 A dropped packet gives the receiver no range to decide about. A trimmed packet
-does. This selective-retransmission transport retransmits every reported range.
+does.
 
 ## Gradient tolerance varies by step
 
@@ -79,7 +80,7 @@ background burst are ineligible.
 
 FORGIVE keeps one accounting entry for each receiving
 [rank](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html)
-and training step. Every eligible network flow records its byte count when it is
+and training step. Every eligible flow records its byte count when it is
 sent. Forgiven bytes plus suppressed bytes for a (rank, step) entry never exceed
 that step's probability times the eligible bytes in the entry. Both counters grow
 and neither refunds bytes. An entry closes when that rank's all-reduce for the
@@ -90,25 +91,26 @@ compare them at equal budget.
 
 A trimmed packet carries its original sequence number and length. The receiver
 calculates how many of its bytes it does not already hold. A re-segmented
-retransmission can straddle the cumulative acknowledgement point, so charging the
-full length would spend budget on bytes already in hand. The receiver either
-forgives the missing range and acknowledges past the hole as if the bytes
-arrived, or requests it with the transport's existing trim NACK. It sends an ACK
-when it forgives and a trim NACK when it does not.
+retransmission can straddle the cumulative acknowledgement, so charging the full
+length would spend budget on bytes already in hand. The receiver either forgives
+the missing range and acknowledges past the hole as if the bytes arrived, or
+requests it with the transport's existing NACK. It sends an ACK when it forgives
+and a NACK when it does not.
 
-## Selective retransmission removes the repair saving
+## Selective repeat removes the repair saving
 
 I built the receiver-side half first. It appeared to reduce training time by 4
 to 11 percent. The transport underneath was go-back-N, and a control run with
-selective retransmission showed the same congestion burst costing 29 ms instead
-of 1.8 s. Under go-back-N every trim made the sender resend its whole window,
-up to 79 bytes on the wire for every byte the policy removed. I had measured
-the transport's amplification rather than the policy. Nobody deploys go-back-N
-without congestion control.
+[selective repeat](https://www.rfc-editor.org/rfc/rfc2018) showed the same
+congestion burst costing 29 ms instead of 1.8 s. Go-back-N put up to 79 bytes on
+the wire for every byte the policy removed. I had measured the transport's
+amplification rather than the policy. Nobody deploys go-back-N without
+congestion control.
 
 I then tested eight network configurations with 64 ranks at 400 Gbps, varying
-congestion control, the number of senders per all-reduce, and the bandwidth
-shared at the network spines. The congestion episode cost under 1 percent of the
+congestion control, the number of senders per all-reduce, and the
+oversubscription at the spine switches. The congestion episode cost under 1
+percent of the
 total time for 20 training steps in every configuration. A sender-side policy that
 drops messages before sending them could not shorten enough of that time.
 Forgiveness that only skips a repair round can save at most one round trip per
@@ -122,19 +124,18 @@ not tested whether the model tolerates that loss.
 
 ## Rate-control exemption
 
-The sender of a network flow whose trimmed bytes are eligible for forgiveness
+The sender of a flow whose trimmed bytes are eligible for forgiveness
 also ignores congestion signals. It does not reduce its sending rate until the
 receiver requests a retransmission for one of its trims. The sender then obeys
 congestion control again. Its lost bytes remain within the budget.
 
-The exemption covers both [ECN](https://www.rfc-editor.org/rfc/rfc3168) marks,
-which report congestion before a queue is full, and trim notifications. In the
-DCQCN configuration here, switches begin ECN-marking at 800 KB of queue and trim
-only when the 4 MiB data queue is full. Marks arrive long before trims. In the
-most congested configuration, at least 74 percent of rate cuts came from marks
-that no forgiven trim affects. Exempting only trim-triggered cuts would leave
-three cuts in four in place. Eligible senders ignore every congestion
-notification packet, or CNP.
+The exemption covers both [ECN](https://www.rfc-editor.org/rfc/rfc3168) marks
+and trim notifications. In the DCQCN configuration here, switches begin
+ECN-marking at 800 KB of queue and trim only when the 4 MiB data queue is full.
+Marks arrive long before trims. In the most congested configuration, at least 74
+percent of rate cuts came from marks that no forgiven trim affects. Exempting
+only trim-triggered cuts would leave three cuts in four in place. Eligible
+senders ignore every congestion notification packet.
 
 All flows to a receiving rank share its budget entry, but no sender can read the
 remaining budget. A retransmission request tells the sender that the receiver
@@ -144,13 +145,13 @@ header change.
 
 ## State and decision
 
-FORGIVE runs on a trimming RDMA fabric. A switch truncates a packet to its
-header when a queue fills and forwards the header on a lossless control queue.
-The data queue loses packets. The control queue does not. The transport repairs
-one reported range at a time, not by go-back-N. A rate-based congestion control
-runs underneath: DCQCN in every run below, and Ultra Ethernet's NSCC once I
-model it. The receiver already accepts out-of-order arrival, since the fabric
-sprays packets across paths. FORGIVE adds no packet type and changes no header.
+FORGIVE runs on an RDMA fabric with packet trimming and selective repeat. The
+data queue loses packets. The high-priority queue that carries trimmed headers
+does not. A
+rate-based congestion control runs underneath: DCQCN in every run below, and
+Ultra Ethernet's NSCC once I model it. The receiver already accepts out-of-order
+arrival, since the fabric sprays packets across paths. FORGIVE adds no packet
+type and changes no header.
 
 The switch trims and does nothing further. It reports a missing range and
 decides nothing about it. Each rank runs the detector over its own gradients and
@@ -203,17 +204,18 @@ the same budget.
 
 ```cpp
 OnStepBegin(rank, step, gradients):
+  // Accordion criterion. No fixed critical-step list anywhere.
   critical = InCriticalRegime(gradients)
   entry = ledger[rank][step]
+  // Only place a budget is set. Detector verdict picks it.
   entry.budget = critical ? kBudgetCritical : kBudgetOther
   entry.eligible = entry.forgiven = entry.suppressed = 0
-  entry.open = true
+  entry.open = true  // Before first gradient byte, else undercount.
 ```
 
-The detector has to finish before the step's first gradient byte leaves, or the
-entry opens after traffic it should have counted. Its two mistakes cost
-differently: a false positive forfeits the gain on an ordinary step; a false
-negative puts the loose budget on a step that cannot afford it.
+The detector's two mistakes cost differently: a false positive forfeits the gain
+on an ordinary step; a false negative puts the loose budget on a step that
+cannot afford it.
 
 A range on the scoreboard never leaves the state it reaches, so no range is
 charged twice. A range that arrives without ever being trimmed becomes
@@ -231,62 +233,64 @@ receiver already has.
 
 ```cpp
 UnsettledBytes(flow, range):
+  // Charge only bytes not already held. Never pay twice for one byte.
   return the bytes of range that are >= flow.rcv_nxt and are marked
     neither Received nor Forgiven on flow.scoreboard
 ```
 
-`OnTrimmedHeader` runs when a trimming switch reports a missing range.
+`OnTrimmedHeader` runs when a trimmed header reports a missing range.
 
 ```cpp
 OnTrimmedHeader(flow, range):
   n = UnsettledBytes(flow, range)
   if (n == 0):
-    SendAck(flow.rcv_nxt)
+    SendAck(flow.rcv_nxt)  // Whole range already settled. No charge.
     return
 
+  // Tensor, pipeline and control traffic: never forgive.
   if (!IsGradientAllReduce(flow)):
     SendRetransmissionRequest(range, kNormal)
     return
 
   (rank, step) = Coordinates(flow)
   entry = ledger[rank][step]
+  // No verdict yet, or step already closed. Repair the ordinary way.
   if (entry == null || !entry.open):
     SendRetransmissionRequest(range, kNormal)
     return
 
+  // Would break the bound. Refusing also revokes the sender's exemption.
   if (entry.forgiven + entry.suppressed + n >
       entry.budget * entry.eligible):
     SendRetransmissionRequest(range, kNormal)
     return
 
-  entry.forgiven += n
+  entry.forgiven += n  // Sole writer of the budget. Never refunds.
   flow.scoreboard[range] = Forgiven
   flow.rcv_nxt = Advance(flow.rcv_nxt, flow.scoreboard)
-  SendAck(flow.rcv_nxt, ecn_echo)
+  SendAck(flow.rcv_nxt, ecn_echo)  // Echo kept: congestion still visible.
 ```
 
 Every path either sends the retransmission request the transport already sends,
-or charges the budget once. No new packet type and no header change. The ACK
-carries the ECN echo, so forgiving a range does not hide from the sender the
-congestion that caused the trim.
+or charges the budget once. No new packet type and no header change.
 
 At the sender, the two congestion signals:
 
 ```cpp
 OnCongestionNotification(flow):
   if (flow.cc_mode == Exempt):
-    cnp_ignored++
+    cnp_ignored++  // Marks too, not only trims. Most cuts are marks.
     return
   ReduceRate(flow)
 
 OnRetransmissionRequest(flow, range):
+  // Revoke before any staleness check: a stale request still counts.
   flow.cc_mode = Obeying
   ReduceRate(flow)
   Retransmit(range)
 ```
 
-Re-arming comes before the staleness check, so a stale request still counts as a
-refusal. A flow that reaches `Obeying` stays there until it finishes.
+A flow that reaches `Obeying` stays there until it finishes.
 
 Only the charge in `OnTrimmedHeader` writes the budget, `forgiven` and
 `suppressed` never fall, and a closed budget never reopens. The bound therefore
@@ -366,9 +370,9 @@ Meta runs its 400 Gbps ML training networks
 [with DCQCN off](https://engineering.fb.com/wp-content/uploads/2024/08/sigcomm24-final246.pdf),
 where the exemption has nothing to act on. Ultra Ethernet's default is
 [Network Signal-based Congestion Control](https://ultraethernet.org/wp-content/uploads/sites/20/2025/06/UE-Specification-6.11.25.pdf#page=377),
-a window-based controller with a trim-triggered fast adaptation that I have not
-modelled. The idea may transfer to controls that react to marks and trims. I have
-not measured that transfer.
+a window-based controller that adjusts on round-trip time, ECN marks and
+optionally trims, which I have not modelled. The idea may transfer to controls
+that react to marks and trims. I have not measured that transfer.
 
 The simulation has one training job. Exempt flows shared the network with their
 own job's tensor-parallel traffic and a single background burst, never with
@@ -397,8 +401,8 @@ host it.
 [LTP](https://arxiv.org/abs/2305.04279) closes a round early based on network
 conditions.
 [OptiReduce](https://www.usenix.org/conference/nsdi25/presentation/warraich)
-bounds each round by an adaptive timeout and makes the resulting loss harmless
-with Hadamard mixing of the gradient.
+bounds each round by an adaptive timeout and spreads the resulting loss over the
+whole gradient with a randomised Hadamard transform.
 [Trimmable gradients](https://doi.org/10.1145/3696348.3696880) lay out each
 packet so that its trimmed prefix is already a quantised gradient. This removes
 retransmission entirely, without a bound: whatever the switch trims is accepted.
@@ -406,17 +410,17 @@ That paper's future work asks for a congestion control that deliberately
 over-sends and lets the switch trim the excess. The exemption has that behaviour
 within a budget.
 
-FORGIVE decides per missing range from the switch's trim report on a network that
-supports selective retransmission. The lost bytes are the ones the network could
-not carry, not the ones that happened to be late. Its budget is per receiving
-rank and training step. Sender suppression and receiver forgiveness both charge
-it. The congestion-control exemption applies per flow, stays within that budget,
-and the receiver's first refusal revokes it.
+FORGIVE decides per missing range from the switch's trim report on a network
+with selective repeat. The lost bytes are the ones the network could not carry,
+not the ones that happened to be late. Its budget is per receiving rank and
+training step. Sender suppression and receiver forgiveness both charge it. The
+congestion-control exemption applies per flow, stays within that budget, and the
+receiver's first refusal revokes it.
 
-On a network that trims packets and supports selective retransmission, the long
-repair tail that MLT, LTP and OptiReduce were built to reduce does not exist.
-Those systems used [TCP](https://www.rfc-editor.org/rfc/rfc9293) and UDP with
-millisecond timeouts. In these simulations, forgiveness alone does not reduce the
+On a network that trims packets and runs selective repeat, the long repair tail
+that MLT, LTP and OptiReduce were built to reduce does not exist. Those systems
+used [TCP](https://www.rfc-editor.org/rfc/rfc9293) and UDP with millisecond
+timeouts. In these simulations, forgiveness alone does not reduce the
 congestion-control reaction. The exemption accounts for the result. I did not
 expect that when I started, and two negative results exposed it.
 
