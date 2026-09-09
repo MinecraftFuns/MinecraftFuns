@@ -14,16 +14,18 @@ trimmed one offered byte in four and carried it again. With
 percent longer to complete. Its senders took millions of rate cuts, and the trim
 rate fell sevenfold. The training job pays one of those costs on every step.
 
-Gradient descent can tolerate losing some gradient bytes, though neither at
-every step nor at any rate. I call the protocol **F**abric-**O**verload
+[Gradient descent](https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent)
+can tolerate losing some gradient bytes, though neither at every step nor at any
+rate. I call the protocol **F**abric-**O**verload
 **R**elief: **G**radients under **I**teration-**V**arying **E**xemption. It
 uses that tolerance when a trimming switch reports congestion. It can forgive
 only gradient payload and only after a trim, leaving
 [tensor-parallel](https://arxiv.org/abs/1909.08053) and
 [pipeline-parallel](https://arxiv.org/abs/1811.06965) traffic alone. The budget
-tightens during the critical learning regime, so a flow eligible on step 12 may
-be ineligible on step 2. The first trim the receiver cannot forgive puts the flow
-back under congestion control.
+tightens during the
+[critical learning regime](https://proceedings.mlsys.org/paper_files/paper/2021/hash/acd593d2db87a799a8d3da5a860c028e-Abstract.html),
+so a flow eligible on step 12 may be ineligible on step 2. The first trim the
+receiver cannot forgive puts the flow back under congestion control.
 
 ## A trim reports a missing range
 
@@ -45,10 +47,11 @@ does. This selective-retransmission transport retransmits every reported range.
 
 Some training steps tolerate lost gradient updates better than others.
 [Accordion](https://proceedings.mlsys.org/paper_files/paper/2021/hash/acd593d2db87a799a8d3da5a860c028e-Abstract.html)
-uses changes in gradient norms to identify critical learning regimes, when the
-model is especially sensitive to compression. It keeps compression low in those
-periods and compresses hard everywhere else, reporting up to 5.5 times better
-compression at accuracy comparable to uncompressed training.
+uses changes in gradient norms to identify
+[critical learning regimes](https://proceedings.mlsys.org/paper_files/paper/2021/hash/acd593d2db87a799a8d3da5a860c028e-Abstract.html),
+when the model is especially sensitive to compression. It keeps compression low
+in those periods and compresses hard everywhere else, reporting up to 5.5 times
+better compression at accuracy comparable to uncompressed training.
 [DBLP](https://arxiv.org/abs/2605.01989) applies that schedule to network
 transport. It uses a hash draw at the sender to suppress whole gradient messages,
 with a tight loss allowance during the critical period and a looser one after it.
@@ -58,8 +61,10 @@ sixteen convolutional and recurrent neural network models and found 0.7 to 3.3
 percent of gradient bytes droppable at the same number of rounds and the same
 accuracy, and 10 percent when the target is a quality level and more rounds are
 allowed. [Weintraub and colleagues](https://arxiv.org/abs/2507.07114) lose 10
-percent of Llama 2 7B's gradient bytes uniformly at random for 1.17 percent
-worse perplexity, and 40 percent for 6.65 percent worse.
+percent of [Llama 2](https://arxiv.org/abs/2307.09288) 7B's gradient bytes
+uniformly at random for 1.17 percent worse
+[perplexity](https://huggingface.co/docs/transformers/perplexity), and 40
+percent for 6.65 percent worse.
 
 My budget is a per-step probability. In my runs, critical steps 1, 2, 3 and 20
 have a budget of 0.005; every other step has a budget of 0.4. Only messages from
@@ -135,6 +140,118 @@ will not forgive a trim. The first request on an exempt flow puts that flow back
 under congestion control and applies its rate cut. It needs no new packet type or
 header change.
 
+## The protocol as a judgment
+
+FORGIVE is three transition systems over one accounting entry: a range state at
+the receiver, a mode at the sender, and the entry itself.
+
+```
+Priority     ::= normal | escalated
+Verdict      ::= forgive N | request P
+Traffic      ::= grad R S | tp | pp | ctl | bg
+RangeState   ::= unknown | held | asked P | given
+Mode         ::= exempt | obey
+Entry        ::= <E, F, U, open> | <E, F, U, closed>
+Ledger    L  :  Rank x Step -> Entry
+```
+
+Each symbol is the first letter of what it names, or the second where the first
+was taken: $R$ rank, $S$ step, $A$ range, $C$ the receiver's cumulative
+acknowledgement point, $H$ the ranges it holds, $G$ the ranges it has given, $E$
+eligible bytes, $F$ forgiven bytes, $U$ suppressed bytes, $N$ unsettled bytes,
+$M$ the set of steps the schedule knows, $B(S)$ the budget at step $S$, $P$ a
+priority, $T$ a traffic class, $V$ a verdict, $L$ the ledger. Write
+$L \oplus_{R,S} N$ for the ledger with the forgiven counter at $(R,S)$ raised by
+$N$, which is the only update any rule performs. The receiver charges only the
+part of a reported range it does not already hold:
+
+$$
+N \;=\; \lvert\, A \setminus (H \cup G \cup [0, C)) \,\rvert
+$$
+
+The entry at $(R,S)$ is sound when $F + U \le B(S)\cdot E$. The verdict judgment
+reads: under ledger $L$, traffic $T$ carrying $N$ unsettled bytes yields verdict
+$V$ and ledger $L'$.
+
+$$
+L \vdash T, N \Downarrow V \dashv L'
+$$
+
+$$
+\frac{\begin{array}{c}
+T = \mathsf{grad}\;R\;S \qquad S \in M \\
+L(R,S) = \langle E, F, U, \mathsf{open}\rangle \qquad F + U + N \le B(S)\cdot E
+\end{array}}
+{L \vdash T, N \Downarrow \mathsf{forgive}\;N \dashv L \oplus_{R,S} N}
+\tag{Forgive}
+$$
+
+$$
+\frac{\begin{array}{c}
+T = \mathsf{grad}\;R\;S \qquad S \in M \\
+L(R,S) = \langle E, F, U, \mathsf{open}\rangle \qquad F + U + N > B(S)\cdot E
+\end{array}}
+{L \vdash T, N \Downarrow \mathsf{request}\;P(S) \dashv L}
+\tag{Spent}
+$$
+
+$$
+\frac{T = \mathsf{grad}\;R\;S \qquad L(R,S) = \langle E, F, U, \mathsf{closed}\rangle}
+{L \vdash T, N \Downarrow \mathsf{request}\;P(S) \dashv L}
+\tag{Closed}
+$$
+
+$$
+\frac{T = \mathsf{grad}\;R\;S \qquad S \notin M}
+{L \vdash T, N \Downarrow \mathsf{request}\;\mathsf{normal} \dashv L}
+\tag{Unscheduled}
+$$
+
+$$
+\frac{T \in \{\mathsf{tp}, \mathsf{pp}, \mathsf{ctl}, \mathsf{bg}\}}
+{L \vdash T, N \Downarrow \mathsf{request}\;\mathsf{normal} \dashv L}
+\tag{Ineligible}
+$$
+
+A refusal is the NACK a selective-retransmission transport already sends. The
+wire format does not change.
+
+A range reaches a state and stays there, so nothing is charged twice.
+
+| range state | trimmed packet | data packet |
+| --- | --- | --- |
+| $\mathsf{unknown}$ | judge, then $\mathsf{given}$ or $\mathsf{asked}\;P$ | $\mathsf{held}$, ACK |
+| $\mathsf{held}$ | $\mathsf{held}$, duplicate ACK, no charge | $\mathsf{held}$, ACK |
+| $\mathsf{asked}\;P$ | $\mathsf{asked}\;P$, resend NACK at $P$ | $\mathsf{held}$, ACK |
+| $\mathsf{given}$ | $\mathsf{given}$, ACK, no charge | $\mathsf{given}$, drop payload, no refund |
+
+The sender carries one bit, and its transition relation has no cycle back.
+
+$$
+\frac{}{\mathsf{exempt} \xrightarrow{\;\mathsf{cnp}\;} \mathsf{exempt}}
+\qquad
+\frac{}{\mathsf{obey} \xrightarrow{\;\mathsf{cnp}\;} \mathsf{obey} \;\triangleright\; \mathit{cut}}
+\qquad
+\frac{}{O \xrightarrow{\;\mathsf{nack}\;P\;} \mathsf{obey} \;\triangleright\; \mathit{cut}}
+$$
+
+The judgment is total: the five rules are mutually exclusive and cover every $T$
+and every $L(R,S)$, so a trimmed range gets exactly one verdict, and a step the
+schedule does not know is refused. A mask with a hole in it yields a null result
+and never an unbounded one. Only $(\text{Forgive})$ moves the ledger, and its
+fourth premise is the obligation on the post-state, so the bound is preserved.
+Neither counter ever falls and no rule reopens a closed entry, so the bound
+holds at every prefix of a run and not only at a step boundary. The telemetry
+can check it during a run. Revocation is permanent: $\mathsf{obey}$ has no
+outgoing edge to $\mathsf{exempt}$, so a flow returned to congestion control
+stays there for its lifetime.
+
+The invariant is not observable on the wire. A forgiven range and a delivered
+range produce the same acknowledgement, which is deliberate: a sender that could
+tell them apart could read a budget it does not own. So the bound holds by
+construction at the receiver, and each run's telemetry is its only external
+witness.
+
 ## Results
 
 I tested the most congested configuration with three random seeds and four
@@ -186,19 +303,23 @@ moment where the network would not carry the traffic.
 ## Limits
 
 Whether a current model tolerates losing 9 percent of its gradient bytes on
-non-critical steps is assumed, not tested. DBLP tested EfficientNet and ResNet;
-Weintraub tested 10 percent uniform loss on Llama 2 7B without phase dependence.
-Nobody has published phase-gated gradient loss at transformer scale or measured
-loss that is bursty and correlated, which packet trimming produces. The budget is
-an assumed tolerance until a training run tests it.
+non-critical steps is assumed, not tested. DBLP tested
+[EfficientNet](https://arxiv.org/abs/1905.11946) and
+[ResNet](https://arxiv.org/abs/1512.03385); Weintraub tested 10 percent uniform
+loss on Llama 2 7B without phase dependence. Nobody has published phase-gated
+gradient loss at
+[Transformer](https://arxiv.org/abs/1706.03762) scale or measured loss that is
+bursty and correlated, which packet trimming produces. The budget is an assumed
+tolerance until a training run tests it.
 
 The congestion control is DCQCN, because that is what the simulator models.
 Meta runs its 400 Gbps ML training networks
 [with DCQCN off](https://engineering.fb.com/wp-content/uploads/2024/08/sigcomm24-final246.pdf),
-where the exemption has nothing to act on. Ultra Ethernet's default is Network
-Signal-based Congestion Control, a window-based controller with a trim-triggered
-fast adaptation that I have not modelled. The idea may transfer to controls that
-react to marks and trims. I have not measured that transfer.
+where the exemption has nothing to act on. Ultra Ethernet's default is
+[Network Signal-based Congestion Control](https://ultraethernet.org/wp-content/uploads/sites/20/2025/06/UE-Specification-6.11.25.pdf#page=377),
+a window-based controller with a trim-triggered fast adaptation that I have not
+modelled. The idea may transfer to controls that react to marks and trims. I have
+not measured that transfer.
 
 The simulation has one training job. Exempt flows shared the network with their
 own job's tensor-parallel traffic and a single background burst, never with
@@ -228,9 +349,11 @@ host it.
 conditions.
 [OptiReduce](https://www.usenix.org/conference/nsdi25/presentation/warraich)
 bounds each round by an adaptive timeout and makes the resulting loss harmless
-with a Hadamard mixing of the gradient.
+with [Hadamard mixing](https://www.usenix.org/conference/nsdi25/presentation/warraich)
+of the gradient.
 [Trimmable gradients](https://doi.org/10.1145/3696348.3696880) lay out each
-packet so that its trimmed prefix is already a quantised gradient. This removes
+packet so that its trimmed prefix is already a
+[quantised gradient](https://doi.org/10.1145/3696348.3696880). This removes
 retransmission entirely, without a bound: whatever the switch trims is accepted.
 That paper's future work asks for a congestion control that deliberately
 over-sends and lets the switch trim the excess. The exemption has that behaviour
@@ -248,7 +371,7 @@ repair tail that MLT, LTP and OptiReduce were built to reduce does not exist.
 Those systems used [TCP](https://www.rfc-editor.org/rfc/rfc9293) and UDP with
 millisecond timeouts. In these simulations, forgiveness alone does not reduce the
 congestion-control reaction. The exemption accounts for the result. I did not
-expect that when I started, and two negative waves exposed it.
+expect that when I started, and two negative results exposed it.
 
 The tolerance numbers I found in the literature come from loss that is uniform
 and independent. Packet trimming produces loss that is bursty, correlated across
