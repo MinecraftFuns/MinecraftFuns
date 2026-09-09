@@ -110,10 +110,9 @@ congestion control.
 I then tested eight network configurations with 64 ranks at 400 Gbps, varying
 congestion control, the number of senders per all-reduce, and the
 oversubscription at the spine switches. The congestion episode cost under 1
-percent of the total time for 20 training steps in every configuration. A
-sender-side policy that drops messages before sending them could not shorten
-enough of that time. Forgiveness that only skips a repair round can save at most
-one round trip per flow. This is under 0.2 percent of an all-reduce.
+percent of the total time for 20 training steps in every configuration.
+Forgiveness that only skips a repair round can save at most one round trip per
+flow. This is under 0.2 percent of an all-reduce.
 
 The eight configurations showed a cost from congestion control. With DCQCN, the
 trim rate was lower by a factor of seven to ten and the total time for 20 training
@@ -318,7 +317,7 @@ baseline. The 218 ms saving came from the 16 non-critical steps. Retransmission
 timeouts fell by two thirds and applied rate cuts by half. Tensor-parallel spans
 fell as well, because gradient flows leave the leaf switch sooner.
 
-Exempt flows push harder, so the trim rate rose slightly, from 0.031 to 0.033,
+Exempt flows push harder, so the trim rate rose from 0.031 to 0.033,
 and two thirds of those trims were forgiven. Per seed the exempt run ignored
 10.4 to 10.9 million congestion notifications, acted on 6.0 to 6.4 million, and
 returned 12 to 13 thousand of its 71,680 eligible flows to congestion control.
@@ -329,8 +328,7 @@ no movement because it hardly trims. That prediction was wrong, and I withdrew
 it. With DCQCN, senders took 3.3 million rate cuts in that configuration from
 ECN marks alone. The exemption applies to those marks. The total time for 20
 training steps fell 4 percent, trims doubled, and the receiver forgave every
-additional trim. The burst drained 5 to 22 percent slower. On a fabric this
-lightly congested the exemption returns little and costs little.
+additional trim. The burst drained 5 to 22 percent slower.
 
 ## Forgiveness uses the budget at congestion
 
@@ -366,11 +364,10 @@ assumed tolerance until a training run tests it.
 
 A deployment has to run the detector these runs did without, and a detector
 makes two kinds of mistake. Calling a critical step ordinary puts a loose budget
-on the step least able to afford it, which is the failure the whole schedule
-exists to prevent. Calling an ordinary step critical
-only forfeits the gain. Nothing here measures either, and the cheap first test
-does not need the network at all: replay a detector over the gradient norms of a
-real training run and count the steps it misses.
+on the step least able to afford it. Calling an ordinary step critical only
+forfeits the gain. Nothing here measures either, and the first test does not
+need the network at all: replay a detector over the gradient norms of a real
+training run and count the steps it misses.
 
 The congestion control is DCQCN, because that is what the simulator models.
 Meta runs its 400 Gbps ML training networks
@@ -419,8 +416,8 @@ over-sends and lets the switch trim the excess. The exemption has that behaviour
 within a budget.
 
 FORGIVE decides per missing range from the switch's trim report on a network
-with selective repeat. The lost bytes are the ones the network could not carry,
-not the ones that happened to be late. Its budget is per receiving rank and
+with selective repeat. The lost bytes are the ones the network could not carry
+rather than the ones that arrived last. Its budget is per receiving rank and
 training step. Sender suppression and receiver forgiveness both charge it. The
 congestion-control exemption applies per flow, stays within that budget, and the
 receiver's first refusal revokes it.
