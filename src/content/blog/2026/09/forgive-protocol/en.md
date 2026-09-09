@@ -144,16 +144,26 @@ header change.
 
 ## State and decision
 
-FORGIVE has four parts: a detector, an accounting entry per receiving rank and
-step, a scoreboard per flow at the receiver, and one mode bit per flow at the
-sender.
+FORGIVE runs on a trimming RDMA fabric. A switch truncates a packet to its
+header when a queue fills and forwards the header on a lossless control queue.
+The data queue loses packets. The control queue does not. The transport repairs
+one reported range at a time, not by go-back-N. A rate-based congestion control
+runs underneath: DCQCN in every run below, and Ultra Ethernet's NSCC once I
+model it. The receiver already accepts out-of-order arrival, since the fabric
+sprays packets across paths. FORGIVE adds no packet type and changes no header.
 
-The detector runs before a step's gradient traffic starts. It classifies the
-step as inside or outside the critical learning regime, from the rate of change
-in gradient norms, which is Accordion's criterion. That classification picks one
-of two budgets, and the budget parameterises the step's entry. Nothing else in
-the protocol knows what a critical step is, and no list of them exists: the
-detector is the only thing that decides, and it decides one step at a time.
+The switch trims and does nothing further. It reports a missing range and
+decides nothing about it. Each rank runs the detector over its own gradients and
+opens its own entry, so a receiver's budget comes from its own verdict on the
+step. The scoreboard and the verdict live at the receiver. The mode bit lives at
+the sender.
+
+The detector runs before a step's gradient traffic starts. It reads the rate of
+change in gradient norms, Accordion's criterion, and classifies the step as
+inside or outside the critical learning regime. The classification picks one of
+two budgets, and that budget parameterises the step's entry. No list of critical
+steps exists anywhere in the protocol. The detector decides, one step at a
+time.
 
 Two budgets:
 
@@ -181,9 +191,15 @@ shared by every flow to that rank:
 - `suppressed: int`. Bytes the sender shed before sending.
 - `open: bool`. `True` until this rank's all-reduce for the step completes.
 
-For every rank and step, at all times, `forgiven + suppressed` is at most
-`budget * eligible`. A step whose entry was never opened forgives nothing, so a
-receiver that has heard no verdict for a step repairs it the ordinary way.
+`eligible` is the gradient bytes destined for that rank in that step, which the
+collective schedule fixes before the step starts. For every rank and step, at
+all times, `forgiven + suppressed` is at most `budget * eligible`. A step whose
+entry was never opened forgives nothing, so a receiver that has heard no verdict
+for a step repairs it the ordinary way.
+
+A run spends its budget in one place, either shedding at the sender or forgiving
+at the receiver. The entry carries both counters so the two can be compared at
+the same budget.
 
 ```cpp
 OnStepBegin(rank, step, gradients):
@@ -194,11 +210,10 @@ OnStepBegin(rank, step, gradients):
   entry.open = true
 ```
 
-The detector has to finish before the step's first gradient byte leaves, since
-an entry opened late has already missed traffic it should have counted. Its two
-errors are not symmetric. Calling an ordinary step critical costs only the gain
-FORGIVE would have made on it. Calling a critical step ordinary puts the loose
-budget on the one step the schedule exists to protect.
+The detector has to finish before the step's first gradient byte leaves, or the
+entry opens after traffic it should have counted. Its two mistakes cost
+differently: a false positive forfeits the gain on an ordinary step; a false
+negative puts the loose budget on a step that cannot afford it.
 
 A range on the scoreboard never leaves the state it reaches, so no range is
 charged twice. A range that arrives without ever being trimmed becomes
