@@ -8,11 +8,11 @@ tags: ["Essays", "Networking", "Artificial Intelligence", "Performance"]
 Distributed ML training sends gradient updates between machines on every step.
 Congestion control and packet loss impose different costs on the network that
 carries those updates. With congestion control off, the most congested of eight
-network configurations I tested trimmed one offered byte in four and carried it
-again. With [DCQCN](https://doi.org/10.1145/2785956.2787484) on, that
-configuration took 24 percent longer to complete. Its senders took millions of
-rate cuts, and the trim rate fell sevenfold. The training job pays one of those
-costs on every step.
+network configurations I simulated with [ASTRA-sim](https://astra-sim.github.io/)
+trimmed one offered byte in four and carried it again. With
+[DCQCN](https://doi.org/10.1145/2785956.2787484) on, that configuration took 24
+percent longer to complete. Its senders took millions of rate cuts, and the trim
+rate fell sevenfold. The training job pays one of those costs on every step.
 
 Gradient descent can tolerate losing some gradient bytes, though neither at
 every step nor at any rate. I call the protocol **F**abric-**O**verload
