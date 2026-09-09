@@ -162,25 +162,26 @@ State per flow, at the receiver:
 
 State per flow, at the sender:
 
-- `cc_mode: Mode`. `Exempt` when an eligible flow is created, `Obeying` from the
-  receiver's first retransmission request. An ineligible flow is created
-  `Obeying` and never leaves it.
+- `cc_mode: Mode`. `Exempt` or `Obeying`. `OnFlowStart` sets it, and the
+  receiver's first retransmission request moves it to `Obeying` for good.
 
 State per receiving rank and training step, opened when the step begins and
 shared by every flow to that rank:
 
 - `tolerance: float`. `kToleranceCritical` or `kToleranceOther`, by the
   detector's verdict on this step.
-- `budget: int`. Bytes this rank may lose on this step. Each eligible flow adds
-  `tolerance` of its own bytes when it starts, so the budget grows through the
-  step.
+- `budget: int`. Bytes this rank may lose on this step. `OnFlowStart` accrues
+  it, so the budget grows as the step's flows begin.
 - `forgiven: int`. Bytes the receiver acknowledged without receiving.
 - `open: bool`. `True` until this rank's all-reduce for the step completes.
 
 At all times, `forgiven` is at most `budget`. Since the budget grows as flows
-register, it is tightest at the start of a step. An entry
-that was never opened forgives nothing, so a step the detector has not
-classified must be repaired the ordinary way.
+register, it is tightest at the start of a step. An entry that was never opened
+forgives nothing, so a step the detector has not classified must be repaired the
+ordinary way.
+
+The entry's life is three events: the step begins, its flows start, its
+all-reduce completes.
 
 ```cpp
 OnStepBegin(rank, step, gradients):
@@ -193,6 +194,21 @@ OnStepBegin(rank, step, gradients):
   // Open before the step's first gradient byte, or those bytes go
   // uncounted.
   entry.open = true
+
+OnFlowStart(flow, bytes):
+  (rank, step) = Coordinates(flow)
+  entry = ledger[rank][step]
+  // Anything else runs under congestion control from the first byte.
+  if (!IsGradientAllReduce(flow) || entry == null || !entry.open):
+    flow.cc_mode = Obeying
+    return
+  // A flow buys budget out of its own bytes, rounded down.
+  entry.budget += Floor(entry.tolerance * bytes)
+  flow.cc_mode = Exempt
+
+OnAllReduceComplete(rank, step):
+  // The step is over. Any later trim on it is repaired.
+  ledger[rank][step].open = false
 ```
 
 A range never leaves the state it reaches, so none is charged twice. A range
