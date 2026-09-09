@@ -105,8 +105,7 @@ to 11 percent. The transport underneath was go-back-N, and a control run with
 [selective repeat](https://www.rfc-editor.org/rfc/rfc2018) showed the same
 congestion burst costing 29 ms instead of 1.8 s. Go-back-N put up to 79 bytes on
 the wire for every byte the policy removed. I had measured the transport's
-amplification rather than the policy. Nobody deploys go-back-N without
-congestion control.
+amplification rather than the policy.
 
 So I went looking for the time the burst was supposed to be costing. I swept
 eight configurations of the fabric, 64 ranks at 400 Gbps, varying congestion
@@ -118,23 +117,23 @@ an all-reduce.
 
 The time was going somewhere else. With DCQCN on, the trim rate fell by a factor
 of seven to ten and the 20-step window grew 18 to 24 percent, paid for in
-millions of rate cuts per run. That is the trade a loss budget can undo: it
-allows the trims DCQCN spends time avoiding. Whether a model tolerates them is
-what no simulation here can answer.
+millions of rate cuts per run. A loss budget can pay for the trims DCQCN spends
+that time avoiding.
 
 ## Rate-control exemption
 
-The sender of a flow whose trimmed bytes are eligible for forgiveness
-also ignores congestion signals. It does not reduce its sending rate until the
-receiver requests a retransmission for one of its trims. The sender then obeys
-congestion control again. Its lost bytes remain within the budget.
+Paying for the trims does not stop the rate cuts. So the sender of a flow whose
+trimmed bytes are eligible for forgiveness ignores congestion signals as well.
+It holds its rate until the receiver requests a retransmission for one of its
+trims, and then obeys congestion control again, its lost bytes still inside the
+budget.
 
 The exemption covers both [ECN](https://www.rfc-editor.org/rfc/rfc3168) marks
 and trim notifications. In the DCQCN configuration here, switches begin
 ECN-marking at 800 KB of queue and trim only when the 4 MiB data queue is full.
 Marks arrive long before trims. In the most congested configuration, at least 74
 percent of rate cuts came from marks that no forgiven trim affects. Exempting
-only trim-triggered cuts would leave those in place. Eligible senders ignore
+only trim-triggered cuts would leave those in place, so eligible senders ignore
 every congestion notification packet.
 
 All flows to a receiving rank share its budget entry, but no sender can read the
@@ -317,22 +316,22 @@ percent across the three seeds. It acted where it was aimed. The all-reduce span
 on non-critical steps fell from 36 ms to 21 ms, and the critical-step span
 stayed at 37 ms, within 0.9 ms of the baseline.
 
-The transport came out calmer rather than wilder, which I did not expect of a
-policy whose senders ignore congestion. Retransmission timeouts fell by two
-thirds and applied rate cuts by half, and tensor-parallel spans fell too,
-because gradient flows leave the leaf switch sooner.
+Senders that ignore congestion left the transport calmer, not wilder.
+Retransmission timeouts fell by two thirds and applied rate cuts by half, and
+tensor-parallel spans fell too, because gradient flows leave the leaf switch
+sooner.
 
 The cost side stayed small. Exempt flows push harder, so the trim rate rose from
 0.031 to 0.033, and two thirds of those trims were forgiven. About one exempt
 flow in six met a refusal and went back under congestion control, so the
 revocation is not dead code. The budget rule held in every accounting entry.
 
-I preregistered a prediction that a lightly congested configuration would show
-no movement because it hardly trims. That prediction was wrong, and I withdrew
-it. With DCQCN, senders took 3.3 million rate cuts in that configuration from
-ECN marks alone. The exemption applies to those marks. The total time for 20
-training steps fell 4 percent, trims doubled, and the receiver forgave every
-additional trim. The burst drained 5 to 22 percent slower.
+The exemption even moves a fabric with almost nothing to forgive. A lightly
+congested configuration barely trims,
+but DCQCN still cuts rates there 3.3 million times on ECN marks alone, and marks
+are most of what the exemption ignores. Its 20-step window fell 4 percent and
+its trims doubled, every extra one forgiven, at the price of a burst that
+drained 5 to 22 percent slower.
 
 ## Forgiveness uses the budget at congestion
 
@@ -351,9 +350,6 @@ A baseline that sheds 40 percent on every step does match FORGIVE on time, 1433
 to 1466 ms against 1459 to 1468 ms, which is a tie inside the seed spread of
 both. It buys that by shedding through the critical steps as well, which
 conflicts with the critical learning regime assumed by the work here.
-
-Network congestion varies over time. A trim report identifies the range and
-moment where the network would not carry the traffic.
 
 ## Limits
 
@@ -430,9 +426,9 @@ receiver's first refusal revokes it.
 On a network that trims packets and runs selective repeat, the long repair tail
 that MLT, LTP and OptiReduce were built to reduce does not exist. Those systems
 used [TCP](https://www.rfc-editor.org/rfc/rfc9293) and UDP with millisecond
-timeouts. In these simulations, forgiveness alone does not reduce the
-congestion-control reaction. The exemption accounts for the result. I did not
-expect that when I started, and two negative results exposed it.
+timeouts. On a fabric that trims, forgiveness alone does not reduce the
+congestion-control reaction, and the exemption accounts for the whole result.
+Two negative results were what exposed that.
 
 The tolerance numbers I found in the literature come from loss that is uniform
 and independent. Packet trimming produces loss that is bursty, correlated across
