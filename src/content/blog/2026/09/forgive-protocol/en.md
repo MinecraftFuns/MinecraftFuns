@@ -140,117 +140,85 @@ will not forgive a trim. The first request on an exempt flow puts that flow back
 under congestion control and applies its rate cut. It needs no new packet type or
 header change.
 
-## The protocol as a judgment
+## State and decision
 
-FORGIVE is three transition systems over one accounting entry: a range state at
-the receiver, a mode at the sender, and the entry itself.
+FORGIVE adds three pieces of state: a receive scoreboard per flow, a congestion
+mode per flow, and one loss budget shared by every flow arriving at a rank.
 
 ```
-Priority     ::= normal | escalated
-Verdict      ::= forgive N | request P
-Traffic      ::= grad R S | tp | pp | ctl | bg
-RangeState   ::= unknown | held | asked P | given
-Mode         ::= exempt | obey
-Entry        ::= <E, F, U, open> | <E, F, U, closed>
-Ledger    L  :  Rank x Step -> Entry
+Per flow, at the receiver
+  rcv_nxt      next sequence number expected, as in RFC 9293; everything
+               below it is settled
+  scoreboard   byte range -> received | forgiven | requested(priority)
+  mode         exempt | obey, set when the flow starts, cleared by the
+               first retransmission request the receiver sends it
+
+Per (rank R, step S), shared by every flow arriving at rank R
+  E            eligible bytes, counted when a gradient message is sent
+  F            forgiven bytes
+  U            suppressed bytes, shed at the sender before sending
+  open         true until rank R's all-reduce for step S finishes
+
+From the loss schedule
+  M            the steps the schedule covers
+  B(S)         loss budget: 0.005 on a critical step, 0.4 otherwise
+  P(S)         NACK priority: escalated on a critical step, normal otherwise
+
+Invariant, for every (R, S) and at every moment of the run
+  F + U <= B(S) * E
 ```
 
-Each symbol is the first letter of what it names, or the second where the first
-was taken: $R$ rank, $S$ step, $A$ range, $C$ the receiver's cumulative
-acknowledgement point, $H$ the ranges it holds, $G$ the ranges it has given, $E$
-eligible bytes, $F$ forgiven bytes, $U$ suppressed bytes, $N$ unsettled bytes,
-$M$ the set of steps the schedule knows, $B(S)$ the budget at step $S$, $P$ a
-priority, $T$ a traffic class, $V$ a verdict, $L$ the ledger. Write
-$L \oplus_{R,S} N$ for the ledger with the forgiven counter at $(R,S)$ raised by
-$N$, which is the only update any rule performs. The receiver charges only the
-part of a reported range it does not already hold:
+A trimmed header names a byte range `A`. Because a retransmission can be
+re-segmented, `A` may overlap bytes the receiver already has, so it counts only
+what is still missing:
 
-$$
-N \;=\; \lvert\, A \setminus (H \cup G \cup [0, C)) \,\rvert
-$$
+```
+N = bytes of A at or above rcv_nxt that the scoreboard
+    marks neither received nor forgiven
+```
 
-The entry at $(R,S)$ is sound when $F + U \le B(S)\cdot E$. The verdict judgment
-reads: under ledger $L$, traffic $T$ carrying $N$ unsettled bytes yields verdict
-$V$ and ledger $L'$.
+It then takes the first row that matches.
 
-$$
-L \vdash T, N \Downarrow V \dashv L'
-$$
+| | condition | response | budget |
+| --- | --- | --- | --- |
+| 1 | `N = 0` | ACK | unchanged |
+| 2 | flow is not gradient all-reduce | NACK, normal | unchanged |
+| 3 | `S` not in `M` | NACK, normal | unchanged |
+| 4 | budget for `(R, S)` not open | NACK, `P(S)` | unchanged |
+| 5 | `F + U + N > B(S) * E` | NACK, `P(S)` | unchanged |
+| 6 | otherwise | ACK past the hole | `F += N` |
 
-$$
-\frac{\begin{array}{c}
-T = \mathsf{grad}\;R\;S \qquad S \in M \\
-L(R,S) = \langle E, F, U, \mathsf{open}\rangle \qquad F + U + N \le B(S)\cdot E
-\end{array}}
-{L \vdash T, N \Downarrow \mathsf{forgive}\;N \dashv L \oplus_{R,S} N}
-\tag{Forgive}
-$$
+Rows 2 to 5 are the refusals, and each sends the NACK a
+selective-retransmission transport already sends. No new packet type, no header
+change.
 
-$$
-\frac{\begin{array}{c}
-T = \mathsf{grad}\;R\;S \qquad S \in M \\
-L(R,S) = \langle E, F, U, \mathsf{open}\rangle \qquad F + U + N > B(S)\cdot E
-\end{array}}
-{L \vdash T, N \Downarrow \mathsf{request}\;P(S) \dashv L}
-\tag{Spent}
-$$
+A scoreboard entry never leaves the state it reaches, so no range is charged
+twice.
 
-$$
-\frac{T = \mathsf{grad}\;R\;S \qquad L(R,S) = \langle E, F, U, \mathsf{closed}\rangle}
-{L \vdash T, N \Downarrow \mathsf{request}\;P(S) \dashv L}
-\tag{Closed}
-$$
-
-$$
-\frac{T = \mathsf{grad}\;R\;S \qquad S \notin M}
-{L \vdash T, N \Downarrow \mathsf{request}\;\mathsf{normal} \dashv L}
-\tag{Unscheduled}
-$$
-
-$$
-\frac{T \in \{\mathsf{tp}, \mathsf{pp}, \mathsf{ctl}, \mathsf{bg}\}}
-{L \vdash T, N \Downarrow \mathsf{request}\;\mathsf{normal} \dashv L}
-\tag{Ineligible}
-$$
-
-A refusal is the NACK a selective-retransmission transport already sends. The
-wire format does not change.
-
-A range reaches a state and stays there, so nothing is charged twice.
-
-| range state | trimmed packet | data packet |
+| scoreboard entry | trimmed packet arrives | data packet arrives |
 | --- | --- | --- |
-| $\mathsf{unknown}$ | judge, then $\mathsf{given}$ or $\mathsf{asked}\;P$ | $\mathsf{held}$, ACK |
-| $\mathsf{held}$ | $\mathsf{held}$, duplicate ACK, no charge | $\mathsf{held}$, ACK |
-| $\mathsf{asked}\;P$ | $\mathsf{asked}\;P$, resend NACK at $P$ | $\mathsf{held}$, ACK |
-| $\mathsf{given}$ | $\mathsf{given}$, ACK, no charge | $\mathsf{given}$, drop payload, no refund |
+| absent | run the table above | received, ACK |
+| received | duplicate ACK, no charge | received, ACK |
+| requested | resend the NACK at its priority | received, ACK |
+| forgiven | ACK, no charge | drop the payload, no credit back |
 
-The sender carries one bit, and its transition relation has no cycle back.
+The sender's mode falls once and does not rise again.
 
-$$
-\frac{}{\mathsf{exempt} \xrightarrow{\;\mathsf{cnp}\;} \mathsf{exempt}}
-\qquad
-\frac{}{\mathsf{obey} \xrightarrow{\;\mathsf{cnp}\;} \mathsf{obey} \;\triangleright\; \mathit{cut}}
-\qquad
-\frac{}{O \xrightarrow{\;\mathsf{nack}\;P\;} \mathsf{obey} \;\triangleright\; \mathit{cut}}
-$$
+| mode | CNP arrives | NACK arrives | ACK arrives |
+| --- | --- | --- | --- |
+| exempt | ignore it, count it | become obey, cut the rate, retransmit | advance |
+| obey | cut the rate | cut the rate, retransmit | advance |
 
-The judgment is total: the five rules are mutually exclusive and cover every $T$
-and every $L(R,S)$, so a trimmed range gets exactly one verdict, and a step the
-schedule does not know is refused. A mask with a hole in it yields a null result
-and never an unbounded one. Only $(\text{Forgive})$ moves the ledger, and its
-fourth premise is the obligation on the post-state, so the bound is preserved.
-Neither counter ever falls and no rule reopens a closed entry, so the bound
-holds at every prefix of a run and not only at a step boundary. The telemetry
-can check it during a run. Revocation is permanent: $\mathsf{obey}$ has no
-outgoing edge to $\mathsf{exempt}$, so a flow returned to congestion control
-stays there for its lifetime.
-
-The invariant is not observable on the wire. A forgiven range and a delivered
-range produce the same acknowledgement, which is deliberate: a sender that could
-tell them apart could read a budget it does not own. So the bound holds by
-construction at the receiver, and each run's telemetry is its only external
-witness.
+No case falls through: rows 1 to 6 are ordered and cover every arriving trim, so
+each one takes exactly one row, and a step the schedule does not cover reaches
+row 3 and is repaired the ordinary way. A schedule with a gap in it therefore
+loses nothing it should have kept. Only row 6 writes the budget, and its
+condition is the invariant checked against the values the write will produce, so
+the invariant survives every charge. `F` and `U` never fall and a closed budget
+never reopens, so the invariant holds at every moment of a run and not only when
+a step ends. That is what lets the telemetry check it while the run is going.
+The mode table has no edge back to exempt, so a flow returned to congestion
+control stays there until it finishes.
 
 ## Results
 
