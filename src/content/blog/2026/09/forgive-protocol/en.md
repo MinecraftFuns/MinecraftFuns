@@ -149,6 +149,14 @@ criterion, the rate of change in gradient norms, puts the step inside or outside
 the critical learning regime, and that verdict picks the budget. No list
 of critical steps exists in the protocol.
 
+None of that is visible from the wire, and FORGIVE does not pretend otherwise.
+The transport has to be told four things by the collective library above it:
+which step is beginning and what its gradient norms say, how many gradient bytes
+the step will bring this rank, which flows carry them, and which step a given
+flow belongs to. That is a host-local interface between NCCL and the network
+interface card, not a packet, which is why the wire format is unchanged and why
+nothing here can be inferred by a switch or a peer.
+
 Two loss tolerances:
 
 - `kToleranceCritical: float`. The fraction of a flow's gradient bytes that may
@@ -355,6 +363,12 @@ A deployment has to run a real detector. Calling a critical step ordinary lets
 ordinary step critical only forfeits the gain. Nothing here measures either, and
 the cheapest check needs no network: replay a detector over the gradient norms
 of a real training run and count the steps it misses.
+
+It also has to build the interface that feeds the detector. A simulator hands
+over a step index, a verdict, a byte count and a flow classification for
+nothing, because it holds the training loop and the network in one process. On
+real hardware that is a path from the collective library into the network
+interface card, and nothing here estimates what it costs to open one.
 
 The congestion control is DCQCN because that is what the simulator models. Meta
 runs its 400 Gbps ML training networks
