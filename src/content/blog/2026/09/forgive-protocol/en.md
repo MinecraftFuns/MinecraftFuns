@@ -204,13 +204,15 @@ the same budget.
 
 ```cpp
 OnStepBegin(rank, step, gradients):
-  // Accordion criterion. No fixed critical-step list anywhere.
+  // Is this step inside the critical learning regime? Gradient norms
+  // answer, one step at a time.
   critical = InCriticalRegime(gradients)
   entry = ledger[rank][step]
-  // Only place a budget is set. Detector verdict picks it.
+  // Critical steps get the tight budget, every other step the loose one.
   entry.budget = critical ? kBudgetCritical : kBudgetOther
   entry.eligible = entry.forgiven = entry.suppressed = 0
-  // Before the step's first gradient byte, else the entry undercounts.
+  // Open before the step's first gradient byte, or those bytes go
+  // uncounted.
   entry.open = true
 ```
 
@@ -234,7 +236,8 @@ receiver already has.
 
 ```cpp
 UnsettledBytes(flow, range):
-  // Charge only bytes not already held. Never pay twice for one byte.
+  // Only the bytes the receiver still lacks. A retransmission can carry
+  // bytes it already holds, and those cost no budget.
   return the bytes of range that are >= flow.rcv_nxt and are marked
     neither Received nor Forgiven on flow.scoreboard
 ```
@@ -244,34 +247,37 @@ UnsettledBytes(flow, range):
 ```cpp
 OnTrimmedHeader(flow, range):
   n = UnsettledBytes(flow, range)
-  // Whole range already settled. No charge.
+  // Nothing missing after all. Acknowledge and spend nothing.
   if (n == 0):
     SendAck(flow.rcv_nxt)
     return
 
-  // Tensor, pipeline and control traffic: never forgive.
+  // Only gradients are forgivable. Tensor, pipeline and control traffic
+  // is always repaired.
   if (!IsGradientAllReduce(flow)):
     SendRetransmissionRequest(range, kNormal)
     return
 
   (rank, step) = Coordinates(flow)
   entry = ledger[rank][step]
-  // No verdict yet, or step already closed. Repair the ordinary way.
+  // No budget open for this step, so there is nothing to spend.
   if (entry == null || !entry.open):
     SendRetransmissionRequest(range, kNormal)
     return
 
-  // Would break the bound. Refusing also revokes the sender's exemption.
+  // The budget will not cover these bytes, so ask for them. That request
+  // also puts the sender back under congestion control.
   if (entry.forgiven + entry.suppressed + n >
       entry.budget * entry.eligible):
     SendRetransmissionRequest(range, kNormal)
     return
 
-  // Sole writer of the budget. Never refunds.
+  // Forgiving spends budget once and never gives it back.
   entry.forgiven += n
   flow.scoreboard[range] = Forgiven
   flow.rcv_nxt = Advance(flow.rcv_nxt, flow.scoreboard)
-  // Echo kept, so the sender still sees the congestion.
+  // The ACK still carries the ECN echo, so forgiving a range hides no
+  // congestion from the sender.
   SendAck(flow.rcv_nxt, ecn_echo)
 ```
 
@@ -282,14 +288,16 @@ At the sender, the two congestion signals:
 
 ```cpp
 OnCongestionNotification(flow):
-  // Marks too, not only trims. Most rate cuts come from marks.
+  // An exempt sender ignores ECN marks as well as trims. Most of the
+  // slowing down DCQCN imposes comes from marks.
   if (flow.cc_mode == Exempt):
     cnp_ignored++
     return
   ReduceRate(flow)
 
 OnRetransmissionRequest(flow, range):
-  // Revoke before any staleness check: a stale request still counts.
+  // The receiver refused to forgive, so the exemption ends here and the
+  // sender slows down like any other.
   flow.cc_mode = Obeying
   ReduceRate(flow)
   Retransmit(range)
