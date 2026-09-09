@@ -149,7 +149,7 @@ criterion, the rate of change in gradient norms, puts the step inside or outside
 the critical learning regime, and that verdict picks the budget. No list
 of critical steps exists in the protocol.
 
-None of that is visible from the wire, and FORGIVE does not pretend otherwise.
+Little of that is visible from the wire, and FORGIVE does not pretend otherwise.
 The transport has to be told four things by the collective library above it:
 which step is beginning and what its gradient norms say, how many gradient bytes
 the step will bring this rank, which flows carry them, and which step a given
@@ -364,11 +364,21 @@ ordinary step critical only forfeits the gain. Nothing here measures either, and
 the cheapest check needs no network: replay a detector over the gradient norms
 of a real training run and count the steps it misses.
 
-It also has to build the interface that feeds the detector. A simulator hands
-over a step index, a verdict, a byte count and a flow classification for
-nothing, because it holds the training loop and the network in one process. On
-real hardware that is a path from the collective library into the network
-interface card, and nothing here estimates what it costs to open one.
+It also has to build the interface that feeds the detector, and the four things
+that interface carries are not equally hard. A communicator's
+[traffic class](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/communicators.html)
+already becomes an IP type of service on RoCE, so a gradient all-reduce can be
+told apart by its DSCP rather than by anything the transport is handed, and a
+receiving net plugin is already given the size of every message posted to it.
+The step index and the gradient norms are carried nowhere, though both are
+host-local and neither needs a wire change.
+
+The decision is the hard part. Forgiving a range means writing the transport's
+own reliability state, which on an RDMA fabric lives in the network interface
+card rather than in a plugin above it. MLT hit that wall and retreated to UDP in
+user space, and FORGIVE asks more of the card than MLT did. Ultra Ethernet is
+where it looks plausible, since trimming, the trimmed-header NACK and selective
+retransmission are already transport-layer functions going into silicon.
 
 The congestion control is DCQCN because that is what the simulator models. Meta
 runs its 400 Gbps ML training networks
