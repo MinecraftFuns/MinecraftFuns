@@ -59,8 +59,8 @@ uniformly at random for 1.17 percent worse
 [perplexity](https://huggingface.co/docs/transformers/perplexity), and 40 percent
 for 6.65 percent worse.
 
-A loss fraction is a per-step allowance on a rank's gradient bytes, and applies
-only to the gradient
+A tolerance is a per-step fraction of a rank's gradient bytes, and applies only
+to the gradient
 [all-reduce](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html).
 Tensor-parallel and pipeline traffic, control packets and the background burst
 are ineligible. ASTRA-sim simulates communication and compute times, not the
@@ -76,10 +76,10 @@ keeps one entry per receiving
 [rank](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html)
 and training step, the grain the phase varies at.
 
-Each eligible flow adds its share to that entry when it starts: the step's loss
-fraction of its own bytes. Forgiven bytes never exceed the budget so accrued,
-and the counter only grows. An entry closes when that rank's all-reduce
-completes, and a closed entry takes no charge.
+Each eligible flow adds its share to that entry when it starts: the step's
+tolerance times its own bytes. Forgiven bytes never exceed that budget, and the
+counter only grows. An entry closes when that rank's all-reduce completes, and a
+closed entry takes no charge.
 
 A trimmed packet carries its original sequence number and length, so the
 receiver can work out how many bytes it still lacks. A re-segmented
@@ -184,11 +184,10 @@ classified must be repaired the ordinary way.
 
 ```cpp
 OnStepBegin(rank, step, gradients):
-  // Gradient norms answer this one step at a time. Nothing is fixed
-  // in advance.
+  // The gradient norms decide, one step at a time. No fixed list.
   critical = InCriticalRegime(gradients)
   entry = ledger[rank][step]
-  // Critical steps tolerate less loss than every other step.
+  // A critical step can afford less loss.
   entry.tolerance = critical ? kToleranceCritical : kToleranceOther
   entry.budget = entry.forgiven = 0
   // Open before the step's first gradient byte, or those bytes go
@@ -215,7 +214,7 @@ Unsettled(flow, range):
 
 Repair(flow, range):
   // Every refusal takes this path. Mark only the unsettled subranges, so
-  // a range that is part Received keeps what it already has.
+  // a range that is partly Received keeps what it has.
   Mark(flow.scoreboard, Unsettled(flow, range), Requested)
   SendRetransmissionRequest(range, kNormal)
 ```
@@ -252,8 +251,8 @@ OnTrimmedHeader(flow, range):
   entry.forgiven += Count(missing)
   Mark(flow.scoreboard, missing, Forgiven)
   flow.rcv_nxt = Advance(flow.rcv_nxt, flow.scoreboard)
-  // The ACK carries the ECN echo either way, so the congestion signal
-  // survives for whenever this flow obeys congestion control again.
+  // The ACK carries the ECN echo either way, so the signal is still
+  // there when this flow obeys congestion control again.
   SendAck(flow.rcv_nxt, ecn_echo)
 ```
 
@@ -264,8 +263,8 @@ At the sender:
 
 ```cpp
 OnCongestionNotification(flow):
-  // An exempt sender ignores ECN marks as well as trims. Most of the
-  // slowing down DCQCN imposes comes from marks.
+  // An exempt sender ignores ECN marks as well as trims. Most of
+  // DCQCN's slowdown comes from marks.
   if (flow.cc_mode == Exempt):
     return
   ReduceRate(flow)
@@ -314,7 +313,7 @@ The burst paid for it, draining 5 to 22 percent slower.
 ## Forgiveness spends the budget only under congestion
 
 DBLP sheds at the sender by a random draw whose probability depends on the
-training step. I ran it at the same per-step loss fractions.
+training step. I ran it at the same per-step tolerances.
 
 Shedding spends whether or not the network is congested. Forgiveness spends only
 on bytes the network trimmed, a much smaller set. On the worst fabric FORGIVE
@@ -354,13 +353,14 @@ control that reacts to marks and trims. Nothing here tests that.
 
 The simulation has one training job. Exempt flows shared the fabric with their
 own job's tensor-parallel traffic and one background burst, never with another
-job obeying congestion control. That neighbour is who the exemption would cost.
-The budget bounds that cost and the refusal revokes the exemption, but neither
-shows a neighbour can absorb it. Only a second job would.
+job obeying congestion control. That other job is the one that pays for the
+exemption. The budget bounds what it pays and the refusal ends the exemption,
+but neither proves it can absorb the cost. Only a run with a second job would
+show that.
 
 The simulation has 64 ranks with tensor parallelism on the network, so eligible
-gradient traffic is only 24 percent of the bytes. Carrying data-parallel and
-pipeline-parallel traffic alone, the fabric would offer four times as much.
+gradient traffic is only 24 percent of the bytes. A fabric carrying only
+data-parallel and pipeline-parallel traffic would offer four times as much.
 Tensor parallelism over
 [NVLink](https://www.nvidia.com/en-us/data-center/nvlink/) keeps its own traffic
 off this network.
@@ -384,8 +384,8 @@ whole gradient with a randomised Hadamard transform.
 packet so its trimmed prefix is already a quantised gradient, which removes
 retransmission entirely and any bound with it: whatever the switch trims is
 accepted. That paper's future work asks for a congestion control that
-deliberately over-sends and lets the switch trim the excess. The exemption is
-that, within a budget.
+deliberately over-sends and lets the switch trim the excess. The exemption does
+exactly that, within a budget.
 
 FORGIVE decides per missing range from the switch's trim report, so the bytes it
 gives up are the ones the network could not carry rather than the ones that
