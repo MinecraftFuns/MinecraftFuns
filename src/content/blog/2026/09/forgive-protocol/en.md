@@ -218,8 +218,9 @@ Before training, MLT has sender and receiver agree on a tolerated fraction for
 each tensor. Once enough of a tensor has arrived, the receiver stops requesting
 retransmissions, so the bytes it gives up are whichever arrive last. Its bound is
 per model and constant over training. It weakens congestion control globally for
-every flow with no way back, and its transport is UDP in user space; the authors
-say remote direct memory access (RDMA) network interface cards cannot host it.
+every flow with no way back, and its transport is
+[UDP](https://www.rfc-editor.org/rfc/rfc768) in user space; the authors say
+remote direct memory access (RDMA) network interface cards cannot host it.
 [LTP](https://arxiv.org/abs/2305.04279) closes a round early based on network
 conditions.
 [OptiReduce](https://www.usenix.org/conference/nsdi25/presentation/warraich)
@@ -241,10 +242,10 @@ and the receiver's first refusal revokes it.
 
 On a network that trims packets and supports selective retransmission, the long
 repair tail that MLT, LTP and OptiReduce were built to reduce does not exist.
-Those systems used TCP and UDP with millisecond timeouts. In these simulations,
-forgiveness alone does not reduce the congestion-control reaction. The exemption
-accounts for the result. I did not expect that when I started, and two negative
-waves exposed it.
+Those systems used [TCP](https://www.rfc-editor.org/rfc/rfc9293) and UDP with
+millisecond timeouts. In these simulations, forgiveness alone does not reduce the
+congestion-control reaction. The exemption accounts for the result. I did not
+expect that when I started, and two negative waves exposed it.
 
 The tolerance numbers I found in the literature come from loss that is uniform
 and independent. Packet trimming produces loss that is bursty, correlated across
