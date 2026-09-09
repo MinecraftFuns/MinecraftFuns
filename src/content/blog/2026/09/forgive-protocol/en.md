@@ -65,9 +65,12 @@ uniformly at random for 1.17 percent worse
 [perplexity](https://huggingface.co/docs/transformers/perplexity), and 40
 percent for 6.65 percent worse.
 
-My budget is a per-step probability. In my runs, critical steps 1, 2, 3 and 20
-have a budget of 0.005; every other step has a budget of 0.4. Only messages from
-the gradient
+A budget is a per-step fraction of a rank's gradient bytes. Accordion computes
+which steps are critical while training runs; I pinned them instead, to steps 1,
+2, 3 and 20, with a budget of 0.005 there and 0.4 everywhere else. Pinning holds
+the detector fixed, so what the runs below measure is the transport and not the
+quality of a detector. It also means they say nothing about what detector error
+would cost. Only messages from the gradient
 [all-reduce](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html)
 are eligible. Tensor-parallel traffic, pipeline traffic, control packets and the
 background burst are ineligible.
@@ -141,16 +144,23 @@ header change.
 
 ## State and decision
 
-The receiver keeps a scoreboard per flow, the sender keeps one mode bit, and
-every flow arriving at a rank shares that rank's loss budget for the step.
+FORGIVE has four parts: a detector, an accounting entry per receiving rank and
+step, a scoreboard per flow at the receiver, and one mode bit per flow at the
+sender.
 
-Constants:
+The detector runs before a step's gradient traffic starts. It classifies the
+step as inside or outside the critical learning regime, from the rate of change
+in gradient norms, which is Accordion's criterion. That classification picks one
+of two budgets, and the budget parameterises the step's entry. Nothing else in
+the protocol knows what a critical step is, and no list of them exists: the
+detector is the only thing that decides, and it decides one step at a time.
 
-- `kCriticalSteps: set[Step]`. The steps the schedule treats as critical,
-  `{1, 2, 3, 20}` in these runs.
+Two budgets:
+
 - `kBudgetCritical: float`. The fraction of a rank's eligible gradient bytes
-  that may be lost on a critical step, `0.005` here.
-- `kBudgetOther: float`. The same fraction on every other step, `0.4` here.
+  that may be lost on a step the detector calls critical. `0.005` in these runs.
+- `kBudgetOther: float`. The same fraction on every other step. `0.4` in these
+  runs.
 
 State per flow, at the receiver:
 
@@ -161,17 +171,34 @@ State per flow, at the receiver:
 - `cc_mode: Mode`. `Exempt` or `Obeying`, set when the flow is created and
   cleared by the first retransmission request the receiver sends it.
 
-State per receiving rank and training step, shared by every flow to that rank:
+State per receiving rank and training step, opened when the step begins and
+shared by every flow to that rank:
 
+- `budget: float`. Set to `kBudgetCritical` or `kBudgetOther` by the detector's
+  verdict on this step.
 - `eligible: int`. Gradient bytes registered for this rank and step.
 - `forgiven: int`. Bytes the receiver acknowledged without receiving.
 - `suppressed: int`. Bytes the sender shed before sending.
-- `budget_open: bool`. `True` until this rank's all-reduce for the step
-  completes.
+- `open: bool`. `True` until this rank's all-reduce for the step completes.
 
 For every rank and step, at all times, `forgiven + suppressed` is at most
-`Budget(step) * eligible`, where `Budget` returns `kBudgetCritical` on a step in
-`kCriticalSteps` and `kBudgetOther` otherwise.
+`budget * eligible`. A step whose entry was never opened forgives nothing, so a
+receiver that has heard no verdict for a step repairs it the ordinary way.
+
+```cpp
+OnStepBegin(rank, step, gradients):
+  critical = InCriticalRegime(gradients)
+  entry = ledger[rank][step]
+  entry.budget = critical ? kBudgetCritical : kBudgetOther
+  entry.eligible = entry.forgiven = entry.suppressed = 0
+  entry.open = true
+```
+
+The detector has to finish before the step's first gradient byte leaves, since
+an entry opened late has already missed traffic it should have counted. Its two
+errors are not symmetric. Calling an ordinary step critical costs only the gain
+FORGIVE would have made on it. Calling a critical step ordinary puts the loose
+budget on the one step the schedule exists to protect.
 
 A range on the scoreboard never leaves the state it reaches, so no range is
 charged twice. A range that arrives without ever being trimmed becomes
@@ -207,18 +234,14 @@ OnTrimmedHeader(flow, range):
     return
 
   (rank, step) = Coordinates(flow)
-  if (step not in kSchedule):
+  entry = ledger[rank][step]
+  if (entry == null || !entry.open):
     SendRetransmissionRequest(range, kNormal)
     return
 
-  entry = ledger[rank][step]
-  if (!entry.budget_open):
-    SendRetransmissionRequest(range, Priority(step))
-    return
-
   if (entry.forgiven + entry.suppressed + n >
-      Budget(step) * entry.eligible):
-    SendRetransmissionRequest(range, Priority(step))
+      entry.budget * entry.eligible):
+    SendRetransmissionRequest(range, kNormal)
     return
 
   entry.forgiven += n
@@ -314,6 +337,14 @@ gradient loss at
 [Transformer](https://arxiv.org/abs/1706.03762) scale or measured loss that is
 bursty and correlated, which packet trimming produces. The budget is an assumed
 tolerance until a training run tests it.
+
+The critical steps were pinned rather than detected. A deployment has to run a
+detector, and a detector makes two kinds of mistake. Calling a critical step
+ordinary puts a loose budget on the step least able to afford it, which is the
+failure the whole schedule exists to prevent. Calling an ordinary step critical
+only forfeits the gain. Nothing here measures either, and the cheap first test
+does not need the network at all: replay a detector over the gradient norms of a
+real training run and count the steps it misses.
 
 The congestion control is DCQCN, because that is what the simulator models.
 Meta runs its 400 Gbps ML training networks
