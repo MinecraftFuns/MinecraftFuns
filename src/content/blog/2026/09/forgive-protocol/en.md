@@ -9,10 +9,10 @@ Distributed ML training sends gradient updates between machines on every step.
 Congestion control and packet loss impose different costs on the network that
 carries those updates. With congestion control off, the most congested of eight
 network configurations I tested trimmed one offered byte in four and carried it
-again. With the Data Center Quantized Congestion Notification (DCQCN) controller
-on, that configuration took 24 percent longer to complete. Its senders took
-millions of rate cuts, and the trim rate fell sevenfold. The training job pays one
-of those costs on every step.
+again. With [DCQCN](https://doi.org/10.1145/2785956.2787484) on, that
+configuration took 24 percent longer to complete. Its senders took millions of
+rate cuts, and the trim rate fell sevenfold. The training job pays one of those
+costs on every step.
 
 Gradient descent can tolerate losing some gradient bytes, though neither at
 every step nor at any rate. I call the protocol **F**abric-**O**verload
@@ -119,13 +119,14 @@ also ignores congestion signals. It does not reduce its sending rate until the
 receiver requests a retransmission for one of its trims. The sender then obeys
 congestion control again. Its lost bytes remain within the budget.
 
-The exemption covers both Explicit Congestion Notification (ECN) marks, which
-report congestion before a queue is full, and trim notifications. In the DCQCN
-configuration here, switches begin ECN-marking at 800 KB of queue and trim only
-when the 4 MiB data queue is full. Marks arrive long before trims. In the most
-congested configuration, at least 74 percent of rate cuts came from marks that no
-forgiven trim affects. Exempting only trim-triggered cuts would leave three cuts
-in four in place. Eligible senders ignore every congestion notification.
+The exemption covers both [ECN](https://www.rfc-editor.org/rfc/rfc3168) marks,
+which report congestion before a queue is full, and trim notifications. In the
+DCQCN configuration here, switches begin ECN-marking at 800 KB of queue and trim
+only when the 4 MiB data queue is full. Marks arrive long before trims. In the
+most congested configuration, at least 74 percent of rate cuts came from marks
+that no forgiven trim affects. Exempting only trim-triggered cuts would leave
+three cuts in four in place. Eligible senders ignore every congestion
+notification.
 
 All flows to a receiving rank share its budget entry, but no sender can read the
 remaining budget. A retransmission request tells the sender that the receiver
