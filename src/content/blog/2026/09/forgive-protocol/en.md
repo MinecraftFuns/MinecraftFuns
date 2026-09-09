@@ -210,7 +210,8 @@ OnStepBegin(rank, step, gradients):
   // Only place a budget is set. Detector verdict picks it.
   entry.budget = critical ? kBudgetCritical : kBudgetOther
   entry.eligible = entry.forgiven = entry.suppressed = 0
-  entry.open = true  // Before first gradient byte, else undercount.
+  // Before the step's first gradient byte, else the entry undercounts.
+  entry.open = true
 ```
 
 The detector's two mistakes cost differently: a false positive forfeits the gain
@@ -243,8 +244,9 @@ UnsettledBytes(flow, range):
 ```cpp
 OnTrimmedHeader(flow, range):
   n = UnsettledBytes(flow, range)
+  // Whole range already settled. No charge.
   if (n == 0):
-    SendAck(flow.rcv_nxt)  // Whole range already settled. No charge.
+    SendAck(flow.rcv_nxt)
     return
 
   // Tensor, pipeline and control traffic: never forgive.
@@ -265,10 +267,12 @@ OnTrimmedHeader(flow, range):
     SendRetransmissionRequest(range, kNormal)
     return
 
-  entry.forgiven += n  // Sole writer of the budget. Never refunds.
+  // Sole writer of the budget. Never refunds.
+  entry.forgiven += n
   flow.scoreboard[range] = Forgiven
   flow.rcv_nxt = Advance(flow.rcv_nxt, flow.scoreboard)
-  SendAck(flow.rcv_nxt, ecn_echo)  // Echo kept: congestion still visible.
+  // Echo kept, so the sender still sees the congestion.
+  SendAck(flow.rcv_nxt, ecn_echo)
 ```
 
 Every path either sends the retransmission request the transport already sends,
@@ -278,8 +282,9 @@ At the sender, the two congestion signals:
 
 ```cpp
 OnCongestionNotification(flow):
+  // Marks too, not only trims. Most rate cuts come from marks.
   if (flow.cc_mode == Exempt):
-    cnp_ignored++  // Marks too, not only trims. Most cuts are marks.
+    cnp_ignored++
     return
   ReduceRate(flow)
 
