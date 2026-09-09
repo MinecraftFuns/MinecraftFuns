@@ -55,15 +55,16 @@ better compression at accuracy comparable to uncompressed training.
 transport. It uses a hash draw at the sender to suppress whole gradient messages,
 with a tight loss allowance during the critical period and a looser one after it.
 
+How much a model tolerates depends on what you will give up for it.
 [MLT](https://www.usenix.org/conference/nsdi24/presentation/wang-hao) profiled
-sixteen convolutional and recurrent neural network models. At the same number of
-rounds and the same accuracy, 0.7 to 3.3 percent of gradient bytes were
-droppable. Allowing more rounds to reach a quality target raised that to 10
-percent. [Weintraub and colleagues](https://arxiv.org/abs/2507.07114) lose 10
-percent of [Llama 2](https://arxiv.org/abs/2307.09288) 7B's gradient bytes
-uniformly at random for 1.17 percent worse
-[perplexity](https://huggingface.co/docs/transformers/perplexity), and 40
-percent for 6.65 percent worse.
+sixteen convolutional and recurrent models and found under 3 percent of gradient
+bytes droppable with the round count and the accuracy both held fixed; allow
+more rounds to reach a quality target and that rises to 10 percent.
+[Weintraub and colleagues](https://arxiv.org/abs/2507.07114) pushed harder on
+[Llama 2](https://arxiv.org/abs/2307.09288) 7B, losing a tenth of its gradient
+bytes uniformly at random for 1.17 percent worse
+[perplexity](https://huggingface.co/docs/transformers/perplexity) and 40 percent
+of them for 6.65 percent worse.
 
 A budget is a per-step fraction of a rank's gradient bytes. ASTRA-sim models
 communication rather than the model, so there are no gradient norms for
@@ -107,18 +108,19 @@ the wire for every byte the policy removed. I had measured the transport's
 amplification rather than the policy. Nobody deploys go-back-N without
 congestion control.
 
-I then tested eight network configurations with 64 ranks at 400 Gbps, varying
-congestion control, the number of senders per all-reduce, and the
-oversubscription at the spine switches. The congestion episode cost under 1
-percent of the total time for 20 training steps in every configuration.
-Forgiveness that only skips a repair round can save at most one round trip per
-flow. This is under 0.2 percent of an all-reduce.
+So I went looking for the time the burst was supposed to be costing. I swept
+eight configurations of the fabric, 64 ranks at 400 Gbps, varying congestion
+control, the number of senders per all-reduce, and the oversubscription at the
+spine switches. There was nothing there to save. The congestion episode cost
+under 1 percent of the 20-step window in every one, and forgiveness that only
+skips a repair round saves at most a round trip per flow, under 0.2 percent of
+an all-reduce.
 
-The eight configurations showed a cost from congestion control. With DCQCN, the
-trim rate was lower by a factor of seven to ten and the total time for 20 training
-steps was 18 to 24 percent longer. Senders took 3.3 to 13.5 million rate cuts per
-run. The loss budget allowed the trims DCQCN avoided, but a real training run has
-not tested whether the model tolerates that loss.
+The time was going somewhere else. With DCQCN on, the trim rate fell by a factor
+of seven to ten and the 20-step window grew 18 to 24 percent, paid for in
+millions of rate cuts per run. That is the trade a loss budget can undo: it
+allows the trims DCQCN spends time avoiding. Whether a model tolerates them is
+what no simulation here can answer.
 
 ## Rate-control exemption
 
@@ -311,17 +313,19 @@ may forgive.
 
 Against a baseline with a 0.005 loss budget on every step, forgiveness with
 exemption shortened the total time for 20 training steps by 12.9, 13.1 and 13.5
-percent across the three seeds. The all-reduce span on non-critical steps fell
-from 36 ms to 21 ms. The critical-step span stayed at 37 ms, within 0.9 ms of the
-baseline. The 218 ms saving came from the 16 non-critical steps. Retransmission
-timeouts fell by two thirds and applied rate cuts by half. Tensor-parallel spans
-fell as well, because gradient flows leave the leaf switch sooner.
+percent across the three seeds. It acted where it was aimed. The all-reduce span
+on non-critical steps fell from 36 ms to 21 ms, and the critical-step span
+stayed at 37 ms, within 0.9 ms of the baseline.
 
-Exempt flows push harder, so the trim rate rose from 0.031 to 0.033,
-and two thirds of those trims were forgiven. Per seed the exempt run ignored
-10.4 to 10.9 million congestion notifications, acted on 6.0 to 6.4 million, and
-returned 12 to 13 thousand of its 71,680 eligible flows to congestion control.
-The budget rule held in all 1,280 accounting entries of every arm.
+The transport came out calmer rather than wilder, which I did not expect of a
+policy whose senders ignore congestion. Retransmission timeouts fell by two
+thirds and applied rate cuts by half, and tensor-parallel spans fell too,
+because gradient flows leave the leaf switch sooner.
+
+The cost side stayed small. Exempt flows push harder, so the trim rate rose from
+0.031 to 0.033, and two thirds of those trims were forgiven. About one exempt
+flow in six met a refusal and went back under congestion control, so the
+revocation is not dead code. The budget rule held in every accounting entry.
 
 I preregistered a prediction that a lightly congested configuration would show
 no movement because it hardly trims. That prediction was wrong, and I withdrew
@@ -337,15 +341,16 @@ it suppresses gradient messages by a random draw based on the training step. I
 compare it with receiver-side forgiveness at the same budget.
 
 Sender-side shedding uses its loss budget by a random draw whether or not the
-network is congested. Forgiveness uses budget only on bytes the network trims.
-In the most congested configuration, the FORGIVE variant lost 8.8 to 9.5 percent
-of its gradient bytes; shedding at the same budget lost 32 percent, a factor of
-3.4. FORGIVE completed the 20 training steps sooner in every seed.
+network is congested. Forgiveness uses budget only on bytes the network trims,
+which is where the difference shows up: in the most congested configuration the
+FORGIVE variant gave up about 9 percent of its gradient bytes against shedding's
+32 percent at the same budget, and still finished the 20 training steps sooner
+in every seed.
 
-A comparison that sheds 40 percent of gradient bytes on every step ran in 1433
-to 1466 ms, against FORGIVE's 1459 to 1468 ms. It also sheds through the
-critical steps. That conflicts with the critical learning regime assumed by the
-work here.
+A baseline that sheds 40 percent on every step does match FORGIVE on time, 1433
+to 1466 ms against 1459 to 1468 ms, which is a tie inside the seed spread of
+both. It buys that by shedding through the critical steps as well, which
+conflicts with the critical learning regime assumed by the work here.
 
 Network congestion varies over time. A trim report identifies the range and
 moment where the network would not carry the traffic.
