@@ -65,11 +65,13 @@ uniformly at random for 1.17 percent worse
 [perplexity](https://huggingface.co/docs/transformers/perplexity), and 40
 percent for 6.65 percent worse.
 
-A budget is a per-step fraction of a rank's gradient bytes. Accordion computes
-which steps are critical while training runs; I pinned them instead, to steps 1,
-2, 3 and 20, with a budget of 0.005 there and 0.4 everywhere else. Pinning holds
-the detector fixed, so the runs below measure the transport alone. They say
-nothing about what detector error would cost. Only messages from the gradient
+A budget is a per-step fraction of a rank's gradient bytes. ASTRA-sim models
+communication rather than the model, so there are no gradient norms for
+Accordion to read. Steps 1, 2, 3 and 20 of twenty are pinned critical at a
+budget of 0.005 and the rest run at 0.4. That follows the literature, which puts
+a model's sensitivity to lost gradient information early in training.
+
+Only messages from the gradient
 [all-reduce](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html)
 are eligible. Tensor-parallel traffic, pipeline traffic, control packets and the
 background burst are ineligible.
@@ -362,10 +364,10 @@ work on phase-gated gradient loss at
 that is bursty and correlated, which packet trimming produces. The budget is an
 assumed tolerance until a training run tests it.
 
-The critical steps were pinned rather than detected. A deployment has to run a
-detector, and a detector makes two kinds of mistake. Calling a critical step
-ordinary puts a loose budget on the step least able to afford it, which is the
-failure the whole schedule exists to prevent. Calling an ordinary step critical
+A deployment has to run the detector these runs did without, and a detector
+makes two kinds of mistake. Calling a critical step ordinary puts a loose budget
+on the step least able to afford it, which is the failure the whole schedule
+exists to prevent. Calling an ordinary step critical
 only forfeits the gain. Nothing here measures either, and the cheap first test
 does not need the network at all: replay a detector over the gradient norms of a
 real training run and count the steps it misses.
