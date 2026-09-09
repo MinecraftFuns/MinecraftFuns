@@ -79,9 +79,7 @@ its own and reads nobody else's.
 
 The collective schedule already says how many gradient bytes a step will bring a
 rank, so the receiver can size the budget before the first byte arrives: the
-step's tolerance times those bytes. Forgiven bytes never exceed it, and the
-counter only grows. The budget closes when that rank's all-reduce completes, and
-a closed budget takes no charge.
+step's tolerance times those bytes.
 
 A trimmed packet carries its original sequence number and length, so the
 receiver can work out how many bytes it still lacks. A re-segmented
@@ -133,29 +131,29 @@ the transport already sends carries the refusal and the revocation.
 
 ## State and decision
 
-FORGIVE runs on an RDMA fabric with packet trimming and selective repeat. The
-data queue loses packets; the high-priority queue carrying trimmed headers does
-not. A rate-based congestion control runs underneath, DCQCN in every run below.
-The receiver already takes out-of-order arrival, since the fabric sprays packets
-across paths. FORGIVE adds no packet type and changes no header.
+FORGIVE assumes two things.
+
+From the fabric: an RDMA network with packet trimming and selective repeat,
+where the data queue loses packets and the high-priority queue carrying trimmed
+headers does not, a rate-based congestion control underneath, DCQCN in every run
+below, and a receiver that already takes out-of-order arrival because the fabric
+sprays packets across paths.
+
+From the software above the transport: four facts the wire cannot show. Which
+step is beginning and what its gradient norms say, how many gradient bytes the
+step will bring this rank, which flows carry them, and which step a given flow
+belongs to. That is a host-local interface between NCCL and the network
+interface card, not a packet, which is why FORGIVE adds no packet type and
+changes no header.
 
 The switch trims, reports the missing range, and decides nothing about it. Each
-rank runs the detector on the gradients it holds and opens its own budget, so a
-receiver's budget comes from its own verdict. The scoreboard and the verdict
-live at the receiver, the mode bit at the sender.
+rank runs the detector on the gradients it holds and opens its own budget. The
+scoreboard and the verdict live at the receiver, the mode bit at the sender.
 
 The detector must run before a step's gradient traffic starts. Accordion's
 criterion, the rate of change in gradient norms, puts the step inside or outside
 the critical learning regime, and that verdict picks the budget. No list
 of critical steps exists in the protocol.
-
-Little of that is visible from the wire, and FORGIVE does not pretend otherwise.
-The transport has to be told four things by the collective library above it:
-which step is beginning and what its gradient norms say, how many gradient bytes
-the step will bring this rank, which flows carry them, and which step a given
-flow belongs to. That is a host-local interface between NCCL and the network
-interface card, not a packet, which is why the wire format is unchanged and why
-nothing here can be inferred by a switch or a peer.
 
 Two loss tolerances:
 
@@ -176,8 +174,7 @@ State per flow, at the sender:
   `Obeying`. The receiver's first retransmission request moves it to `Obeying`
   for good.
 
-State per training step, at each receiving rank. Nothing here is shared: a rank
-keeps this for its own steps and never reads another rank's.
+State per training step, at each receiving rank. No rank reads another's.
 
 - `tolerance: float`. `kToleranceCritical` or `kToleranceOther`, by the
   detector's verdict on this step.
@@ -186,12 +183,8 @@ keeps this for its own steps and never reads another rank's.
 - `forgiven: int`. Bytes the receiver acknowledged without receiving.
 - `open: bool`. `True` until this rank's all-reduce for the step completes.
 
-At all times, `forgiven` is at most `budget`. A step with no open budget
-forgives nothing, so a step the detector has not classified must be repaired the
-ordinary way.
-
-A step's budget opens when the step begins and closes when the rank's all-reduce
-finishes.
+At all times, `forgiven` is at most `budget`. A step the detector never
+classified has no budget, and must be repaired the ordinary way.
 
 ```cpp
 OnStepBegin(step, gradients):
@@ -200,8 +193,6 @@ OnStepBegin(step, gradients):
   entry = steps[step]
   // A critical step can afford less loss.
   entry.tolerance = critical ? kToleranceCritical : kToleranceOther
-  // The collective schedule already says how much this rank will
-  // receive, so the budget is known before the first byte arrives.
   entry.budget = Floor(entry.tolerance * ExpectedGradientBytes(step))
   entry.forgiven = 0
   // Open before the step's first gradient byte, or those bytes go
@@ -225,8 +216,7 @@ that arrives without ever being trimmed becomes `Received` directly.
 
 ```cpp
 Unsettled(flow, range):
-  // Only the bytes the receiver still lacks. A retransmission can carry
-  // bytes it already holds, and those cost no budget.
+  // Only the bytes the receiver still lacks.
   return the bytes of range at or above flow.rcv_nxt that are marked
     neither Received nor Forgiven on flow.scoreboard
 
@@ -312,10 +302,9 @@ drew from one random stream, so the sender-side baseline suppresses the same
 messages the receiver-side policy may forgive.
 
 Against a baseline holding 0.005 on every step, forgiveness with exemption cut
-the 20-step training time by 12.9, 13.1 and 13.5 percent. It acted where it was
-aimed: the all-reduce span on non-critical steps fell from 36 ms to 21 ms, while
-the critical-step span stayed at 37 ms, within 0.9 ms of the baseline in every
-seed.
+the 20-step training time by 12.9, 13.1 and 13.5 percent. The all-reduce span on
+non-critical steps fell from 36 ms to 21 ms, while the critical-step span stayed
+at 37 ms, within 0.9 ms of the baseline in every seed.
 
 Senders that ignore congestion left the transport calmer, not wilder.
 Retransmission timeouts fell by two thirds and applied rate cuts by half, and
@@ -323,8 +312,8 @@ tensor-parallel spans fell too, because gradient flows leave the leaf sooner.
 
 The cost stayed small. Exempt flows push harder, so the trim rate rose from
 0.031 to 0.033, two thirds of those trims forgiven. About one exempt flow in six
-met a refusal and went back under congestion control, so the revocation is not
-dead code. The budget rule held on every step.
+met a refusal and went back under congestion control. The budget rule held on
+every step.
 
 The exemption even moves a fabric with almost nothing to forgive. A lightly
 congested one barely trims, but DCQCN still cuts rates there 3.3 million times
@@ -364,14 +353,12 @@ ordinary step critical only forfeits the gain. Nothing here measures either, and
 the cheapest check needs no network: replay a detector over the gradient norms
 of a real training run and count the steps it misses.
 
-It also has to build the interface that feeds the detector, and the four things
-that interface carries are not equally hard. A communicator's
+Two of the four facts the transport needs already reach it. A communicator's
 [traffic class](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/communicators.html)
-already becomes an IP type of service on RoCE, so a gradient all-reduce can be
-told apart by its DSCP rather than by anything the transport is handed, and a
-receiving net plugin is already given the size of every message posted to it.
-The step index and the gradient norms are carried nowhere, though both are
-host-local and neither needs a wire change.
+becomes an IP type of service on RoCE, so a gradient all-reduce is identifiable
+by its DSCP, and a receiving net plugin is already given the size of every
+message posted to it. The step index and the gradient norms are carried nowhere,
+though both are host-local and neither needs a wire change.
 
 The decision is the hard part. Forgiving a range means writing the transport's
 own reliability state, which on an RDMA fabric lives in the network interface
