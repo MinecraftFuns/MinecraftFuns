@@ -47,11 +47,10 @@ does. This selective-retransmission transport retransmits every reported range.
 
 Some training steps tolerate lost gradient updates better than others.
 [Accordion](https://proceedings.mlsys.org/paper_files/paper/2021/hash/acd593d2db87a799a8d3da5a860c028e-Abstract.html)
-uses changes in gradient norms to identify
-[critical learning regimes](https://proceedings.mlsys.org/paper_files/paper/2021/hash/acd593d2db87a799a8d3da5a860c028e-Abstract.html),
-when the model is especially sensitive to compression. It keeps compression low
-in those periods and compresses hard everywhere else, reporting up to 5.5 times
-better compression at accuracy comparable to uncompressed training.
+uses changes in gradient norms to identify critical learning regimes, when the
+model is especially sensitive to compression. It keeps compression low in those
+periods and compresses hard everywhere else, reporting up to 5.5 times better
+compression at accuracy comparable to uncompressed training.
 [DBLP](https://arxiv.org/abs/2605.01989) applies that schedule to network
 transport. It uses a hash draw at the sender to suppress whole gradient messages,
 with a tight loss allowance during the critical period and a looser one after it.
@@ -132,7 +131,7 @@ only when the 4 MiB data queue is full. Marks arrive long before trims. In the
 most congested configuration, at least 74 percent of rate cuts came from marks
 that no forgiven trim affects. Exempting only trim-triggered cuts would leave
 three cuts in four in place. Eligible senders ignore every congestion
-notification.
+notification packet, or CNP.
 
 All flows to a receiving rank share its budget entry, but no sender can read the
 remaining budget. A retransmission request tells the sender that the receiver
@@ -142,83 +141,97 @@ header change.
 
 ## State and decision
 
-FORGIVE adds three pieces of state: a receive scoreboard per flow, a congestion
-mode per flow, and one loss budget shared by every flow arriving at a rank.
+FORGIVE adds three pieces of state. Each flow gets a scoreboard of the byte
+ranges still outstanding, and a congestion mode. Each (rank, step) gets a loss
+budget, which every flow arriving at that rank shares.
 
-```
-Per flow, at the receiver
-  rcv_nxt      next sequence number expected, as in RFC 9293; everything
-               below it is settled
-  scoreboard   byte range -> received | forgiven | requested(priority)
-  mode         exempt | obey, set when the flow starts, cleared by the
-               first retransmission request the receiver sends it
+```python
+Seq = Bytes = Rank = Step = int
+Range = tuple[Seq, Seq]                     # half-open, [start, end)
+Priority = Literal["normal", "escalated"]
+Mode = Literal["exempt", "obey"]
+RangeState = Literal["received", "forgiven"] | tuple[Literal["requested"], Priority]
 
-Per (rank R, step S), shared by every flow arriving at rank R
-  E            eligible bytes, counted when a gradient message is sent
-  F            forgiven bytes
-  U            suppressed bytes, shed at the sender before sending
-  open         true until rank R's all-reduce for step S finishes
+@dataclass
+class Flow:                                 # one per queue pair, at the receiver
+    rcv_nxt: Seq                            # next sequence expected; RFC 9293's RCV.NXT
+    scoreboard: dict[Range, RangeState]     # outstanding ranges above rcv_nxt
+    mode: Mode                              # set when the flow starts, cleared by a NACK
 
-From the loss schedule
-  M            the steps the schedule covers
-  B(S)         loss budget: 0.005 on a critical step, 0.4 otherwise
-  P(S)         NACK priority: escalated on a critical step, normal otherwise
+@dataclass
+class LossBudget:                           # one per (rank, step)
+    eligible: Bytes                         # counted when a gradient message is sent
+    forgiven: Bytes                         # charged by the receiver
+    suppressed: Bytes                       # shed at the sender, before sending
+    open: bool                              # True until that rank's all-reduce finishes
 
-Invariant, for every (R, S) and at every moment of the run
-  F + U <= B(S) * E
-```
+ledger: dict[tuple[Rank, Step], LossBudget] # every flow to a rank shares its entry
+mask: set[Step]                             # the steps the loss schedule covers
 
-A trimmed header names a byte range `A`. Because a retransmission can be
-re-segmented, `A` may overlap bytes the receiver already has, so it counts only
-what is still missing:
-
-```
-N = bytes of A at or above rcv_nxt that the scoreboard
-    marks neither received nor forgiven
+def budget(s: Step) -> float: ...           # 0.005 on a critical step, 0.4 otherwise
+def priority(s: Step) -> Priority: ...      # escalated on a critical step, else normal
 ```
 
-It then takes the first row that matches.
+The invariant, for every `(r, s)` and at every moment of the run:
+
+```python
+b = ledger[r, s]
+assert b.forgiven + b.suppressed <= budget(s) * b.eligible
+```
+
+A trimmed header names a byte range. A retransmission can be re-segmented, so
+that range may overlap bytes the receiver already has. It charges only what is
+still missing:
+
+```python
+def unsettled(flow: Flow, rng: Range) -> Bytes:
+    """Bytes of rng at or above flow.rcv_nxt that flow.scoreboard marks
+    neither "received" nor "forgiven"."""
+```
+
+Write `n = unsettled(flow, rng)` and `b = ledger[r, s]`. The receiver takes the
+first row that matches.
 
 | | condition | response | budget |
 | --- | --- | --- | --- |
-| 1 | `N = 0` | ACK | unchanged |
+| 1 | `n == 0` | ACK | unchanged |
 | 2 | flow is not gradient all-reduce | NACK, normal | unchanged |
-| 3 | `S` not in `M` | NACK, normal | unchanged |
-| 4 | budget for `(R, S)` not open | NACK, `P(S)` | unchanged |
-| 5 | `F + U + N > B(S) * E` | NACK, `P(S)` | unchanged |
-| 6 | otherwise | ACK past the hole | `F += N` |
+| 3 | `s not in mask` | NACK, normal | unchanged |
+| 4 | `not b.open` | NACK, `priority(s)` | unchanged |
+| 5 | `b.forgiven + b.suppressed + n > budget(s) * b.eligible` | NACK, `priority(s)` | unchanged |
+| 6 | otherwise | ACK past the hole | `b.forgiven += n` |
 
 Rows 2 to 5 are the refusals, and each sends the NACK a
 selective-retransmission transport already sends. No new packet type, no header
 change.
 
-A scoreboard entry never leaves the state it reaches, so no range is charged
-twice.
+A range never leaves the state it reaches, so no range is charged twice.
 
-| scoreboard entry | trimmed packet arrives | data packet arrives |
+| `flow.scoreboard` value | trimmed packet arrives | data packet arrives |
 | --- | --- | --- |
-| absent | run the table above | received, ACK |
-| received | duplicate ACK, no charge | received, ACK |
-| requested | resend the NACK at its priority | received, ACK |
-| forgiven | ACK, no charge | drop the payload, no credit back |
+| absent | run the table above | `"received"`, ACK |
+| `"received"` | duplicate ACK, no charge | `"received"`, ACK |
+| `("requested", p)` | resend the NACK at `p` | `"received"`, ACK |
+| `"forgiven"` | ACK, no charge | drop the payload, no credit back |
 
 The sender's mode falls once and does not rise again.
 
-| mode | CNP arrives | NACK arrives | ACK arrives |
+| `flow.mode` | CNP arrives | NACK arrives | ACK arrives |
 | --- | --- | --- | --- |
-| exempt | ignore it, count it | become obey, cut the rate, retransmit | advance |
-| obey | cut the rate | cut the rate, retransmit | advance |
+| `"exempt"` | ignore it, count it | becomes `"obey"`, cut the rate, retransmit | advance |
+| `"obey"` | cut the rate | cut the rate, retransmit | advance |
 
-No case falls through: rows 1 to 6 are ordered and cover every arriving trim, so
-each one takes exactly one row, and a step the schedule does not cover reaches
-row 3 and is repaired the ordinary way. A schedule with a gap in it therefore
-loses nothing it should have kept. Only row 6 writes the budget, and its
-condition is the invariant checked against the values the write will produce, so
-the invariant survives every charge. `F` and `U` never fall and a closed budget
-never reopens, so the invariant holds at every moment of a run and not only when
-a step ends. That is what lets the telemetry check it while the run is going.
-The mode table has no edge back to exempt, so a flow returned to congestion
-control stays there until it finishes.
+The six rows are ordered and cover every trim, so each trim takes exactly one of
+them. A step the schedule does not cover reaches row 3 and is repaired the
+ordinary way, so a gap in the schedule costs nothing.
+
+Only row 6 writes the budget, and its condition is the invariant tested against
+the values that write will produce. `forgiven` and `suppressed` never fall, and
+a closed budget never reopens. The invariant therefore holds throughout a run,
+not only when a step ends, and the telemetry can check it while the run is
+going.
+
+A flow that falls back to `"obey"` stays there until it finishes.
 
 ## Results
 
@@ -250,7 +263,7 @@ additional trim.
 
 ## Forgiveness uses the budget at congestion
 
-[DBLP](https://arxiv.org/abs/2605.01989) uses phase-aware sender-side shedding:
+DBLP uses phase-aware sender-side shedding:
 it suppresses gradient messages by a random draw based on the training step. I
 compare it with receiver-side forgiveness at the same budget.
 
@@ -317,11 +330,9 @@ host it.
 conditions.
 [OptiReduce](https://www.usenix.org/conference/nsdi25/presentation/warraich)
 bounds each round by an adaptive timeout and makes the resulting loss harmless
-with [Hadamard mixing](https://www.usenix.org/conference/nsdi25/presentation/warraich)
-of the gradient.
+with Hadamard mixing of the gradient.
 [Trimmable gradients](https://doi.org/10.1145/3696348.3696880) lay out each
-packet so that its trimmed prefix is already a
-[quantised gradient](https://doi.org/10.1145/3696348.3696880). This removes
+packet so that its trimmed prefix is already a quantised gradient. This removes
 retransmission entirely, without a bound: whatever the switch trims is accepted.
 That paper's future work asks for a congestion control that deliberately
 over-sends and lets the switch trim the excess. The exemption has that behaviour
