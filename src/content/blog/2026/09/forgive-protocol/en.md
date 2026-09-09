@@ -390,8 +390,8 @@ off this network.
 Before training, MLT has the sender and receiver agree on a tolerated fraction
 for each tensor. Once enough of a tensor has arrived, the receiver stops
 requesting retransmissions, so the bytes it gives up are whichever arrive last.
-Its bound is per model and constant over training. It weakens congestion control for every
-flow with no way back, and its transport is
+Its bound is per model and constant over training. It weakens congestion control
+for every flow with no way back, and its transport is
 [UDP](https://www.rfc-editor.org/rfc/rfc768) in user space: the authors say
 [RDMA](https://www.rfc-editor.org/rfc/rfc5040) network interface cards cannot
 host it.
