@@ -8,9 +8,9 @@ tags: ["Essays", "Networking", "Artificial Intelligence", "Performance"]
 Distributed ML training exchanges gradient updates on every step. With packet
 trimming on and congestion control off, my most congested
 [ASTRA-sim](https://astra-sim.github.io/) fabric retransmitted a quarter of the
-offered load. Turning [DCQCN](https://doi.org/10.1145/2785956.2787484) on cut
-its trim rate sevenfold and made it 24 percent slower. Every step pays one of
-those costs.
+offered load. With [DCQCN](https://doi.org/10.1145/2785956.2787484) on, the trim
+rate was sevenfold lower and the training run took 24 percent longer to
+complete. Every step pays one of those costs.
 
 [Gradient descent](https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent)
 tolerates some lost gradient bytes, but not on every step and not without limit.
@@ -63,17 +63,18 @@ A tolerance is a per-step fraction of a rank's gradient bytes, and applies only
 to the gradient
 [all-reduce](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html).
 ASTRA-sim simulates communication and compute times, not the model, so Accordion
-has no gradient norms to read. Steps 1, 2, 3 and 20 of twenty are pinned
-critical, so $p_{\text{low}}$ covers those and $p_{\text{high}}$ the rest. The
-literature puts a model's sensitivity to lost gradients early in training, where
-three of those four sit.
+has no gradient norms to read. I treat steps 1, 2, 3 and 20 of twenty as
+critical. FORGIVE adapts Accordion's two-level communication schedule as two
+loss probabilities: $P_{\text{low}}$ covers those steps and $P_{\text{high}}$
+the rest. The literature puts a model's sensitivity to lost gradients early in
+training, where three of those four sit.
 
 ## The budget
 
 A per-model bound holds for the whole run and cannot follow a phase. FORGIVE
 gives each receiving
 [rank](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html)
-one budget per training step, the grain the phase varies at. The collective
+one budget per training step, the unit at which the phase varies. The collective
 schedule already says how many gradient bytes a step will bring a rank, so the
 receiver can size that budget before the first byte arrives: the step's
 tolerance times those bytes. Forgiven bytes never exceed it.
@@ -101,10 +102,10 @@ cost under 1 percent of the 20-step training time in every one, and skipping a
 repair round saves at most a round trip per flow, under 0.2 percent of an
 all-reduce.
 
-The time was going somewhere else. With DCQCN on, millions of rate cuts per run
-bought a trim rate seven to ten times lower and cost 18 to 24 percent of the
-20-step training time. A loss budget can pay for the trims DCQCN spends that
-time avoiding.
+The remaining cost came from rate control. With DCQCN on, millions of rate cuts
+per run reduced the trim rate by a factor of seven to ten and added 18 to 24
+percent to the 20-step training time. A loss budget can accept the trims those
+rate cuts avoid.
 
 ## Rate-control exemption
 
@@ -122,15 +123,16 @@ eligible senders ignore every congestion notification packet.
 
 The budget is knowledge the receiver keeps to itself: all flows to a rank share
 it, and no sender can read what is left. A sender learns it ran out only
-when a trim it expected forgiven comes back as a retransmission request, which
-also puts the flow under congestion control and applies its rate cut. One packet
-the transport already sends carries the refusal and the revocation.
+when a trim it expected to be forgiven comes back as a retransmission request,
+which also puts the flow under congestion control and applies its rate cut. One
+packet the transport already sends carries the refusal and the revocation.
 
 ## State and decision
 
 FORGIVE assumes a fabric and an interface. From the fabric:
 
-- Packet trimming, on a lossy RDMA network.
+- Packet trimming, on a lossy [RDMA](https://www.rfc-editor.org/rfc/rfc5040)
+  network.
 - A lossless high-priority queue for the trimmed headers.
 - Selective repeat, and a receiver that already reassembles out of order because
   the fabric sprays packets across paths.
@@ -143,8 +145,9 @@ From the software above the transport, four facts the wire cannot show:
 - Which flows carry them.
 - Which step a given flow belongs to.
 
-That is a host-local interface between NCCL and the network interface card, not
-a packet, which is why FORGIVE adds no packet type and changes no header.
+That is a host-local interface between
+[NCCL](https://developer.nvidia.com/nccl) and the network interface card, not a
+packet, which is why FORGIVE adds no packet type and changes no header.
 
 The switch trims, reports the missing range, and decides nothing about it. The
 scoreboard and the verdict live at the receiver, the mode bit at the sender.
@@ -154,11 +157,12 @@ criterion, the rate of change in gradient norms, puts the step inside or outside
 the critical learning regime, and that verdict picks the budget. No list
 of critical steps exists in the protocol.
 
-Two loss tolerances, under the names DBLP and Accordion use:
+FORGIVE adapts Accordion's two-level compression schedule into two loss
+probabilities:
 
-- `p_low: float`. The fraction of a flow's gradient bytes that may be lost on a
-  critical step. `0.005` here.
-- `p_high: float`. The same on every other step. `0.4` here.
+- `P_low: float`. The loss probability for the eligible gradient bytes a rank
+  expects on a critical step. `0.005` here.
+- `P_high: float`. The same probability on every other step. `0.4` here.
 
 State per flow, at the receiver:
 
@@ -175,7 +179,7 @@ State per flow, at the sender:
 
 State per training step, at each receiving rank. No rank reads another's.
 
-- `p: float`. `p_low` or `p_high`, by the detector's verdict on this step.
+- `p: float`. `P_low` or `P_high`, by the detector's verdict on this step.
 - `budget: int`. Bytes this rank may lose on this step, fixed when the step
   opens.
 - `forgiven: int`. Bytes the receiver acknowledged without receiving.
@@ -188,8 +192,7 @@ Handlers below are named for where they run. Nothing runs at the
 switch. Four calls reach outside the transport for the four facts above:
 
 - `InCriticalRegime(gradients)`. Accordion's criterion, at the receiving rank,
-  over the gradients that rank holds. Nothing ships it, and it is the one hard
-  piece here.
+  over the gradients that rank holds. The network does not carry this input.
 - `ExpectedGradientBytes(step)`. What this step will deliver to this rank. A
   receiving net plugin is already handed the size of every message posted to it,
   so this is a sum it can keep.
@@ -197,7 +200,9 @@ switch. Four calls reach outside the transport for the four facts above:
 - `IsGradientAllReduce(flow)`. Whether a flow is gradient traffic. A
   communicator's
   [traffic class](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/communicators.html)
-  already becomes an IP type of service on RoCE, so the DSCP carries it.
+  already becomes an IP type of service on
+  [RoCE](https://doi.org/10.1145/2785956.2787484), so the
+  [DSCP](https://www.rfc-editor.org/rfc/rfc2474) carries it.
 
 Everything else is the transport's own. `Mark` and `Advance` write the
 scoreboard, `SendAck` and `SendRetransmissionRequest` are packets it already
@@ -209,7 +214,7 @@ Receiver::OnStepBegin(step, gradients):
   critical = InCriticalRegime(gradients)
   entry = steps[step]
   // A critical step can afford less loss.
-  entry.p = critical ? p_low : p_high
+  entry.p = critical ? P_low : P_high
   entry.budget = Floor(entry.p * ExpectedGradientBytes(step))
   entry.forgiven = 0
   entry.open = true
@@ -309,43 +314,41 @@ I ran the worst fabric with three seeds and four policy variants each. All four
 drew from one random stream, so the sender-side baseline suppresses the same
 messages the receiver-side policy may forgive.
 
-Against a tight baseline, $p_{\text{low}} = p_{\text{high}} = 0.005$,
+Against a tight baseline, $P_{\text{low}} = P_{\text{high}} = 0.005$,
 forgiveness with exemption cut the 20-step training time by 12.9, 13.1 and 13.5
 percent. The all-reduce span on
 non-critical steps fell from 36 ms to 21 ms, while the critical-step span stayed
 at 37 ms, within 0.9 ms of the baseline in every seed.
 
 Senders that ignore congestion left the transport calmer, not wilder.
-Retransmission timeouts fell by two thirds and applied rate cuts by half, and
+Retransmission timeouts fell by two thirds and rate cuts by half, and
 tensor-parallel spans fell too, because gradient flows leave the leaf sooner.
 
-The cost stayed small. Exempt flows push harder, so the trim rate rose from
-0.031 to 0.033, two thirds of those trims forgiven. About one exempt flow in six
-met a refusal and went back under congestion control. The budget rule held on
-every step.
+Exempt flows push harder, so the trim rate rose from 0.031 to 0.033, two thirds
+of those trims forgiven. About one exempt flow in six met a refusal and went back
+under congestion control. The budget rule held on every step.
 
-The exemption even moves a fabric with almost nothing to forgive. A lightly
-congested one barely trims, but DCQCN still cuts rates there 3.3 million times
-on ECN marks alone, and marks are most of what the exemption ignores. Its
-training time fell 4 percent and its trims doubled, every extra one forgiven.
-The burst paid for it, draining 5 to 22 percent slower.
+The exemption also changes a fabric that barely trims. DCQCN still cuts rates
+there 3.3 million times on ECN marks alone, which the exemption also ignores.
+Its training time fell 4 percent and its trims doubled, every extra one
+forgiven. The congestion burst drained 5 to 22 percent more slowly.
 
 ## Forgiveness spends the budget only under congestion
 
 Forgiveness and DBLP's sender-side shedding run the same schedule at the same
-$p_{\text{low}}$ and $p_{\text{high}}$. What separates them is where the
+$P_{\text{low}}$ and $P_{\text{high}}$. What separates them is where the
 allowance goes.
 
 Shedding spends it whether or not the network is congested. Forgiveness spends
-it only on bytes the network trimmed, a much smaller set. On the worst fabric
-the receiver-side arm gave up about 9 percent of its gradient bytes and the
-sender-side arm 32 percent, and the receiver-side arm finished sooner in every
-seed.
+it only on bytes the network trimmed, a much smaller set. On the worst fabric,
+the receiver-side policy gave up about 9 percent of its gradient bytes and the
+sender-side policy 32 percent, and the receiver-side policy finished sooner in
+every seed.
 
-A loose baseline, $p_{\text{low}} = p_{\text{high}} = 0.4$, does match
-forgiveness on time: 1,433 to 1,466 ms against 1,459 to 1,468 ms, a tie inside
-the seed spread of both. It gets there by shedding through the critical steps
-too, which is what the critical learning regime says not to do.
+A loose baseline, $P_{\text{low}} = P_{\text{high}} = 0.4$, does match
+forgiveness on time: 1,433 to 1,466 ms against 1,459 to 1,468 ms, a tie within
+the range across their seeds. It gets there by shedding through the critical
+steps too, which conflicts with the critical learning regime.
 
 ## Limits
 
@@ -359,18 +362,17 @@ work on phase-gated gradient loss at
 that is bursty and correlated, which packet trimming produces.
 
 A deployment has to run a real detector. Calling a critical step ordinary lets
-40 percent of its gradient bytes go where the schedule allows 0.5. Calling an
-ordinary step critical only forfeits the gain. Nothing here measures either, and
-the cheapest check needs no network: replay a detector over the gradient norms
-of a real training run and count the steps it misses.
+40 percent of its gradient bytes go where the schedule allows 0.5 percent.
+Calling an ordinary step critical only forfeits the gain. Nothing here measures
+either, and the cheapest check needs no network: replay a detector over the
+gradient norms of a real training run and count the steps it misses.
 
-The two facts nobody carries today need no wire change. The decision does:
-forgiving a range writes
-the transport's own reliability state, which on an RDMA fabric lives in the
-network interface card rather than in a plugin above it. MLT hit that wall and
-retreated to UDP in user space, and FORGIVE asks more of the card than MLT did.
-Ultra Ethernet is putting trimming, the trimmed-header NACK and selective repeat
-into silicon, which is where such a card would come from.
+The two host facts no component carries today need no wire change. The decision
+does: forgiving a range writes the transport's own reliability state, which on an
+RDMA fabric lives in the network interface card rather than in a plugin above it.
+MLT hit that wall and retreated to UDP in user space, and FORGIVE asks more of the
+card than MLT did. Ultra Ethernet is putting trimming, the trimmed-header NACK
+and selective repeat into silicon, which is where such a card would come from.
 
 The congestion control is DCQCN because that is what the simulator models. Meta
 runs its 400 Gbps ML training networks
@@ -387,14 +389,14 @@ cost.
 
 The simulation has 64 ranks with tensor parallelism on the network, so eligible
 gradient traffic is only 24 percent of the bytes. A fabric carrying only
-data-parallel and pipeline-parallel traffic would offer four times as much.
-Tensor parallelism over
-[NVLink](https://www.nvidia.com/en-us/data-center/nvlink/) keeps its own traffic
-off this network.
+[data-parallel](https://docs.pytorch.org/tutorials/intermediate/ddp_tutorial.html)
+and pipeline-parallel traffic would offer four times as much. Tensor parallelism
+over [NVLink](https://www.nvidia.com/en-us/data-center/nvlink/) keeps its own
+traffic off this network.
 
 ## Prior work
 
-Four systems give up gradient bytes on purpose, and each picks which bytes a
+Four systems give up gradient bytes on purpose, and each picks which bytes in a
 different way.
 
 - MLT has the sender and receiver agree on a tolerated fraction per tensor
@@ -403,8 +405,7 @@ different way.
   is per model and constant over training, it weakens congestion control for
   every flow with no way back, and its transport is
   [UDP](https://www.rfc-editor.org/rfc/rfc768) in user space, which the authors
-  say [RDMA](https://www.rfc-editor.org/rfc/rfc5040) network interface cards
-  cannot host.
+  say RDMA network interface cards cannot host.
 - [LTP](https://arxiv.org/abs/2305.04279) closes a round early on network
   conditions.
 - [OptiReduce](https://www.usenix.org/conference/nsdi25/presentation/warraich)
@@ -429,7 +430,8 @@ On a fabric that trims and runs selective repeat, the long repair tail MLT, LTP
 and OptiReduce were built to reduce does not exist: those systems ran on
 [TCP](https://www.rfc-editor.org/rfc/rfc9293) and UDP with millisecond timeouts.
 Forgiveness alone does not reduce the congestion-control reaction there, and the
-exemption accounts for the whole result. Two negative results exposed that.
+exemption accounts for the whole result. The selective-repeat result and the
+lightly congested result exposed that.
 
 The tolerance numbers in the literature come from loss that is uniform and
 independent. Packet trimming produces loss that is bursty, correlated across
