@@ -41,4 +41,4 @@ DingTalk.exe (3568)：SBIE2203 与 Sandboxie 服务的通信失败: *GUIPROXY_00
 git.exe (19676)：SBIE2205 未实现该服务: ConsoleInit (C00000D4)
 ```
 
-Compatibility is decent overall; the occasional small error is bound to happen, since Sandboxie can't fully replicate certain Windows behaviors (Windows Sandbox should do better on that front), and none of the software above was specifically tuned for Sandboxie either. Still, I'm quite happy just being able to lock homegrown malware-grade software inside it; running things like Tor Browser and GitHub Desktop directly on bare metal doesn't worry me much.
+Compatibility is decent overall; the occasional small error is bound to happen, since Sandboxie can't fully replicate certain Windows behaviours (Windows Sandbox should do better on that front), and none of the software above was specifically tuned for Sandboxie either. Still, I'm quite happy just being able to lock homegrown malware-grade software inside it; running things like Tor Browser and GitHub Desktop directly on bare metal doesn't worry me much.

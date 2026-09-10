@@ -12,7 +12,7 @@ tags: ["Essays", "Cognitive Science", "Artificial Intelligence"]
 > [available as a PDF](https://ragnarok.joefang.org/static/xdra88a3gk7f0ve3atnon5dq7clq5eilv.pdf).
 
 Large neural networks and the human brain now turn in strikingly similar
-behavioral performances on object recognition and language understanding,
+behavioural performances on object recognition and language understanding,
 and the tempting conclusion, that they are [the same kind of
 system](https://doi.org/10.1016/j.neuron.2017.06.011), [gets voiced
 regularly](https://www.theverge.com/2017/7/19/15998610/ai-neuroscience-machine-learning-deepmind-demis-hassabis-interview).
@@ -33,7 +33,7 @@ update a synapse from the activity of the two neurons it connects, and
 decades of work on
 [long-term potentiation and depression](https://doi.org/10.1016/j.neuron.2004.09.012)
 show neuromodulators like dopamine
-[gating that plasticity by behavioral significance](https://doi.org/10.1038/s41583-020-0277-3),
+[gating that plasticity by behavioural significance](https://doi.org/10.1038/s41583-020-0277-3),
 not by any single scalar loss. Cortical circuits assign credit through
 distributed local rules, under constraints of biophysics and
 [developmental history](https://doi.org/10.1038/npp.2009.115). No neuron

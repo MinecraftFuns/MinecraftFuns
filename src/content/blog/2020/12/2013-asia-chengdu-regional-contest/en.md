@@ -76,7 +76,7 @@ Little P trades salt along the way. Every vertex except vertex $1$ and vertex $n
 
 However, Little P can carry at most $B$ bags of salt at once (he starts with none). Trading salt takes no time.
 
-Little P also has a device that lets him travel among $k$ parallel universes, labeled $0\sim k-1$. He starts in universe $0$. Each use of the device costs $1$ minute and moves him from universe $i$ to the vertex with the same label in universe $(i+1)\bmod k$.
+Little P also has a device that lets him travel among $k$ parallel universes, labelled $0\sim k-1$. He starts in universe $0$. Each use of the device costs $1$ minute and moves him from universe $i$ to the vertex with the same label in universe $(i+1)\bmod k$.
 
 The salt price at a vertex with the same label may differ across parallel universes, but the time and money cost of traversing the same edge is identical. Little P cannot visit vertex $1$ or vertex $n$ in universes $1\sim k-1$.
 

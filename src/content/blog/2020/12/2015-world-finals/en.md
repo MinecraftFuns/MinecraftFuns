@@ -174,7 +174,7 @@ Let $d(x)$ denote the number of divisors of $x$, and $ans(x)$ denote the number 
 
 > Problem
 
-Given a simple graph $G$ containing at least one cycle, find all integers $k$ such that the edges of $G$ can be colored with $k$ colors so that every simple cycle contains the same number of edges of each of the $k$ colors.
+Given a simple graph $G$ containing at least one cycle, find all integers $k$ such that the edges of $G$ can be coloured with $k$ colours so that every simple cycle contains the same number of edges of each of the $k$ colours.
 
 > Solution
 

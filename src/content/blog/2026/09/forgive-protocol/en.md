@@ -319,7 +319,7 @@ percent. All-reduce completion time on non-critical steps fell from 36 ms to
 21 ms; on critical steps it stayed at 37 ms, within 0.9 ms of the baseline in
 every seed.
 
-Ignoring congestion signals did not destabilise the fabric. Retransmission
+Ignoring congestion signals did not destabilize the fabric. Retransmission
 timeouts fell by two thirds and rate cuts by half, and tensor-parallel
 completion times fell too, because the leaf switch queue drained sooner.
 
@@ -410,9 +410,9 @@ different way.
   conditions.
 - [OptiReduce](https://www.usenix.org/conference/nsdi25/presentation/warraich)
   bounds each round by an adaptive timeout and spreads the resulting loss over
-  the whole gradient with a randomised Hadamard transform.
+  the whole gradient with a randomized Hadamard transform.
 - [Trimmable gradients](https://doi.org/10.1145/3696348.3696880) lay out each
-  packet so its trimmed prefix is already a quantised gradient, which removes
+  packet so its trimmed prefix is already a quantized gradient, which removes
   retransmission entirely and any bound with it: whatever the switch trims is
   accepted.
 

@@ -32,7 +32,7 @@ translation: machine
 
 #### Directly Related to `the Direction of the Essay's Thesis`
 
-> Advocating that everyone "**love labor**, starting with **myself**."  
+> Advocating that everyone "**love labour**, starting with **myself**."  
 > Each generation has its own opportunities and missions, its own challenges. **You** grow and travel alongside China in the new century, chasing and realizing dreams together with China's **new era**.  
 
 #### Directly Related to `Genre and Format`
@@ -103,9 +103,9 @@ Facing opposing viewpoints
 #### Fully Abstract Material
 
 > **Extract the keywords (distinguish primary from secondary)**  
-> *Each thing has its own nature*; water at its blandest, salt at its most flavorful. Water added to water is still water; salt added to salt is still salt. Sour, sweet, bitter, spicy, salty: the *five flavors blend*, coexisting and giving rise to one another, producing a hundred varied tastes. So it is with things, so it is with affairs, and so it is with people.  
+> *Each thing has its own nature*; water at its blandest, salt at its most flavourful. Water added to water is still water; salt added to salt is still salt. Sour, sweet, bitter, spicy, salty: the *five flavours blend*, coexisting and giving rise to one another, producing a hundred varied tastes. So it is with things, so it is with affairs, and so it is with people.  
 
-Center on the core, `use the material as a springboard for your own point`
+Centre on the core, `use the material as a springboard for your own point`
 
 #### How to Handle Special Forms of Material
 
@@ -131,10 +131,10 @@ Common three-part structures: `parallel` / `progressive`
 
 #### Using `Why` as the Thread
 
-> *Main thesis* **Labor creates value, labor brings happiness (still to be refined)**  
-> *Sub-thesis 1* Labor helps individuals realize their achievements and value, bringing every laborer joy and happiness from the heart  
-> *Sub-thesis 2* Labor drives the development and progress of society, bringing every labor-loving nation passion and hope  
-> *Sub-thesis 3* Labor is the cornerstone by which humanity creates material and spiritual civilization, giving humanity the strength and warmth to endure  
+> *Main thesis* **Labour creates value, labour brings happiness (still to be refined)**  
+> *Sub-thesis 1* Labour helps individuals realize their achievements and value, bringing every labourer joy and happiness from the heart  
+> *Sub-thesis 2* Labour drives the development and progress of society, bringing every labour-loving nation passion and hope  
+> *Sub-thesis 3* Labour is the cornerstone by which humanity creates material and spiritual civilization, giving humanity the strength and warmth to endure  
 
 #### Using `What to Do` as the Thread
 

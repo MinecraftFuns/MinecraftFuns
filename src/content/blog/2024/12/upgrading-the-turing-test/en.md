@@ -26,7 +26,7 @@ evaluation that separates intelligence from imitation.
 
 The Turing Test grades a machine on mimicking human conversation and asks
 nothing about the thinking behind it. It measures performance, not
-comprehension. Focusing on behavior instead of
+comprehension. Focusing on behaviour instead of
 ["internal state"](https://doi.org/10.1007/s11023-022-09616-8) confuses
 imitation with mental capability, and a judgment built on surface-level
 interaction misses most of what human thinking is actually doing.
@@ -66,7 +66,7 @@ lookup and one by reasoning, and the test could not tell them apart.
 
 ## Attention and activations
 
-If the failure is that we only watch behavior, the fix is to also watch the
+If the failure is that we only watch behaviour, the fix is to also watch the
 processing. For current models we have two windows into that: attention and
 activations.
 
@@ -88,9 +88,9 @@ transcript of its conversation.
 
 ## The upgraded test
 
-The evaluation I want keeps behavioral testing but stops trusting it alone.
+The evaluation I want keeps behavioural testing but stops trusting it alone.
 
-On the behavioral side, the upgrades are known and already accepted.
+On the behavioural side, the upgrades are known and already accepted.
 Task-specific batteries like
 [BIG-bench](https://arxiv.org/abs/2206.04615), whose name is literally
 "Beyond the Imitation Game", probe problem-solving and decision-making
@@ -117,6 +117,6 @@ models still stumble on trivially simple questions, the persistent "9.11 >
 fundamental concepts is thinner than their fluency implies. And the specific
 tools named here will age; LIME and SHAP will be superseded by better
 interpretability methods. But the diagnosis does not depend on the tools. A
-test that only watches behavior cannot tell imitation from understanding,
+test that only watches behaviour cannot tell imitation from understanding,
 and any evaluation that wants to measure machine intelligence, rather than
-machine theater, has to open the machine.
+machine theatre, has to open the machine.

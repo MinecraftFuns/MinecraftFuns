@@ -10,7 +10,7 @@ translation: machine
 
 > A "permalink" on the internet may not be quite so permanent.
 
-Many bloggers have been through things like forgetting to renew a server or having a blogging platform ban their account, and migrating platforms can leave a pile of dead links behind. While tidying up my bookmarks a while ago, I found that many algorithm articles I'd saved back when I was an OIer are now 404, and only a year has passed `/(ㄒoㄒ)/~~`. Mainland China's ubiquitous internet censorship only speeds up the process by which pages go 404. For a reader, having a favorite article vanish for no clear reason is genuinely frustrating. So web archiving is, without question, a practical skill.
+Many bloggers have been through things like forgetting to renew a server or having a blogging platform ban their account, and migrating platforms can leave a pile of dead links behind. While tidying up my bookmarks a while ago, I found that many algorithm articles I'd saved back when I was an OIer are now 404, and only a year has passed `/(ㄒoㄒ)/~~`. Mainland China's ubiquitous internet censorship only speeds up the process by which pages go 404. For a reader, having a favourite article vanish for no clear reason is genuinely frustrating. So web archiving is, without question, a practical skill.
 
 ## Public web archiving services
 

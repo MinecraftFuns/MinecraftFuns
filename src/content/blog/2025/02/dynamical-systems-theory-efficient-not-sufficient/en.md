@@ -1,6 +1,6 @@
 ---
 title: "Dynamical Systems Theory is efficient, not sufficient"
-description: "An exam essay: the Watt governor buys intelligent behavior at near-zero representational cost, and that same thrift is why Dynamical Systems Theory cannot account for language, logic, or planning."
+description: "An exam essay: the Watt governor buys intelligent behaviour at near-zero representational cost, and that same thrift is why Dynamical Systems Theory cannot account for language, logic, or planning."
 date: "2025-02-03"
 tags: ["Essays", "Cognitive Science", "Philosophy of Mind"]
 ---
@@ -10,13 +10,13 @@ tags: ["Essays", "Cognitive Science", "Philosophy of Mind"]
 > unchanged.
 
 **Thesis:** while Dynamical Systems Theory provides an efficient way to achieve
-intelligent behavior, it is not powerful enough to explain human-level
+intelligent behaviour, it is not powerful enough to explain human-level
 intelligence.
 
 Dynamical Systems Theory (DST), as exemplified by
 [the Watt governor](https://doi.org/10.2307/2941061), provides an intriguing
 way to explain cognition: one that is energy-efficient, simple in its
-constructs, and highly complex in its behavior compared to the simplicity of
+constructs, and highly complex in its behaviour compared to the simplicity of
 its internal structure. Set against the
 [GOFAI model of cognition](https://doi.org/10.1145/360018.360022), which
 relies heavily on internal representation of knowledge, DST achieves an

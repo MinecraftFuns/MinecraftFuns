@@ -43,9 +43,9 @@ on the observer's point of view.
 ## What the objects give away
 
 The original study drew on one family of shapes, which leaves the attributes
-of the object uncontrolled: complexity, symmetry, color. A simple shape may
+of the object uncontrolled: complexity, symmetry, colour. A simple shape may
 be recognized faster because it demands less. A complex or distinctive one
-may do the opposite favor and hand the participant a landmark, a feature
+may do the opposite favour and hand the participant a landmark, a feature
 salient enough to suggest which axis to turn about. Either way, some of the
 variance in response time belongs to the stimulus rather than to the
 rotation.
@@ -56,8 +56,8 @@ Eighty adult participants from a university population, for a spread of
 spatial reasoning ability.
 
 Sixty three-dimensional objects in three sets of twenty. Simple shapes,
-cubes and pyramids, in uniform color. Complex shapes, asymmetrical and
-intricate, in varied colors. And distinctive shapes, carrying features
+cubes and pyramids, in uniform colour. Complex shapes, asymmetrical and
+intricate, in varied colours. And distinctive shapes, carrying features
 particular enough to be used as landmarks.
 
 Then a warm-up phase before anything counts: a hundred rotation trials drawn
@@ -67,7 +67,7 @@ while nobody is recording it.
 
 The main phase runs six hundred pairs, two hundred from each set. Six
 hundred objects are not needed, since the sixty already built can be
-presented again at different colors and orientations. Participants judge
+presented again at different colours and orientations. Participants judge
 each pair congruent or incongruent, and response time and accuracy are
 recorded.
 

@@ -91,7 +91,7 @@ talking themselves through the steps of a task. Even the phrasing matters:
 without recruiting extra cognitive control. Inner speech is not a byproduct
 of thinking. It is one of the mechanisms.
 
-## Chain-of-thought, the artificial analog
+## Chain-of-thought, the artificial analogue
 
 [Wei and colleagues](https://arxiv.org/abs/2201.11903) showed that a few
 exemplars of step-by-step reasoning dramatically improve LLM performance on

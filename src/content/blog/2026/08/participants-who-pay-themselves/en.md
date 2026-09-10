@@ -59,7 +59,7 @@ A wider range of people than a lab gets. A lab sample is narrow by
 construction: undergraduates on one campus in one language. Self-selected
 web samples come out wider in age, education and geography.
 [LabintheWild](https://dl.acm.org/doi/10.1145/2675133.2675246)'s stated
-reason for paying in personalised feedback instead of money is exactly this:
+reason for paying in personalized feedback instead of money is exactly this:
 money limits both the size and the variety of who turns up.
 
 More of them, too. LabintheWild drew roughly
@@ -76,7 +76,7 @@ incentive, data as a byproduct. No grant I will ever hold buys a hundred
 countries.
 
 Experiments then come almost free. Self-selection wrecks any claim about how
-common something is. It leaves a randomised comparison inside your own
+common something is. It leaves a randomized comparison inside your own
 sample completely alone. Moral Machine ran a nine-factor design that would
 have been unaffordable country by country, and LabintheWild's experiments
 replicate findings from the lab. If the question is whether A beats B, a
@@ -97,7 +97,7 @@ explains much more.
 had already measured how much the result itself drives the sharing, across
 81,131 participants of a feedback-driven platform. Higher performers shared
 significantly more, the effect depended on whether people expected to do
-well, and of three ways of presenting the same result, the one emphasising
+well, and of three ways of presenting the same result, the one emphasizing
 relative success produced the most sharing. The result screen is the lever.
 What belongs on it depends on which reward you are paying.
 
@@ -165,7 +165,7 @@ it means a reaction-time task is not shut out of any of this.
 
 Dress up the display, never the data. The animal is just the highest of five
 continuous numbers, so keep the five numbers; the moment the animal becomes
-the thing you analyse, you have traded most of your measurement for a share
+the thing you analyze, you have traded most of your measurement for a share
 card.
 
 [Berger and Heath](https://academic.oup.com/jcr/article/34/2/121/1793110)
@@ -258,7 +258,7 @@ The answers survive the packaging, so the only thing at risk is who turns
 up. The reward decides which channel a share can travel through, and the
 channel decides who arrives. Pick the reward and you have picked the sample.
 
-That buys a randomised comparison at a scale no lab budget reaches. It never
+That buys a randomized comparison at a scale no lab budget reaches. It never
 buys a prevalence estimate; scale is no rescue there.
 
 The next step is small enough to do this month. Run the reward audit on an

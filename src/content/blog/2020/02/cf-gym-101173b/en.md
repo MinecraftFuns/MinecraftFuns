@@ -165,7 +165,7 @@ Cached - [http://faculty.wwu.edu/sarkara/hall.pdf](https://ragnarok.joefang.org/
 Suppose the two vertex sets are `X` and `Y`; then the size of the bipartite graph's maximum matching is `|X| - max{|W| - N(W)}`, where `W` is a subset of `X`  
 > For certain special problems, this lets you find the maximum matching directly without building the graph  
 > From [Hall's theorem and perfect bipartite matching - dummyummy - cnblogs](https://ragnarok.joefang.org/static/xlfhdntmsf6jt2h3it239c6bnqijrg5fr.pdf)  
-> Let the two vertex sets of bipartite graph `G` be `X` and `Y` (assume `|X| ≤ |Y|`). The **necessary and sufficient condition** for `G` to have a set of vertex-disjoint edges with one endpoint exactly covering `X` (that is, **a perfect matching on the `X` side exists**) is: **any `k` vertices in `X` are adjacent to at least `k` vertices in `Y`**; that is, for a vertex subset `W` of `X`, letting `N(W)` denote all neighbors of `W`, Hall's theorem says that for any `W`, `|W| ≤ |N(W)|`
+> Let the two vertex sets of bipartite graph `G` be `X` and `Y` (assume `|X| ≤ |Y|`). The **necessary and sufficient condition** for `G` to have a set of vertex-disjoint edges with one endpoint exactly covering `X` (that is, **a perfect matching on the `X` side exists**) is: **any `k` vertices in `X` are adjacent to at least `k` vertices in `Y`**; that is, for a vertex subset `W` of `X`, letting `N(W)` denote all neighbours of `W`, Hall's theorem says that for any `W`, `|W| ≤ |N(W)|`
 
 ---
 
@@ -195,13 +195,13 @@ The woman's response strategy:
 
 * In the first case, the woman **does nothing** and simply **keeps waiting**
 * In the second case, she **accepts that person's proposal** and agrees to **be his girlfriend for now**
-* In the third case, she picks **her favorite** among all her suitors, agrees to **be his girlfriend for now**, and **rejects all the others**
+* In the third case, she picks **her favourite** among all her suitors, agrees to **be his girlfriend for now**, and **rejects all the others**
 
 > After the first round, some men already have girlfriends, while others are still single.
 
-**In the second round of courting**, every **single man** picks his **favorite** among all the **women who haven't rejected him yet** and proposes to her, **regardless of whether she is currently single**.
+**In the second round of courting**, every **single man** picks his **favourite** among all the **women who haven't rejected him yet** and proposes to her, **regardless of whether she is currently single**.
 
-**Just as in the first round**, the women choose their **favorite** among the proposers and reject the rest.
+**Just as in the first round**, the women choose their **favourite** among the proposers and reject the rest.
 
 *Note that if the woman **already has a boyfriend** and she **encounters a better suitor**, she **must reject her current boyfriend** and go to the new suitor.*
 

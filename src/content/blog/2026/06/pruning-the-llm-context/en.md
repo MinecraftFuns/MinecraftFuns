@@ -118,7 +118,7 @@ strongest model and took none.
 Then they deleted the options from seventy-nine of those questions and ran
 them again. The shared-failure rate went from roughly zero to 0.127. Same
 questions, same subject, and the ceiling came down on the models' heads,
-because a model that cannot produce an answer can still recognise one in a
+because a model that cannot produce an answer can still recognize one in a
 list.
 
 My evaluation was multiple choice throughout, because GPQA is. It sat where
@@ -161,7 +161,7 @@ Mine could not clear it, and could not be tested either. I scored subsets
 against a utility table computed over all eighty-six questions, so the
 sampler was fitted to the same numbers that judged it, and nothing in the
 design would have caught that. The one study I found asking whether this
-family of samplers generalises at all comes from
+family of samplers generalizes at all comes from
 [Adesh Gupta and colleagues](https://arxiv.org/abs/2503.01819), who
 fine-tuned on the Game of 24, tested on the Game of 42, and report that
 diversity and accuracy both fall away.
@@ -181,7 +181,7 @@ benchmark would show you.
 
 Nobody has run that comparison for what I was actually asking. Whether a
 person can tell a sparse configuration from a dense one is unmeasured as far
-as I can find, so the field has spent two years optimising the cost of
+as I can find, so the field has spent two years optimizing the cost of
 something without checking whether anyone notices. If they cannot,
 firing every tool at every question is a bill we pay to satisfy our own
 intuitions about relevance. In March I asked which tools to keep. The

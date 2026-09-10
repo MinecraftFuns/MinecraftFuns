@@ -76,11 +76,11 @@ Still remembered it was a three-segment construction, but couldn't work out the 
 
 > Problem
 
-Fill an $h*w$ carpet with k colors. For every pair of squares sharing an edge, a constraint is given requiring them to be the same color or different colors. It suffices to satisfy $3\over 4$ of these constraints. If a construction is possible, give one.
+Fill an $h*w$ carpet with k colours. For every pair of squares sharing an edge, a constraint is given requiring them to be the same colour or different colours. It suffices to satisfy $3\over 4$ of these constraints. If a construction is possible, give one.
 
 > Solution
 
-The problem gives $k$ colors, but for $k\ge 2$ only two colors are actually needed, and a construction always exists. For $k=1$, simply check whether the number of `E` constraints exceeds $3\over 4$ of the total. Otherwise, note there are $h*(w-1)+w*(h-1)$ constraints; first satisfy the larger of $h*(w-1)$ and $w*(h-1)$, then pick some of the remaining constraints to satisfy. Flip the board first so that $h\le w$. Then every constraint within a row can be satisfied, and the vertical relations between rows can always be more than half satisfied (fix the color of the first block; if that fill fails to satisfy at least half, flip the whole row's colors, and then more than half are satisfied). Adding them together exceeds $3\over 4$ of the total.
+The problem gives $k$ colours, but for $k\ge 2$ only two colours are actually needed, and a construction always exists. For $k=1$, simply check whether the number of `E` constraints exceeds $3\over 4$ of the total. Otherwise, note there are $h*(w-1)+w*(h-1)$ constraints; first satisfy the larger of $h*(w-1)$ and $w*(h-1)$, then pick some of the remaining constraints to satisfy. Flip the board first so that $h\le w$. Then every constraint within a row can be satisfied, and the vertical relations between rows can always be more than half satisfied (fix the colour of the first block; if that fill fails to satisfy at least half, flip the whole row's colours, and then more than half are satisfied). Adding them together exceeds $3\over 4$ of the total.
 
 > Takeaway
 

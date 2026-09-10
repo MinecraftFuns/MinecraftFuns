@@ -75,7 +75,7 @@ Add, at (some location), a (some vessel) containing (some reagent)
 ![equation](https://ragnarok.joefang.org/static/xm38vsmen6dnfduf4pl3527sq8idfi8hg.jpg)
 
 * Control the stopcock so the water level stays just below the side-arm opening
-* Favors reflux of the organic layer, improving raw material utilization
+* Favours reflux of the organic layer, improving raw material utilization
 * Sign that the reaction has ended: the water volume in the separator stops increasing
 
 #### Buchner Funnel (vacuum filtration setup)

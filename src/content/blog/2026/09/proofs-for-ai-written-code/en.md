@@ -1,6 +1,6 @@
 ---
 title: "Machine-checked proofs for AI-written software"
-description: "A product manager writes the requirements, one agent turns them into Lean, another writes the code, and the checker proves the code satisfies the spec. The human reviews only the formalisation, and most of that pipeline already works today."
+description: "A product manager writes the requirements, one agent turns them into Lean, another writes the code, and the checker proves the code satisfies the spec. The human reviews only the formalization, and most of that pipeline already works today."
 date: "2026-09-01"
 tags: ["Essays", "Artificial Intelligence", "Software Engineering"]
 ---
@@ -17,10 +17,10 @@ and had never written any of it down.
 
 ## The pipeline
 
-Start with the entities. Account, device, organisation, policy, and the
-relations among them. Those get formalised first, together with the invariants
+Start with the entities. Account, device, organization, policy, and the
+relations among them. Those get formalized first, together with the invariants
 that hold across the whole business: every device belongs to exactly one
-organisation, no policy grants a permission its parent organisation lacks.
+organization, no policy grants a permission its parent organization lacks.
 
 Then the product manager writes the local rules, in the precondition, action,
 postcondition shape they already use for acceptance criteria. Given a device
@@ -34,7 +34,7 @@ the requirements that matter are about sequences: what stays true while a
 multi-step action is in flight, and what becomes true once it lands.
 
 Then an agent writes the implementation and proves the global invariants and
-the pre/post pairs hold under it. A human reads the formalisation and asks
+the pre/post pairs hold under it. A human reads the formalization and asks
 whether it says what the business meant.
 
 If that reading is sound, the product conforms to the spec.
@@ -156,7 +156,7 @@ management product cannot, and that is the arithmetic that is moving.
 ## Keep the specifications small
 
 [Matichuk and colleagues](https://trustworthy.systems/publications/nictaabstracts/Matichuk_MAJKS_15.abstract)
-analysed 15,018 lemmas and around 215,000 lines of proof from seL4 and the two
+analyzed 15,018 lemmas and around 215,000 lines of proof from seL4 and the two
 largest developments in the Archive of Formal Proofs, and found a consistent
 quadratic relationship between the size of a property's formal statement and
 the size of its proof. Earlier work on seL4 found effort tracking proof size
@@ -177,7 +177,7 @@ obligation to close at once.
 
 Most of the parts are off the shelf. Structured requirements have a whole
 tooling ecosystem now, since spec-driven development got product
-organisations writing preconditions and postconditions in
+organizations writing preconditions and postconditions in
 [EARS](https://alistairmavin.com/ears/) or
 [Gherkin](https://cucumber.io/docs/gherkin/) shape without anyone calling it
 formal methods. Lean and its libraries are there. The agents are there, at
@@ -185,7 +185,7 @@ formal methods. Lean and its libraries are there. The agents are there, at
 published.
 
 Any given company still has to build three things: the entity layer for its own
-domain, the glue between the structured requirement and the formalisation, and
+domain, the glue between the structured requirement and the formalization, and
 somewhere for a human to read the result. A month with coding agents gets you a
 working loop over one bounded domain. You end the month able to show that the
 loop closes on real requirements, which nobody has shown yet.
@@ -216,7 +216,7 @@ state says them. "Mark the device stale if it has not been seen within a
 reasonable window" is one. Those need temporal logic or explicit trace
 quantification, which is where the 8.6 percent and Vero's chain states both
 sit. It also explains a result I had filed away without understanding:
-Gupte and Ramesh formalise requirements into propositional Lean, and
+Gupte and Ramesh formalize requirements into propositional Lean, and
 propositional logic cannot express a Gherkin scenario either. Same wall, one
 level down.
 

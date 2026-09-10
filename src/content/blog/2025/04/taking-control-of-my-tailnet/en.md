@@ -29,7 +29,7 @@ a node with somebody else. What I wanted instead:
 - **Roles instead of machines.** A container that gets rebuilt every week
   should not need a new rule each time. It needs to be a `container`.
 
-Tags handle that last part. Each device is labeled by what it is (`server`,
+Tags handle that last part. Each device is labelled by what it is (`server`,
 `container`, `exit-node`, `rdp-client`) and the rules talk about labels, so
 the policy tells you what a device may do without you needing to know which
 device it is.

@@ -16,7 +16,7 @@ translation: machine
 
 ## [Pinned] Q & A
 
-Q. How do we explain why the **first ionization energy** of `helium`, `beryllium`, `neon`, `magnesium`, `nitrogen`, and `phosphorus` is **higher than that of their neighboring elements**?
+Q. How do we explain why the **first ionization energy** of `helium`, `beryllium`, `neon`, `magnesium`, `nitrogen`, and `phosphorus` is **higher than that of their neighbouring elements**?
 
 A.
 

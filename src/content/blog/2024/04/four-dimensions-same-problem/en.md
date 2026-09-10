@@ -21,7 +21,7 @@ tags: ["Essays", "Philosophy", "Metaphysics"]
 On the four-dimensional view an object is a sequence of temporal stages,
 each made of spatial parts. The
 [Ship of Theseus](https://en.wikipedia.org/wiki/Ship_of_Theseus) becomes a
-series of stages, each one the planks standing in the harbor at some moment.
+series of stages, each one the planks standing in the harbour at some moment.
 
 Several sequences of stages, several
 [spacetime worms](https://plato.stanford.edu/entries/temporal-parts/), can

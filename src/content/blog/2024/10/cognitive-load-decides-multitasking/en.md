@@ -15,7 +15,7 @@ Multitasking names the ability to run more than one task at a time, and the
 literature does not agree that anyone has it. One reading of the evidence is
 true simultaneous attention. The other is rapid switching between tasks that
 never really overlap, a workaround for limited cognitive resources. Both
-describe real behavior, and the variable that decides which one you get is
+describe real behaviour, and the variable that decides which one you get is
 the cognitive load of the task.
 
 ## Tracking several things at once

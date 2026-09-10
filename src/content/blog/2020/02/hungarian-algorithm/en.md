@@ -20,7 +20,7 @@ A bipartite graph is a graph whose **nodes consist of two sets**, with **no edge
 
 ### Properties
 
-* If the points in the two sets are colored **black** and **white** respectively, it can be observed that **every edge** in a bipartite graph must connect **one black point** and **one white point**.
+* If the points in the two sets are coloured **black** and **white** respectively, it can be observed that **every edge** in a bipartite graph must connect **one black point** and **one white point**.
 * A bipartite graph has **no cycle** of **odd** length, `since every edge goes from one set to the other, and only an even number of steps can return to the same set.`
 
 ### Checking
