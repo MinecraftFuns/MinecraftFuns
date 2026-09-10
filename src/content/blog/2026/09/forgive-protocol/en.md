@@ -7,10 +7,10 @@ tags: ["Essays", "Networking", "Artificial Intelligence", "Performance"]
 
 Distributed ML training exchanges gradient updates on every step. With packet
 trimming on and congestion control off, my most congested
-[ASTRA-sim](https://astra-sim.github.io/) fabric retransmitted a quarter of the
-offered load. With [DCQCN](https://doi.org/10.1145/2785956.2787484) on, the trim
-rate was sevenfold lower and the training run took 24 percent longer to
-complete. Every step pays one of those costs.
+[ASTRA-sim](https://astra-sim.github.io/) fabric hit a 25 percent
+retransmission rate. With [DCQCN](https://doi.org/10.1145/2785956.2787484) on,
+the trim rate was sevenfold lower and the training run took 24 percent longer
+to complete. Every step pays one of those costs.
 
 [Gradient descent](https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent)
 tolerates some lost gradient bytes, but not on every step and not without limit.
@@ -86,21 +86,21 @@ delivered. The
 receiver then either forgives the range and acknowledges past the hole, or
 requests it with the transport's existing NACK.
 
-## Selective repeat removes the repair saving
+## Selective repeat removes the loss-recovery saving
 
 I built the receiver-side half first. It appeared to cut training time by 4 to
 11 percent. The transport underneath was go-back-N: a control run with
-[selective repeat](https://www.rfc-editor.org/rfc/rfc2018) put the same burst at
-29 ms instead of 1.8 s. Go-back-N put up to 79 bytes on the wire for every byte
-the policy removed. I had measured the transport's amplification, not the
-policy.
+[selective repeat](https://www.rfc-editor.org/rfc/rfc2018) cut the same burst's
+completion time from 1.8 s to 29 ms. Go-back-N put up to 79 bytes on the wire
+for every byte the policy removed. I had measured the transport's
+amplification, not the policy.
 
 So I went looking for the time the burst was supposed to cost. I swept eight
-fabrics at 64 ranks and 400 Gbps, varying congestion control, fan-in and
-oversubscription between 2:1 and 4:1. There was nothing there to save: the burst
-cost under 1 percent of the 20-step training time in every one, and skipping a
-repair round saves at most a round trip per flow, under 0.2 percent of an
-all-reduce.
+fabrics at 64 ranks and 400 Gbps, varying congestion control, incast ratio and
+oversubscription between 2:1 and 4:1. There was nothing there to save: the
+burst cost under 1 percent of the 20-step training time in every one, and
+skipping a round of loss recovery saves at most a round trip per flow, under
+0.2 percent of an all-reduce.
 
 The remaining cost came from congestion control. With DCQCN on, millions of rate cuts
 per run reduced the trim rate by a factor of seven to ten and added 18 to 24
@@ -115,10 +115,10 @@ requests a retransmission for one of its trims, then obeys congestion control
 again.
 
 The exemption covers [ECN](https://www.rfc-editor.org/rfc/rfc3168) marks as well
-as trims. Switches here begin ECN-marking at 800 KB of queue and trim only when
-the 4 MiB data queue is full, so marks arrive long before trims: at least 74
-percent of rate cuts in the worst fabric came from marks no forgiven trim
-touches. Exempting only trim-triggered cuts would leave those in place, so
+as trims. Switches here begin ECN-marking at 800 KB of queue occupancy and trim
+only when the 4 MiB data queue is full, so marks arrive long before trims: at
+least 74 percent of rate cuts in the worst fabric came from marks no forgiven
+trim touches. Exempting only trim-triggered cuts would leave those in place, so
 eligible senders ignore every congestion notification packet.
 
 The receiver owns each rank's loss budget, which all flows to that rank share.
@@ -185,7 +185,7 @@ State per training step, at each receiving rank. No rank reads another's.
 - `open: bool`. `True` until this rank's all-reduce for the step completes.
 
 At all times, `forgiven` is at most `budget`. A step the detector never
-classified has no loss budget, and must be repaired the usual way.
+classified has no loss budget, and must go through ordinary loss recovery.
 
 Handlers below are named for where they run. Nothing runs at the
 switch. Four calls reach outside the transport for the four facts above:
@@ -315,17 +315,18 @@ messages the receiver-side policy may forgive.
 
 Against a tight baseline, $P_{\text{low}} = P_{\text{high}} = 0.005$,
 forgiveness with exemption cut the 20-step training time by 12.9, 13.1 and 13.5
-percent. The all-reduce span on
-non-critical steps fell from 36 ms to 21 ms, while the critical-step span stayed
-at 37 ms, within 0.9 ms of the baseline in every seed.
+percent. All-reduce completion time on non-critical steps fell from 36 ms to
+21 ms; on critical steps it stayed at 37 ms, within 0.9 ms of the baseline in
+every seed.
 
-Senders that ignore congestion left the transport calmer, not wilder.
-Retransmission timeouts fell by two thirds and rate cuts by half, and
-tensor-parallel spans fell too, because gradient flows leave the leaf sooner.
+Ignoring congestion signals did not destabilise the fabric. Retransmission
+timeouts fell by two thirds and rate cuts by half, and tensor-parallel
+completion times fell too, because the leaf switch queue drained sooner.
 
-Exempt flows push harder, so the trim rate rose from 0.031 to 0.033, two thirds
-of those trims forgiven. About one exempt flow in six met a refusal and went back
-under congestion control. The loss-budget invariant held on every step.
+Exempt flows sustain a higher sending rate, so the trim rate rose from 0.031 to
+0.033, two thirds of those trims forgiven. About one exempt flow in six met a
+refusal and went back under congestion control. The loss-budget invariant held
+on every step.
 
 The exemption also changes a fabric that barely trims. DCQCN still cuts rates
 there 3.3 million times on ECN marks alone, which the exemption also ignores.
@@ -425,9 +426,10 @@ arrived last. Its loss budget is per receiving rank and training step, not per
 model. Its exemption is per flow, stays within that loss budget, and ends at the receiver's
 first refusal.
 
-On a fabric that trims and runs selective repeat, the long repair tail MLT, LTP
-and OptiReduce were built to reduce does not exist: those systems ran on
-[TCP](https://www.rfc-editor.org/rfc/rfc9293) and UDP with millisecond timeouts.
+On a fabric that trims and runs selective repeat, the long loss-recovery tail
+MLT, LTP and OptiReduce were built to reduce does not exist: those systems ran
+on [TCP](https://www.rfc-editor.org/rfc/rfc9293) and UDP with millisecond
+timeouts.
 Forgiveness alone does not reduce the congestion-control reaction there, and the
 exemption accounts for the whole result. The selective-repeat result and the
 lightly congested result exposed that.
