@@ -121,11 +121,11 @@ percent of rate cuts in the worst fabric came from marks no forgiven trim
 touches. Exempting only trim-triggered cuts would leave those in place, so
 eligible senders ignore every congestion notification packet.
 
-The loss budget is knowledge the receiver keeps to itself: all flows to a rank
-share it, and no sender can read what is left. A sender learns it ran out only
-when a trim it expected to be forgiven comes back as a retransmission request,
-which also puts the flow under congestion control and applies its rate cut. One
-packet the transport already sends carries the refusal and the revocation.
+The receiver owns each rank's loss budget, which all flows to that rank share.
+Senders cannot see how much remains. A sender learns that the loss budget is
+exhausted only when it receives a retransmission request for a trim it expected
+to be forgiven. That packet refuses the trim and restores congestion control.
+On receipt, the sender applies its rate cut.
 
 ## State and decision
 
