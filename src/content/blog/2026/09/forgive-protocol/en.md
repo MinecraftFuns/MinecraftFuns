@@ -1,6 +1,6 @@
 ---
 title: "The FORGIVE protocol"
-description: "Fabric-Overload Relief: Gradients under Iteration-Varying Exemption. A receiver acknowledges past bytes a switch trimmed, each range with an optional probability, within a loss budget that tightens on steps most sensitive to loss and is released as bytes arrive. A congested ML training network can then trade bounded loss for less time spent throttled."
+description: "Fabric-Overload Relief: Gradients under Iteration-Varying Exemption. A receiver forgives bytes a switch trimmed, each range with an optional probability, within a loss budget that tightens on steps most sensitive to loss and vests as bytes arrive. A congested ML training network can then trade bounded loss for less time spent throttled."
 date: "2026-09-08"
 tags: ["Essays", "Networking", "Artificial Intelligence", "Performance"]
 ---
@@ -45,7 +45,7 @@ where a model is especially sensitive to compression. It compresses lightly
 there and hard everywhere else, for up to 5.5 times better compression at
 accuracy comparable to uncompressed training.
 [DBLP](https://arxiv.org/abs/2605.01989) applies that schedule to network
-transport. A hash draw at the sender suppresses whole gradient messages,
+transport. A hash draw at the sender sheds whole gradient messages,
 tightly during the critical period and loosely after.
 
 What counts as tolerable depends on what the measurement trades for it.
@@ -84,10 +84,11 @@ re-segmented retransmission can straddle the cumulative acknowledgement, and
 charging the full length would charge the loss budget for bytes already
 delivered. The
 receiver then either forgives the range and acknowledges past the hole, or
-requests it with the transport's existing NACK.
+requests its retransmission, as the transport already does.
 
-FORGIVE vests the loss budget: the receiver releases it as bytes arrive. A loss
-budget available in full at step start is consumed by the opening burst. With
+FORGIVE vests the loss budget: it becomes available in proportion to the bytes
+that arrive. A loss budget available in full at step start is exhausted by the
+opening burst. With
 $\text{received}$ the distinct gradient bytes a rank has received this step and
 $\text{forgiven}$ the bytes it has forgiven, a missing range of length
 $\text{len}$ may be forgiven only if
@@ -98,14 +99,13 @@ Forgiven bytes are at most a fraction $p$ of the bytes received or forgiven so
 far. At step completion, $\text{received} + \text{forgiven}$ equals the step's
 expected bytes, $\text{expected}$, so $\text{forgiven} \le p \times \text{expected}$
 still holds; vesting adds a bound at every instant before that. A refused range
-is requested with the transport's retransmission request and reconsidered if it
-is trimmed again.
+is requested for retransmission and reconsidered if it is trimmed again.
 
 A range that passes the vesting rule is then forgiven with probability $P$, a
 fresh draw per trimmed header, $0 \le P \le 1$, $P = 1$ by default. A range the
 draw refuses is requested for retransmission and charges nothing. It stays
 outstanding until it arrives or a later trim of it is forgiven. $P$ changes how
-much of the loss budget is spent, not the two budget rules.
+much of the loss budget is charged, not the two budget rules.
 
 ## Selective repeat removes the loss-recovery saving
 
@@ -125,12 +125,12 @@ skipping a round of loss recovery saves at most a round trip per flow, under
 
 The remaining cost came from congestion control. With DCQCN on, millions of rate cuts
 per run reduced the trim rate by a factor of seven to ten and added 18 to 24
-percent to the 20-step training time. A loss budget can accept the trims those
+percent to the 20-step training time. A loss budget can cover the trims those
 rate cuts avoid.
 
 ## Congestion-control exemption
 
-Paying for the trims does not stop the rate cuts. So an eligible flow's sender
+Forgiving the trims does not stop the rate cuts. So an eligible flow's sender
 ignores congestion signals too, for as long as the receiver reports that the
 loss budget is not exhausted.
 
@@ -138,8 +138,8 @@ The exemption covers [ECN](https://www.rfc-editor.org/rfc/rfc3168) marks as well
 as trims. Switches here begin ECN-marking at 800 KB of queue occupancy and trim
 only when the 4 MiB data queue is full, so marks arrive long before trims: at
 least 74 percent of rate cuts in the worst fabric came from marks no forgiven
-trim touches. Exempting only trim-triggered cuts would leave those in place, so
-eligible senders ignore every congestion notification packet.
+trim touches. Ignoring trims alone would leave those in place, so eligible
+senders ignore every congestion notification packet.
 
 The receiver owns each rank's loss budget, which all flows to that rank share.
 Senders cannot see how much remains. A retransmission request does not tell
@@ -150,9 +150,11 @@ gradient all-reduce payload on a step with $p > 0$. `budget-exhausted` is set
 while
 $\text{forgiven} + \text{outstanding} + \text{one packet} > p \times \text{expected}$,
 where $\text{outstanding}$ counts distinct trimmed bytes neither arrived nor
-forgiven. A sender suspends its congestion response while its flow is eligible
-and not exhausted. It resumes it when a report sets `budget-exhausted`, and
-suspends it again if a later report clears the flag. The latest report wins.
+forgiven, and one packet is 4,096 bytes, the largest range the next trim can
+carry. A sender ignores congestion signals while its flow is eligible and not
+exhausted. It obeys congestion control again when a report sets
+`budget-exhausted`, and ignores them again if a later report clears the flag.
+The latest report wins.
 
 ## State and decision
 
@@ -178,12 +180,13 @@ packet, which is why FORGIVE adds no packet type. Its only wire change is the
 two flags on the receiver's feedback.
 
 The switch trims, reports the missing range, and decides nothing about it. The
-scoreboard and the verdict live at the receiver, the mode bit at the sender.
+scoreboard and the forgiveness decision live at the receiver, the mode bit at
+the sender.
 
 The detector must run before a step's gradient traffic starts. Accordion's
 criterion, the rate of change in gradient norms, puts the step inside or outside
-the critical learning regime, and that verdict picks the loss budget. No list
-of critical steps exists in the protocol.
+the critical learning regime, and that classification picks the loss budget.
+No list of critical steps exists in the protocol.
 
 FORGIVE adapts Accordion's two-level compression schedule into two loss
 probabilities, and adds a forgiveness probability:
@@ -205,15 +208,14 @@ State per flow, at the receiver:
 
 State per flow, at the sender:
 
-- `cc_mode: Mode`. `Exempt` if the flow is a gradient all-reduce, else
-  `Obeying`. After that it follows the two flags on the receiver's latest
-  report.
+- `cc_mode: Mode`. `Obeying` when the flow starts. After that it follows the
+  two flags on the receiver's latest report.
 
 State per training step, at each receiving rank. No rank reads another's.
 
-- `p: float`. `P_low` or `P_high`, by the detector's verdict on this step.
-- `budget: int`. The loss budget in bytes for the whole step. Vesting releases
-  it as bytes arrive.
+- `p: float`. `P_low` or `P_high`, by the detector's classification of this step.
+- `budget: int`. The loss budget in bytes for the whole step. It vests as
+  bytes arrive.
 - `received: int`. Distinct gradient bytes this rank has received this step.
   The data path counts a byte when it first becomes `Received`.
 - `forgiven: int`. Bytes the receiver acknowledged without receiving.
@@ -242,8 +244,8 @@ switch. Four calls reach outside the transport for the four facts above:
 
 Everything else is the transport's own. `Mark` and `Advance` write the
 scoreboard, `SendAck` and `SendRetransmissionRequest` are packets it already
-sends, and `ReduceRate` and `Retransmit` are what congestion control already
-does. `Draw(P)` is true with probability `P`.
+sends, and `ReduceRate` and `Retransmit` are what congestion control and loss
+recovery already do. `Draw(P)` is true with probability `P`.
 
 ```cpp
 Receiver::OnStepBegin(step, gradients):
@@ -258,7 +260,8 @@ Receiver::OnStepBegin(step, gradients):
   entry.open = true
 
 Receiver::OnAllReduceComplete(step):
-  // The step is over. Any later trim on it is repaired.
+  // The step is over. Any range trimmed later is requested for
+  // retransmission.
   steps[step].open = false
 ```
 
@@ -295,18 +298,19 @@ Receiver::Repair(flow, range):
 ```cpp
 Receiver::OnTrimmedHeader(flow, range):
   missing = Unsettled(flow, range)
-  // Nothing missing after all. Acknowledge and spend nothing.
+  // Nothing missing after all. Acknowledge and charge nothing.
   if (missing is empty):
     SendAck(flow.rcv_nxt, Flags(flow))
     return
 
-  // Only gradients are forgivable. Everything else must be repaired.
+  // Only gradients are forgivable. Everything else is requested for
+  // retransmission.
   if (!IsGradientAllReduce(flow)):
     Repair(flow, range)
     return
 
   entry = steps[StepOf(flow)]
-  // No loss budget is open for this step, so there is nothing to spend.
+  // No loss budget is open for this step, so there is nothing to charge.
   if (entry == null || !entry.open):
     Repair(flow, range)
     return
@@ -342,12 +346,14 @@ or charges the loss budget once.
 
 ```cpp
 Sender::OnFlowStart(flow):
-  // A local decision at the sender, until the first report arrives.
-  flow.cc_mode = IsGradientAllReduce(flow) ? Exempt : Obeying
+  // Every flow obeys congestion control until the first report arrives,
+  // one round trip after it starts.
+  flow.cc_mode = Obeying
 
 Sender::OnReport(flow, exemption_eligible, budget_exhausted):
   // Every acknowledgement and retransmission request is a report. The
-  // latest one wins, so the exemption can end and resume within a step.
+  // latest one wins, so the exemption can end and begin again within a
+  // step.
   flow.cc_mode =
     (exemption_eligible && !budget_exhausted) ? Exempt : Obeying
 
@@ -374,20 +380,20 @@ never exceeds $\frac{p}{1 - p} \times \text{received}$ at any instant.
 ## Results
 
 I ran the worst fabric with three seeds for each policy variant. All variants
-drew from one random stream, so the sender-side baseline suppresses the same
+drew from one random stream, so the sender-side baseline sheds the same
 messages the receiver-side policy may forgive.
 
 Against a tight baseline, $P_{\text{low}} = P_{\text{high}} = 0.005$,
 forgiveness with exemption at $P_{\text{high}} = 0.1$ cut the 20-step training
 time by 16.1 to 16.7 percent and gave up 7.55 to 7.57 percent of gradient bytes.
-All-reduce completion time on non-critical steps fell from 36 ms to 21 ms; on
-critical steps it stayed at 37 ms, within 0.9 ms of the baseline in every seed.
-Plain DCQCN with no loss at all stayed within -1.1 to +0.8 percent of that
-tight baseline over five seeds.
+The median all-reduce completion time on non-critical steps fell from 32.3 ms to
+17.4 ms; on critical steps it stayed at the baseline's. Plain DCQCN with no loss
+at all stayed within -1.1 to +0.8 percent of that tight baseline over five
+seeds, so every figure here is measured against DCQCN with no loss tolerance.
 
 With the loss budget available in full at step start, the same policy cut
 training time by only 9.1 to 10.2 percent, for 7.9 to 8.1 percent of gradient
-bytes. The opening burst spent it. In one seed's trim-level accounting, the
+bytes. The opening burst exhausted it. In one seed's trim-level accounting, the
 first fifth of a step trimmed seven times more bytes than the last fifth,
 12.3 GB against 1.8 GB. The vested rule forgave 18 percent of the trimmed bytes
 that arrived in the first fifth and 60 percent of those in the last. Its bound
@@ -403,30 +409,34 @@ is about fifteen of the sixteen points. Forgiveness is about one point, and it
 halves the retransmission load. $P$ is a loss dial rather than a time dial.
 
 Ignoring congestion signals did not destabilize the fabric. Retransmission
-timeouts fell by two thirds and rate cuts by half, and tensor-parallel
-completion times fell too, because the leaf switch queue drained sooner.
+timeouts fell by more than half, senders received a third as many congestion
+notification packets, and tensor-parallel completion times stayed within 4.4
+percent of the baseline either way, inside that metric's seed spread.
 
-Exempt flows sustain a higher sending rate, so the trim rate rose from 0.031 to
-0.033, two thirds of those trims forgiven. The `budget-exhausted` flag changed
-about 0.5 times per exempt flow. Of the exempt flows, 19 percent reacted to
-congestion signals after a grant, for 0.17 ms each on average. The loss-budget
-invariant held on every step.
+Exempt flows sustain a higher sending rate, so the trim rate more than doubled,
+from about 3 percent to 6.7 to 7.4 percent. The `budget-exhausted` flag changed
+about 0.5 times per exempt flow. Of the exempt flows, 19 percent went back to
+obeying congestion control after their exemption began, for 0.17 ms each on
+average. The loss-budget invariant held on every step.
 
-The exemption also changes a fabric that barely trims. DCQCN still cuts rates
-there 3.3 million times on ECN marks alone, which the exemption also ignores.
-Its training time fell 4 percent and its trims doubled, every extra one
-forgiven. The congestion burst drained 5 to 22 percent more slowly.
+The exemption also changes a fabric that barely trims. With eight spines per
+leaf the same fabric is not oversubscribed, and the tight baseline trims 0.02 to
+0.04 percent of bytes. Seven senders still converge on every receiving link, so
+DCQCN cuts rates there on every step, on signals the exemption ignores. Training
+time fell 4.5 to 7.5 percent for 1.0 to 1.3 percent of gradient bytes, and
+exempt senders trimmed ten times as much as the baseline.
 
-## Forgiveness spends the loss budget only under congestion
+## Forgiveness charges the loss budget only under congestion
 
 Forgiveness and DBLP's sender-side shedding run the same schedule at the same
 $P_{\text{low}}$ and $P_{\text{high}}$. What separates them is where the
 loss budget goes.
 
-Shedding spends it whether or not the network is congested. Forgiveness spends
-it only on bytes the network trimmed. On the worst fabric at the same loss
-budget, sender-side shedding gave up 8.1 percent of its gradient bytes, slightly
-more than forgiveness, and cut training time by only 2.4 to 3.3 percent.
+Shedding charges it whether or not the network is congested. Forgiveness
+charges it only for bytes the network trimmed. On the worst fabric at the same
+loss budget, sender-side shedding gave up 8.1 percent of its gradient bytes,
+slightly more than forgiveness, and cut training time by only 2.4 to 3.3
+percent.
 
 Under the rules before vesting, forgiveness ran at $P_{\text{high}} = 0.4$, and
 a loose baseline that shed at that rate on every step matched it on time: 1,433
@@ -455,8 +465,9 @@ The two host facts no component carries today need no wire change. The decision
 does: forgiving a range writes the transport's own reliability state, which on an
 RDMA fabric lives in the network interface card rather than in a plugin above it.
 MLT hit that wall and retreated to UDP in user space, and FORGIVE asks more of the
-card than MLT did. Ultra Ethernet is putting trimming, the trimmed-header NACK
-and selective repeat into silicon, which is where such a card would come from.
+card than MLT did. Ultra Ethernet is putting trimming, the retransmission
+request for a trimmed header and selective repeat into silicon, which is where
+such a card would come from.
 
 The congestion control is DCQCN because that is what the simulator models. Meta
 runs its 400 Gbps ML training networks
@@ -514,7 +525,7 @@ On a fabric that trims and runs selective repeat, the long loss-recovery tail
 MLT, LTP and OptiReduce were built to reduce does not exist: those systems ran
 on [TCP](https://www.rfc-editor.org/rfc/rfc9293) and UDP with millisecond
 timeouts.
-Forgiveness alone does not reduce the congestion-control reaction there, and the
+Forgiveness alone does not reduce the rate cuts there, and the
 exemption accounts for most of the result. The selective-repeat result, the
 lightly congested result and the $P = 0$ run exposed that.
 
