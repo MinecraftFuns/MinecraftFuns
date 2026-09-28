@@ -1,6 +1,6 @@
 ---
 title: "The FORGIVE protocol"
-description: "Fabric-Overload Relief: Gradients under Iteration-Varying Exemption. A receiver forgives bytes a switch trimmed, each range with an optional probability, within a loss budget that tightens on steps most sensitive to loss and vests as bytes arrive. A congested ML training network can then trade bounded loss for less time spent throttled."
+description: "Fabric-Overload Relief: Gradients under Iteration-Varying Exemption. A receiver forgives bytes a switch trimmed, within a loss budget that tightens on the steps most sensitive to loss, and senders ignore congestion signals while it lasts. A congested ML training network can then trade bounded loss for less time spent throttled."
 date: "2026-09-08"
 tags: ["Essays", "Networking", "Artificial Intelligence", "Performance"]
 ---
