@@ -109,8 +109,8 @@ much of the loss budget is charged, not the two budget rules.
 
 ## Selective repeat removes the loss-recovery saving
 
-I built the receiver-side half first. It appeared to cut training time by 4 to
-11 percent. The transport underneath was go-back-N: a control run with
+I built the loss schedule first, as sender-side shedding at admission. It
+appeared to cut training time by 4 to 11 percent. The transport underneath was go-back-N: a control run with
 [selective repeat](https://www.rfc-editor.org/rfc/rfc2018) cut the same burst's
 completion time from 1.8 s to 29 ms. Go-back-N put up to 79 bytes on the wire
 for every byte the policy removed. I had measured the transport's
@@ -124,7 +124,7 @@ skipping a round of loss recovery saves at most a round trip per flow, under
 0.2 percent of an all-reduce.
 
 The remaining cost came from congestion control. With DCQCN on, millions of rate cuts
-per run reduced the trim rate by a factor of seven to ten and added 18 to 24
+per run reduced the trim rate by a factor of eight to ten and added 18 to 25
 percent to the 20-step training time. A loss budget can cover the trims those
 rate cuts avoid.
 
@@ -438,11 +438,11 @@ loss budget, sender-side shedding gave up 8.1 percent of its gradient bytes,
 slightly more than forgiveness, and cut training time by only 2.4 to 3.3
 percent.
 
-Under the rules before vesting, forgiveness ran at $P_{\text{high}} = 0.4$, and
-a loose baseline that shed at that rate on every step matched it on time: 1,433
-to 1,466 ms against 1,459 to 1,468 ms, a tie within the range across their
-seeds. The baseline got there by shedding through the critical steps too, which
-conflicts with the critical learning regime.
+A loose baseline, $P_{\text{low}} = P_{\text{high}} = 0.1$, sheds through the
+critical steps too, which conflicts with the critical learning regime, and
+gains nothing for it. Its training time fell 2.6 to 3.9 percent for 10.0 to
+10.2 percent of gradient bytes, no more than shedding under the schedule
+recovered.
 
 ## Limits
 
